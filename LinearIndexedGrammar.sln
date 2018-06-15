@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2026
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinearIndexedGrammar", "LinearIndexedGrammar\LinearIndexedGrammar.csproj", "{CD0E8349-8231-45E8-8B83-AAAF65DE4515}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinearIndexedGrammarParser", "LinearIndexedGrammarParser\LinearIndexedGrammarParser.csproj", "{0158A9ED-46DA-4CC9-80AE-C5F69CB33E20}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{838D4754-51FE-4A65-B407-E28C8D72156C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CD0E8349-8231-45E8-8B83-AAAF65DE4515}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD0E8349-8231-45E8-8B83-AAAF65DE4515}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD0E8349-8231-45E8-8B83-AAAF65DE4515}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD0E8349-8231-45E8-8B83-AAAF65DE4515}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0158A9ED-46DA-4CC9-80AE-C5F69CB33E20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0158A9ED-46DA-4CC9-80AE-C5F69CB33E20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0158A9ED-46DA-4CC9-80AE-C5F69CB33E20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0158A9ED-46DA-4CC9-80AE-C5F69CB33E20}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6F32C555-0CEB-48B5-9210-5489D87B57E3}
+	EndGlobalSection
+EndGlobal

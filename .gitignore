@@ -3,3 +3,7 @@
 ################################################################################
 
 /.vs
+/LinearIndexedGrammar/bin/Debug/netcoreapp2.0
+/LinearIndexedGrammar/obj
+/LinearIndexedGrammarParser/bin/Debug/netcoreapp2.0
+/LinearIndexedGrammarParser/obj
