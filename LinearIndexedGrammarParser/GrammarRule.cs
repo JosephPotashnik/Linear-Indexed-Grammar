@@ -5,56 +5,46 @@ using Newtonsoft.Json;
 namespace LinearIndexedGrammarParser
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public class GrammarRule
+    public class Rule
     {
         [JsonProperty]
-        public SyntacticCategory LeftHandSide { get; set; }
+        public DerivedCategory LeftHandSide { get; set; }
 
         [JsonProperty]
-        public SyntacticCategory[] RightHandSide { get; set; }
-
-        [JsonProperty]
-        public int HeadPosition { get; set; }
-
-        [JsonProperty]
-        public int ComplementPosition { get; set; }
+        public DerivedCategory[] RightHandSide { get; set; }
 
         public int Number { get; set; }
 
-        public string HeadTerm => RightHandSide[HeadPosition].Symbol;
-        public string NonHeadTerm => RightHandSide[(HeadPosition + 1) % RightHandSide.Length].Symbol;
-        public string ComplementTerm => RightHandSide[ComplementPosition].Symbol;
-        public string NonComplementTerm => RightHandSide[(ComplementPosition + 1) % RightHandSide.Length].Symbol;
-
-        public GrammarRule() {}
-
-        public GrammarRule(string leftHandSide, string[] rightHandSide, int headPos = 0, int compPos = 1, int num = -1)
+        public Rule() {}
+        public Rule(DerivedCategory leftHandSide, DerivedCategory[] rightHandSide,  int num = -1)
         {
-            LeftHandSide = new SyntacticCategory(leftHandSide);
-            RightHandSide = rightHandSide?.Select(cat => new SyntacticCategory(cat)).ToArray();
-            HeadPosition = headPos;
-            ComplementPosition = compPos;
+            LeftHandSide = new DerivedCategory(leftHandSide);
+            RightHandSide = rightHandSide?.Select(cat => new DerivedCategory(cat)).ToArray();
+            Number = num;
+        }
+        public Rule(string leftHandSide, string[] rightHandSide,  int num = -1)
+        {
+            LeftHandSide = new DerivedCategory(leftHandSide);
+            RightHandSide = rightHandSide?.Select(cat => new DerivedCategory(cat)).ToArray();
             Number = num;
         }
 
-        public GrammarRule(GrammarRule otherRule)
+        public Rule(Rule otherRule)
         {
-            LeftHandSide = new SyntacticCategory(otherRule.LeftHandSide);
-            RightHandSide = otherRule.RightHandSide.Select(cat => new SyntacticCategory(cat)).ToArray();
-            HeadPosition = otherRule.HeadPosition;
-            ComplementPosition = otherRule.ComplementPosition;
+            LeftHandSide = new DerivedCategory(otherRule.LeftHandSide);
+            RightHandSide = otherRule.RightHandSide.Select(cat => new DerivedCategory(cat)).ToArray();
             Number = otherRule.Number;
         }
 
         public override string ToString()
         {
             var p = RightHandSide.Select(x => x.ToString()).ToArray();
-            return $"{Number}.{LeftHandSide}->{string.Join(" ", p)} {HeadPosition}{ComplementPosition}";
+            return $"{Number}.{LeftHandSide}->{string.Join(" ", p)}";
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is GrammarRule p))
+            if (!(obj is Rule p))
                 return false;
 
             return Number == p.Number;

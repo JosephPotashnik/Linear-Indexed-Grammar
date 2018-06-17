@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace LinearIndexedGrammarParser
 {
@@ -20,72 +21,89 @@ namespace LinearIndexedGrammarParser
         private const string GammaRule = "Gamma";
         private const float ChanceToGenerateConstituent = 0.4f; //for running the parser as a generator.
         private readonly Random rand = new Random(); //for running the parser as a generator.
-        private readonly Dictionary<int, double> ruleLogProbabilities;
-        private readonly Dictionary<SyntacticCategory, List<DerivedRule>> rules = new Dictionary<SyntacticCategory, List<DerivedRule>>();
-        private bool generator;
+        private readonly Dictionary<DerivedCategory, List<Rule>> rules = new Dictionary<DerivedCategory, List<Rule>>();
+        private readonly Dictionary<SyntacticCategory, List<Rule>> grammarRules = new Dictionary<SyntacticCategory, List<Rule>>();
+
         static int ruleCounter = 0;
         private Vocabulary voc;
 
-        public Earleyarser(bool debug = false)
+        private static Rule GenerateRule(Rule grammarRule, DerivedCategory leftHandSide)
         {
-            Debug = debug;
-            voc = Vocabulary.GetVocabularyFromFile(@"Vocabulary.json");
+            string patternStringLeftHandSide = grammarRule.LeftHandSide.Stack;
+            if (!patternStringLeftHandSide.Contains("*")) return null;
 
-            //ruleLogProbabilities = Grammar.GetLogProbabilitiesOfRules();
+            //1. make the pattern be your Syntactic Category
+            //2. then find the stack contents - anything by "*" (the first group)
+            var newRule = new Rule(grammarRule);
+            string patternString = patternStringLeftHandSide.Replace("*", "(.*)");
+            Regex pattern = new Regex(patternString);
+
+            string textToMatch = leftHandSide.Stack;
+            Match match = pattern.Match(textToMatch);
+            var stackContents = match.Groups[1].Value;
+            newRule.LeftHandSide = leftHandSide;
+
+
+            //3. replace the contents of the stack * in the right hand side productions.
+            for (int i = 0; i < newRule.RightHandSide.Length; i++)
+            {
+                string patternRightHandSide = newRule.RightHandSide[i].Stack;
+                string res = patternRightHandSide.Replace("*", stackContents);
+
+                newRule.RightHandSide[i].Stack = res;
+            }
+
+            return newRule;
+
         }
 
-
-        public void AddDerivedRule(GrammarRule r)
+        public Earleyarser()
         {
+            voc = Vocabulary.GetVocabularyFromFile(@"Vocabulary.json");
+        }
+
+        public void AddRule(Rule r)
+        {
+            if (r == null) return;
+
             ruleCounter++;
-            var newRule = new DerivedRule(r);
+            var newRule = new Rule(r);
             newRule.Number = ruleCounter;
 
             if (!rules.ContainsKey(newRule.LeftHandSide))
-                rules[newRule.LeftHandSide] = new List<DerivedRule>();
+                rules[newRule.LeftHandSide] = new List<Rule>();
 
             rules[newRule.LeftHandSide].Add(newRule);
+        }
+
+        public void AddGrammarRule(Rule r)
+        {
+            var newRule = new Rule(r);
+            var newSynCat = new SyntacticCategory(newRule.LeftHandSide);
+
+            if (!grammarRules.ContainsKey(newSynCat))
+                grammarRules[newSynCat] = new List<Rule>();
+
+            grammarRules[newSynCat].Add(newRule);
+
+            var emptyStackRule = new DerivedCategory(newSynCat.ToString());
+
+            //generate base form of the rule with the empty stack
+            //as a starting point of the grammar (= equal to context free case)
+            var derivedRule = GenerateRule(newRule, emptyStackRule);
+
+            var rule = derivedRule ?? newRule;
+            //if there is no derived rule to be generated (i.e, the rule does not
+            //come with a stack specified, it is a strictly context-free rule, then just add it)
+            AddRule(rule);
+
         }
         public bool Debug { get; set; }
 
         public Grammar Grammar { get; set; }
 
-        private void Predict(EarleyColumn col, List<DerivedRule> ruleList)
+        private void Predict(EarleyColumn col, List<Rule> ruleList)
         {
-
-            if (generator)
-            {
-                //Rule rule = null;
-
-                //var l = Grammar.Rules[currObject.NonTerminal];
-                //var feasibleRules = new List<Rule>();
-
-                ////when generating, predict only rules that terminate the derivation successfully.
-                //foreach (var candidate in l)
-                //{
-                //    var c = IsPredictedRuleConsistentWithCurrentDerivation(currObject, candidate);
-                //    if (c == RuleConsistentWithDerivation.SkipGeneration) return;
-
-                //    //temporary: do not push another symbol if the current stack already contains a symbol
-                //    //in other words: allow only one symbol. 
-                //    var complementPositionObject = candidate.Production[candidate.ComplementPosition];
-                //    var isPushRule = !complementPositionObject.IsStackEmpty() &&
-                //                     complementPositionObject.Stack.Top != Grammar.Epsilon;
-
-
-                //    if (!currObject.IsStackEmpty() && isPushRule) continue;
-
-                //    if (c == RuleConsistentWithDerivation.RuleConsistent)
-                //        feasibleRules.Add(candidate);
-                //}
-
-                //if (feasibleRules.Count == 0) //no feasible rules to predict
-                //    return;
-
-                //rule = Grammar.GetRandomRuleForAGivenLHS(currObject.NonTerminal, feasibleRules);
-                //ruleList = new List<Rule> { rule };
-            }
-
             foreach (var rule in ruleList)
             {
                 var newState = new EarleyState(rule, 0, col, null) { LogProbability = 0 };
@@ -104,7 +122,7 @@ namespace LinearIndexedGrammarParser
 
         private void Scan(EarleyColumn col, EarleyState state, SyntacticCategory term, string token)
         {
-            var v = new EarleyNode(term.Symbol, col.Index - 1, col.Index)
+            var v = new EarleyNode(term.ToString(), col.Index - 1, col.Index)
             {
                 AssociatedTerminal = token,
                 LogProbability = 0.0f,
@@ -128,7 +146,7 @@ namespace LinearIndexedGrammarParser
 
         private void Complete(EarleyColumn col, EarleyState state)
         {
-            if (state.Rule.LeftHandSide.Symbol == GammaRule)
+            if (state.Rule.LeftHandSide.ToString() == GammaRule)
             {
                 col.GammaStates.Add(state);
                 return;
@@ -182,7 +200,7 @@ namespace LinearIndexedGrammarParser
                 {
                     try
                     {
-                        n = ParseSentence(null);
+                        n = ParseSentence(null)[0];
                     }
                     catch (Exception e)
                     {
@@ -192,102 +210,17 @@ namespace LinearIndexedGrammarParser
 
                 sentences[i] = n.GetTerminalStringUnderNode();
             }
-            //var y = (float)sentences.Select(x => x.Length).Sum() / numberOfSentences;
-            //Console.WriteLine($"average characters in generated sentence: {y}");
+
             return sentences;
         }
-
-        //private HashSet<NonTerminalObject> GenerateSetOfPredictions(int maxElementsInStack = 2)
-        //{
-        //    Queue<NonTerminalObject> queue = new Queue<NonTerminalObject>();
-        //    HashSet<NonTerminalObject> visitedNonTerminalObjects = new HashSet<NonTerminalObject>(new NonTerminalObjectStackComparer());
-
-        //    NonTerminalObject o = null;
-
-        //    foreach (var moveable in Grammar.Moveables)
-        //    {
-        //        o = new NonTerminalObject(moveable);
-        //        o.Stack = new NonTerminalStack(moveable);
-        //        queue.Enqueue(o);
-        //    }
-
-        //    while (queue.Any())
-        //    {
-        //        var rhs = queue.Dequeue();
-        //        visitedNonTerminalObjects.Add(rhs);
-
-        //        var rulesforRHS = Grammar.RHSDictionary[rhs.NonTerminal].ToList();
-        //        foreach (var item in rulesforRHS)
-        //        {
-        //            o = null;
-        //            var rule = Grammar.ruleNumberDictionary[item.Item1];
-        //            int RHSPosition = item.Item2;
-        //            if (rule.Name.NonTerminal == Grammar.StartSymbol) continue;
-
-        //            if (rule.IsInitialRule())
-        //            {
-        //                if (rule.ComplementPosition == RHSPosition)
-        //                {
-        //                    o = new NonTerminalObject(rule.Name.NonTerminal);
-        //                    o.Stack = new NonTerminalStack(rhs.Stack);
-        //                    if (!visitedNonTerminalObjects.Contains(o))
-        //                        queue.Enqueue(o);
-        //                }
-        //            }
-        //            else
-        //            {
-        //                NonTerminalStack contentOfDot;
-
-        //                var s = rule.Production[RHSPosition].Stack;
-        //                if (s != null)
-        //                {
-        //                    if (s.Peek() == ".")
-        //                        contentOfDot = rhs.Stack;
-        //                    else if (s.PrefixList != null)
-        //                        contentOfDot = rhs.Stack.GetPrefixListStackObjectOfGivenTop(rhs.Stack.Peek());
-        //                    else
-        //                        continue;
-        //                    //assumption: if this is a secondary constituent (i.e, s.PrefixList == null), does not participate in the sharing of stacks,
-        //                    //the LHS will be handled through the primary constituent (the distinguished descendant).
-
-
-        //                    o = new NonTerminalObject(rule.Name.NonTerminal);
-        //                    if (rule.Name.Stack.Peek() == ".")
-        //                    {
-        //                        if (contentOfDot != null)
-        //                            o.Stack = new NonTerminalStack(contentOfDot);
-        //                    }
-        //                    else
-        //                    {
-        //                        if (contentOfDot == null || contentOfDot.Depth() < maxElementsInStack)
-        //                            o.Stack = new NonTerminalStack(rule.Name.Stack.Peek(), contentOfDot);
-        //                    }
-        //                    if (o.Stack != null && !visitedNonTerminalObjects.Contains(o))
-        //                        queue.Enqueue(o);
-        //                }
-
-        //            }
-
-        //        }
-        //    }
-
-        //    return visitedNonTerminalObjects;
-        //}
-
-        public EarleyNode ParseSentence(string text)
+        
+        public List<EarleyNode> ParseSentence(string text)
         {
             string[] arr;
-            if (text == null)
-            {
-                generator = true;
-                arr = Enumerable.Repeat("", 100).ToArray();
-            }
-            else
-                arr = text.Split();
-
+            arr = text.Split();
 
             //check below that the text appears in the vocabulary
-            if (!generator && arr.Any(str => !voc.ContainsWord(str)))
+            if (arr.Any(str => !voc.ContainsWord(str)))
                 throw new Exception("word in text does not appear in the vocabulary.");
 
             var table = new EarleyColumn[arr.Length + 1];
@@ -299,9 +232,9 @@ namespace LinearIndexedGrammarParser
 
             EarleyState.stateCounter = 0;
 
-            var startGrammarRule = new GrammarRule(GammaRule, new[] { "START" }, 0, 0);
-            var startRule = new DerivedRule(startGrammarRule);
-            AddDerivedRule(startGrammarRule);
+            var startGrammarRule = new Rule(GammaRule, new[] { "START" });
+            var startRule = new Rule(startGrammarRule);
+            AddRule(startGrammarRule);
 
             var startState = new EarleyState(startRule, 0, table[0], null);
             startState.LogProbability = 0.0f;
@@ -312,11 +245,6 @@ namespace LinearIndexedGrammarParser
                 foreach (var col in table)
                 {
                     var count = 0;
-                    if (generator && !col.StatesWithNextSyntacticCategory.Any())
-                    {
-                        finalColumn = table[col.Index - 1];
-                        break;
-                    }
 
                     //1. complete
                     count = TraverseCompletedStates(col, count);
@@ -328,8 +256,9 @@ namespace LinearIndexedGrammarParser
                     TraverseScannableStates(table, col);
                 }
 
-                foreach (var state in finalColumn.GammaStates)
-                    return state.Node.Children[0];
+                var nodes = finalColumn.GammaStates.Select(x => x.Node.Children[0]).ToList();
+                return nodes;
+
             }
             catch (LogException e)
             {
@@ -337,76 +266,40 @@ namespace LinearIndexedGrammarParser
                 Console.WriteLine(s);
                 Console.WriteLine(string.Format("sentence: {0}, grammar: {1}", text, Grammar));
             }
-            catch (GenerateException e)
-            {
-            }
+
             catch (Exception e)
             {
                 var s = e.ToString();
                 Console.WriteLine(s);
             }
 
-            if (!generator)
-                throw new Exception("Parsing Failed!");
-            throw new Exception("Generating Failed!");
+
+            throw new Exception("Parsing Failed!");
+
         }
 
         private void TraverseScannableStates(EarleyColumn[] table, EarleyColumn col)
         {
-            if (col.Index + 1 >= table.Length && !generator) return;
+            if (col.Index + 1 >= table.Length) return;
 
-            if (!generator)
+
+            var nextScannableTerm = table[col.Index + 1].Token;
+
+            var possibleSyntacticCategories = voc[nextScannableTerm];
+
+            foreach (var item in possibleSyntacticCategories)
             {
-                var nextScannableTerm = table[col.Index + 1].Token;
+                var currentCategory = new DerivedCategory(item);
 
-                var possibleSyntacticCategories = voc[nextScannableTerm];
-
-                foreach (var item in possibleSyntacticCategories)
+                if (col.StatesWithNextSyntacticCategory.ContainsKey(currentCategory))
                 {
-                    var currentCategory = new SyntacticCategory(item);
-
-                    if (col.StatesWithNextSyntacticCategory.ContainsKey(currentCategory))
+                    foreach (var state in col.StatesWithNextSyntacticCategory[currentCategory])
                     {
-                        foreach (var state in col.StatesWithNextSyntacticCategory[currentCategory])
-                        {
-                            Scan(table[col.Index + 1], state, currentCategory, nextScannableTerm);
-                        }
+                        Scan(table[col.Index + 1], state, currentCategory, nextScannableTerm);
                     }
                 }
+            }
                 
-            }
-            else
-            {
-                //if (Grammar.Vocabulary.POSWithPossibleWords.ContainsKey(term))
-                //{
-                //    var ruleList = Grammar[term];
-                //    //if the term is a constituent, generate it given some probability. otherwise continue.
-                //    if (ruleList != null)
-                //    {
-                //        if (rand.NextDouble() > ChanceToGenerateConstituent) continue;
-                //        if (ruleList[0].IsEpsilonRule())
-                //            continue;
-                //        //if we generated a predicted epsilon rule for that constituent, don't scan.
-                //    }
-
-                //    //selecting random word from vocabulary: (uncomment the next line)
-                //    //var index = rand.Next(Vocabulary.POSWithPossibleWords[currentNode.Name].Count);
-
-                //    //always selecting the same word from vocabulary is considerably faster because I do not re-parse the same sentence
-                //    //but keep the counts of appearances of the sentence.
-                //    //the parse of two sentences with identical sequence of POS is the same - regardless of the actual word selected.
-
-                //    if (table[col.Index + 1].Token == "")
-                //    //if the token was already written by a previous scan 
-                //    //(for instance NP -> John, NP -> D N, D -> the, "John" was already written before "the")
-                //    {
-                //        var index = 0;
-                //        table[col.Index + 1].Token =
-                //            Grammar.Vocabulary.POSWithPossibleWords[term].ElementAt(index);
-                //        Scan(table[col.Index + 1], state, term, table[col.Index + 1].Token);
-                //    }
-                //}
-            }
         }
 
         private int TraversePredictableStates(EarleyColumn col, int count)
@@ -423,12 +316,30 @@ namespace LinearIndexedGrammarParser
                 count++;
                 TestForTooManyStatesInColumn(count, Debug);
 
+                if (!rules.ContainsKey(nextTerm))
+                {
+                    var newSynCat = new SyntacticCategory(nextTerm);
+
+                    if (!grammarRules.ContainsKey(newSynCat)) return count;
+
+                    var grammarRuleList = grammarRules[newSynCat];
+
+                    if (grammarRuleList != null)
+                    {
+                        foreach (var item in grammarRuleList)
+                        {
+                            var derivedRule = GenerateRule(item, nextTerm);
+                            AddRule(derivedRule);
+                        }
+                    }
+
+                }
+
                 if (!rules.ContainsKey(nextTerm)) return count;
 
                 var ruleList = rules[nextTerm];
+                Predict(col, ruleList);
 
-                if (ruleList != null)
-                    Predict(col, ruleList);
 
             }
 
@@ -449,9 +360,6 @@ namespace LinearIndexedGrammarParser
 
                 if (!completedStatesQueue.Any())
                     col.ActionableCompleteStates.Remove(completedStatesQueueKey);
-
-                if (generator)
-                    state.LogProbability = 0;
 
                 Complete(col, state);
             }

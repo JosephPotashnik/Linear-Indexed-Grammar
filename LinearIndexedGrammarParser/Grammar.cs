@@ -19,7 +19,7 @@ namespace LinearIndexedGrammarParser
             StartSymbol = "START";
             POSTypes = new HashSet<string>();
             numberOfRules = 0;
-            Rules = new Dictionary<SyntacticCategory, List<GrammarRule>>();
+            Rules = new Dictionary<SyntacticCategory, List<Rule>>();
         }
 
         public Grammar(Vocabulary voc) : this()
@@ -34,12 +34,12 @@ namespace LinearIndexedGrammarParser
         public Vocabulary Vocabulary { get; set; }
 
         [JsonProperty]
-        public Dictionary<SyntacticCategory, List<GrammarRule>> Rules { get; set; }
+        public Dictionary<SyntacticCategory, List<Rule>> Rules { get; set; }
     
         [JsonProperty]
         public HashSet<string> POSTypes { get; set; }
 
-        public List<GrammarRule> this[SyntacticCategory lhs]
+        public List<Rule> this[SyntacticCategory lhs]
         {
             get { return Rules.ContainsKey(lhs) ? Rules[lhs] : null; }
         }
@@ -55,7 +55,7 @@ namespace LinearIndexedGrammarParser
         private void PopulateDependentJsonPropertys()
         {
             var rules = Rules.Values.SelectMany(l => l).ToArray();
-            Rules = new Dictionary<SyntacticCategory, List<GrammarRule>>();
+            Rules = new Dictionary<SyntacticCategory, List<Rule>>();
 
             //foreach (var r in rules)
             //    AddRule(r);

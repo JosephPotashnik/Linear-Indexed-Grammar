@@ -7,7 +7,7 @@ namespace LinearIndexedGrammarParser
     {
         public static int stateCounter;
 
-        public EarleyState(DerivedRule r, int dotIndex, EarleyColumn c, EarleyNode n)
+        public EarleyState(Rule r, int dotIndex, EarleyColumn c, EarleyNode n)
         {
             Rule = r;
             DotIndex = dotIndex;
@@ -20,7 +20,7 @@ namespace LinearIndexedGrammarParser
         }
 
 
-        public DerivedRule Rule { get; set; }
+        public Rule Rule { get; set; }
         public EarleyColumn StartColumn { get; set; }
         public EarleyColumn EndColumn { get; set; }
         public int DotIndex { get; set; }
@@ -34,7 +34,7 @@ namespace LinearIndexedGrammarParser
             return (int)Math.Ceiling(logprobability) + 1;
         }
 
-        private static string RuleWithDotNotation(DerivedRule rule, int dotIndex)
+        private static string RuleWithDotNotation(Rule rule, int dotIndex)
         {
             var terms = rule.RightHandSide.Select(x => x.ToString()).ToList();
             terms.Insert(dotIndex, "$");
@@ -44,7 +44,7 @@ namespace LinearIndexedGrammarParser
         public bool IsCompleted() => DotIndex >= Rule.RightHandSide.Length;
 
 
-        public SyntacticCategory NextTerm()
+        public DerivedCategory NextTerm()
         {
             if (IsCompleted())
                 return null;

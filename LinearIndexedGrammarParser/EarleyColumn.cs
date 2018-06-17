@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿
 using System.Collections.Generic;
 
 namespace LinearIndexedGrammarParser
@@ -18,8 +17,6 @@ namespace LinearIndexedGrammarParser
 
     internal class EarleyColumn 
     {
-        private readonly bool debug = false;
-
         public EarleyColumn(int index, string token)
         {
             Index = index;
@@ -27,9 +24,9 @@ namespace LinearIndexedGrammarParser
 
             //completed agenda is ordered in decreasing order of start indices (see Stolcke 1995 about completion priority queue).
             ActionableCompleteStates = new SortedDictionary<EarleyState, Queue<EarleyState>>(new CompletedStateComparer());
-            StatesWithNextSyntacticCategory = new Dictionary<SyntacticCategory, List<EarleyState>>();
+            StatesWithNextSyntacticCategory = new Dictionary<DerivedCategory, List<EarleyState>>();
             GammaStates = new List<EarleyState>();
-            CategoriesToPredict = new Queue<SyntacticCategory>();
+            CategoriesToPredict = new Queue<DerivedCategory>();
 
         }
 
@@ -37,8 +34,8 @@ namespace LinearIndexedGrammarParser
         public string Token { get; set; }
 
         internal SortedDictionary<EarleyState, Queue<EarleyState>> ActionableCompleteStates { get; set; }
-        internal Dictionary<SyntacticCategory, List<EarleyState>> StatesWithNextSyntacticCategory;
-        internal Queue<SyntacticCategory> CategoriesToPredict;
+        internal Dictionary<DerivedCategory, List<EarleyState>> StatesWithNextSyntacticCategory;
+        internal Queue<DerivedCategory> CategoriesToPredict;
 
         public List<EarleyState> GammaStates { get; set; }
 
