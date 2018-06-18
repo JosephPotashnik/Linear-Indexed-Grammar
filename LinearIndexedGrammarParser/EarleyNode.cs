@@ -15,12 +15,8 @@ namespace LinearIndexedGrammarParser
             StartIndex = startIndex;
             EndIndex = endIndex;
             RuleNumber = ScanRuleNumber;
-            LogProbability = 0.0f;
-            Bits = 1;
         }
 
-        public double LogProbability { get; set; }
-        public int Bits { get; set; }
         public string Name { get; set; }
         public int StartIndex { get; set; }
         public int EndIndex { get; set; }
@@ -66,7 +62,7 @@ namespace LinearIndexedGrammarParser
 
         public override string ToString()
         {
-            return $"{AssociatedTerminal ?? ""} {Name} [{StartIndex}-{EndIndex}] [p:{LogProbability}] -{RuleNumber}-";
+            return $"{AssociatedTerminal ?? ""} {Name} [{StartIndex}-{EndIndex}] -{RuleNumber}-";
         }
 
         public void Print(int level = 0)

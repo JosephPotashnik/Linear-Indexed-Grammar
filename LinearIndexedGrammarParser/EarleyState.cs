@@ -16,23 +16,16 @@ namespace LinearIndexedGrammarParser
             Node = n;
             StateNumber = stateCounter;
             stateCounter += 1;
-            LogProbability = -1;
         }
-
 
         public Rule Rule { get; set; }
         public EarleyColumn StartColumn { get; set; }
         public EarleyColumn EndColumn { get; set; }
         public int DotIndex { get; set; }
         public EarleyNode Node { get; set; }
-        public double LogProbability { get; set; }
 
         public int StateNumber { get; set; }
 
-        public static int RequiredBitsGivenLogProbability(double logprobability)
-        {
-            return (int)Math.Ceiling(logprobability) + 1;
-        }
 
         private static string RuleWithDotNotation(Rule rule, int dotIndex)
         {
@@ -93,49 +86,12 @@ namespace LinearIndexedGrammarParser
             if (nextDotIndex == 1 && predecessorState.Rule.RightHandSide.Length > 1)
             {
                 y = reductor;
-                if (predecessorState.Node == null)
-                {
-                    y.LogProbability = predecessorState.LogProbability + reductor.LogProbability;
-                    y.Bits = RequiredBitsGivenLogProbability(predecessorState.LogProbability) + reductor.Bits;
-                    if (predecessorState.LogProbability < 0 || reductor.LogProbability < 0)
-                    {
-                        throw new Exception(
-                            string.Format("first case y NODE log probability lower than 0: {0} < , {1} , {2}",
-                                y.LogProbability, predecessorState.LogProbability, reductor.LogProbability));
-                    }
-                }
-                else
-                    throw new Exception("arrived in a clause that should not be possible. make_node");
             }
             else
             {
                 y = new EarleyNode(nodeName, predecessorState.StartColumn.Index, endIndex);
                 if (!y.HasChildren())
                     y.AddChildren(reductor, predecessorState.Node);
-                if (predecessorState.Node == null)
-                {
-                    y.LogProbability = predecessorState.LogProbability + reductor.LogProbability;
-                    y.Bits = RequiredBitsGivenLogProbability(predecessorState.LogProbability) + reductor.Bits;
-
-                    if (predecessorState.LogProbability < 0 || reductor.LogProbability < 0)
-                    {
-                        throw new Exception(
-                            string.Format("second case y NODE log probability lower than 0: {0} = , {1} + {2}",
-                                y.LogProbability, predecessorState.LogProbability, reductor.LogProbability));
-                    }
-                }
-                else
-                {
-                    y.LogProbability = predecessorState.Node.LogProbability + reductor.LogProbability;
-                    y.Bits = predecessorState.Node.Bits + reductor.Bits;
-                    if (predecessorState.Node.LogProbability < 0 || reductor.LogProbability < 0)
-                    {
-                        throw new Exception(
-                            string.Format("third case y NODE log probability lower than 0: {0} = , {1} + {2}",
-                                y.LogProbability, predecessorState.Node.LogProbability, reductor.LogProbability));
-                    }
-                }
-
 
                 y.RuleNumber = predecessorState.Rule.Number;
             }

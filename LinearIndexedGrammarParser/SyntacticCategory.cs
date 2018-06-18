@@ -50,8 +50,8 @@ namespace LinearIndexedGrammarParser
             return base.Equals(p) &&  Stack == p.Stack;
         }
 
-        private string contents() { return base.ToString() + Stack; }
-        public override int GetHashCode() => contents().GetHashCode();
-        public override string ToString() => contents();
+        private string Contents { get { return base.ToString() + Stack; } }
+        public override int GetHashCode() => Contents.GetHashCode();
+        public override string ToString() => Contents;
     }
 }

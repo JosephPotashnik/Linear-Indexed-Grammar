@@ -10,10 +10,7 @@ namespace LinearIndexedGrammar
        
         static void Main(string[] args)
         {
-            //var grammarRule = new Rule(new Rule("CP*", new[] { "NP", "IP*NP" }, 0, 1));
-            //var cat = new SyntacticCategory("CP");
 
-            //var newRule = GenerateRule(grammarRule, cat);
             Earleyarser parser = new Earleyarser();
 
             var startCat = new DerivedCategory("START", "*");
@@ -27,11 +24,17 @@ namespace LinearIndexedGrammar
             var V1Cat = new DerivedCategory("V1");
             var CPCat = new DerivedCategory("CP", "*");
             var NPCat1 = new DerivedCategory("NP");
+
             var CPCat1 = new DerivedCategory("CP", "*NP");
             var NPCat2 = new DerivedCategory("NP", "*NP");
+            var NPCat3 = new DerivedCategory("NP", "*");
+            var NPCat4 = new DerivedCategory("NP", "NP");
+            var epsiloncat = new DerivedCategory("epsilon");
+
+            parser.AddGrammarRule(new Rule(NPCat4, new[] { epsiloncat }));
 
 
-            //parser.AddGrammarRule(new Rule(CPCat, new[] { NPCat1, CPCat1 }));
+            parser.AddGrammarRule(new Rule(VPCat1, new[] { V0Cat, NPCat3 }));
 
             parser.AddGrammarRule(new Rule(startCat, new[] { NPCat1, VPCat }));
             parser.AddGrammarRule(new Rule(startCat, new[] { NPCat1, VPCat1 }));
