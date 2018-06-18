@@ -11,19 +11,33 @@ namespace LinearIndexedGrammarParser
     }
 
     public class GenerateException : Exception { }
-
-    public class Earleyarser
+    public class Grammar
     {
-        private const string GammaRule = "Gamma";
-        private readonly Dictionary<DerivedCategory, List<Rule>> staticRules = new Dictionary<DerivedCategory, List<Rule>>();
-        private readonly Dictionary<SyntacticCategory, List<Rule>> dynamicRules = new Dictionary<SyntacticCategory, List<Rule>>();
-        private readonly HashSet<DerivedCategory> staticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
-        static int ruleCounter = 0;
+        public Grammar() { }
+        internal const string GammaRule = "Gamma";
+        internal const string StartRule = "START";
+        internal const string EpsislonSymbol = "Epsilon";
+
+        internal readonly Dictionary<DerivedCategory, List<Rule>> staticRules = new Dictionary<DerivedCategory, List<Rule>>();
+        internal readonly Dictionary<SyntacticCategory, List<Rule>> dynamicRules = new Dictionary<SyntacticCategory, List<Rule>>();
+        internal readonly HashSet<DerivedCategory> staticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
+        internal readonly HashSet<DerivedCategory> nullableCategories = new HashSet<DerivedCategory>();
+        internal static int ruleCounter = 0;
+    }
+    public class EarleyParser
+    {
         private Vocabulary voc;
+        private Grammar grammar;
+
+        public EarleyParser()
+        {
+            voc = Vocabulary.GetVocabularyFromFile(@"Vocabulary.json");
+            grammar = new Grammar();
+        }
+
 
         private Rule GenerateRule(Rule grammarRule, DerivedCategory leftHandSide)
         {
-
             if (grammarRule.LeftHandSide.Stack == null || grammarRule.LeftHandSide.Stack == string.Empty)
                 return null;
 
@@ -48,27 +62,31 @@ namespace LinearIndexedGrammarParser
             {
                 string patternRightHandSide = newRule.RightHandSide[i].Stack;
                 string res = patternRightHandSide.Replace("*", stackContents);
-
                 newRule.RightHandSide[i].Stack = res;
             }
 
             return newRule;
         }
 
-        public Earleyarser() => voc = Vocabulary.GetVocabularyFromFile(@"Vocabulary.json");
-
         public void AddStaticRule(Rule r)
         {
             if (r == null) return;
 
-            ruleCounter++;
+            Grammar.ruleCounter++;
             var newRule = new Rule(r);
-            newRule.Number = ruleCounter;
+            newRule.Number = Grammar.ruleCounter;
 
-            if (!staticRules.ContainsKey(newRule.LeftHandSide))
-                staticRules[newRule.LeftHandSide] = new List<Rule>();
+            if (!grammar.staticRules.ContainsKey(newRule.LeftHandSide))
+                grammar.staticRules[newRule.LeftHandSide] = new List<Rule>();
 
-            staticRules[newRule.LeftHandSide].Add(newRule);
+            grammar.staticRules[newRule.LeftHandSide].Add(newRule);
+
+            //TODO: calculate the transitive closure of all nullable symbols.
+            //at the moment you calculate only the rules that directly lead to epsilon.
+            //For instance. C -> D E, D -> epsilon, E-> epsilon. C is not in itself an epsilon rule
+            //yet it is a nullable production.
+            if (newRule.RightHandSide[0].IsEpsilon())
+                grammar.nullableCategories.Add(newRule.LeftHandSide);
         }
 
         public void AddGrammarRule(Rule r)
@@ -85,15 +103,15 @@ namespace LinearIndexedGrammarParser
                 {
 
                     var newSynCat = new SyntacticCategory(newRule.LeftHandSide);
-                    if (!dynamicRules.ContainsKey(newSynCat))
-                        dynamicRules[newSynCat] = new List<Rule>();
+                    if (!grammar.dynamicRules.ContainsKey(newSynCat))
+                        grammar.dynamicRules[newSynCat] = new List<Rule>();
 
-                    dynamicRules[newSynCat].Add(newRule);
+                    grammar.dynamicRules[newSynCat].Add(newRule);
 
                     var emptyStackRule = new DerivedCategory(newSynCat.ToString());
                     //generate base form of the rule with the empty stack
                     //as a starting point of the grammar (= equal to context free case)
-                    staticRulesGeneratedForCategory.Add(emptyStackRule);
+                    grammar.staticRulesGeneratedForCategory.Add(emptyStackRule);
                     var derivedRule = GenerateRule(newRule, emptyStackRule);
                     if (derivedRule != null)
                         AddStaticRule(derivedRule);
@@ -102,25 +120,23 @@ namespace LinearIndexedGrammarParser
                 }
                 else
                 {
-                    staticRulesGeneratedForCategory.Add(newRule.LeftHandSide);
+                    grammar.staticRulesGeneratedForCategory.Add(newRule.LeftHandSide);
                     AddStaticRule(newRule);
                 }
             }
             else
             {
-                staticRulesGeneratedForCategory.Add(newRule.LeftHandSide);
+                grammar.staticRulesGeneratedForCategory.Add(newRule.LeftHandSide);
                 AddStaticRule(newRule);
             }
         }
-
-        public Grammar Grammar { get; set; }
 
         private void Predict(EarleyColumn col, List<Rule> ruleList)
         {
             foreach (var rule in ruleList)
             {
                 var newState = new EarleyState(rule, 0, col, null);
-                col.AddState(newState);
+                col.AddState(newState, grammar);
             }
         }
 
@@ -133,13 +149,12 @@ namespace LinearIndexedGrammarParser
             var y = EarleyState.MakeNode(state, col.Index, v);
             var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn, y);
 
-            col.AddState(newState);
-
+            col.AddState(newState, grammar);
         }
 
         private void Complete(EarleyColumn col, EarleyState state)
         {
-            if (state.Rule.LeftHandSide.ToString() == GammaRule)
+            if (state.Rule.LeftHandSide.ToString() == Grammar.GammaRule)
             {
                 col.GammaStates.Add(state);
                 return;
@@ -153,7 +168,7 @@ namespace LinearIndexedGrammarParser
             {
                 var y = EarleyState.MakeNode(st, state.EndColumn.Index, state.Node);
                 var newState = new EarleyState(st.Rule, st.DotIndex + 1, st.StartColumn, y);
-                col.AddState(newState);       
+                col.AddState(newState, grammar);       
             }
         }
 
@@ -162,7 +177,7 @@ namespace LinearIndexedGrammarParser
             if (count > 10000)
             {
                 Console.WriteLine("More than 10000 states in a single column. Suspicious. Grammar is : {0}",
-                    Grammar);
+                    grammar);
                 throw new Exception("Grammar with infinite parse. abort this grammar..");
             }
         }
@@ -185,12 +200,12 @@ namespace LinearIndexedGrammarParser
 
             EarleyState.stateCounter = 0;
 
-            var startGrammarRule = new Rule(GammaRule, new[] { "START" });
+            var startGrammarRule = new Rule(Grammar.GammaRule, new[] { Grammar.StartRule });
             var startRule = new Rule(startGrammarRule);
             AddStaticRule(startGrammarRule);
 
             var startState = new EarleyState(startRule, 0, table[0], null);
-            table[0].AddState(startState);
+            table[0].AddState(startState, grammar);
             var finalColumn = table[table.Length - 1];
             try
             {
@@ -216,7 +231,7 @@ namespace LinearIndexedGrammarParser
             {
                 var s = e.ToString();
                 Console.WriteLine(s);
-                Console.WriteLine(string.Format("sentence: {0}, grammar: {1}", text, Grammar));
+                Console.WriteLine(string.Format("sentence: {0}, grammar: {1}", text, grammar));
             }
 
             catch (Exception e)
@@ -261,14 +276,14 @@ namespace LinearIndexedGrammarParser
 
                 //if static rules have not been generated for this term yet
                 //compute them from dynamaic rules dictionary
-                if (!staticRulesGeneratedForCategory.Contains(nextTerm))
+                if (!grammar.staticRulesGeneratedForCategory.Contains(nextTerm))
                 {
-                    staticRulesGeneratedForCategory.Add(nextTerm);
+                    grammar.staticRulesGeneratedForCategory.Add(nextTerm);
                     var baseSyntacticCategory = new SyntacticCategory(nextTerm);
 
-                    if (dynamicRules.ContainsKey(baseSyntacticCategory))
+                    if (grammar.dynamicRules.ContainsKey(baseSyntacticCategory))
                     {
-                        var grammarRuleList = dynamicRules[baseSyntacticCategory];
+                        var grammarRuleList = grammar.dynamicRules[baseSyntacticCategory];
                         foreach (var item in grammarRuleList)
                         {
                             var derivedRule = GenerateRule(item, nextTerm);
@@ -277,9 +292,9 @@ namespace LinearIndexedGrammarParser
                     }
                 }
 
-                if (!staticRules.ContainsKey(nextTerm)) return count;
+                if (!grammar.staticRules.ContainsKey(nextTerm)) return count;
 
-                var ruleList = staticRules[nextTerm];
+                var ruleList = grammar.staticRules[nextTerm];
                 Predict(col, ruleList);
             }
 

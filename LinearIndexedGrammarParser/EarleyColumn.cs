@@ -36,39 +36,23 @@ namespace LinearIndexedGrammarParser
         internal SortedDictionary<EarleyState, Queue<EarleyState>> ActionableCompleteStates { get; set; }
         internal Dictionary<DerivedCategory, List<EarleyState>> StatesWithNextSyntacticCategory;
         internal Queue<DerivedCategory> CategoriesToPredict;
-
         public List<EarleyState> GammaStates { get; set; }
 
+        private void EpsilonComplete(EarleyState state, Grammar grammar)
+        {
+            //TODO:
+            //make sure epsilon complete is called only once per rule in that column.
 
-
-        //private void EpsilonComplete(EarleyState state)
-        //{
-        //    var v = new EarleyNode("trace", Index, Index)
-        //    {
-        //        LogProbability = 0.0f,
-        //        Bits = 1
-        //    };
-        //    var y = EarleyState.MakeNode(state, Index, v);
-        //    var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn, y);
-
-        //    AddState(newState);
-        //    //if (true)
-        //    //    Console.WriteLine("{0} & {1} & {2} & EpsilonComplete from State {3}\\\\", newState.StateNumber, newState,
-        //    //        Index, state.StateNumber);
-
-        //    if (newState.Node.LogProbability < 0)
-        //    {
-        //        throw new LogException(
-        //            string.Format("EpsilonCompletearrrr! NODE log probability lower than 0: {0}, state: {1}",
-        //                newState.Node.LogProbability, newState));
-        //    }
-        //}
-
-
+            var v = new EarleyNode("trace", Index, Index);
+            var y = EarleyState.MakeNode(state, Index, v);
+            var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn, y);
+            AddState(newState, grammar);
+        }
 
         //The responsibility not to add a state that already exists in the columnn
-        //lays with the caller to AddState(). i.e, either predict, scan or complete.
-        public void AddState(EarleyState newState)
+        //lays with the caller to AddState(). i.e, either predict, scan or complete,
+        //or epsilon complete.
+        public void AddState(EarleyState newState, Grammar grammar)
         {
             newState.EndColumn = this;
 
@@ -86,16 +70,13 @@ namespace LinearIndexedGrammarParser
 
                 StatesWithNextSyntacticCategory[term].Add(newState);
 
-
                 //check if the next nonterminal leads to an expansion of null production, if yes, insert it to the 
                 //completed rules.
-
-                //initially just check if the next nonterminal is nullable production
-                //if (grammar.nullableProductions.ContainsKey(term))
-                //{
-                //    //spontaneous dot shift.
-                //    EpsilonComplete(newState);
-                //}
+                if (grammar.nullableCategories.Contains(term))
+                {
+                    //spontaneous dot shift.
+                    EpsilonComplete(newState, grammar);
+                }
 
             }
             else 

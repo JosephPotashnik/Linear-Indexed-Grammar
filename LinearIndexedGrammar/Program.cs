@@ -11,7 +11,7 @@ namespace LinearIndexedGrammar
         static void Main(string[] args)
         {
 
-            Earleyarser parser = new Earleyarser();
+            EarleyParser parser = new EarleyParser();
 
             var startCat = new DerivedCategory("START", "*");
             var VPCat = new DerivedCategory("VP", "*");
@@ -29,7 +29,7 @@ namespace LinearIndexedGrammar
             var NPCat2 = new DerivedCategory("NP", "*NP");
             var NPCat3 = new DerivedCategory("NP", "*");
             var NPCat4 = new DerivedCategory("NP", "NP");
-            var epsiloncat = new DerivedCategory("epsilon");
+            var epsiloncat = new DerivedCategory("Epsilon");
 
             parser.AddGrammarRule(new Rule(NPCat4, new[] { epsiloncat }));
 

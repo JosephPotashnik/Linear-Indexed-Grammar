@@ -7,8 +7,6 @@ namespace LinearIndexedGrammarParser
 
     public class SyntacticCategory
     {
-        public const string Epsilon = "epsilon";
-
         private readonly string Symbol;
         public SyntacticCategory() { }
         public SyntacticCategory(string symbol) => Symbol = symbol;
@@ -24,7 +22,7 @@ namespace LinearIndexedGrammarParser
 
         public override int GetHashCode() => Symbol.GetHashCode();
         public override string ToString() => Symbol;
-        internal bool IsEpsilon() =>  Symbol == Epsilon;
+        internal bool IsEpsilon() =>  Symbol == Grammar.EpsislonSymbol;
 
     }
 
