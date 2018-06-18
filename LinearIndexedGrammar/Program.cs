@@ -14,6 +14,25 @@ namespace LinearIndexedGrammar
                 Console.WriteLine();
             }
         }
+        private static System.Collections.Generic.List<EarleyNode> CFGTestLeftRecursion()
+        {
+            EarleyParser parser = new EarleyParser();
+
+            parser.AddGrammarRule(new Rule("START", new[] { "NP", "VP" }));
+            parser.AddGrammarRule(new Rule("VP", new[] { "V0" }));
+            parser.AddGrammarRule(new Rule("NP", new[] { "D", "N" }));
+            parser.AddGrammarRule(new Rule("NP", new[] { "NP", "D" }));
+
+
+            parser.AddGrammarRule(new Rule("PP", new[] { "P", "NP" }));
+            parser.AddGrammarRule(new Rule("NP", new[] { "NP", "ADJP" }));
+            parser.AddGrammarRule(new Rule("VP", new[] { "VP", "ADJP" }));
+            parser.AddGrammarRule(new Rule("ADJP", new[] { "NP" }));
+
+            var n = parser.ParseSentence("John a the a the a the cried");
+
+            return n;
+        }
 
         private static System.Collections.Generic.List<EarleyNode> CFGTest()
         {
@@ -25,6 +44,7 @@ namespace LinearIndexedGrammar
             parser.AddGrammarRule(new Rule("VP", new[] { "V2", "PP" }));
             parser.AddGrammarRule(new Rule("VP", new[] { "V3", "START" }));
             parser.AddGrammarRule(new Rule("NP", new[] { "D", "N" }));
+
             parser.AddGrammarRule(new Rule("PP", new[] { "P", "NP" }));
             parser.AddGrammarRule(new Rule("NP", new[] { "NP", "ADJP" }));
             parser.AddGrammarRule(new Rule("VP", new[] { "VP", "ADJP" }));
