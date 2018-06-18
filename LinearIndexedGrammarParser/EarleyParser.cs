@@ -292,7 +292,7 @@ namespace LinearIndexedGrammarParser
                     }
                 }
 
-                if (!grammar.staticRules.ContainsKey(nextTerm)) return count;
+                if (!grammar.staticRules.ContainsKey(nextTerm)) continue;
 
                 var ruleList = grammar.staticRules[nextTerm];
                 Predict(col, ruleList);
