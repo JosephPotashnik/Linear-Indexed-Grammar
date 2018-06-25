@@ -14,7 +14,7 @@ namespace LinearIndexedGrammarParser
     
     public class EarleyParser
     {
-        private Vocabulary voc;
+        protected Vocabulary voc;
         private Grammar grammar;
 
         public EarleyParser()
@@ -128,7 +128,7 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        private void Scan(EarleyColumn col, EarleyState state, SyntacticCategory term, string token)
+        protected void Scan(EarleyColumn col, EarleyState state, SyntacticCategory term, string token)
         {
             var v = new EarleyNode(term.ToString(), col.Index - 1, col.Index)
             {
@@ -170,22 +170,9 @@ namespace LinearIndexedGrammarParser
             }
         }
         
-        public List<EarleyNode> ParseSentence(string text)
+        public List<EarleyNode> ParseSentence(string text, int maxWords = 0)
         {
-            string[] arr;
-            arr = text.Split();
-
-            //check below that the text appears in the vocabulary
-            if (arr.Any(str => !voc.ContainsWord(str)))
-                throw new Exception("word in text does not appear in the vocabulary.");
-
-            var table = new EarleyColumn[arr.Length + 1];
-
-            for (var i = 1; i < table.Length; i++)
-                table[i] = new EarleyColumn(i, arr[i - 1]);
-
-            table[0] = new EarleyColumn(0, "");
-
+            (EarleyColumn[] table, int[] finalColumns) = PrepareEarleyTable(text, maxWords);
             EarleyState.stateCounter = 0;
 
             var startGrammarRule = new Rule(Grammar.GammaRule, new[] { Grammar.StartRule });
@@ -194,7 +181,6 @@ namespace LinearIndexedGrammarParser
 
             var startState = new EarleyState(startRule, 0, table[0], null);
             table[0].AddState(startState, grammar);
-            var finalColumn = table[table.Length - 1];
             try
             {
                 foreach (var col in table)
@@ -211,7 +197,13 @@ namespace LinearIndexedGrammarParser
                     TraverseScannableStates(table, col);
                 }
 
-                var nodes = finalColumn.GammaStates.Select(x => x.Node.Children[0]).ToList();
+                int numOfColumnsToLookForGamma = finalColumns.Length;
+                List<EarleyNode> nodes = new List<EarleyNode>();
+                foreach (var index in finalColumns)
+                {
+                    var n = table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
+                    nodes.AddRange(n);
+                }
                 return nodes;
 
             }
@@ -230,12 +222,34 @@ namespace LinearIndexedGrammarParser
             throw new Exception("Parsing Failed!");
         }
 
+        virtual protected (EarleyColumn[], int[]) PrepareEarleyTable(string text, int maxWord)
+        {
+            string[] arr = text.Split();
+            //check below that the text appears in the vocabulary
+            if (arr.Any(str => !voc.ContainsWord(str)))
+                throw new Exception("word in text does not appear in the vocabulary.");
+
+            var table = new EarleyColumn[arr.Length + 1];
+
+            for (var i = 1; i < table.Length; i++)
+                table[i] = new EarleyColumn(i, arr[i - 1]);
+
+            table[0] = new EarleyColumn(0, "");
+            return (table, new[] { table.Length - 1 });
+        }
+
+        protected virtual HashSet<string> GetPossibleSyntacticCategoriesForToken(string nextScannableTerm)
+        {
+            return voc[nextScannableTerm];
+        }
+
+
         private void TraverseScannableStates(EarleyColumn[] table, EarleyColumn col)
         {
             if (col.Index + 1 >= table.Length) return;
 
             var nextScannableTerm = table[col.Index + 1].Token;
-            var possibleSyntacticCategories = voc[nextScannableTerm];
+            var possibleSyntacticCategories = GetPossibleSyntacticCategoriesForToken(nextScannableTerm);
 
             foreach (var item in possibleSyntacticCategories)
             {

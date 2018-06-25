@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
-    internal class EarleyState
+    public class EarleyState
     {
         public static int stateCounter;
 

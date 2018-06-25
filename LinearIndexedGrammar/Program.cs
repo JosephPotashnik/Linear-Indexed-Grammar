@@ -14,9 +14,26 @@ namespace LinearIndexedGrammar
             //var n = ParseSentenceAccordingToGrammar("LIGMovementFromSubject.txt", "the man kissed the woman");
             //var n = ParseSentenceAccordingToGrammar("LIGMovementPP.txt", "to a girl the man went");
             //var n = ParseSentenceAccordingToGrammar("LIGMovementPP.txt", "a girl the man went to");
-            var n = ParseSentenceAccordingToGrammar("LIGMovementFromSubjectOrNoMovementAmbiguity.txt", "a girl the man kissed");
+            //var n = ParseSentenceAccordingToGrammar("LIGMovementFromSubjectOrNoMovementAmbiguity.txt", "a girl the man kissed");
 
-            PrintTrees(n);
+            //PrintTrees(n);
+
+            //var n = GenerateSentenceAccordingToGrammar("SimpleCFG.txt", 10);
+            var n = GenerateSentenceAccordingToGrammar("LIGMovementPP.txt", 10);
+            PrintNonTerminals(n);
+
+        }
+
+        private static List<EarleyNode> GenerateSentenceAccordingToGrammar(string filename, int maxWords)
+        {
+            EarleyGenerator generator = new EarleyGenerator();
+
+            var rules = GrammarFileReader.ReadRulesFromFile(filename);
+            foreach (var item in rules)
+                generator.AddGrammarRule(item);
+
+            var n = generator.ParseSentence("", maxWords);
+            return n;
         }
 
         private static List<EarleyNode>  ParseSentenceAccordingToGrammar(string filename, string sentence)
@@ -37,6 +54,14 @@ namespace LinearIndexedGrammar
             {
                 item.Print(4);
                 Console.WriteLine();
+            }
+        }
+
+        private static void PrintNonTerminals(List<EarleyNode> n)
+        {
+            foreach (var item in n)
+            {
+                Console.WriteLine(item.GetTerminalStringUnderNode());
             }
         }
     }

@@ -85,8 +85,10 @@ namespace LinearIndexedGrammarParser
         {
             if (Children == null)
             {
+                //if (Name != null && AssociatedTerminal != null)
+                //    leavesList.Add(AssociatedTerminal);
                 if (Name != null && AssociatedTerminal != null)
-                    leavesList.Add(AssociatedTerminal);
+                    leavesList.Add(Name);
             }
             else
             {
@@ -94,5 +96,6 @@ namespace LinearIndexedGrammarParser
                     child.GetTerminalStringUnderNode(leavesList);
             }
         }
+        
     }
 }

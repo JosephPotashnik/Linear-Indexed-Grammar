@@ -9,6 +9,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="SimpleCFG.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="LIGMovementFromSubjectOrNoMovementAmbiguity.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

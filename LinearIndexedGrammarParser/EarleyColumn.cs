@@ -15,7 +15,7 @@ namespace LinearIndexedGrammarParser
         }
     }
 
-    internal class EarleyColumn 
+    public class EarleyColumn 
     {
         public EarleyColumn(int index, string token)
         {
