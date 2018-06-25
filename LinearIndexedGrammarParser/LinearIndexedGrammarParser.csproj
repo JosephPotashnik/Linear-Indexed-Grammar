@@ -9,6 +9,27 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="LIGMovementFromSubjectOrNoMovementAmbiguity.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LIGMovementPP.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LIGMovementFromSubject.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LIGMovementFromDirectObject.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LIG.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="CFG.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="CFGLeftRecursion.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Vocabulary.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
