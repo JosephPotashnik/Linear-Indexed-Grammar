@@ -73,15 +73,15 @@ namespace LinearIndexedGrammarParser
                 child.Print(level + 1);
         }
 
-        public string GetTerminalStringUnderNode()
+        public string GetNonTerminalStringUnderNode()
         {
             var leaves = new List<string>();
-            GetTerminalStringUnderNode(leaves);
+            GetNonTerminalStringUnderNode(leaves);
             return string.Join(" ", leaves);
         }
 
 
-        private void GetTerminalStringUnderNode(List<string> leavesList)
+        private void GetNonTerminalStringUnderNode(List<string> leavesList)
         {
             if (Children == null)
             {
@@ -93,7 +93,7 @@ namespace LinearIndexedGrammarParser
             else
             {
                 foreach (var child in Children)
-                    child.GetTerminalStringUnderNode(leavesList);
+                    child.GetNonTerminalStringUnderNode(leavesList);
             }
         }
         

@@ -6,7 +6,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LinearIndexedGrammarLearner\LinearIndexedGrammarLearner.csproj" />
     <ProjectReference Include="..\LinearIndexedGrammarParser\LinearIndexedGrammarParser.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="MutationWeights.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ProgramParameters.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SessionReport.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="SimulatedAnnealingParameters.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

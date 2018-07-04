@@ -40,9 +40,6 @@ namespace LinearIndexedGrammarParser
 
         private void EpsilonComplete(EarleyState state, Grammar grammar)
         {
-            //TODO:
-            //make sure epsilon complete is called only once per rule in that column.
-
             var v = new EarleyNode("trace", Index, Index);
             var y = EarleyState.MakeNode(state, Index, v);
             var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn, y);
@@ -70,13 +67,10 @@ namespace LinearIndexedGrammarParser
 
                 StatesWithNextSyntacticCategory[term].Add(newState);
 
-                //check if the next nonterminal leads to an expansion of null production, if yes, insert it to the 
-                //completed rules.
+                //check if the next nonterminal leads to an expansion of null production, if yes,
+                //then perform a spontaneous dot shift.
                 if (grammar.nullableCategories.Contains(term))
-                {
-                    //spontaneous dot shift.
                     EpsilonComplete(newState, grammar);
-                }
 
             }
             else 

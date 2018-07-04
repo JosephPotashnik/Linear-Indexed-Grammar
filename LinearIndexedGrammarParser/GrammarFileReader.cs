@@ -9,13 +9,22 @@ namespace LinearIndexedGrammarParser
 {
     public class GrammarFileReader
     {
+        public static Grammar CreateGrammarFromFile(string filename)
+        {
+            var rules = ReadRulesFromFile(filename);
+            Grammar grammar = new Grammar();
+            foreach (var item in rules)
+                grammar.AddGrammarRule(item);
+
+            return grammar;
+        }
         private static DerivedCategory CreateDerivedCategory(string s)
         {
             Regex pattern = new Regex(@"(?<BaseCategory>\w*)(\[(?<Stack>[\w\*]*)\])?");
             Match match = pattern.Match(s);
             return new DerivedCategory(match.Groups["BaseCategory"].Value, match.Groups["Stack"].Value);
         }
-        public  static List<Rule> ReadRulesFromFile(string filename)
+        private static List<Rule> ReadRulesFromFile(string filename)
         {
             string line;
             char comment = '#';

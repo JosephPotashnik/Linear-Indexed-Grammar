@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace LinearIndexedGrammarParser
 {
@@ -17,108 +16,13 @@ namespace LinearIndexedGrammarParser
         protected Vocabulary voc;
         private Grammar grammar;
 
-        public EarleyParser()
+        public EarleyParser(Grammar g, Vocabulary v = null)
         {
-            voc = Vocabulary.GetVocabularyFromFile(@"Vocabulary.json");
-            grammar = new Grammar();
+            if (v == null)
+                voc = Vocabulary.GetVocabularyFromFile(@"Vocabulary.json");
+            grammar = g;
         }
-
-
-        private Rule GenerateRule(Rule grammarRule, DerivedCategory leftHandSide)
-        {
-            if (grammarRule.LeftHandSide.Stack == null || grammarRule.LeftHandSide.Stack == string.Empty)
-                return null;
-
-            string patternStringLeftHandSide = grammarRule.LeftHandSide.Stack;
-
-            //1. make the pattern be your Syntactic Category
-            //2. then find the stack contents - anything by "*" (the first group)
-            var newRule = new Rule(grammarRule);
-            string patternString = patternStringLeftHandSide.Replace("*", "(.*)");
-
-            Regex pattern = new Regex(patternString);
-
-            string textToMatch = leftHandSide.Stack;
-            Match match = pattern.Match(textToMatch);
-            if (!match.Success) return null;
-
-            var stackContents = match.Groups[1].Value;
-            newRule.LeftHandSide = leftHandSide;
-
-            //3. replace the contents of the stack * in the right hand side productions.
-            for (int i = 0; i < newRule.RightHandSide.Length; i++)
-            {
-                string patternRightHandSide = newRule.RightHandSide[i].Stack;
-                string res = patternRightHandSide.Replace("*", stackContents);
-                newRule.RightHandSide[i].Stack = res;
-            }
-
-            return newRule;
-        }
-
-        public void AddStaticRule(Rule r)
-        {
-            if (r == null) return;
-
-            Grammar.ruleCounter++;
-            var newRule = new Rule(r);
-            newRule.Number = Grammar.ruleCounter;
-
-            if (!grammar.staticRules.ContainsKey(newRule.LeftHandSide))
-                grammar.staticRules[newRule.LeftHandSide] = new List<Rule>();
-
-            grammar.staticRules[newRule.LeftHandSide].Add(newRule);
-
-            //TODO: calculate the transitive closure of all nullable symbols.
-            //at the moment you calculate only the rules that directly lead to epsilon.
-            //For instance. C -> D E, D -> epsilon, E-> epsilon. C is not in itself an epsilon rule
-            //yet it is a nullable production.
-            if (newRule.RightHandSide[0].IsEpsilon())
-                grammar.nullableCategories.Add(newRule.LeftHandSide);
-        }
-
-        public void AddGrammarRule(Rule r)
-        {
-            var newRule = new Rule(r);
-
-            //if non-empty stack
-            if (newRule.LeftHandSide.Stack != null)
-            {
-                var stackContents = newRule.LeftHandSide.Stack;
-                //and if the left hand side allows manipulating the stack (has the wildcard)
-                //insert into the stackManipulationRules dictionary.
-                if (stackContents.Contains("*"))
-                {
-
-                    var newSynCat = new SyntacticCategory(newRule.LeftHandSide);
-                    if (!grammar.dynamicRules.ContainsKey(newSynCat))
-                        grammar.dynamicRules[newSynCat] = new List<Rule>();
-
-                    grammar.dynamicRules[newSynCat].Add(newRule);
-
-                    var emptyStackRule = new DerivedCategory(newSynCat.ToString());
-                    //generate base form of the rule with the empty stack
-                    //as a starting point of the grammar (= equal to context free case)
-                    grammar.staticRulesGeneratedForCategory.Add(emptyStackRule);
-                    var derivedRule = GenerateRule(newRule, emptyStackRule);
-                    if (derivedRule != null)
-                        AddStaticRule(derivedRule);
-
-
-                }
-                else
-                {
-                    grammar.staticRulesGeneratedForCategory.Add(newRule.LeftHandSide);
-                    AddStaticRule(newRule);
-                }
-            }
-            else
-            {
-                grammar.staticRulesGeneratedForCategory.Add(newRule.LeftHandSide);
-                AddStaticRule(newRule);
-            }
-        }
-
+        
         private void Predict(EarleyColumn col, List<Rule> ruleList)
         {
             foreach (var rule in ruleList)
@@ -177,7 +81,7 @@ namespace LinearIndexedGrammarParser
 
             var startGrammarRule = new Rule(Grammar.GammaRule, new[] { Grammar.StartRule });
             var startRule = new Rule(startGrammarRule);
-            AddStaticRule(startGrammarRule);
+            grammar.AddStaticRule(startGrammarRule);
 
             var startState = new EarleyState(startRule, 0, table[0], null);
             table[0].AddState(startState, grammar);
@@ -288,8 +192,8 @@ namespace LinearIndexedGrammarParser
                         var grammarRuleList = grammar.dynamicRules[baseSyntacticCategory];
                         foreach (var item in grammarRuleList)
                         {
-                            var derivedRule = GenerateRule(item, nextTerm);
-                            AddStaticRule(derivedRule);
+                            var derivedRule = grammar.GenerateRule(item, nextTerm);
+                            grammar.AddStaticRule(derivedRule);
                         }
                     }
                 }
