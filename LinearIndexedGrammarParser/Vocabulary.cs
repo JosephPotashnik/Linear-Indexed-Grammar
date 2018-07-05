@@ -29,7 +29,7 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        public static Vocabulary GetVocabularyFromFile(string jsonFileName)
+        public static Vocabulary ReadVocabularyFromFile(string jsonFileName)
         {
             Vocabulary voc;
 

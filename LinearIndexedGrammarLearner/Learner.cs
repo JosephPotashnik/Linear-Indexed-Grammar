@@ -12,20 +12,24 @@ namespace LinearIndexedGrammarLearner
         private readonly Dictionary<string, int> sentencesWithCounts;
         public Grammar originalGrammar;
         private GrammarPermutations gp = new GrammarPermutations();
-        //TODO: find maxWords from sentences in the Data.
-        private const int maxWords = 10;  //temporary 
-        
+        private Vocabulary voc;
+        private int maxWordsInSentence;
 
-        public Learner(string[] sentences)
+
+
+
+        public Learner(string[] sentences, int maxWordsInSentence)
         {
+            this.maxWordsInSentence = maxWordsInSentence;
             gp.ReadPermutationWeightsFromFile();
             sentencesWithCounts = sentences.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
         }
 
-        ////We create the "promiscuous grammar" as 
+        ////We create the "promiscuous grammar" as initial grammar.
         public Grammar CreateInitialGrammar(Vocabulary voc)
         {
             originalGrammar = new Grammar();
+            this.voc = voc;
             var posInText = voc.POSWithPossibleWords.Keys;
 
             foreach (var pos in posInText)
@@ -45,7 +49,7 @@ namespace LinearIndexedGrammarLearner
             {
                 Parallel.ForEach(sentencesWithCounts, (sentenceItem, state, i) =>
                 {
-                    var parser = new EarleyParser(currentHypothesis);
+                    var parser = new EarleyParser(currentHypothesis, this.voc);
                     var n = parser.ParseSentence(sentenceItem.Key);
                     allParses[i] = new SentenceParsingResults()
                     {
@@ -63,9 +67,9 @@ namespace LinearIndexedGrammarLearner
             }
         }
 
-        public static int RequiredBitsGivenProbability(double probability)
+        public static double NegativeLogProbability(double probability)
         {
-            return (int)Math.Ceiling(-Math.Log(probability, 2)) + 1;
+            return Math.Ceiling(-Math.Log(probability, 2));
         }
 
         public Energy Energy(Grammar currentHypothesis)
@@ -79,7 +83,8 @@ namespace LinearIndexedGrammarLearner
                 // fix - count them only once.
                 var totalTreesCountofData = allParses.Select(x => x.Trees.Count).Sum();
                 var generator = new EarleyGenerator(currentHypothesis);
-                var possibleTreesOfGrammar = generator.ParseSentence("", maxWords);
+                var possibleTreesOfGrammar = generator.ParseSentence("", maxWordsInSentence);
+
                 var totalTreesCountofGrammar = possibleTreesOfGrammar.Count;
 
                 double probabilityOfInputGivenGrammar = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
@@ -89,7 +94,8 @@ namespace LinearIndexedGrammarLearner
                     throw new Exception("probability is wrong!");
                 }
 
-                energy.DataEnergy = RequiredBitsGivenProbability(probabilityOfInputGivenGrammar);
+
+                energy.DataEnergy = (int)(NegativeLogProbability(probabilityOfInputGivenGrammar) * 100);
                 return energy;
             }
             return null;

@@ -26,8 +26,8 @@ namespace LinearIndexedGrammar
     {
         static void Main(string[] args)
         {
-            Tests();
-            //Learn();
+            //Tests();
+            Learn();
         }
 
         public static void StopWatch(Stopwatch stopWatch)
@@ -51,19 +51,13 @@ namespace LinearIndexedGrammar
         }
 
 
-        private static void Learn()
+        private static void Learn(int maxWordsInSentence = 5)
         {
+            ProgramParams programParams = ReadProgramParamsFromFile();
+            Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
 
-            ProgramParams programParams;
-            using (var file = File.OpenText(@"ProgramParameters.json"))
-            {
-                var serializer = new JsonSerializer();
-                programParams = (ProgramParams)serializer.Deserialize(file, typeof(ProgramParams));
-            }
-
-            var voc = Vocabulary.GetVocabularyFromFile(@"Vocabulary.json");
-            var n = GenerateSentenceAccordingToGrammar("SimpleCFG.txt", 10);
-            var data = GetSentencesOfGenerator(n, voc);
+            (var n, var targetGrammar) = GenerateSentenceAccordingToGrammar("SimpleCFG.txt", maxWordsInSentence);
+            (var data, var dataVocabulary) = GetSentencesOfGenerator(n, universalVocabulary);
 
             using (var sw = File.AppendText("SessionReport.txt"))
             {
@@ -74,10 +68,9 @@ namespace LinearIndexedGrammar
             }
             var stopWatch = StartWatch();
 
-            var learner = new Learner(data);
-            learner.CreateInitialGrammar(voc);
+            var learner = new Learner(data, maxWordsInSentence);
 
-            var targetGrammarEnergy = learner.Energy(learner.originalGrammar);
+            var targetGrammarEnergy = learner.Energy(targetGrammar);
             var s = string.Format("Target Hypothesis:\r\n{0} with energy: {1}\r\n", learner.originalGrammar,
                 targetGrammarEnergy);
 
@@ -89,10 +82,22 @@ namespace LinearIndexedGrammar
 
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
-                var sa = new SimulatedAnnealing(learner, voc);
+                var sa = new SimulatedAnnealing(learner, dataVocabulary);
                 sa.Run();
             }
             StopWatch(stopWatch);
+        }
+
+        private static ProgramParams ReadProgramParamsFromFile()
+        {
+            ProgramParams programParams;
+            using (var file = File.OpenText(@"ProgramParameters.json"))
+            {
+                var serializer = new JsonSerializer();
+                programParams = (ProgramParams)serializer.Deserialize(file, typeof(ProgramParams));
+            }
+
+            return programParams;
         }
 
         private static void Tests()
@@ -104,25 +109,25 @@ namespace LinearIndexedGrammar
             //var n = ParseSentenceAccordingToGrammar("LIGMovementFromSubject.txt", "the man kissed the woman");
             //var n = ParseSentenceAccordingToGrammar("LIGMovementPP.txt", "to a girl the man went");
             //var n = ParseSentenceAccordingToGrammar("LIGMovementPP.txt", "a girl the man went to");
-            var n = ParseSentenceAccordingToGrammar("LIGMovementFromSubjectOrNoMovementAmbiguity.txt", "a girl the man kissed");
+            //var n = ParseSentenceAccordingToGrammar("LIGMovementFromSubjectOrNoMovementAmbiguity.txt", "a girl the man kissed");
 
-            PrintTrees(n);
+            //PrintTrees(n);
 
-            //var n = GenerateSentenceAccordingToGrammar("SimpleCFG.txt", 10);
+            (var n, var grammar) = GenerateSentenceAccordingToGrammar("SimpleCFG.txt", 10);
             //var n = GenerateSentenceAccordingToGrammar("LIGMovementPP.txt", 10);
             //var n = GenerateSentenceAccordingToGrammar("LIGMovementFromSubjectOrNoMovementAmbiguity.txt", 6);
 
-            //PrintNonTerminals(n);
+            PrintNonTerminals(n);
         }
 
-        private static List<EarleyNode> GenerateSentenceAccordingToGrammar(string filename, int maxWords)
+        private static (List<EarleyNode> n, Grammar g) GenerateSentenceAccordingToGrammar(string filename, int maxWords)
         {
 
             var grammar = GrammarFileReader.CreateGrammarFromFile(filename);
             EarleyGenerator generator = new EarleyGenerator(grammar);
 
             var n = generator.ParseSentence("", maxWords);
-            return n;
+            return (n, grammar);
         }
 
         private static List<EarleyNode>  ParseSentenceAccordingToGrammar(string filename, string sentence)
@@ -155,8 +160,9 @@ namespace LinearIndexedGrammar
                 Console.WriteLine(item);
         }
 
-        private static string[] GetSentencesOfGenerator(List<EarleyNode> n, Vocabulary voc)
+        private static (string[] sentences, Vocabulary textVocabulary) GetSentencesOfGenerator(List<EarleyNode> n, Vocabulary universalVocabulary)
         {
+            Vocabulary textVocabulary  = new Vocabulary();
             var nonTerminalSentences = GetSentencesNonTerminals(n);
             List<string> sentences = new List<string>();
 
@@ -165,14 +171,24 @@ namespace LinearIndexedGrammar
                 string[] arr = item.Split();
                 string[] sentence = new string[arr.Length];
 
+                var posCategories = new HashSet<string>();
                 for (int i = 0; i < arr.Length; i++)
-                    sentence[i] = voc.POSWithPossibleWords[arr[i]].First();
+                {
+                    string posCat = arr[i];
+
+                    sentence[i] = universalVocabulary.POSWithPossibleWords[posCat].First();
+                    if (!posCategories.Contains(posCat))
+                        posCategories.Add(posCat);
+
+                }
+                foreach (var category in posCategories)
+                    textVocabulary.AddWordsToPOSCategory(category, universalVocabulary.POSWithPossibleWords[category].ToArray());
 
                 var s = string.Join(" ", sentence);
                 sentences.Add(s);
             }
 
-            return sentences.ToArray();
+            return (sentences.ToArray(), textVocabulary);
         }
 
     }

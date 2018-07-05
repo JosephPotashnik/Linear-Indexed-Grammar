@@ -7,16 +7,30 @@ namespace LinearIndexedGrammarLearner
 {
     public class SimulatedAnnealing
     {
-        private readonly float coolingFactor;
+        SimulatedAnnealingRunningParameters simulatedAnnealingParams;
         private readonly Learner learner;
-        private readonly int reportEveryNIterations;
-        private readonly float threshold;
         private Grammar bestHypothesis, currentHypothesis;
         private Energy currentEnergy, bestEnergy;
         private int currentIteration, bestIteration;
         private double currentTemp;
 
         public SimulatedAnnealing(Learner l, Vocabulary voc)
+        {
+            simulatedAnnealingParams = ReadSimulatedAnnealingParametersFromFile();
+            learner = l;
+            currentIteration = bestIteration = 1;
+            currentHypothesis = bestHypothesis = learner.CreateInitialGrammar(voc);
+            currentEnergy = bestEnergy = learner.Energy(currentHypothesis);
+
+            currentTemp = currentEnergy.DataEnergy * simulatedAnnealingParams.InitialTemperatureTimesInitialEnegrgy;
+            using (var sw = File.AppendText("SessionReport.txt"))
+            {
+                sw.WriteLine(string.Format("cooling factor: {0}, initial energy: {1}, initial temperature: {2}",
+                    simulatedAnnealingParams.CoolingFactor, currentEnergy, currentTemp));
+            }
+        }
+
+        private static SimulatedAnnealingRunningParameters ReadSimulatedAnnealingParametersFromFile()
         {
             SimulatedAnnealingRunningParameters pam;
             using (var file = File.OpenText(@"SimulatedAnnealingParameters.json"))
@@ -27,25 +41,8 @@ namespace LinearIndexedGrammarLearner
                         serializer.Deserialize(file, typeof(SimulatedAnnealingRunningParameters));
             }
 
-            learner = l;
-
-            threshold = pam.ThresholdTemperature;
-            coolingFactor = pam.CoolingFactor;
-            currentIteration = bestIteration = 1;
-            reportEveryNIterations = pam.ReportEveryNIteration;
-
-            currentHypothesis = bestHypothesis = learner.CreateInitialGrammar(voc);
-            currentEnergy = bestEnergy = learner.Energy(currentHypothesis);
-
-            currentTemp = currentEnergy.DataEnergy * pam.InitialTemperatureTimesInitialEnegrgy;
-            using (var sw = File.AppendText("SessionReport.txt"))
-            {
-                sw.WriteLine(string.Format("cooling factor: {0}, initial energy: {1}, initial temperature: {2}",
-                    coolingFactor, currentEnergy, currentTemp));
-            }
+            return pam;
         }
-
-        public int Energy { get; set; }
 
         private double P(Energy currStateEnergy, Energy possibleStateEnergy, double temp)
         {
@@ -56,7 +53,7 @@ namespace LinearIndexedGrammarLearner
         public Tuple<Energy, Grammar> Run()
         {
             var rand = new Random();
-            while (currentTemp > threshold)
+            while (currentTemp > simulatedAnnealingParams.ThresholdTemperature)
             {
                 try
                 {
@@ -87,9 +84,9 @@ namespace LinearIndexedGrammarLearner
                         }
                     }
                     currentIteration++;
-                    if (currentIteration % reportEveryNIterations == 0)
+                    if (currentIteration % simulatedAnnealingParams.ReportEveryNIteration == 0)
                         Console.WriteLine("Iteration {0}", currentIteration);
-                    currentTemp *= coolingFactor;
+                    currentTemp *= simulatedAnnealingParams.CoolingFactor;
                 }
 
                 catch (Exception e)
@@ -99,7 +96,7 @@ namespace LinearIndexedGrammarLearner
             }
 
 
-            var s = string.Format("{0}. ({1}) \r\nBest Hypothesis: \r\n{2}Best so far: #{3} with energy: {4}\r\n",
+            var s = string.Format("{0}. ({1}) \r\nBest Hypothesis: \r\n{2}\r\nBest so far: #{3} with energy: {4}\r\n",
                 currentIteration, currentTemp, bestHypothesis,bestIteration, bestEnergy);
 
             Console.WriteLine(s);

@@ -26,6 +26,12 @@ namespace LinearIndexedGrammarParser
 
         }
 
+        public override string ToString()
+        {
+            var allRules = staticRules.Values.SelectMany(x => x);
+            return string.Join("\r\n", allRules);
+        }
+
         public void AddGrammarRule(Rule r)
         {
             var newRule = new Rule(r);

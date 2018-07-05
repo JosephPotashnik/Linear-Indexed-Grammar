@@ -18,9 +18,11 @@ namespace LinearIndexedGrammarParser
 
         public EarleyParser(Grammar g, Vocabulary v = null)
         {
-            if (v == null)
-                voc = Vocabulary.GetVocabularyFromFile(@"Vocabulary.json");
-            grammar = g;
+            voc  = v ?? Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
+
+            //deep copy to a private variable, because the rules of the grammar
+            //are dynamically changeable, do not alter the input grammar.
+            grammar = new Grammar(g);
         }
         
         private void Predict(EarleyColumn col, List<Rule> ruleList)
@@ -64,14 +66,17 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        private void TestForTooManyStatesInColumn(int count)
+        //inactive. use for debugging when you suspect program stuck.
+        //at the moment, the promiscuous grammar could generate +100,000 earley states
+        //so a very large amount of earley states is not necessarily a a bug.
+        private void TestForTooManyStatesInColumn(EarleyColumn col, int count)
         {
-            if (count > 10000)
-            {
-                Console.WriteLine("More than 10000 states in a single column. Suspicious. Grammar is : {0}",
-                    grammar);
-                throw new Exception("Grammar with infinite parse. abort this grammar..");
-            }
+            //if (count > 10000)
+            //{
+            //    Console.WriteLine("More than 10000 states in a single column. Suspicious. Grammar is : {0}",
+            //        grammar);
+            //    throw new Exception("Grammar with infinite parse. abort this grammar..");
+            //}
         }
         
         public List<EarleyNode> ParseSentence(string text, int maxWords = 0)
@@ -178,7 +183,7 @@ namespace LinearIndexedGrammarParser
                     throw new Exception(
                         "completed states queue should always be empty while processing predicted states.");
                 count++;
-                TestForTooManyStatesInColumn(count);
+                //TestForTooManyStatesInColumn(col, count);
 
                 //if static rules have not been generated for this term yet
                 //compute them from dynamaic rules dictionary
@@ -212,7 +217,7 @@ namespace LinearIndexedGrammarParser
             while (col.ActionableCompleteStates.Any())
             {
                 count++;
-                TestForTooManyStatesInColumn(count);
+                //TestForTooManyStatesInColumn(col, count);
 
                 var completedStatesQueueKey = col.ActionableCompleteStates.First().Key;
                 var completedStatesQueue = col.ActionableCompleteStates.First().Value;
