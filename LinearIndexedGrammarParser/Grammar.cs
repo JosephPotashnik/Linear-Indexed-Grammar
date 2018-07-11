@@ -11,10 +11,10 @@ namespace LinearIndexedGrammarParser
         public const string StartRule = "START";
         public const string EpsislonSymbol = "Epsilon";
 
-        internal readonly Dictionary<DerivedCategory, List<Rule>> staticRules = new Dictionary<DerivedCategory, List<Rule>>();
-        internal readonly Dictionary<SyntacticCategory, List<Rule>> dynamicRules = new Dictionary<SyntacticCategory, List<Rule>>();
-        internal readonly HashSet<DerivedCategory> staticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
-        internal readonly HashSet<DerivedCategory> nullableCategories = new HashSet<DerivedCategory>();
+        public readonly Dictionary<DerivedCategory, List<Rule>> staticRules = new Dictionary<DerivedCategory, List<Rule>>();
+        public readonly Dictionary<SyntacticCategory, List<Rule>> dynamicRules = new Dictionary<SyntacticCategory, List<Rule>>();
+        public readonly HashSet<DerivedCategory> staticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
+        public readonly HashSet<DerivedCategory> nullableCategories = new HashSet<DerivedCategory>();
         internal static int ruleCounter = 0;
 
         public Grammar(Grammar otherGrammar)
@@ -25,13 +25,31 @@ namespace LinearIndexedGrammarParser
             nullableCategories = new HashSet<DerivedCategory>(otherGrammar.nullableCategories);
 
         }
-
+        public IEnumerable<Rule> Rules
+        {
+            //Note: SelectMany here does not deep-copy, we get the reference to the grammar rules.
+            get {  return staticRules.Values.SelectMany(x => x); }
+        }
         public override string ToString()
         {
-            var allRules = staticRules.Values.SelectMany(x => x);
+            var allRules = Rules;
             return string.Join("\r\n", allRules);
         }
 
+        public void DeleteGrammarRule(Rule r)
+        {
+            var LHS = r.LeftHandSide;
+            var rulesWithSameLHS = staticRules[LHS];
+            rulesWithSameLHS.Remove(r);
+
+            if (rulesWithSameLHS.Count == 0)
+            {
+                staticRules.Remove(LHS);
+                staticRulesGeneratedForCategory.Remove(LHS);
+
+            }
+
+        }
         public void AddGrammarRule(Rule r)
         {
             var newRule = new Rule(r);

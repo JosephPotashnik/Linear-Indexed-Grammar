@@ -11,17 +11,13 @@ namespace LinearIndexedGrammarLearner
     {
         private readonly Dictionary<string, int> sentencesWithCounts;
         public Grammar originalGrammar;
-        private GrammarPermutations gp = new GrammarPermutations();
+        private GrammarPermutations gp;
         private Vocabulary voc;
         private int maxWordsInSentence;
-
-
-
 
         public Learner(string[] sentences, int maxWordsInSentence)
         {
             this.maxWordsInSentence = maxWordsInSentence;
-            gp.ReadPermutationWeightsFromFile();
             sentencesWithCounts = sentences.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
         }
 
@@ -29,8 +25,9 @@ namespace LinearIndexedGrammarLearner
         public Grammar CreateInitialGrammar(Vocabulary voc)
         {
             originalGrammar = new Grammar();
-            this.voc = voc;
             var posInText = voc.POSWithPossibleWords.Keys;
+            gp = new GrammarPermutations(posInText.ToArray());
+            gp.ReadPermutationWeightsFromFile();
 
             foreach (var pos in posInText)
             {
@@ -82,20 +79,32 @@ namespace LinearIndexedGrammarLearner
                 //here you will count it several times instead of once.
                 // fix - count them only once.
                 var totalTreesCountofData = allParses.Select(x => x.Trees.Count).Sum();
-                var generator = new EarleyGenerator(currentHypothesis);
-                var possibleTreesOfGrammar = generator.ParseSentence("", maxWordsInSentence);
 
-                var totalTreesCountofGrammar = possibleTreesOfGrammar.Count;
-
-                double probabilityOfInputGivenGrammar = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
-
-                if (probabilityOfInputGivenGrammar < 0 || probabilityOfInputGivenGrammar > 1)
+                if (totalTreesCountofData == 0)
                 {
-                    throw new Exception("probability is wrong!");
+                    energy.DataEnergy = int.MaxValue;
                 }
+                else
+                {
+                    var generator = new EarleyGenerator(currentHypothesis);
+                    var possibleTreesOfGrammar = generator.ParseSentence("", maxWordsInSentence);
+
+                    var totalTreesCountofGrammar = possibleTreesOfGrammar.Count;
+
+                    double probabilityOfInputGivenGrammar = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
+
+                    if (probabilityOfInputGivenGrammar < 0 || probabilityOfInputGivenGrammar > 1)
+                    {
+                        throw new Exception("probability is wrong!");
+                    }
 
 
-                energy.DataEnergy = (int)(NegativeLogProbability(probabilityOfInputGivenGrammar) * 100);
+                    energy.DataEnergy = (int)(NegativeLogProbability(probabilityOfInputGivenGrammar) * 100);
+                    if (energy.DataEnergy < 0)
+                    {
+                        throw new Exception("energy is wrong!");
+                    }
+                }
                 return energy;
             }
             return null;

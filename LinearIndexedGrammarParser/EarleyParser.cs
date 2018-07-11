@@ -83,6 +83,7 @@ namespace LinearIndexedGrammarParser
         {
             (EarleyColumn[] table, int[] finalColumns) = PrepareEarleyTable(text, maxWords);
             EarleyState.stateCounter = 0;
+            List<EarleyNode> nodes = new List<EarleyNode>();
 
             var startGrammarRule = new Rule(Grammar.GammaRule, new[] { Grammar.StartRule });
             var startRule = new Rule(startGrammarRule);
@@ -107,14 +108,12 @@ namespace LinearIndexedGrammarParser
                 }
 
                 int numOfColumnsToLookForGamma = finalColumns.Length;
-                List<EarleyNode> nodes = new List<EarleyNode>();
                 foreach (var index in finalColumns)
                 {
                     var n = table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
                     nodes.AddRange(n);
                 }
-                return nodes;
-
+                
             }
             catch (LogException e)
             {
@@ -123,11 +122,17 @@ namespace LinearIndexedGrammarParser
                 Console.WriteLine(string.Format("sentence: {0}, grammar: {1}", text, grammar));
             }
 
+            //if the parse is unsuccessful - nodes will contain an empty list with 0 trees.
+            //return nodes;
+
             catch (Exception e)
             {
                 var s = e.ToString();
                 Console.WriteLine(s);
             }
+            if (nodes.Count > 0)
+                return nodes;
+
             throw new Exception("Parsing Failed!");
         }
 

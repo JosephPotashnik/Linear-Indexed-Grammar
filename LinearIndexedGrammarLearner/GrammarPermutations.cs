@@ -16,8 +16,12 @@ namespace LinearIndexedGrammarLearner
         private static Tuple<GrammarMutation, int>[] mutations;
         private static Random rand = new Random();
         private static int totalWeights;
+        private static int newNonTerminalCounter = 1;
+        private DerivedCategory[] PartsOfSpeechCategories;
 
-        public GrammarPermutations() { }
+        public GrammarPermutations(string[] POS) {
+            PartsOfSpeechCategories = POS.Select(x => new DerivedCategory(x)).ToArray();
+        }
         public void ReadPermutationWeightsFromFile()
         {
             List<GrammarMutationData> l;
@@ -60,16 +64,69 @@ namespace LinearIndexedGrammarLearner
         //generate a new rule from random existing productions.
         public Grammar InsertRule(Grammar grammar)
         {
+            var lhsCategories = grammar.staticRulesGeneratedForCategory.ToArray();
+            var rightHandSidePOOL = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
+
+            //we cannot insert a new rule if the number of left hand sided symbols
+            //exceeds a certain amount, determined by the number of parts of speech.
+
+            //a full binary tree with N parts of speech as leaves
+            //requires N-1 non-terminals to parse.
+            //so at best case, the number of LHS symbols is in the order of N, the number
+            //of different Parts of speech. 
+            //we will no assume a full binary tree, so We can increase the upper bound to allow flexibility.
+            int RelationOfLHSToPOS = 2;
+            if (lhsCategories.Length >= PartsOfSpeechCategories.Length * RelationOfLHSToPOS)
+                return null;
+
             for (var i = 0; i < NumberOfRetries; i++)
             {
-                
+                var rules = grammar.Rules.ToArray();
+                var randomRule = rules[rand.Next(rules.Length)];
+
+                //choose for now only binary rules.
+                if (randomRule.RightHandSide.Length < 2)
+                    continue;
+
+                //select a right hand side category randomly.
+                var randomChildIndex = rand.Next(2);
+                var randomChildCategory = randomRule.RightHandSide[randomChildIndex];
+
+                //create a new terminal or select a POS instead? (with are the probabilities for each?)
+
+                //For now, create a new non terminal.
+
+                //create a new non terminal
+                var baseNonTerminal = $"X{newNonTerminalCounter}";
+                newNonTerminalCounter++;
+                var newCategory = new DerivedCategory(baseNonTerminal);
+
+                //change the original rule 
+                randomRule.RightHandSide[randomChildIndex] = newCategory;
+
+                //create a new Rule, whose LHS is the new category. 
+                //the right hand side of the new rule is chosen randomly
+                //from existing LHS symbols of the grammar, or from POS.
+                   var rightHandSide = new DerivedCategory[2];
+                for (i = 0; i < 2; i++)
+                {
+                    var randomRightHandSideCategory = rightHandSidePOOL[rand.Next(rightHandSidePOOL.Length)];
+                    rightHandSide[i] = randomRightHandSideCategory;
+                }
+                var newRule = new Rule(newCategory, rightHandSide);
+                grammar.AddGrammarRule(newRule);
+
+                return grammar;
             }
             return null;
         }
 
         public Grammar DeleteRule(Grammar grammar)
         {
-            return null;
+            var rules = grammar.Rules.ToList();
+            var randomRule = rules[rand.Next(rules.Count)];
+            grammar.DeleteGrammarRule(randomRule);
+            return grammar;
         }
         
 
