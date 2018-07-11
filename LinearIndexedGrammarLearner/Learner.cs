@@ -103,19 +103,14 @@ namespace LinearIndexedGrammarLearner
 
         internal Grammar GetNeighbor(Grammar currentHypothesis)
         {
-            while (true)
-            {
-                //choose mutation function in random (weighted according to weights file)
-                var m = GrammarPermutations.GetWeightedRandomMutation();
+            //choose mutation function in random (weighted according to weights file)
+            var m = GrammarPermutations.GetWeightedRandomMutation();
 
-                //deep copy the grammr
-                var newGrammar = new Grammar(currentHypothesis);
+            //deep copy the grammr
+            var newGrammar = new Grammar(currentHypothesis);
 
-                //mutate the grammar.
-                var res = m(newGrammar);
-                if (!res) return null;
-
-            }
+            //mutate the grammar.
+            return m(newGrammar);
         }
     }
 }

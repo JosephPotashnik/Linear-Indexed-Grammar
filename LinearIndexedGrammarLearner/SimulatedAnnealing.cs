@@ -50,7 +50,7 @@ namespace LinearIndexedGrammarLearner
             return Math.Min(1.0, calcValue);
         }
 
-        public Tuple<Energy, Grammar> Run()
+        public (Energy e, Grammar g) Run()
         {
             var rand = new Random();
             while (currentTemp > simulatedAnnealingParams.ThresholdTemperature)
@@ -104,7 +104,7 @@ namespace LinearIndexedGrammarLearner
             {
                 sw.WriteLine(s);
             }
-            return new Tuple<Energy, Grammar>(bestEnergy, bestHypothesis);
+            return (bestEnergy, bestHypothesis);
         }
 
         [JsonObject(MemberSerialization.OptIn)]

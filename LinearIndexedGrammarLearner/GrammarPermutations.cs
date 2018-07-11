@@ -10,7 +10,7 @@ namespace LinearIndexedGrammarLearner
 {
     public class GrammarPermutations
     {
-        public delegate bool GrammarMutation(Grammar grammar);
+        public delegate Grammar GrammarMutation(Grammar grammar);
 
         private const int NumberOfRetries = 10;
         private static Tuple<GrammarMutation, int>[] mutations;
@@ -58,18 +58,18 @@ namespace LinearIndexedGrammarLearner
         }
 
         //generate a new rule from random existing productions.
-        public bool InsertRule(Grammar grammar)
+        public Grammar InsertRule(Grammar grammar)
         {
             for (var i = 0; i < NumberOfRetries; i++)
             {
                 
             }
-            return false;
+            return null;
         }
 
-        public bool DeleteRule(Grammar grammar)
+        public Grammar DeleteRule(Grammar grammar)
         {
-            return true;
+            return null;
         }
         
 

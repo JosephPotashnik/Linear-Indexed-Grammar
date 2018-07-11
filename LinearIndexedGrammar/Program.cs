@@ -71,8 +71,7 @@ namespace LinearIndexedGrammar
             var learner = new Learner(data, maxWordsInSentence);
 
             var targetGrammarEnergy = learner.Energy(targetGrammar);
-            var s = string.Format("Target Hypothesis:\r\n{0} with energy: {1}\r\n", learner.originalGrammar,
-                targetGrammarEnergy);
+            var s = string.Format("Target Hypothesis:\r\n{0}\r\n with energy: {1}\r\n", targetGrammar, targetGrammarEnergy);
 
             Console.WriteLine(s);
             using (var sw = File.AppendText("SessionReport.txt"))
