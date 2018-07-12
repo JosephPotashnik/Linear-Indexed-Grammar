@@ -1,7 +1,3 @@
-C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\obj\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.csprojAssemblyReference.cache
-C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\obj\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.csproj.CoreCompileInputs.cache
-C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\obj\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.AssemblyInfoInputs.cache
-C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\obj\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.AssemblyInfo.cs
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\CFG.txt
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\CFGLeftRecursion.txt
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\LIG.txt
@@ -16,6 +12,10 @@ C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\b
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.pdb
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\LinearIndexedGrammarParser.dll
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\LinearIndexedGrammarParser.pdb
+C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\obj\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.csprojAssemblyReference.cache
+C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\obj\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.csproj.CoreCompileInputs.cache
+C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\obj\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.AssemblyInfoInputs.cache
+C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\obj\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.AssemblyInfo.cs
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\obj\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.csproj.CopyComplete
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\obj\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.dll
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\obj\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.pdb

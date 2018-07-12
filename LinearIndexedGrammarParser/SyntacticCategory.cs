@@ -45,7 +45,7 @@ namespace LinearIndexedGrammarParser
             if (!(obj is DerivedCategory p))
                 return false;
 
-            return base.Equals(p) &&  Stack == p.Stack;
+            return base.Equals(p) &&  Stack.Equals(p.Stack);
         }
 
         private string Contents { get { return base.ToString() + Stack; } }

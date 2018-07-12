@@ -13,9 +13,6 @@ namespace LinearIndexedGrammar
     public class ProgramParams
     {
         [JsonProperty]
-        public int NumberOfDataSentences { get; set; }
-
-        [JsonProperty]
         public bool DataWithMovement { get; set; }
 
         [JsonProperty]
@@ -63,8 +60,7 @@ namespace LinearIndexedGrammar
             {
                 sw.WriteLine("-------------------");
                 sw.WriteLine("Session {0} ", DateTime.Now.ToString("MM/dd/yyyy h:mm tt"));
-                sw.WriteLine("sentences: {0}, runs: {1}, movement: {2}", programParams.NumberOfDataSentences,
-                    programParams.NumberOfRuns, programParams.DataWithMovement);
+                sw.WriteLine("runs: {0}, movement: {1}", programParams.NumberOfRuns, programParams.DataWithMovement);
             }
             var stopWatch = StartWatch();
 
@@ -112,9 +108,9 @@ namespace LinearIndexedGrammar
 
             //PrintTrees(n);
 
-            (var n, var grammar) = GenerateSentenceAccordingToGrammar("SimpleCFG.txt", 10);
-            //var n = GenerateSentenceAccordingToGrammar("LIGMovementPP.txt", 10);
-            //var n = GenerateSentenceAccordingToGrammar("LIGMovementFromSubjectOrNoMovementAmbiguity.txt", 6);
+            //(var n, var grammar) = GenerateSentenceAccordingToGrammar("SimpleCFG.txt", 10);
+            (var n, var grammar) = GenerateSentenceAccordingToGrammar("LIGMovementPP.txt", 10);
+            //(var n, var grammar) = GenerateSentenceAccordingToGrammar("LIGMovementFromSubjectOrNoMovementAmbiguity.txt", 6);
 
             PrintNonTerminals(n);
         }

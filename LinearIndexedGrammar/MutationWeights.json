@@ -1,10 +1,14 @@
 ﻿[
-   {
+  {
     "Mutation": "InsertRule",
     "MutationWeight": 10
   },
   {
     "Mutation": "DeleteRule",
+    "MutationWeight": 10
+  },
+  {
+    "Mutation": "SpreadRule",
     "MutationWeight": 10
   }
 ]

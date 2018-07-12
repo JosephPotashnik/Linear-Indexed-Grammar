@@ -71,7 +71,7 @@ namespace LinearIndexedGrammarParser
         //so a very large amount of earley states is not necessarily a a bug.
         private void TestForTooManyStatesInColumn(EarleyColumn col, int count)
         {
-            //if (count > 10000)
+            //if (count > 100000)
             //{
             //    Console.WriteLine("More than 10000 states in a single column. Suspicious. Grammar is : {0}",
             //        grammar);
