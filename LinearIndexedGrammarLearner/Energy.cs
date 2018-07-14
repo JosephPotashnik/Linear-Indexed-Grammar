@@ -7,6 +7,7 @@ namespace LinearIndexedGrammarLearner
     public class Energy
     {
         public int DataEnergy { get; set; }
+        public double Probability { get; set; }
 
         public static bool operator >(Energy c1, Energy c2)
         {

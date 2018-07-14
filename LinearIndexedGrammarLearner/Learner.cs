@@ -66,7 +66,7 @@ namespace LinearIndexedGrammarLearner
 
         public static double NegativeLogProbability(double probability)
         {
-            return Math.Ceiling(-Math.Log(probability, 2));
+            return -Math.Log(probability, 2);
         }
 
         public Energy Energy(Grammar currentHypothesis)
@@ -83,6 +83,7 @@ namespace LinearIndexedGrammarLearner
                 if (totalTreesCountofData == 0)
                 {
                     energy.DataEnergy = int.MaxValue;
+                    energy.Probability = 0.0;
                 }
                 else
                 {
@@ -92,6 +93,7 @@ namespace LinearIndexedGrammarLearner
                     var totalTreesCountofGrammar = possibleTreesOfGrammar.Count;
 
                     double probabilityOfInputGivenGrammar = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
+                    energy.Probability = probabilityOfInputGivenGrammar;
 
                     if (probabilityOfInputGivenGrammar < 0 || probabilityOfInputGivenGrammar > 1)
                     {

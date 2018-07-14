@@ -77,8 +77,8 @@ namespace LinearIndexedGrammar
 
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
-                var sa = new SimulatedAnnealing(learner, dataVocabulary);
-                sa.Run();
+                var GA = new GeneticAlgorithm(learner, dataVocabulary);
+                GA.Run();
             }
             StopWatch(stopWatch);
         }
