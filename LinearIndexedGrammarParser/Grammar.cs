@@ -36,6 +36,8 @@ namespace LinearIndexedGrammarParser
             return string.Join("\r\n", allRules);
         }
 
+        //takes care properly of staticRules, staticRulesGeneratedForCategory fields of Grammar class.
+        //TODO: dynamicRules, nullableCategories are not properly handled yet!
         public void DeleteGrammarRule(Rule r)
         {
             var LHS = r.LeftHandSide;
@@ -50,6 +52,7 @@ namespace LinearIndexedGrammarParser
             }
 
         }
+
         public void AddGrammarRule(Rule r)
         {
             var newRule = new Rule(r);

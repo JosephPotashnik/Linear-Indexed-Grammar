@@ -6,6 +6,7 @@ C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\b
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\LIGMovementFromSubjectOrNoMovementAmbiguity.txt
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\LIGMovementPP.txt
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\SimpleCFG.txt
+C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\SolutionCFG.txt
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\Vocabulary.json
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.deps.json
 C:\Users\sefi-\source\repos\Linear-Indexed-Grammar\LinearIndexedGrammarLearner\bin\Debug\netcoreapp2.0\LinearIndexedGrammarLearner.dll

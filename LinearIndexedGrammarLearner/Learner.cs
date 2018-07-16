@@ -75,8 +75,8 @@ namespace LinearIndexedGrammarLearner
             var allParses = ParseAllSentences(currentHypothesis);
             if (allParses != null)
             {
-                //TODO: same tree could be produced for different sentences (ambiguity)
-                //here you will count it several times instead of once.
+                //TODO: same tree could be produced for different sentences by chance.
+                //here you will count the same parse tree several times instead of once.
                 // fix - count them only once.
                 var totalTreesCountofData = allParses.Select(x => x.Trees.Count).Sum();
 
@@ -122,6 +122,16 @@ namespace LinearIndexedGrammarLearner
 
             //mutate the grammar.
             return m(newGrammar);
+        }
+
+        internal Grammar GetChild(Grammar parent1, Grammar parent2)
+        {
+            //deep copy the grammr
+            var newParent1 = new Grammar(parent1);
+            var newParent2 = new Grammar(parent2);
+
+            //mutate the grammar.
+            return GrammarPermutations.Crossover(newParent1, newParent2);
         }
     }
 }

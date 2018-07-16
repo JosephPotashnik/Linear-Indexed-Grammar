@@ -39,7 +39,7 @@ namespace LinearIndexedGrammarParser
         public override string ToString()
         {
             var p = RightHandSide.Select(x => x.ToString()).ToArray();
-            return $"{Number}.{LeftHandSide}->{string.Join(" ", p)}";
+            return $"{Number}. {LeftHandSide} -> {string.Join(" ", p)}";
         }
 
         public override bool Equals(object obj)

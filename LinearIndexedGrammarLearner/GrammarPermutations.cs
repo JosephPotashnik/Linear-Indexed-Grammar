@@ -130,8 +130,7 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
-        //generate a new rule from random existing productions.
-        public Grammar SpreadRule(Grammar grammar)
+        public Grammar SpreadRuleRHS(Grammar grammar)
         {
             var startCategory = new DerivedCategory(Grammar.StartRule);
 
@@ -152,9 +151,78 @@ namespace LinearIndexedGrammarLearner
                 //pick in random right hand side category: either from LHS categories or from POS
                 DerivedCategory randomRightHandSideCategory = GetRandomRightHandSideCategory(startCategory, rightHandSidePOOL);
                 //change the original rule 
-                randomRule.RightHandSide[randomChildIndex] = randomRightHandSideCategory;
+                randomRule.RightHandSide[randomChildIndex] = new DerivedCategory(randomRightHandSideCategory);
 
                 return grammar;
+            }
+            return null;
+        }
+
+        public Grammar SpreadRuleLHS(Grammar grammar)
+        {
+            var startCategory = new DerivedCategory(Grammar.StartRule);
+            var lhsCategories = grammar.staticRulesGeneratedForCategory.ToArray();
+            if (lhsCategories.Length < 2)
+                return null;
+
+            for (var i = 0; i < NumberOfRetries; i++)
+            {
+                //find LHS to spread:
+                DerivedCategory lhs = new DerivedCategory(startCategory);
+                lock (locker)
+                {
+                    while (lhs.Equals(startCategory))
+                        lhs = lhsCategories[rand.Next(lhsCategories.Length)];
+                }
+
+                //choose random rule whose LHS we will replace by lhs chosen above.
+                Rule randomRule = GetRandomRule(grammar);
+                var originalLHSSymbol = randomRule.LeftHandSide;
+
+                if (originalLHSSymbol.Equals(lhs)) continue;
+
+                var replaceRule = new Rule(randomRule);
+                replaceRule.LeftHandSide = new DerivedCategory(lhs);
+                grammar.DeleteGrammarRule(randomRule);
+                grammar.AddGrammarRule(replaceRule);
+
+                return grammar;
+            }
+            return null;
+        }
+
+        public static Grammar Crossover(Grammar parent1, Grammar parent2)
+        {
+            var startCategory = new DerivedCategory(Grammar.StartRule);
+
+            for (var i = 0; i < NumberOfRetries; i++)
+            {
+                Rule randomRule1 = GetRandomRule(parent1);
+
+                //choose for now only binary rules.
+                if (randomRule1.RightHandSide.Length < 2)
+                    continue;
+
+                //select a right hand side category randomly.
+                int randomChildIndex = GetRandomChildIndex();
+                var CategoryToCopyToChild = randomRule1.RightHandSide[randomChildIndex];
+                if (CategoryToCopyToChild.Equals(startCategory))
+                    continue;
+
+
+                Rule randomRule2 = GetRandomRule(parent2);
+
+                //choose for now only binary rules.
+                if (randomRule2.RightHandSide.Length < 2)
+                    continue;
+
+                //select a right hand side category randomly.
+                int randomChildIndex2 = GetRandomChildIndex();
+
+                //change the original rule 
+                randomRule2.RightHandSide[randomChildIndex] = new DerivedCategory(CategoryToCopyToChild);
+
+                return parent2; //parent 2 with category from parent 1 = child.
             }
             return null;
         }

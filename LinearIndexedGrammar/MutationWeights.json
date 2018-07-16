@@ -1,14 +1,18 @@
 ﻿[
   {
     "Mutation": "InsertRule",
-    "MutationWeight": 10
+    "MutationWeight": 5
   },
   {
     "Mutation": "DeleteRule",
     "MutationWeight": 10
   },
   {
-    "Mutation": "SpreadRule",
-    "MutationWeight": 10
+    "Mutation": "SpreadRuleLHS",
+    "MutationWeight": 5
+  },
+  {
+    "Mutation": "SpreadRuleRHS",
+    "MutationWeight": 5
   }
 ]
