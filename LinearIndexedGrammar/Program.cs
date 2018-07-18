@@ -62,16 +62,25 @@ namespace LinearIndexedGrammar
                 sw.WriteLine("Session {0} ", DateTime.Now.ToString("MM/dd/yyyy h:mm tt"));
                 sw.WriteLine("runs: {0}, movement: {1}", programParams.NumberOfRuns, programParams.DataWithMovement);
             }
+
+
             var stopWatch = StartWatch();
 
             var learner = new Learner(data, maxWordsInSentence);
 
             var targetGrammarEnergy = learner.Energy(targetGrammar);
             var s = string.Format("Target Hypothesis:\r\n{0}\r\n with energy: {1}\r\n", targetGrammar, targetGrammarEnergy);
-
             Console.WriteLine(s);
+
+            //(var n1, var targetGrammar1) = GenerateSentenceAccordingToGrammar("SolutionCFG.txt", maxWordsInSentence);
+            //(var data1, var dataVocabulary1) = GetSentencesOfGenerator(n1, universalVocabulary);
+            //targetGrammar1.PruneUnusedRulesLHS();
+            //targetGrammar1.PruneUnusedRulesRHS();
+            //var energy1 = learner.Energy(targetGrammar1);
+
             using (var sw = File.AppendText("SessionReport.txt"))
             {
+
                 sw.WriteLine(s);
             }
 

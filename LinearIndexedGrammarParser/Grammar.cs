@@ -53,10 +53,32 @@ namespace LinearIndexedGrammarParser
 
         }
 
+        //takes care properly of staticRules, staticRulesGeneratedForCategory fields of Grammar class.
+        //TODO: dynamicRules, nullableCategories are not properly handled yet!
         public void AddGrammarRule(Rule r)
         {
             var newRule = new Rule(r);
 
+            bool bFoundIdentical = false;
+            //assuming compositionality.
+            // if found rule with the same right hand side, do not re-add it.
+            //the nonterminal of the left hand side does not matter.
+            {
+                foreach (var rule in Rules)
+                {
+                    if (rule.RightHandSide.Length > 0 && rule.RightHandSide.Length == newRule.RightHandSide.Length)
+                    {
+                        bFoundIdentical = true;
+                        for (int i = 0; i < rule.RightHandSide.Length; i++)
+                        {
+                            if (!rule.RightHandSide[i].Equals(newRule.RightHandSide[i]))
+                                bFoundIdentical = false;
+                        }
+                        if (bFoundIdentical) return;
+                    }
+                }
+
+            }
             //if non-empty stack
             if (newRule.LeftHandSide.Stack != null)
             {
@@ -76,7 +98,7 @@ namespace LinearIndexedGrammarParser
                     //generate base form of the rule with the empty stack
                     //as a starting point of the grammar (= equal to context free case)
                     staticRulesGeneratedForCategory.Add(emptyStackRule);
-                    var derivedRule = GenerateRule(newRule, emptyStackRule);
+                    var derivedRule = GenerateStaticRuleFromDyamicRule(newRule, emptyStackRule);
                     if (derivedRule != null)
                         AddStaticRule(derivedRule);
 
@@ -116,16 +138,73 @@ namespace LinearIndexedGrammarParser
                 nullableCategories.Add(newRule.LeftHandSide);
         }
 
-        public Rule GenerateRule(Rule grammarRule, DerivedCategory leftHandSide)
+        public void PruneUnusedRulesLHS()
         {
-            if (grammarRule.LeftHandSide.Stack == null || grammarRule.LeftHandSide.Stack == string.Empty)
+            bool bFound = true;
+            while (bFound)
+            {
+                bFound = false;
+                var lhsCategories = staticRulesGeneratedForCategory.ToList();
+                var rhsCategories = Rules.SelectMany(x => x.RightHandSide).ToList();
+
+                var unusedLhsCategories = lhsCategories.Except(rhsCategories);
+                if (unusedLhsCategories.Any())
+                {
+                    bFound = true;
+                    foreach (var lhs in unusedLhsCategories)
+                    {
+
+                        staticRules.Remove(lhs);
+                        staticRulesGeneratedForCategory.Remove(lhs);
+
+                    }
+                }
+            }
+
+        }
+
+        public void PruneUnusedRulesRHS()
+        {
+            bool bFound = true;
+            while (bFound)
+            {
+                bFound = false;
+                var lhsCategories = staticRulesGeneratedForCategory.ToList();
+                var rhsCategories = Rules.SelectMany(x => x.RightHandSide).ToList();
+
+                var unusedRhsCategories = rhsCategories.Except(lhsCategories).ToList();
+
+                //strong assumption: all nonterminals begin with X.
+                //REmove all non-POS unused variables.
+                //TODO:  pass the vocabulary object and weed out the RHS that are POS in the vocabulary.
+                unusedRhsCategories.RemoveAll(x => x.ToString()[0] != 'X');
+
+                if (unusedRhsCategories.Any())
+                {
+                    List<Rule> rulesToDelete = new List<Rule>();
+                    foreach (var rule in Rules)
+                    {
+                        if (rule.RightHandSide.Intersect(unusedRhsCategories).Any())
+                            rulesToDelete.Add(rule);
+                    }
+
+                    foreach (var rule in rulesToDelete)
+                        DeleteGrammarRule(rule);
+                    
+                }
+            }
+
+        }
+        public Rule GenerateStaticRuleFromDyamicRule(Rule dynamicGrammarRule, DerivedCategory leftHandSide)
+        {
+            if (dynamicGrammarRule.LeftHandSide.Stack == null || dynamicGrammarRule.LeftHandSide.Stack == string.Empty)
                 return null;
 
-            string patternStringLeftHandSide = grammarRule.LeftHandSide.Stack;
+            string patternStringLeftHandSide = dynamicGrammarRule.LeftHandSide.Stack;
 
             //1. make the pattern be your Syntactic Category
             //2. then find the stack contents - anything by "*" (the first group)
-            var newRule = new Rule(grammarRule);
+            var newRule = new Rule(dynamicGrammarRule);
             string patternString = patternStringLeftHandSide.Replace("*", "(.*)");
 
             Regex pattern = new Regex(patternString);

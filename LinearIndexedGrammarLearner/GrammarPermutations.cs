@@ -11,10 +11,8 @@ namespace LinearIndexedGrammarLearner
     public class GrammarPermutations
     {
         public delegate Grammar GrammarMutation(Grammar grammar);
-        private static object locker = new object();
         private const int NumberOfRetries = 10;
         private static Tuple<GrammarMutation, int>[] mutations;
-        private static Random rand = new Random();
         private static int totalWeights;
         private static int newNonTerminalCounter = 1;
         private DerivedCategory[] PartsOfSpeechCategories;
@@ -54,10 +52,9 @@ namespace LinearIndexedGrammarLearner
         public static GrammarMutation GetWeightedRandomMutation()
         {
             int r = 0;
-            lock (locker)
-            {
-                r = rand.Next(totalWeights);
-            }
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+            r = rand.Next(totalWeights);
+
             var sum = 0;
             foreach (var mutation in mutations)
             {
@@ -102,11 +99,9 @@ namespace LinearIndexedGrammarLearner
 
                 //create a new non terminal
                 string baseNonTerminal = null;
-                lock (locker)
-                {
-                    baseNonTerminal = $"X{newNonTerminalCounter++}";
-                    //newNonTerminalCounter++;
-                }
+                var rand = ThreadSafeRandom.ThisThreadsRandom;
+                baseNonTerminal = $"X{newNonTerminalCounter++}";
+
                 var newCategory = new DerivedCategory(baseNonTerminal);
 
                 //change the original rule 
@@ -169,11 +164,10 @@ namespace LinearIndexedGrammarLearner
             {
                 //find LHS to spread:
                 DerivedCategory lhs = new DerivedCategory(startCategory);
-                lock (locker)
-                {
-                    while (lhs.Equals(startCategory))
+                var rand = ThreadSafeRandom.ThisThreadsRandom;
+
+                while (lhs.Equals(startCategory))
                         lhs = lhsCategories[rand.Next(lhsCategories.Length)];
-                }
 
                 //choose random rule whose LHS we will replace by lhs chosen above.
                 Rule randomRule = GetRandomRule(grammar);
@@ -191,7 +185,7 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
-        public static Grammar Crossover(Grammar parent1, Grammar parent2)
+        public static (Grammar child1, Grammar child2) Crossover(Grammar parent1, Grammar parent2)
         {
             var startCategory = new DerivedCategory(Grammar.StartRule);
 
@@ -204,9 +198,9 @@ namespace LinearIndexedGrammarLearner
                     continue;
 
                 //select a right hand side category randomly.
-                int randomChildIndex = GetRandomChildIndex();
-                var CategoryToCopyToChild = randomRule1.RightHandSide[randomChildIndex];
-                if (CategoryToCopyToChild.Equals(startCategory))
+                int randomChildIndex1 = GetRandomChildIndex();
+                var CategoryToCopyToChild1 = randomRule1.RightHandSide[randomChildIndex1];
+                if (CategoryToCopyToChild1.Equals(startCategory))
                     continue;
 
 
@@ -219,32 +213,35 @@ namespace LinearIndexedGrammarLearner
                 //select a right hand side category randomly.
                 int randomChildIndex2 = GetRandomChildIndex();
 
-                //change the original rule 
-                randomRule2.RightHandSide[randomChildIndex] = new DerivedCategory(CategoryToCopyToChild);
+                //change the original rules
+                var CategoryToCopyToChild2 = randomRule2.RightHandSide[randomChildIndex2];
 
-                return parent2; //parent 2 with category from parent 1 = child.
+                if (CategoryToCopyToChild2.Equals(startCategory))
+                    continue;
+
+                randomRule2.RightHandSide[randomChildIndex2] = new DerivedCategory(CategoryToCopyToChild1);
+                randomRule1.RightHandSide[randomChildIndex1] = new DerivedCategory(CategoryToCopyToChild2);
+
+                return (parent1, parent2); 
             }
-            return null;
+            return (null, null);
         }
 
         private static int GetRandomChildIndex()
         {
             int randomChildIndex = 0;
-            lock (locker)
-            {
-                randomChildIndex = rand.Next(2);
-            }
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+            randomChildIndex = rand.Next(2);
             return randomChildIndex;
         }
 
         private static DerivedCategory GetRandomRightHandSideCategory(DerivedCategory startCategory, DerivedCategory[] rightHandSidePOOL)
         {
             DerivedCategory randomRightHandSideCategory = startCategory;
-            lock (locker)
-            {
-                while (randomRightHandSideCategory.Equals(startCategory))
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+
+            while (randomRightHandSideCategory.Equals(startCategory))
                     randomRightHandSideCategory = rightHandSidePOOL[rand.Next(rightHandSidePOOL.Length)];
-            }
 
             return randomRightHandSideCategory;
         }
@@ -259,12 +256,8 @@ namespace LinearIndexedGrammarLearner
         private static Rule GetRandomRule(Grammar grammar)
         {
             var rules = grammar.Rules.ToList();
-            Rule randomRule = null;
-            lock (locker)
-            {
-                randomRule = rules[rand.Next(rules.Count)];
-            }
-
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+            Rule randomRule = rules[rand.Next(rules.Count)];
             return randomRule;
         }
 

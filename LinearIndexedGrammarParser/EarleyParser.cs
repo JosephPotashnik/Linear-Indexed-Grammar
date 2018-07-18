@@ -202,7 +202,7 @@ namespace LinearIndexedGrammarParser
                         var grammarRuleList = grammar.dynamicRules[baseSyntacticCategory];
                         foreach (var item in grammarRuleList)
                         {
-                            var derivedRule = grammar.GenerateRule(item, nextTerm);
+                            var derivedRule = grammar.GenerateStaticRuleFromDyamicRule(item, nextTerm);
                             grammar.AddStaticRule(derivedRule);
                         }
                     }

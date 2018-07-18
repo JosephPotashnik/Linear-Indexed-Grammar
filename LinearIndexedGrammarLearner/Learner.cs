@@ -6,7 +6,17 @@ using LinearIndexedGrammarParser;
 
 namespace LinearIndexedGrammarLearner
 {
+    public class GrammarWithProbability
+    {
+        public readonly Grammar Grammar;
+        public readonly double Probability;
 
+        public GrammarWithProbability(Grammar g, double probability)
+        {
+            this.Grammar = g;
+            this.Probability = probability;
+        }
+    }
     public class Learner
     {
         private readonly Dictionary<string, int> sentencesWithCounts;
@@ -124,7 +134,7 @@ namespace LinearIndexedGrammarLearner
             return m(newGrammar);
         }
 
-        internal Grammar GetChild(Grammar parent1, Grammar parent2)
+        internal (Grammar child1, Grammar child2) GetChild(Grammar parent1, Grammar parent2)
         {
             //deep copy the grammr
             var newParent1 = new Grammar(parent1);
@@ -132,6 +142,17 @@ namespace LinearIndexedGrammarLearner
 
             //mutate the grammar.
             return GrammarPermutations.Crossover(newParent1, newParent2);
+        }
+
+        internal GrammarWithProbability ComputeProbabilityForGrammar(Grammar g)
+        {
+            double prob = 0.0;
+            Energy newEnergy = null;
+            if (g != null)
+                newEnergy = Energy(g);
+            if (newEnergy != null)
+                prob = newEnergy.Probability;
+            return new GrammarWithProbability(g, prob);
         }
     }
 }

@@ -21,6 +21,8 @@ namespace LinearIndexedGrammarLearner
         public float PopulationSize { get; set; }
 
     }
+
+   
     public static class ThreadSafeRandom
     {
         [ThreadStatic] private static Random Local;
@@ -38,8 +40,8 @@ namespace LinearIndexedGrammarLearner
 
         public GeneticAlgorithm(Learner l, Vocabulary voc)
         {
-            parameters.NumberOfGenerations = 100;
-            parameters.PopulationSize = 100;
+            parameters.NumberOfGenerations = 300;
+            parameters.PopulationSize = 300;
             learner = l;
 
             Grammar initialGrammar = learner.CreateInitialGrammar(voc);
@@ -72,16 +74,15 @@ namespace LinearIndexedGrammarLearner
             while (currentGeneration++ < parameters.NumberOfGenerations)
             {
                 bestPreviousProbability = population.Last().Key;
-                //Console.WriteLine($"generation {currentGeneration}");
+                Console.WriteLine($"generation {currentGeneration}");
                 try
                 {
                     //mutate each grammar and push the result into the descendants list.
                     Parallel.ForEach(population.Values, (individual) =>
                     {
-
-                        (double prob, Grammar mutatedIndividual) = Mutate(individual);
-                        if (mutatedIndividual != null)
-                            descendants.Enqueue(new KeyValuePair<double, Grammar>(prob, mutatedIndividual));
+                        var mutatedIndividual = Mutate(individual);
+                        if (mutatedIndividual.Grammar != null)
+                            descendants.Enqueue(new KeyValuePair<double, Grammar>(mutatedIndividual.Probability, mutatedIndividual.Grammar));
                     }
                     );
                     var descendantsList = descendants.ToList();
@@ -96,9 +97,12 @@ namespace LinearIndexedGrammarLearner
                     Parallel.For(0, halfDescendantssize, (i) =>
                     {
 
-                        (double prob, Grammar child) = Crossover(descendantsList[i].Value, descendantsList[i + halfDescendantssize].Value);
-                        if (child != null)
-                            descendants.Enqueue(new KeyValuePair<double, Grammar>(prob, child));
+                        var childrenList = Crossover(descendantsList[i].Value, descendantsList[i + halfDescendantssize].Value);
+                        foreach (var child in childrenList)
+                        {
+                            if (child.Grammar != null)
+                                descendants.Enqueue(new KeyValuePair<double, Grammar>(child.Probability, child.Grammar));
+                        }
                     }
                     );
 
@@ -106,10 +110,10 @@ namespace LinearIndexedGrammarLearner
 
                     bestProbability = population.Last().Key;
 
-                    if (bestProbability - bestPreviousProbability < 0.0001)
+                    if (bestProbability - bestPreviousProbability < 0.001)
                     {
                         generationsWithoutChange++;
-                        if (generationsWithoutChange > 50)
+                        if (generationsWithoutChange > 300)
                             break;
                     }
                     else
@@ -126,6 +130,9 @@ namespace LinearIndexedGrammarLearner
             }
 
             var bestHypothesis = population.Last().Value.First();
+            bestHypothesis.PruneUnusedRulesLHS();
+            bestHypothesis.PruneUnusedRulesRHS();
+
             bestProbability = population.Last().Key;
             var s = string.Format($"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestProbability}");
 
@@ -156,32 +163,25 @@ namespace LinearIndexedGrammarLearner
             }
         }
 
-        private (double probability, Grammar mutatedIndividual) Mutate(Grammar individual)
+        private GrammarWithProbability Mutate(Grammar individual)
         {
-            double prob = 0.0;
             var mutatedIndividual = learner.GetNeighbor(individual);
-            Energy newEnergy = null;
-            if (mutatedIndividual != null)
-                newEnergy = learner.Energy(mutatedIndividual);
-
-            if (newEnergy != null)
-                prob = newEnergy.Probability;
-
-            return (prob, mutatedIndividual);
+            return learner.ComputeProbabilityForGrammar(mutatedIndividual);
         }
 
-        private (double probability, Grammar mutatedIndividual) Crossover(Grammar parent1, Grammar parent2)
+        private List<GrammarWithProbability> Crossover(Grammar parent1, Grammar parent2)
         {
-            double prob = 0.0;
-            var child = learner.GetChild(parent1, parent2);
-            Energy newEnergy = null;
-            if (child != null)
-                newEnergy = learner.Energy(child);
+            var childrenList = new List<GrammarWithProbability>();
 
-            if (newEnergy != null)
-                prob = newEnergy.Probability;
+            (var child1, var child2) = learner.GetChild(parent1, parent2);
 
-            return (prob, child);
+            childrenList.Add(learner.ComputeProbabilityForGrammar(child1));
+            childrenList.Add(learner.ComputeProbabilityForGrammar(child2));
+
+            return childrenList;
         }
+
+
+
     }
 }
