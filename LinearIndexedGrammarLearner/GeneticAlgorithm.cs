@@ -40,8 +40,8 @@ namespace LinearIndexedGrammarLearner
 
         public GeneticAlgorithm(Learner l, Vocabulary voc)
         {
-            parameters.NumberOfGenerations = 300;
-            parameters.PopulationSize = 300;
+            parameters.NumberOfGenerations = 100;
+            parameters.PopulationSize = 100;
             learner = l;
 
             Grammar initialGrammar = learner.CreateInitialGrammar(voc);

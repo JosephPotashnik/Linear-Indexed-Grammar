@@ -7,3 +7,6 @@
 /LinearIndexedGrammar/obj
 /LinearIndexedGrammarParser/bin/Debug/netcoreapp2.0
 /LinearIndexedGrammarParser/obj
+/LinearIndexedGrammarParserTests/bin/Debug/netcoreapp2.0
+/LinearIndexedGrammarParserTests/obj/Debug/netcoreapp2.0
+/LinearIndexedGrammarParserTests/obj

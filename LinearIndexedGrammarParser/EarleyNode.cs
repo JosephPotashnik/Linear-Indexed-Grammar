@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace LinearIndexedGrammarParser
 {
@@ -17,12 +19,19 @@ namespace LinearIndexedGrammarParser
             RuleNumber = ScanRuleNumber;
         }
 
+
         public string Name { get; set; }
+
         public int StartIndex { get; set; }
+
         public int EndIndex { get; set; }
+
         public List<EarleyNode> Children { get; set; }
-        public int RuleNumber { get; set; }
+
         public string AssociatedTerminal { get; set; }
+
+        [JsonIgnore]
+        public int RuleNumber { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -71,6 +80,21 @@ namespace LinearIndexedGrammarParser
             if (Children == null) return;
             foreach (var child in Children)
                 child.Print(level + 1);
+        }
+
+        public string TreeString(int level = 0)
+        {
+            StringBuilder builder = new StringBuilder();
+            string s = ToString();
+            string s1 = s.PadLeft(level * 4 + s.Length, '_');
+
+            builder.AppendLine(s1);
+            if (Children != null)
+            {
+                foreach (var child in Children)
+                    builder.Append(child.TreeString(level + 1));
+            }
+            return builder.ToString();
         }
 
         public string GetNonTerminalStringUnderNode()

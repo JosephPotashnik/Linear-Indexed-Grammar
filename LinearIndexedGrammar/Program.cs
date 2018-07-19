@@ -23,7 +23,6 @@ namespace LinearIndexedGrammar
     {
         static void Main(string[] args)
         {
-            //Tests();
             Learn();
         }
 
@@ -53,8 +52,8 @@ namespace LinearIndexedGrammar
             ProgramParams programParams = ReadProgramParamsFromFile();
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
 
-            (var n, var targetGrammar) = GenerateSentenceAccordingToGrammar("SimpleCFG.txt", maxWordsInSentence);
-            (var data, var dataVocabulary) = GetSentencesOfGenerator(n, universalVocabulary);
+            (var n, var targetGrammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("SimpleCFG.txt", maxWordsInSentence);
+            (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(n, universalVocabulary);
 
             using (var sw = File.AppendText("SessionReport.txt"))
             {
@@ -80,7 +79,6 @@ namespace LinearIndexedGrammar
 
             using (var sw = File.AppendText("SessionReport.txt"))
             {
-
                 sw.WriteLine(s);
             }
 
@@ -104,96 +102,7 @@ namespace LinearIndexedGrammar
             return programParams;
         }
 
-        private static void Tests()
-        {
-            //var n = ParseSentenceAccordingToGrammar("CFGLeftRecursion.txt", "John a the a the a the cried");
-            //var n = ParseSentenceAccordingToGrammar("CFG.txt", "David knows the man kissed the woman a girl");
-            //var n = ParseSentenceAccordingToGrammar("LIG.txt", "the man kissed the woman");
-            //var n = ParseSentenceAccordingToGrammar("LIGMovementFromDirectObject.txt", "the woman the man kissed");
-            //var n = ParseSentenceAccordingToGrammar("LIGMovementFromSubject.txt", "the man kissed the woman");
-            //var n = ParseSentenceAccordingToGrammar("LIGMovementPP.txt", "to a girl the man went");
-            //var n = ParseSentenceAccordingToGrammar("LIGMovementPP.txt", "a girl the man went to");
-            //var n = ParseSentenceAccordingToGrammar("LIGMovementFromSubjectOrNoMovementAmbiguity.txt", "a girl the man kissed");
 
-            //PrintTrees(n);
-
-            //(var n, var grammar) = GenerateSentenceAccordingToGrammar("SimpleCFG.txt", 10);
-            (var n, var grammar) = GenerateSentenceAccordingToGrammar("LIGMovementPP.txt", 10);
-            //(var n, var grammar) = GenerateSentenceAccordingToGrammar("LIGMovementFromSubjectOrNoMovementAmbiguity.txt", 6);
-
-            PrintNonTerminals(n);
-        }
-
-        private static (List<EarleyNode> n, Grammar g) GenerateSentenceAccordingToGrammar(string filename, int maxWords)
-        {
-
-            var grammar = GrammarFileReader.CreateGrammarFromFile(filename);
-            EarleyGenerator generator = new EarleyGenerator(grammar);
-
-            var n = generator.ParseSentence("", maxWords);
-            return (n, grammar);
-        }
-
-        private static List<EarleyNode>  ParseSentenceAccordingToGrammar(string filename, string sentence)
-        {
-            var grammar = GrammarFileReader.CreateGrammarFromFile(filename);
-            EarleyParser parser = new EarleyParser(grammar);
-
-            var n = parser.ParseSentence(sentence);
-            return n;
-        }
-
-        private static void PrintTrees(List<EarleyNode> n)
-        {
-            foreach (var item in n)
-            {
-                item.Print(4);
-                Console.WriteLine();
-            }
-        }
-
-        private static List<string> GetSentencesNonTerminals(List<EarleyNode> n)
-        {
-            return n.Select(x => x.GetNonTerminalStringUnderNode()).ToList();
-        }
-
-        private static void PrintNonTerminals(List<EarleyNode> n)
-        {
-            var nonTerminalSentences = GetSentencesNonTerminals(n);
-            foreach (var item in nonTerminalSentences)
-                Console.WriteLine(item);
-        }
-
-        private static (string[] sentences, Vocabulary textVocabulary) GetSentencesOfGenerator(List<EarleyNode> n, Vocabulary universalVocabulary)
-        {
-            Vocabulary textVocabulary  = new Vocabulary();
-            var nonTerminalSentences = GetSentencesNonTerminals(n);
-            List<string> sentences = new List<string>();
-
-            foreach (var item in nonTerminalSentences)
-            {
-                string[] arr = item.Split();
-                string[] sentence = new string[arr.Length];
-
-                var posCategories = new HashSet<string>();
-                for (int i = 0; i < arr.Length; i++)
-                {
-                    string posCat = arr[i];
-
-                    sentence[i] = universalVocabulary.POSWithPossibleWords[posCat].First();
-                    if (!posCategories.Contains(posCat))
-                        posCategories.Add(posCat);
-
-                }
-                foreach (var category in posCategories)
-                    textVocabulary.AddWordsToPOSCategory(category, universalVocabulary.POSWithPossibleWords[category].ToArray());
-
-                var s = string.Join(" ", sentence);
-                sentences.Add(s);
-            }
-
-            return (sentences.ToArray(), textVocabulary);
-        }
-
+       
     }
 }

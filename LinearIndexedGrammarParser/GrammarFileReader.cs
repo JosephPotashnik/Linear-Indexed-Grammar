@@ -9,6 +9,60 @@ namespace LinearIndexedGrammarParser
 {
     public class GrammarFileReader
     {
+        private static List<string> GetSentencesNonTerminals(List<EarleyNode> n)
+        {
+            return n.Select(x => x.GetNonTerminalStringUnderNode()).ToList();
+        }
+
+        public static (string[] sentences, Vocabulary textVocabulary) GetSentencesOfGenerator(List<EarleyNode> n, Vocabulary universalVocabulary)
+        {
+            Vocabulary textVocabulary = new Vocabulary();
+            var nonTerminalSentences = GetSentencesNonTerminals(n);
+            List<string> sentences = new List<string>();
+
+            foreach (var item in nonTerminalSentences)
+            {
+                string[] arr = item.Split();
+                string[] sentence = new string[arr.Length];
+
+                var posCategories = new HashSet<string>();
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    string posCat = arr[i];
+
+                    sentence[i] = universalVocabulary.POSWithPossibleWords[posCat].First();
+                    if (!posCategories.Contains(posCat))
+                        posCategories.Add(posCat);
+
+                }
+                foreach (var category in posCategories)
+                    textVocabulary.AddWordsToPOSCategory(category, universalVocabulary.POSWithPossibleWords[category].ToArray());
+
+                var s = string.Join(" ", sentence);
+                sentences.Add(s);
+            }
+
+            return (sentences.ToArray(), textVocabulary);
+        }
+        
+        public static (List<EarleyNode> n, Grammar g) GenerateSentenceAccordingToGrammar(string filename, int maxWords)
+        {
+
+            var grammar = CreateGrammarFromFile(filename);
+            EarleyGenerator generator = new EarleyGenerator(grammar);
+
+            var n = generator.ParseSentence("", maxWords);
+            return (n, grammar);
+        }
+
+        public static List<EarleyNode> ParseSentenceAccordingToGrammar(string filename, string sentence)
+        {
+            var grammar = CreateGrammarFromFile(filename);
+            EarleyParser parser = new EarleyParser(grammar);
+
+            var n = parser.ParseSentence(sentence);
+            return n;
+        }
         public static Grammar CreateGrammarFromFile(string filename)
         {
             var rules = ReadRulesFromFile(filename);

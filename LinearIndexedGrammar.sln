@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinearIndexedGrammarParser"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{838D4754-51FE-4A65-B407-E28C8D72156C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinearIndexedGrammarLearner", "LinearIndexedGrammarLearner\LinearIndexedGrammarLearner.csproj", "{B6673D28-A853-4B68-BCFF-35DD906F5CAB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinearIndexedGrammarLearner", "LinearIndexedGrammarLearner\LinearIndexedGrammarLearner.csproj", "{B6673D28-A853-4B68-BCFF-35DD906F5CAB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinearIndexedGrammarParserTests", "LinearIndexedGrammarParserTests\LinearIndexedGrammarParserTests.csproj", "{84B4EEF2-8CB6-4C1B-B239-BCC0EBF1C605}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +31,10 @@ Global
 		{B6673D28-A853-4B68-BCFF-35DD906F5CAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6673D28-A853-4B68-BCFF-35DD906F5CAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6673D28-A853-4B68-BCFF-35DD906F5CAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84B4EEF2-8CB6-4C1B-B239-BCC0EBF1C605}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84B4EEF2-8CB6-4C1B-B239-BCC0EBF1C605}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84B4EEF2-8CB6-4C1B-B239-BCC0EBF1C605}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84B4EEF2-8CB6-4C1B-B239-BCC0EBF1C605}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

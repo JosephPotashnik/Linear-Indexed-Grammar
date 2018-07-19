@@ -1,0 +1,182 @@
+[
+  {
+    "Name": "START -> CP $",
+    "StartIndex": 0,
+    "EndIndex": 5,
+    "Children": [
+      {
+        "Name": "CP -> NP CPNP $",
+        "StartIndex": 0,
+        "EndIndex": 5,
+        "Children": [
+          {
+            "Name": "NP -> D N $",
+            "StartIndex": 0,
+            "EndIndex": 2,
+            "Children": [
+              {
+                "Name": "D",
+                "StartIndex": 0,
+                "EndIndex": 1,
+                "AssociatedTerminal": "a"
+              },
+              {
+                "Name": "N",
+                "StartIndex": 1,
+                "EndIndex": 2,
+                "AssociatedTerminal": "girl"
+              }
+            ]
+          },
+          {
+            "Name": "CPNP -> NP CPNPNP $",
+            "StartIndex": 2,
+            "EndIndex": 5,
+            "Children": [
+              {
+                "Name": "NP -> D N $",
+                "StartIndex": 2,
+                "EndIndex": 4,
+                "Children": [
+                  {
+                    "Name": "D",
+                    "StartIndex": 2,
+                    "EndIndex": 3,
+                    "AssociatedTerminal": "the"
+                  },
+                  {
+                    "Name": "N",
+                    "StartIndex": 3,
+                    "EndIndex": 4,
+                    "AssociatedTerminal": "man"
+                  }
+                ]
+              },
+              {
+                "Name": "CPNPNP -> IPNPNP $",
+                "StartIndex": 4,
+                "EndIndex": 5,
+                "Children": [
+                  {
+                    "Name": "IPNPNP -> NPNP VPNP $",
+                    "StartIndex": 4,
+                    "EndIndex": 5,
+                    "Children": [
+                      {
+                        "Name": "trace",
+                        "StartIndex": 4,
+                        "EndIndex": 4
+                      },
+                      {
+                        "Name": "VPNP -> V1 NPNP $",
+                        "StartIndex": 4,
+                        "EndIndex": 5,
+                        "Children": [
+                          {
+                            "Name": "V1",
+                            "StartIndex": 4,
+                            "EndIndex": 5,
+                            "AssociatedTerminal": "kissed"
+                          },
+                          {
+                            "Name": "trace",
+                            "StartIndex": 5,
+                            "EndIndex": 5
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Name": "START -> CP $",
+    "StartIndex": 0,
+    "EndIndex": 5,
+    "Children": [
+      {
+        "Name": "CP -> NP CPNP $",
+        "StartIndex": 0,
+        "EndIndex": 5,
+        "Children": [
+          {
+            "Name": "NP -> D N $",
+            "StartIndex": 0,
+            "EndIndex": 2,
+            "Children": [
+              {
+                "Name": "D",
+                "StartIndex": 0,
+                "EndIndex": 1,
+                "AssociatedTerminal": "a"
+              },
+              {
+                "Name": "N",
+                "StartIndex": 1,
+                "EndIndex": 2,
+                "AssociatedTerminal": "girl"
+              }
+            ]
+          },
+          {
+            "Name": "CPNP -> IPNP $",
+            "StartIndex": 2,
+            "EndIndex": 5,
+            "Children": [
+              {
+                "Name": "IPNP -> NP VPNP $",
+                "StartIndex": 2,
+                "EndIndex": 5,
+                "Children": [
+                  {
+                    "Name": "NP -> D N $",
+                    "StartIndex": 2,
+                    "EndIndex": 4,
+                    "Children": [
+                      {
+                        "Name": "D",
+                        "StartIndex": 2,
+                        "EndIndex": 3,
+                        "AssociatedTerminal": "the"
+                      },
+                      {
+                        "Name": "N",
+                        "StartIndex": 3,
+                        "EndIndex": 4,
+                        "AssociatedTerminal": "man"
+                      }
+                    ]
+                  },
+                  {
+                    "Name": "VPNP -> V1 NPNP $",
+                    "StartIndex": 4,
+                    "EndIndex": 5,
+                    "Children": [
+                      {
+                        "Name": "V1",
+                        "StartIndex": 4,
+                        "EndIndex": 5,
+                        "AssociatedTerminal": "kissed"
+                      },
+                      {
+                        "Name": "trace",
+                        "StartIndex": 5,
+                        "EndIndex": 5
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -66,7 +66,7 @@ namespace LinearIndexedGrammarParser
             {
                 foreach (var rule in Rules)
                 {
-                    if (rule.RightHandSide.Length > 0 && rule.RightHandSide.Length == newRule.RightHandSide.Length)
+                    if (!rule.RightHandSide[0].IsEpsilon() && rule.RightHandSide.Length == newRule.RightHandSide.Length)
                     {
                         bFoundIdentical = true;
                         for (int i = 0; i < rule.RightHandSide.Length; i++)
