@@ -1,0 +1,22 @@
+﻿[
+  {
+    "Mutation": "InsertRule",
+    "MutationWeight": 10
+  },
+  {
+    "Mutation": "DeleteRule",
+    "MutationWeight": 10
+  },
+  {
+    "Mutation": "SpreadRuleLHSToRHS",
+    "MutationWeight": 10
+  },
+  {
+    "Mutation": "SpreadRuleLHSToLHS",
+    "MutationWeight": 10
+  },
+  {
+    "Mutation": "SpreadRuleRHS",
+    "MutationWeight": 0
+  }
+]

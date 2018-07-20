@@ -1,0 +1,6 @@
+﻿{
+  "CoolingFactor": 0.999,
+  "InitialTemperatureTimesInitialEnegrgy": 2.0,
+  "ReportEveryNIteration": 1000,
+  "ThresholdTemperature": 2
+}

@@ -1,0 +1,163 @@
+-------------------
+Session 07/20/2018 2:01 PM 
+runs: 5, movement: False
+Target Hypothesis:
+1. START -> X1 VP
+2. VP -> V0
+3. VP -> V1 X1
+4. VP -> V2 PP
+5. VP -> V3 START
+6. X1 -> D N
+7. PP -> P X1
+ with energy: Data Energy:0 
+
+-------------------
+Session 07/20/2018 2:01 PM 
+runs: 5, movement: False
+Target Hypothesis:
+1. START -> X1 VP
+2. VP -> V0
+3. VP -> V1 X1
+4. VP -> V2 PP
+5. VP -> V3 START
+6. X1 -> D N
+7. PP -> P X1
+ with energy: Data Energy:0 
+
+-------------------
+Session 07/20/2018 2:04 PM 
+runs: 5, movement: False
+Target Hypothesis:
+1. START -> X1 VP
+2. VP -> V0
+3. VP -> V1 X1
+4. VP -> V2 PP
+5. VP -> V3 START
+6. X1 -> D N
+7. PP -> P X1
+ with energy: Data Energy:0 
+
+-------------------
+Session 07/20/2018 2:09 PM 
+runs: 5, movement: False
+Target Hypothesis:
+1. START -> X1 VP
+2. VP -> V0
+3. VP -> V1 X1
+4. VP -> V2 PP
+5. VP -> V3 START
+6. X1 -> D N
+7. PP -> P X1
+ with energy: Data Energy:0 
+
+Best Hypothesis:
+14. START -> X38 START
+19. START -> V0
+20. START -> V1 X38
+22. START -> X1628 X588
+24. START -> V2 START
+26. START -> P X38
+217. X38 -> D N
+7170. X588 -> X38 V0
+21655. X1628 -> X38 V3 
+ with probability 0.114285714285714
+Best Hypothesis:
+34842. START -> X2610 START
+34844. START -> N X3198
+34845. START -> N
+35585. X2610 -> P D
+37320. X2610 -> D
+38085. X2610 -> X2610 N
+42276. X2610 -> V3 X2610
+48926. X3198 -> V1 START
+54072. X3198 -> V2 X2610
+58907. X3198 -> V0 
+ with probability 0.0101010101010101
+Best Hypothesis:
+70294. START -> N
+70296. START -> V0
+70297. START -> V1 X5463
+70301. START -> X5463 START
+70303. START -> X5522 START
+74096. X5041 -> D
+75972. X5463 -> X5041 N
+76652. X5522 -> X5463 V3
+98693. X5522 -> X5463 V2
+102703. X5522 -> P X5041 
+ with probability 0.102564102564103
+Best Hypothesis:
+106757. START -> X7734 START
+106762. START -> V0
+106763. START -> V1 X7734
+106765. START -> V3 START
+106769. START -> X9235 X7734
+107625. X7734 -> D N
+129023. X9235 -> V2 P 
+ with probability 0.129032258064516
+Best Hypothesis:
+144002. START -> X10085 START
+144004. START -> X10085 START
+144007. START -> V0
+144008. START -> V1 X10085
+144010. START -> V3 X10831
+144012. START -> V2 START
+144014. START -> P X10085
+144322. X10085 -> D N
+155628. X10831 -> X10085 START
+160905. X10831 -> X10085 V0 
+ with probability 0.126582278481013
+Average probability is: 0.0965130726992711
+Overall session RunTime 00:17:47.40
+-------------------
+Session 07/20/2018 2:37 PM 
+runs: 5, movement: False
+Target Hypothesis:
+1. START -> X1 VP
+2. VP -> V0
+3. VP -> V1 X1
+4. VP -> V2 PP
+5. VP -> V3 START
+6. X1 -> D N
+7. PP -> P X1
+ with energy: Data Energy:0 
+
+Best Hypothesis:
+24. START -> X407 X3
+43. X3 -> V3 X10853
+17275. X3 -> V1 X407
+99407. X3 -> X4707 X407
+207150. X3 -> V0
+4553. X407 -> D N
+160812. X4707 -> V2 P
+194358. X10853 -> X407 V0 
+ with probability 1
+Best Hypothesis:
+377143. START -> X20390 X22441
+377151. START -> X22317 START
+377679. X20390 -> D N
+404321. X22317 -> X20390 V3
+412641. X22441 -> V1 X20390
+422649. X22441 -> V0
+425506. X22441 -> V2 X23624
+427511. X23624 -> P X20390 
+ with probability 1
+Best Hypothesis:
+755152. START -> D X42041
+755157. START -> V0
+755158. START -> X42816 X46033
+758506. X41563 -> P
+763299. X42041 -> N START
+916995. X42041 -> N X48204
+769631. X42609 -> X41563 X46033
+949790. X42609 -> X41563 X46033
+958281. X42609 -> X41563 X46033
+1073579. X42609 -> X41563 X46033
+772944. X42816 -> X46033 V1
+838843. X42816 -> X46033 V1
+1001592. X42816 -> X46033 V1
+1101969. X42816 -> X46033 V1
+859734. X45435 -> V3 X46033
+829428. X46033 -> D N
+924569. X48204 -> V2 X42609
+931337. X48204 -> X45435 START 
+ with probability 0.833333333333333

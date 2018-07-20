@@ -1,0 +1,60 @@
+[
+  {
+    "Name": "START -> NP VP $",
+    "StartIndex": 0,
+    "EndIndex": 5,
+    "Children": [
+      {
+        "Name": "NP -> D N $",
+        "StartIndex": 0,
+        "EndIndex": 2,
+        "Children": [
+          {
+            "Name": "D",
+            "StartIndex": 0,
+            "EndIndex": 1,
+            "AssociatedTerminal": "the"
+          },
+          {
+            "Name": "N",
+            "StartIndex": 1,
+            "EndIndex": 2,
+            "AssociatedTerminal": "man"
+          }
+        ]
+      },
+      {
+        "Name": "VP -> V1 NP $",
+        "StartIndex": 2,
+        "EndIndex": 5,
+        "Children": [
+          {
+            "Name": "V1",
+            "StartIndex": 2,
+            "EndIndex": 3,
+            "AssociatedTerminal": "kissed"
+          },
+          {
+            "Name": "NP -> D N $",
+            "StartIndex": 3,
+            "EndIndex": 5,
+            "Children": [
+              {
+                "Name": "D",
+                "StartIndex": 3,
+                "EndIndex": 4,
+                "AssociatedTerminal": "the"
+              },
+              {
+                "Name": "N",
+                "StartIndex": 4,
+                "EndIndex": 5,
+                "AssociatedTerminal": "woman"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

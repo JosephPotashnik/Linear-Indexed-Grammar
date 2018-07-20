@@ -5,10 +5,14 @@
   },
   {
     "Mutation": "DeleteRule",
-    "MutationWeight": 20
+    "MutationWeight": 10
   },
   {
-    "Mutation": "SpreadRuleLHS",
+    "Mutation": "SpreadRuleLHSToRHS",
+    "MutationWeight": 10
+  },
+  {
+    "Mutation": "SpreadRuleLHSToLHS",
     "MutationWeight": 10
   },
   {

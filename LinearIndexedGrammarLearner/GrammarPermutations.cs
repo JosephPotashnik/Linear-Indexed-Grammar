@@ -86,6 +86,92 @@ namespace LinearIndexedGrammarLearner
             if (lhsCategories.Length >= upperBoundNonTerminals)
                 return null;
 
+            for (var k = 0; k < NumberOfRetries; k++)
+            {
+             
+                //create a new non terminal
+                string baseNonTerminal = null;
+                var rand = ThreadSafeRandom.ThisThreadsRandom;
+                baseNonTerminal = $"X{newNonTerminalCounter++}";
+
+                var newCategory = new DerivedCategory(baseNonTerminal);
+
+                //create a new Rule, whose LHS is the new category. 
+                //the right hand side of the new rule is chosen randomly
+                //from existing LHS symbols of the grammar, or from POS.
+                var rightHandSide = new DerivedCategory[2];
+                for (var i = 0; i < 2; i++)
+                {
+                    DerivedCategory randomRightHandSideCategory = GetRandomRightHandSideCategory(startCategory, rightHandSidePOOL);
+                    rightHandSide[i] = randomRightHandSideCategory;
+                }
+                var newRule = new Rule(newCategory, rightHandSide);
+
+                if (grammar.ContainsSameRHSRule(newRule)) continue;
+
+                grammar.AddGrammarRule(newRule);
+
+                return grammar;
+            }
+            return null;
+        }
+
+        public Grammar SpreadRuleLHSToRHS(Grammar grammar)
+        {
+            var startCategory = new DerivedCategory(Grammar.StartRule);
+            var lhsCategories = grammar.staticRulesGeneratedForCategory.ToArray();
+            if (lhsCategories.Length < 2)
+                return null;
+
+            for (var i = 0; i < NumberOfRetries; i++)
+            {
+                //find LHS to spread:
+                DerivedCategory lhs = new DerivedCategory(startCategory);
+                var rand = ThreadSafeRandom.ThisThreadsRandom;
+
+                while (lhs.Equals(startCategory))
+                    lhs = lhsCategories[rand.Next(lhsCategories.Length)];
+
+                //choose random rule whose LHS we will replace by lhs chosen above.
+                Rule randomRule = GetRandomRule(grammar);
+
+                //choose for now only binary rules.
+                if (randomRule.RightHandSide.Length < 2)
+                    continue;
+
+                //select a right hand side category randomly.
+                int randomChildIndex = GetRandomChildIndex();
+                var originalRHSSymbol = randomRule.RightHandSide[randomChildIndex];
+
+                if (originalRHSSymbol.Equals(lhs)) continue;
+
+                randomRule.RightHandSide[randomChildIndex] = new DerivedCategory(lhs);
+                return grammar;
+            }
+            return null;
+        }
+
+        //generate a new rule from random existing productions.
+        public Grammar InsertRuleOld(Grammar grammar)
+        {
+            var startCategory = new DerivedCategory(Grammar.StartRule);
+            //we cannot insert a new rule if the number of left hand sided symbols
+            //exceeds a certain amount, determined by the number of parts of speech.
+
+            //a full binary tree with N different parts of speech as leaves
+            //requires N-1 non-terminals to parse.
+            //so at best case, the number of LHS symbols is in the order of the number
+            //of different Parts of speech. 
+            //we will no assume a full binary tree, so we can increase the upper bound to allow flexibility.
+            int RelationOfLHSToPOS = 2;
+            var lhsCategories = grammar.staticRulesGeneratedForCategory.ToArray();
+            var rightHandSidePOOL = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
+
+            int upperBoundNonTerminals = PartsOfSpeechCategories.Length * RelationOfLHSToPOS;
+
+            if (lhsCategories.Length >= upperBoundNonTerminals)
+                return null;
+
             for (var i = 0; i < NumberOfRetries; i++)
             {
                 Rule randomRule = GetRandomRule(grammar);
@@ -105,8 +191,10 @@ namespace LinearIndexedGrammarLearner
                 var newCategory = new DerivedCategory(baseNonTerminal);
 
                 //change the original rule 
+                //var originalRuleCopy = new Rule(randomRule);
                 randomRule.RightHandSide[randomChildIndex] = newCategory;
-                
+                //grammar.AddGrammarRule(originalRuleCopy);
+
 
                 //create a new Rule, whose LHS is the new category. 
                 //the right hand side of the new rule is chosen randomly
@@ -153,7 +241,7 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
-        public Grammar SpreadRuleLHS(Grammar grammar)
+        public Grammar SpreadRuleLHSToLHS(Grammar grammar)
         {
             var startCategory = new DerivedCategory(Grammar.StartRule);
             var lhsCategories = grammar.staticRulesGeneratedForCategory.ToArray();

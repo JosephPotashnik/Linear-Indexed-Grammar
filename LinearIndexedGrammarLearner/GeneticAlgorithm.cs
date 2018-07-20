@@ -36,11 +36,11 @@ namespace LinearIndexedGrammarLearner
     {
         private GeneticAlgorithmParameters parameters = new GeneticAlgorithmParameters();
         private readonly Learner learner;
-        private PriorityQueue<double, Grammar> population = new PriorityQueue<double, Grammar>();
+        private PriorityQueue<double, GrammarWithProbability> population = new PriorityQueue<double, GrammarWithProbability>();
 
         public GeneticAlgorithm(Learner l, Vocabulary voc)
         {
-            parameters.NumberOfGenerations = 100;
+            parameters.NumberOfGenerations = 1000;
             parameters.PopulationSize = 100;
             learner = l;
 
@@ -48,7 +48,7 @@ namespace LinearIndexedGrammarLearner
             var prob = learner.Energy(initialGrammar).Probability;
 
             for (int i = 0; i < parameters.PopulationSize; i++)
-                population.Enqueue(prob, new Grammar(initialGrammar));
+                population.Enqueue(prob, new GrammarWithProbability(initialGrammar, prob));
         }
 
         public static void Shuffle(List<KeyValuePair<double, Grammar>> list)
@@ -63,18 +63,18 @@ namespace LinearIndexedGrammarLearner
                 list[n] = value;
             }
         }
-        public (Energy e, Grammar g) Run()
+        public (double prob, Grammar g) Run()
         {
             int currentGeneration = 0;
             ConcurrentQueue<KeyValuePair<double, Grammar>> descendants = new ConcurrentQueue<KeyValuePair<double, Grammar>>();
             double bestProbability;
             double bestPreviousProbability;
             bestProbability = population.Last().Key;
-            int generationsWithoutChange = 0;
             while (currentGeneration++ < parameters.NumberOfGenerations)
             {
                 bestPreviousProbability = population.Last().Key;
-                Console.WriteLine($"generation {currentGeneration}");
+                if (currentGeneration % 50 == 0)
+                    Console.WriteLine($"generation {currentGeneration}");
                 try
                 {
                     //mutate each grammar and push the result into the descendants list.
@@ -85,41 +85,30 @@ namespace LinearIndexedGrammarLearner
                             descendants.Enqueue(new KeyValuePair<double, Grammar>(mutatedIndividual.Probability, mutatedIndividual.Grammar));
                     }
                     );
-                    var descendantsList = descendants.ToList();
+                    //var descendantsList = descendants.ToList();
 
-                    Shuffle(descendantsList);
+                    //Shuffle(descendantsList);
 
                     //read off descendants list and push into population every grammar
                     //that is better from the grammar with the current lowest probability in the population.
                     InsertDescendantsIntoPopulation(descendants);
 
-                    int halfDescendantssize = descendantsList.Count / 2;
-                    Parallel.For(0, halfDescendantssize, (i) =>
-                    {
+                    //int halfDescendantssize = descendantsList.Count / 2;
+                    //Parallel.For(0, halfDescendantssize, (i) =>
+                    //{
 
-                        var childrenList = Crossover(descendantsList[i].Value, descendantsList[i + halfDescendantssize].Value);
-                        foreach (var child in childrenList)
-                        {
-                            if (child.Grammar != null)
-                                descendants.Enqueue(new KeyValuePair<double, Grammar>(child.Probability, child.Grammar));
-                        }
-                    }
-                    );
+                    //    var childrenList = Crossover(descendantsList[i].Value, descendantsList[i + halfDescendantssize].Value);
+                    //    foreach (var child in childrenList)
+                    //    {
+                    //        if (child.Grammar != null)
+                    //            descendants.Enqueue(new KeyValuePair<double, Grammar>(child.Probability, child.Grammar));
+                    //    }
+                    //}
+                    //);
 
-                    InsertDescendantsIntoPopulation(descendants);
+                    //InsertDescendantsIntoPopulation(descendants);
 
                     bestProbability = population.Last().Key;
-
-                    if (bestProbability - bestPreviousProbability < 0.001)
-                    {
-                        generationsWithoutChange++;
-                        if (generationsWithoutChange > 300)
-                            break;
-                    }
-                    else
-                    {
-                        generationsWithoutChange = 0;
-                    }
 
                 }
 
@@ -129,9 +118,10 @@ namespace LinearIndexedGrammarLearner
                 }
             }
 
-            var bestHypothesis = population.Last().Value.First();
-            bestHypothesis.PruneUnusedRulesLHS();
-            bestHypothesis.PruneUnusedRulesRHS();
+            var bestHypothesis = new Grammar(population.Last().Value.First().Grammar);
+            var ruleDistribution = learner.CollectUsages(bestHypothesis);
+            bestHypothesis.PruneUnusedRules(ruleDistribution);
+
 
             bestProbability = population.Last().Key;
             var s = string.Format($"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestProbability}");
@@ -141,7 +131,7 @@ namespace LinearIndexedGrammarLearner
             {
                 sw.WriteLine(s);
             }
-            return (null, bestHypothesis);
+            return (bestProbability, bestHypothesis);
         }
 
         private void InsertDescendantsIntoPopulation(ConcurrentQueue<KeyValuePair<double, Grammar>> descendants)
@@ -153,30 +143,30 @@ namespace LinearIndexedGrammarLearner
                 if (success)
                 {
 
-                    if (descendant.Key > population.PeekFirstKey())
+                    if (descendant.Key >= population.PeekFirstKey())
                     {
                         population.Dequeue();
-                        population.Enqueue(descendant.Key, descendant.Value);
+                        population.Enqueue(descendant.Key, new GrammarWithProbability(descendant.Value, descendant.Key));
                     }
 
                 }
             }
         }
 
-        private GrammarWithProbability Mutate(Grammar individual)
+        private GrammarWithProbability Mutate(GrammarWithProbability individual)
         {
-            var mutatedIndividual = learner.GetNeighbor(individual);
-            return learner.ComputeProbabilityForGrammar(mutatedIndividual);
+            var mutatedIndividual = learner.GetNeighbor(individual.Grammar);
+            return learner.ComputeProbabilityForGrammar(individual, mutatedIndividual);
         }
 
         private List<GrammarWithProbability> Crossover(Grammar parent1, Grammar parent2)
         {
             var childrenList = new List<GrammarWithProbability>();
 
-            (var child1, var child2) = learner.GetChild(parent1, parent2);
+            //(var child1, var child2) = learner.GetChild(parent1, parent2);
 
-            childrenList.Add(learner.ComputeProbabilityForGrammar(child1));
-            childrenList.Add(learner.ComputeProbabilityForGrammar(child2));
+            //childrenList.Add(learner.ComputeProbabilityForGrammar(child1));
+            //childrenList.Add(learner.ComputeProbabilityForGrammar(child2));
 
             return childrenList;
         }

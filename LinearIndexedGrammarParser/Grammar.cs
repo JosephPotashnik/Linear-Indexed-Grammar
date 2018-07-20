@@ -53,32 +53,36 @@ namespace LinearIndexedGrammarParser
 
         }
 
+        public bool ContainsSameRHSRule(Rule newRule)
+        {
+            bool bFoundIdentical = false;
+            //assuming compositionality.
+            // if found rule with the same right hand side, do not re-add it.
+            //the nonterminal of the left hand side does not matter.
+
+            foreach (var rule in Rules)
+            {
+                if (!rule.RightHandSide[0].IsEpsilon() && rule.RightHandSide.Length == newRule.RightHandSide.Length)
+                {
+                    bFoundIdentical = true;
+                    for (int i = 0; i < rule.RightHandSide.Length; i++)
+                    {
+                        if (!rule.RightHandSide[i].Equals(newRule.RightHandSide[i]))
+                            bFoundIdentical = false;
+                    }
+                    if (bFoundIdentical) break;
+                }
+            }
+
+            return bFoundIdentical;
+        }
+
         //takes care properly of staticRules, staticRulesGeneratedForCategory fields of Grammar class.
         //TODO: dynamicRules, nullableCategories are not properly handled yet!
         public void AddGrammarRule(Rule r)
         {
             var newRule = new Rule(r);
 
-            bool bFoundIdentical = false;
-            //assuming compositionality.
-            // if found rule with the same right hand side, do not re-add it.
-            //the nonterminal of the left hand side does not matter.
-            {
-                foreach (var rule in Rules)
-                {
-                    if (!rule.RightHandSide[0].IsEpsilon() && rule.RightHandSide.Length == newRule.RightHandSide.Length)
-                    {
-                        bFoundIdentical = true;
-                        for (int i = 0; i < rule.RightHandSide.Length; i++)
-                        {
-                            if (!rule.RightHandSide[i].Equals(newRule.RightHandSide[i]))
-                                bFoundIdentical = false;
-                        }
-                        if (bFoundIdentical) return;
-                    }
-                }
-
-            }
             //if non-empty stack
             if (newRule.LeftHandSide.Stack != null)
             {
@@ -138,63 +142,14 @@ namespace LinearIndexedGrammarParser
                 nullableCategories.Add(newRule.LeftHandSide);
         }
 
-        public void PruneUnusedRulesLHS()
+        public void PruneUnusedRules(Dictionary<int, int> usagesDic)
         {
-            bool bFound = true;
-            while (bFound)
-            {
-                bFound = false;
-                var lhsCategories = staticRulesGeneratedForCategory.ToList();
-                var rhsCategories = Rules.SelectMany(x => x.RightHandSide).ToList();
+            var unusedRules = Rules.Where(x => !usagesDic.ContainsKey(x.Number)).ToArray();
 
-                var unusedLhsCategories = lhsCategories.Except(rhsCategories);
-                if (unusedLhsCategories.Any())
-                {
-                    bFound = true;
-                    foreach (var lhs in unusedLhsCategories)
-                    {
-
-                        staticRules.Remove(lhs);
-                        staticRulesGeneratedForCategory.Remove(lhs);
-
-                    }
-                }
-            }
-
+            foreach (var rule in unusedRules)      
+                DeleteGrammarRule(rule);
         }
 
-        public void PruneUnusedRulesRHS()
-        {
-            bool bFound = true;
-            while (bFound)
-            {
-                bFound = false;
-                var lhsCategories = staticRulesGeneratedForCategory.ToList();
-                var rhsCategories = Rules.SelectMany(x => x.RightHandSide).ToList();
-
-                var unusedRhsCategories = rhsCategories.Except(lhsCategories).ToList();
-
-                //strong assumption: all nonterminals begin with X.
-                //REmove all non-POS unused variables.
-                //TODO:  pass the vocabulary object and weed out the RHS that are POS in the vocabulary.
-                unusedRhsCategories.RemoveAll(x => x.ToString()[0] != 'X');
-
-                if (unusedRhsCategories.Any())
-                {
-                    List<Rule> rulesToDelete = new List<Rule>();
-                    foreach (var rule in Rules)
-                    {
-                        if (rule.RightHandSide.Intersect(unusedRhsCategories).Any())
-                            rulesToDelete.Add(rule);
-                    }
-
-                    foreach (var rule in rulesToDelete)
-                        DeleteGrammarRule(rule);
-                    
-                }
-            }
-
-        }
         public Rule GenerateStaticRuleFromDyamicRule(Rule dynamicGrammarRule, DerivedCategory leftHandSide)
         {
             if (dynamicGrammarRule.LeftHandSide.Stack == null || dynamicGrammarRule.LeftHandSide.Stack == string.Empty)

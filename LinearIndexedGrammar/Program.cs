@@ -47,7 +47,7 @@ namespace LinearIndexedGrammar
         }
 
 
-        private static void Learn(int maxWordsInSentence = 5)
+        private static void Learn(int maxWordsInSentence = 6)
         {
             ProgramParams programParams = ReadProgramParamsFromFile();
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
@@ -71,21 +71,31 @@ namespace LinearIndexedGrammar
             var s = string.Format("Target Hypothesis:\r\n{0}\r\n with energy: {1}\r\n", targetGrammar, targetGrammarEnergy);
             Console.WriteLine(s);
 
-            //(var n1, var targetGrammar1) = GenerateSentenceAccordingToGrammar("SolutionCFG.txt", maxWordsInSentence);
-            //(var data1, var dataVocabulary1) = GetSentencesOfGenerator(n1, universalVocabulary);
-            //targetGrammar1.PruneUnusedRulesLHS();
-            //targetGrammar1.PruneUnusedRulesRHS();
+            //(var n1, var targetGrammar1) = GrammarFileReader.GenerateSentenceAccordingToGrammar("SolutionCFG.txt", maxWordsInSentence);
+            //(var data1, var dataVocabulary1) = GrammarFileReader.GetSentencesOfGenerator(n1, universalVocabulary);
             //var energy1 = learner.Energy(targetGrammar1);
+            //var ruleDistribution = learner.CollectUsages(targetGrammar1);
+            //targetGrammar1.PruneUnusedRules(ruleDistribution);
+            //Console.WriteLine(targetGrammar1);
+
 
             using (var sw = File.AppendText("SessionReport.txt"))
             {
                 sw.WriteLine(s);
             }
 
+            List<double> probs = new List<double>();
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
                 var GA = new GeneticAlgorithm(learner, dataVocabulary);
-                GA.Run();
+                (var prob, var bestHypothesis) = GA.Run();
+                probs.Add(prob);
+            }
+            using (var sw = File.AppendText("SessionReport.txt"))
+            {
+                double averageProb = probs.Average();
+                sw.WriteLine($"Average probability is: {averageProb}");
+                Console.WriteLine($"Average probability is: {averageProb}");
             }
             StopWatch(stopWatch);
         }

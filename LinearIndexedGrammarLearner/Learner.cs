@@ -121,6 +121,39 @@ namespace LinearIndexedGrammarLearner
             }
             return null;
         }
+        public Dictionary<int, int> CollectUsages(Grammar currentHypothesis)
+        {
+            var allParses = ParseAllSentences(currentHypothesis);
+            var usagesDic = new Dictionary<int, int>();
+
+            if (allParses != null)
+            {
+                foreach (var sentenceParsingResult in allParses)
+                {
+                    foreach (var tree in sentenceParsingResult.Trees)
+                        CollectRuleUsages(tree, usagesDic, sentenceParsingResult.Count);
+                }
+                return usagesDic;
+            }
+
+            return null;
+        }
+
+        private static void CollectRuleUsages(EarleyNode n, Dictionary<int, int> ruleCounts, int sentenceCount)
+        {
+            if (n.Children != null)
+            {
+                foreach (var child in n.Children)
+                    CollectRuleUsages(child, ruleCounts, sentenceCount);
+            }
+
+            if (n.RuleNumber != 0) //SCAN_RULE_NUMBER = 0.
+            {
+                if (!ruleCounts.ContainsKey(n.RuleNumber)) ruleCounts[n.RuleNumber] = 0;
+                ruleCounts[n.RuleNumber] += sentenceCount;
+                //add +1 to the count of the rule, multiplied by the number of times the sentence appears in the text (sentenceCount).
+            }
+        }
 
         internal Grammar GetNeighbor(Grammar currentHypothesis)
         {
@@ -144,15 +177,25 @@ namespace LinearIndexedGrammarLearner
             return GrammarPermutations.Crossover(newParent1, newParent2);
         }
 
-        internal GrammarWithProbability ComputeProbabilityForGrammar(Grammar g)
+        internal GrammarWithProbability ComputeProbabilityForGrammar(GrammarWithProbability originalGrammar, Grammar mutatedGrammar)
         {
             double prob = 0.0;
-            Energy newEnergy = null;
-            if (g != null)
-                newEnergy = Energy(g);
-            if (newEnergy != null)
-                prob = newEnergy.Probability;
-            return new GrammarWithProbability(g, prob);
+            if (mutatedGrammar != null)
+            {
+
+
+                //assuming: insertion of rule adds as of yet unused rule
+                //so it does not affect the parsibility of the grammar nor its probability.
+                if (mutatedGrammar.Rules.ToArray().Length > originalGrammar.Grammar.Rules.ToArray().Length )
+                    return new GrammarWithProbability(mutatedGrammar, originalGrammar.Probability);
+
+                Energy newEnergy = null;
+                newEnergy = Energy(mutatedGrammar);
+
+                if (newEnergy != null)
+                    prob = newEnergy.Probability;
+            }
+            return new GrammarWithProbability(mutatedGrammar, prob);
         }
     }
 }
