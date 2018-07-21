@@ -19,10 +19,7 @@ namespace LinearIndexedGrammarLearner
 
         [JsonProperty]
         public float PopulationSize { get; set; }
-
     }
-
-   
     public static class ThreadSafeRandom
     {
         [ThreadStatic] private static Random Local;
@@ -51,32 +48,28 @@ namespace LinearIndexedGrammarLearner
                 population.Enqueue(prob, new GrammarWithProbability(initialGrammar, prob));
         }
 
-        public static void Shuffle(List<KeyValuePair<double, Grammar>> list)
-        {
-            int n = list.Count;
-            while (n > 1)
-            {
-                n--;
-                int k = ThreadSafeRandom.ThisThreadsRandom.Next(n + 1);
-                KeyValuePair<double, Grammar> value = list[k];
-                list[k] = list[n];
-                list[n] = value;
-            }
-        }
         public (double prob, Grammar g) Run()
         {
             int currentGeneration = 0;
             ConcurrentQueue<KeyValuePair<double, Grammar>> descendants = new ConcurrentQueue<KeyValuePair<double, Grammar>>();
-            double bestProbability;
-            double bestPreviousProbability;
-            bestProbability = population.Last().Key;
             while (currentGeneration++ < parameters.NumberOfGenerations)
             {
-                bestPreviousProbability = population.Last().Key;
                 if (currentGeneration % 50 == 0)
                     Console.WriteLine($"generation {currentGeneration}");
                 try
                 {
+                    //mutate each grammar and push the result into the descendants list.
+                    //foreach (var individual in population.Values)
+                    //{
+                    //    var mutatedIndividual = Mutate(individual);
+                    //    if (mutatedIndividual.Grammar != null)
+                    //        descendants.Enqueue(new KeyValuePair<double, Grammar>(mutatedIndividual.Probability, mutatedIndividual.Grammar));
+                    //}
+
+
+                    //no need to parallelize here, since the heavy weightlifting is done in
+                    //computation of the grammar probability, i.e, in parsing.
+                    //parsing is fully parallelized.
                     //mutate each grammar and push the result into the descendants list.
                     Parallel.ForEach(population.Values, (individual) =>
                     {
@@ -85,31 +78,8 @@ namespace LinearIndexedGrammarLearner
                             descendants.Enqueue(new KeyValuePair<double, Grammar>(mutatedIndividual.Probability, mutatedIndividual.Grammar));
                     }
                     );
-                    //var descendantsList = descendants.ToList();
 
-                    //Shuffle(descendantsList);
-
-                    //read off descendants list and push into population every grammar
-                    //that is better from the grammar with the current lowest probability in the population.
                     InsertDescendantsIntoPopulation(descendants);
-
-                    //int halfDescendantssize = descendantsList.Count / 2;
-                    //Parallel.For(0, halfDescendantssize, (i) =>
-                    //{
-
-                    //    var childrenList = Crossover(descendantsList[i].Value, descendantsList[i + halfDescendantssize].Value);
-                    //    foreach (var child in childrenList)
-                    //    {
-                    //        if (child.Grammar != null)
-                    //            descendants.Enqueue(new KeyValuePair<double, Grammar>(child.Probability, child.Grammar));
-                    //    }
-                    //}
-                    //);
-
-                    //InsertDescendantsIntoPopulation(descendants);
-
-                    bestProbability = population.Last().Key;
-
                 }
 
                 catch (Exception e)
@@ -118,12 +88,9 @@ namespace LinearIndexedGrammarLearner
                 }
             }
 
-            var bestHypothesis = new Grammar(population.Last().Value.First().Grammar);
-            var ruleDistribution = learner.CollectUsages(bestHypothesis);
-            bestHypothesis.PruneUnusedRules(ruleDistribution);
+            //choosing shortest grammar among all those with the best probability.
+            (var bestProbability, var bestHypothesis) = ChooseBestHypothesis();
 
-
-            bestProbability = population.Last().Key;
             var s = string.Format($"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestProbability}");
 
             Console.WriteLine(s);
@@ -131,6 +98,27 @@ namespace LinearIndexedGrammarLearner
             {
                 sw.WriteLine(s);
             }
+            return (bestProbability, bestHypothesis);
+        }
+
+        private (double bestProbability, Grammar bestHypothesis) ChooseBestHypothesis()
+        {
+            double bestProbability = population.Last().Key;
+            int minimalNumberOfRules = int.MaxValue;
+            Grammar bestHypothesis = null;
+            foreach (var bestHypothesisCandidates in population.Last().Value)
+            {
+                var g = bestHypothesisCandidates.Grammar;
+                var ruleDistribution = learner.CollectUsages(g);
+                g.PruneUnusedRules(ruleDistribution);
+                int numberOfRules = g.RuleCount;
+                if (numberOfRules < minimalNumberOfRules)
+                {
+                    bestHypothesis = g;
+                    minimalNumberOfRules = numberOfRules;
+                }
+            }
+
             return (bestProbability, bestHypothesis);
         }
 
@@ -158,20 +146,6 @@ namespace LinearIndexedGrammarLearner
             var mutatedIndividual = learner.GetNeighbor(individual.Grammar);
             return learner.ComputeProbabilityForGrammar(individual, mutatedIndividual);
         }
-
-        private List<GrammarWithProbability> Crossover(Grammar parent1, Grammar parent2)
-        {
-            var childrenList = new List<GrammarWithProbability>();
-
-            //(var child1, var child2) = learner.GetChild(parent1, parent2);
-
-            //childrenList.Add(learner.ComputeProbabilityForGrammar(child1));
-            //childrenList.Add(learner.ComputeProbabilityForGrammar(child2));
-
-            return childrenList;
-        }
-
-
-
+        
     }
 }

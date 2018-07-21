@@ -34,6 +34,7 @@ namespace LinearIndexedGrammarLearner
         ////We create the "promiscuous grammar" as initial grammar.
         public Grammar CreateInitialGrammar(Vocabulary voc)
         {
+            this.voc = voc;
             originalGrammar = new Grammar();
             var posInText = voc.POSWithPossibleWords.Keys;
             gp = new GrammarPermutations(posInText.ToArray());
@@ -167,26 +168,14 @@ namespace LinearIndexedGrammarLearner
             return m(newGrammar);
         }
 
-        internal (Grammar child1, Grammar child2) GetChild(Grammar parent1, Grammar parent2)
-        {
-            //deep copy the grammr
-            var newParent1 = new Grammar(parent1);
-            var newParent2 = new Grammar(parent2);
-
-            //mutate the grammar.
-            return GrammarPermutations.Crossover(newParent1, newParent2);
-        }
-
         internal GrammarWithProbability ComputeProbabilityForGrammar(GrammarWithProbability originalGrammar, Grammar mutatedGrammar)
         {
             double prob = 0.0;
             if (mutatedGrammar != null)
             {
-
-
                 //assuming: insertion of rule adds as of yet unused rule
                 //so it does not affect the parsibility of the grammar nor its probability.
-                if (mutatedGrammar.Rules.ToArray().Length > originalGrammar.Grammar.Rules.ToArray().Length )
+                if (mutatedGrammar.RuleCount > originalGrammar.Grammar.RuleCount )
                     return new GrammarWithProbability(mutatedGrammar, originalGrammar.Probability);
 
                 Energy newEnergy = null;

@@ -16,6 +16,8 @@ namespace LinearIndexedGrammarParser
         public readonly HashSet<DerivedCategory> staticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
         public readonly HashSet<DerivedCategory> nullableCategories = new HashSet<DerivedCategory>();
         internal static int ruleCounter = 0;
+        private int ruleCount = 0;
+        public int RuleCount => ruleCount;
 
         public Grammar(Grammar otherGrammar)
         {
@@ -23,7 +25,7 @@ namespace LinearIndexedGrammarParser
             dynamicRules = otherGrammar.dynamicRules.ToDictionary(x => x.Key, x => x.Value.Select(y => new Rule(y)).ToList());
             staticRulesGeneratedForCategory = new HashSet<DerivedCategory>(otherGrammar.staticRulesGeneratedForCategory);
             nullableCategories = new HashSet<DerivedCategory>(otherGrammar.nullableCategories);
-
+            ruleCount = otherGrammar.ruleCount;
         }
         public IEnumerable<Rule> Rules
         {
@@ -43,6 +45,7 @@ namespace LinearIndexedGrammarParser
             var LHS = r.LeftHandSide;
             var rulesWithSameLHS = staticRules[LHS];
             rulesWithSameLHS.Remove(r);
+            ruleCount--;
 
             if (rulesWithSameLHS.Count == 0)
             {
@@ -133,6 +136,7 @@ namespace LinearIndexedGrammarParser
                 staticRules[newRule.LeftHandSide] = new List<Rule>();
 
             staticRules[newRule.LeftHandSide].Add(newRule);
+            ruleCount++;
 
             //TODO: calculate the transitive closure of all nullable symbols.
             //at the moment you calculate only the rules that directly lead to epsilon.
