@@ -54,23 +54,10 @@ namespace LinearIndexedGrammarLearner
             ConcurrentQueue<KeyValuePair<double, Grammar>> descendants = new ConcurrentQueue<KeyValuePair<double, Grammar>>();
             while (currentGeneration++ < parameters.NumberOfGenerations)
             {
-                if (currentGeneration % 50 == 0)
+                //if (currentGeneration % 50 == 0)
                     Console.WriteLine($"generation {currentGeneration}");
                 try
                 {
-                    //mutate each grammar and push the result into the descendants list.
-                    //foreach (var individual in population.Values)
-                    //{
-                    //    var mutatedIndividual = Mutate(individual);
-                    //    if (mutatedIndividual.Grammar != null)
-                    //        descendants.Enqueue(new KeyValuePair<double, Grammar>(mutatedIndividual.Probability, mutatedIndividual.Grammar));
-                    //}
-
-
-                    //no need to parallelize here, since the heavy weightlifting is done in
-                    //computation of the grammar probability, i.e, in parsing.
-                    //parsing is fully parallelized.
-                    //mutate each grammar and push the result into the descendants list.
                     Parallel.ForEach(population.Values, (individual) =>
                     {
                         var mutatedIndividual = Mutate(individual);
