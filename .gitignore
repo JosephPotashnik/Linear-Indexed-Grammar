@@ -3,10 +3,12 @@
 ################################################################################
 
 /.vs
-/LinearIndexedGrammar/bin/Debug/netcoreapp2.0
+/LinearIndexedGrammar/bin
 /LinearIndexedGrammar/obj
-/LinearIndexedGrammarParser/bin/Debug/netcoreapp2.0
+/LinearIndexedGrammarParser/bin
 /LinearIndexedGrammarParser/obj
-/LinearIndexedGrammarParserTests/bin/Debug/netcoreapp2.0
-/LinearIndexedGrammarParserTests/obj/Debug/netcoreapp2.0
+/LinearIndexedGrammarLearner/bin
+/LinearIndexedGrammarLearner/obj
+/LinearIndexedGrammarParserTests/bin
 /LinearIndexedGrammarParserTests/obj
+
