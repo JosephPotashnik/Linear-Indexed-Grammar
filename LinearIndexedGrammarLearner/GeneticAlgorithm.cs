@@ -38,7 +38,7 @@ namespace LinearIndexedGrammarLearner
         public GeneticAlgorithm(Learner l)
         {
             parameters.NumberOfGenerations = 1000;
-            parameters.PopulationSize = 100;
+            parameters.PopulationSize = 200;
             learner = l;
 
             Grammar initialGrammar = learner.CreateInitialGrammar();
@@ -54,7 +54,7 @@ namespace LinearIndexedGrammarLearner
             ConcurrentQueue<KeyValuePair<double, Grammar>> descendants = new ConcurrentQueue<KeyValuePair<double, Grammar>>();
             while (currentGeneration++ < parameters.NumberOfGenerations)
             {
-                if (currentGeneration % 50 == 0)
+                if (currentGeneration % 200 == 0)
                     Console.WriteLine($"generation {currentGeneration}");
                 try
                 {

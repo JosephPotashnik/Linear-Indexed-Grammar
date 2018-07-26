@@ -242,20 +242,6 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        //private static List<KeyValuePair<int, WordsTreesCounts>> GetListOfTreesCountsWithDepths(SubtreeCountsWithNumberOfWords catCounts1)
-        //{
-        //    //var xy = catCounts1.WordTreesCounts.Select(x => x.WordsTreesDic.Values).ToArray();
-        //    var xy = catCounts1.WordsTreesDic.Values;
-        //    List<KeyValuePair<int, WordsTreesCounts>> listTreesCountWithDepths = new List<KeyValuePair<int, WordsTreesCounts>>();
-
-        //    for (int i = 0; i < xy.Length; i++)
-        //    {
-        //        foreach (var item in xy[i])
-        //            listTreesCountWithDepths.Add(new KeyValuePair<int, WordsTreesCounts>(i, item));
-        //    }
-
-        //    return listTreesCountWithDepths;
-        //}
 
         public SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(DerivedCategory cat, int treeDepth, HashSet<string> POS)
         {
@@ -313,41 +299,5 @@ namespace LinearIndexedGrammarParser
 
             }
         }
-
-        /*
-        public int NumberOfParseTrees(DerivedCategory[] RHS, int treeDepth, HashSet<string> POS)
-        {
-            int res = 1;
-            foreach (var cat in RHS)
-                res *= NumberOfParseTrees(cat, treeDepth, POS);
-
-            return res;
-        }
-
-        public int NumberOfParseTrees(DerivedCategory cat, int treeDepth, HashSet<string> POS)
-        {
-            if (staticRules.ContainsKey(cat))
-            {
-                int res = 0;
-                //POS can sometimes be a left-side nonterminal, for instance NP -> D N
-                if (POS.Contains(cat.ToString()))
-                    res += 1;
-
-                if (treeDepth > 0)
-                {
-                    var ruleList = staticRules[cat];
-                    foreach (var rule in ruleList)
-                        res += NumberOfParseTrees(rule.RightHandSide, treeDepth - 1, POS);
-                }
-
-                return res;
-
-            }
-            else if (POS.Contains(cat.ToString()))
-                return 1;
-            else
-                return 0;
-        }
-        */
     }
 }

@@ -145,48 +145,20 @@ namespace LinearIndexedGrammarLearner
 
                 if (originalRHSSymbol.Equals(lhs)) continue;
 
-                randomRule.RightHandSide[randomChildIndex] = new DerivedCategory(lhs);
+                //randomRule.RightHandSide[randomChildIndex] = new DerivedCategory(lhs);
 
-                //var replaceRule = new Rule(randomRule);
-                //replaceRule.RightHandSide[randomChildIndex] = new DerivedCategory(lhs);
-                //if (grammar.ContainsSameRHSRule(replaceRule)) continue;
+                var replaceRule = new Rule(randomRule);
+                replaceRule.RightHandSide[randomChildIndex] = new DerivedCategory(lhs);
+                if (grammar.ContainsSameRHSRule(replaceRule)) continue;
 
-                //grammar.DeleteGrammarRule(randomRule);
-                //grammar.AddGrammarRule(replaceRule);
+                grammar.DeleteGrammarRule(randomRule);
+                grammar.AddGrammarRule(replaceRule);
 
                 return grammar;
             }
             return null;
         }
         
-        public Grammar SpreadRuleRHS(Grammar grammar)
-        {
-            //var startCategory = new DerivedCategory(Grammar.StartRule);
-
-            //var lhsCategories = grammar.staticRulesGeneratedForCategory.ToArray();
-            //var rightHandSidePOOL = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
-
-            //for (var i = 0; i < NumberOfRetries; i++)
-            //{
-            //    Rule randomRule = GetRandomRule(grammar);
-
-            //    //choose for now only binary rules.
-            //    if (randomRule.RightHandSide.Length < 2)
-            //        continue;
-
-            //    //select a right hand side category randomly.
-            //    int randomChildIndex = GetRandomChildIndex();
-
-            //    //pick in random right hand side category: either from LHS categories or from POS
-            //    DerivedCategory randomRightHandSideCategory = GetRandomRightHandSideCategory(startCategory, rightHandSidePOOL);
-            //    //change the original rule 
-            //    randomRule.RightHandSide[randomChildIndex] = new DerivedCategory(randomRightHandSideCategory);
-
-            //    return grammar;
-            //}
-            return null;
-        }
-
         public Grammar SpreadRuleLHSToLHS(Grammar grammar)
         {
             var startCategory = new DerivedCategory(Grammar.StartRule);
