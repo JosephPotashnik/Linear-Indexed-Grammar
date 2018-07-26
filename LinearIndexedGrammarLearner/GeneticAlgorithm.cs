@@ -106,6 +106,14 @@ namespace LinearIndexedGrammarLearner
                 }
             }
 
+            //foreach (var item in bestHypothesis.staticRulesGeneratedForCategory)
+            //{
+            //    if (item.ToString()[0] == 'X')
+            //    {
+            //    }
+
+            //}
+
             return (bestProbability, bestHypothesis);
         }
 

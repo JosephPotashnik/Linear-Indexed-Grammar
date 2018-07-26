@@ -84,9 +84,9 @@ namespace LinearIndexedGrammarLearner
         {
             //worst case: the tree is non-balanced (fully right or left branching)
             var treeDepth = maxWordsInSentence - 1;
-
             var posInText = voc.POSWithPossibleWords.Keys.ToHashSet();
-            var parseTreesCountPerWords = hypothesis.NumberOfParseTreesPerWords(new DerivedCategory(Grammar.StartRule), treeDepth, posInText);
+            var parseTreesCountPerWords = hypothesis.NumberOfParseTreesPerWords(new DerivedCategory(Grammar.StartRule), treeDepth, posInText, 
+                new SubTreeCountsCache(hypothesis, treeDepth));
 
             var numberOfParseTreesBelowMaxWords = parseTreesCountPerWords.WordsTreesDic.Values.Where(x => x.WordsCount <= maxWordsInSentence).Select(x => x.TreesCount).Sum();
 

@@ -5,6 +5,23 @@ using System.Text.RegularExpressions;
 
 namespace LinearIndexedGrammarParser
 {
+    public class SubTreeCountsCache
+    {
+        public Dictionary<DerivedCategory, SubtreeCountsWithNumberOfWords[]> CategoriesCache;
+        public Dictionary<Rule, SubtreeCountsWithNumberOfWords[]> RuleCache;
+
+        public SubTreeCountsCache(Grammar g, int depth)
+        {
+            CategoriesCache = new Dictionary<DerivedCategory, SubtreeCountsWithNumberOfWords[]>();
+            foreach (var lhs in g.staticRulesGeneratedForCategory)
+                CategoriesCache[lhs] = new SubtreeCountsWithNumberOfWords[depth];
+
+            RuleCache = new Dictionary<Rule, SubtreeCountsWithNumberOfWords[]>();
+            foreach (var rule in g.Rules)
+                RuleCache[rule] = new SubtreeCountsWithNumberOfWords[depth];
+        }
+
+    }
 
     public class SubtreeCountsWithNumberOfWords
     {
@@ -196,14 +213,24 @@ namespace LinearIndexedGrammarParser
 
             return newRule;
         }
-        public SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(DerivedCategory[] RHS, int treeDepth, HashSet<string> POS)
+
+        public Dictionary<DerivedCategory, SubtreeCountsWithNumberOfWords[]>  PrepareCacheTableSubtreeCountsWithNumberOfWords(int maxDepth)
+        {
+            var subtreeCountsCache = new Dictionary<DerivedCategory, SubtreeCountsWithNumberOfWords[]>();
+            foreach (var lhs in staticRulesGeneratedForCategory)
+                subtreeCountsCache[lhs] = new SubtreeCountsWithNumberOfWords[maxDepth];
+
+            return subtreeCountsCache;
+
+        }
+        public SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(DerivedCategory[] RHS, int treeDepth, HashSet<string> POS, SubTreeCountsCache cache)
         {
             SubtreeCountsWithNumberOfWords res = new SubtreeCountsWithNumberOfWords();
 
             if (RHS.Length == 2)
             {
-                var catCounts1 = NumberOfParseTreesPerWords(RHS[0], treeDepth, POS);
-                var catCounts2 = NumberOfParseTreesPerWords(RHS[1], treeDepth, POS);
+                var catCounts1 = NumberOfParseTreesPerWords(RHS[0], treeDepth, POS, cache);
+                var catCounts2 = NumberOfParseTreesPerWords(RHS[1], treeDepth, POS, cache);
 
                 var kvpFromCat1 = catCounts1.WordsTreesDic.Values.ToList();
                 var kvpFromCat2 = catCounts2.WordsTreesDic.Values.ToList();
@@ -212,7 +239,7 @@ namespace LinearIndexedGrammarParser
             }
             else
             {
-                var catCounts1 = NumberOfParseTreesPerWords(RHS[0], treeDepth, POS);
+                var catCounts1 = NumberOfParseTreesPerWords(RHS[0], treeDepth, POS, cache);
                 var kvpFromCat1 = catCounts1.WordsTreesDic.Values.ToList();
                 UpdateCounts(res, kvpFromCat1);
 
@@ -243,27 +270,57 @@ namespace LinearIndexedGrammarParser
         }
 
 
-        public SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(DerivedCategory cat, int treeDepth, HashSet<string> POS)
+        public SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(DerivedCategory cat, int treeDepth, HashSet<string> POS, SubTreeCountsCache cache )
         {
             var res = new SubtreeCountsWithNumberOfWords();
             res.WordsTreesDic = new Dictionary<int, WordsTreesCounts>();
 
             if (staticRules.ContainsKey(cat))
             {
-
+                //if not in cache, compute counts of subtrees
                 //POS can sometimes be a left-side nonterminal, for instance NP -> D N
                 if (POS.Contains(cat.ToString()))
                     CountTerminal(res);
 
                 if (treeDepth > 0)
                 {
+                    //check if in categories cache.
+                    var storedCountsOfCat = cache.CategoriesCache[cat];
+                    int indexInCatCacheArr = treeDepth - 1;
+                    var cachedCatCounts = storedCountsOfCat[indexInCatCacheArr];
+                    while (cachedCatCounts == null && ++indexInCatCacheArr < storedCountsOfCat.Length)
+                        cachedCatCounts = storedCountsOfCat[indexInCatCacheArr];
+
+                    if (cachedCatCounts != null)
+                        return cachedCatCounts;
+
                     var ruleList = staticRules[cat];
                     foreach (var rule in ruleList)
                     {
-                        var fromRHS = NumberOfParseTreesPerWords(rule.RightHandSide, treeDepth - 1, POS);
+                        //check if in rules cache.
+                        var storedCountsOfRules = cache.RuleCache[rule];
+                        int indexInRuleCacheArr = treeDepth - 1;
+                        var cachedRuleCounts = storedCountsOfRules[indexInRuleCacheArr];
+                        while (cachedRuleCounts == null && ++indexInRuleCacheArr < storedCountsOfRules.Length)
+                            cachedRuleCounts = storedCountsOfRules[indexInRuleCacheArr];
+
+                        SubtreeCountsWithNumberOfWords fromRHS = null;
+                        //use previously computed results if applicable.
+                        if (cachedRuleCounts != null)
+                            fromRHS = cachedRuleCounts;
+                        else
+                            fromRHS = NumberOfParseTreesPerWords(rule.RightHandSide, treeDepth - 1, POS, cache);
+
                         var kvpFromCat1 = fromRHS.WordsTreesDic.Values.ToList();
                         UpdateCounts(res, kvpFromCat1);
+
+                        //store in rules cache.
+                        storedCountsOfRules[treeDepth - 1] = fromRHS;
                     }
+
+                    //store in categories cache.
+                    storedCountsOfCat[treeDepth - 1] = res;
+
                 }
             }
             else if (POS.Contains(cat.ToString()))
