@@ -19,7 +19,7 @@ namespace LinearIndexedGrammarLearner
             simulatedAnnealingParams = ReadSimulatedAnnealingParametersFromFile();
             learner = l;
             currentIteration = bestIteration = 1;
-            currentHypothesis = bestHypothesis = learner.CreateInitialGrammar(voc);
+            currentHypothesis = bestHypothesis = learner.CreateInitialGrammar();
             currentEnergy = bestEnergy = learner.Energy(currentHypothesis);
 
             currentTemp = currentEnergy.DataEnergy * simulatedAnnealingParams.InitialTemperatureTimesInitialEnegrgy;

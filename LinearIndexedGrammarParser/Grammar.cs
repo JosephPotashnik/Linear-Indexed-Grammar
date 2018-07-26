@@ -1,9 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace LinearIndexedGrammarParser
 {
+
+    public class SubtreeCountsWithNumberOfWords
+    {
+        public Dictionary<int ,WordsTreesCounts> WordsTreesDic = new Dictionary<int, WordsTreesCounts>();
+    }
+    public class WordsTreesCounts
+    {
+        public int WordsCount { get; set; }
+        public int TreesCount { get; set; }
+    }
     public class Grammar
     {
         public Grammar() { }
@@ -185,5 +196,158 @@ namespace LinearIndexedGrammarParser
 
             return newRule;
         }
+        public SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(DerivedCategory[] RHS, int treeDepth, HashSet<string> POS)
+        {
+            SubtreeCountsWithNumberOfWords res = new SubtreeCountsWithNumberOfWords();
+
+            if (RHS.Length == 2)
+            {
+                var catCounts1 = NumberOfParseTreesPerWords(RHS[0], treeDepth, POS);
+                var catCounts2 = NumberOfParseTreesPerWords(RHS[1], treeDepth, POS);
+
+                var kvpFromCat1 = catCounts1.WordsTreesDic.Values.ToList();
+                var kvpFromCat2 = catCounts2.WordsTreesDic.Values.ToList();
+
+                UpdateCounts(res, kvpFromCat1, kvpFromCat2);
+            }
+            else
+            {
+                var catCounts1 = NumberOfParseTreesPerWords(RHS[0], treeDepth, POS);
+                var kvpFromCat1 = catCounts1.WordsTreesDic.Values.ToList();
+                UpdateCounts(res, kvpFromCat1);
+
+            }
+
+            return res;
+        }
+
+        private static void UpdateCounts(SubtreeCountsWithNumberOfWords res, List<WordsTreesCounts> kvpFromCat1, List<WordsTreesCounts> kvpFromCat2)
+        {
+            foreach (var wordsTreesDepth1 in kvpFromCat1)
+            {
+                foreach (var wordsTreesDepth2 in kvpFromCat2)
+                {
+                    var dic = res.WordsTreesDic;
+
+                    var wc = wordsTreesDepth1.WordsCount + wordsTreesDepth2.WordsCount;
+                    var tc = wordsTreesDepth1.TreesCount * wordsTreesDepth2.TreesCount;
+
+                    if (!dic.ContainsKey(wc))
+                        dic[wc] = new WordsTreesCounts();
+
+                    dic[wc].WordsCount = wc;
+                    dic[wc].TreesCount += tc;
+
+                }
+            }
+        }
+
+        //private static List<KeyValuePair<int, WordsTreesCounts>> GetListOfTreesCountsWithDepths(SubtreeCountsWithNumberOfWords catCounts1)
+        //{
+        //    //var xy = catCounts1.WordTreesCounts.Select(x => x.WordsTreesDic.Values).ToArray();
+        //    var xy = catCounts1.WordsTreesDic.Values;
+        //    List<KeyValuePair<int, WordsTreesCounts>> listTreesCountWithDepths = new List<KeyValuePair<int, WordsTreesCounts>>();
+
+        //    for (int i = 0; i < xy.Length; i++)
+        //    {
+        //        foreach (var item in xy[i])
+        //            listTreesCountWithDepths.Add(new KeyValuePair<int, WordsTreesCounts>(i, item));
+        //    }
+
+        //    return listTreesCountWithDepths;
+        //}
+
+        public SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(DerivedCategory cat, int treeDepth, HashSet<string> POS)
+        {
+            var res = new SubtreeCountsWithNumberOfWords();
+            res.WordsTreesDic = new Dictionary<int, WordsTreesCounts>();
+
+            if (staticRules.ContainsKey(cat))
+            {
+
+                //POS can sometimes be a left-side nonterminal, for instance NP -> D N
+                if (POS.Contains(cat.ToString()))
+                    CountTerminal(res);
+
+                if (treeDepth > 0)
+                {
+                    var ruleList = staticRules[cat];
+                    foreach (var rule in ruleList)
+                    {
+                        var fromRHS = NumberOfParseTreesPerWords(rule.RightHandSide, treeDepth - 1, POS);
+                        var kvpFromCat1 = fromRHS.WordsTreesDic.Values.ToList();
+                        UpdateCounts(res, kvpFromCat1);
+                    }
+                }
+            }
+            else if (POS.Contains(cat.ToString()))
+                CountTerminal(res);
+
+            return res;
+
+        }
+
+        private static void CountTerminal(SubtreeCountsWithNumberOfWords res)
+        {
+            WordsTreesCounts c = new WordsTreesCounts();
+            c.TreesCount = 1;
+            c.WordsCount = 1;
+            res.WordsTreesDic[c.WordsCount] = c;
+        }
+
+        private static void UpdateCounts(SubtreeCountsWithNumberOfWords res, List<WordsTreesCounts> kvpFromCat1)
+        {
+            foreach (var wordsTreesDepth1 in kvpFromCat1)
+            {
+
+                var dic = res.WordsTreesDic;
+
+                var wc = wordsTreesDepth1.WordsCount;
+                var tc = wordsTreesDepth1.TreesCount;
+
+                if (!dic.ContainsKey(wc))
+                    dic[wc] = new WordsTreesCounts();
+
+                dic[wc].WordsCount = wc;
+                dic[wc].TreesCount += tc;
+
+            }
+        }
+
+        /*
+        public int NumberOfParseTrees(DerivedCategory[] RHS, int treeDepth, HashSet<string> POS)
+        {
+            int res = 1;
+            foreach (var cat in RHS)
+                res *= NumberOfParseTrees(cat, treeDepth, POS);
+
+            return res;
+        }
+
+        public int NumberOfParseTrees(DerivedCategory cat, int treeDepth, HashSet<string> POS)
+        {
+            if (staticRules.ContainsKey(cat))
+            {
+                int res = 0;
+                //POS can sometimes be a left-side nonterminal, for instance NP -> D N
+                if (POS.Contains(cat.ToString()))
+                    res += 1;
+
+                if (treeDepth > 0)
+                {
+                    var ruleList = staticRules[cat];
+                    foreach (var rule in ruleList)
+                        res += NumberOfParseTrees(rule.RightHandSide, treeDepth - 1, POS);
+                }
+
+                return res;
+
+            }
+            else if (POS.Contains(cat.ToString()))
+                return 1;
+            else
+                return 0;
+        }
+        */
     }
 }

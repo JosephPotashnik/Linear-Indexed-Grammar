@@ -35,13 +35,13 @@ namespace LinearIndexedGrammarLearner
         private readonly Learner learner;
         private PriorityQueue<double, GrammarWithProbability> population = new PriorityQueue<double, GrammarWithProbability>();
 
-        public GeneticAlgorithm(Learner l, Vocabulary voc)
+        public GeneticAlgorithm(Learner l)
         {
             parameters.NumberOfGenerations = 1000;
             parameters.PopulationSize = 100;
             learner = l;
 
-            Grammar initialGrammar = learner.CreateInitialGrammar(voc);
+            Grammar initialGrammar = learner.CreateInitialGrammar();
             var prob = learner.Energy(initialGrammar).Probability;
 
             for (int i = 0; i < parameters.PopulationSize; i++)
@@ -54,7 +54,7 @@ namespace LinearIndexedGrammarLearner
             ConcurrentQueue<KeyValuePair<double, Grammar>> descendants = new ConcurrentQueue<KeyValuePair<double, Grammar>>();
             while (currentGeneration++ < parameters.NumberOfGenerations)
             {
-                //if (currentGeneration % 50 == 0)
+                if (currentGeneration % 50 == 0)
                     Console.WriteLine($"generation {currentGeneration}");
                 try
                 {

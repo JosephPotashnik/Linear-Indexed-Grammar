@@ -25,16 +25,16 @@ namespace LinearIndexedGrammarLearner
         private Vocabulary voc;
         private int maxWordsInSentence;
 
-        public Learner(string[] sentences, int maxWordsInSentence)
+        public Learner(string[] sentences, int maxWordsInSentence, Vocabulary voc)
         {
+            this.voc = voc;
             this.maxWordsInSentence = maxWordsInSentence;
             sentencesWithCounts = sentences.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
         }
 
         ////We create the "promiscuous grammar" as initial grammar.
-        public Grammar CreateInitialGrammar(Vocabulary voc)
+        public Grammar CreateInitialGrammar()
         {
-            this.voc = voc;
             originalGrammar = new Grammar();
             var posInText = voc.POSWithPossibleWords.Keys;
             gp = new GrammarPermutations(posInText.ToArray());
@@ -80,6 +80,18 @@ namespace LinearIndexedGrammarLearner
             return -Math.Log(probability, 2);
         }
 
+        public int GetNumberOfParseTrees(Grammar hypothesis, int maxWordsInSentence)
+        {
+            //worst case: the tree is non-balanced (fully right or left branching)
+            var treeDepth = maxWordsInSentence - 1;
+
+            var posInText = voc.POSWithPossibleWords.Keys.ToHashSet();
+            var parseTreesCountPerWords = hypothesis.NumberOfParseTreesPerWords(new DerivedCategory(Grammar.StartRule), treeDepth, posInText);
+
+            var numberOfParseTreesBelowMaxWords = parseTreesCountPerWords.WordsTreesDic.Values.Where(x => x.WordsCount <= maxWordsInSentence).Select(x => x.TreesCount).Sum();
+
+            return numberOfParseTreesBelowMaxWords;
+        }
         public Energy Energy(Grammar currentHypothesis)
         {
             var energy = new Energy();
@@ -98,11 +110,11 @@ namespace LinearIndexedGrammarLearner
                 }
                 else
                 {
-                    var generator = new EarleyGenerator(currentHypothesis);
-                    var possibleTreesOfGrammar = generator.ParseSentence("", maxWordsInSentence);
+                    //var generator = new EarleyGenerator(currentHypothesis);
+                    //var possibleTreesOfGrammar = generator.ParseSentence("", maxWordsInSentence);
 
-                    var totalTreesCountofGrammar = possibleTreesOfGrammar.Count;
-
+                    //var totalTreesCountofGrammar = possibleTreesOfGrammar.Count;
+                    var totalTreesCountofGrammar = GetNumberOfParseTrees(currentHypothesis, maxWordsInSentence);
                     double probabilityOfInputGivenGrammar = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
                     energy.Probability = probabilityOfInputGivenGrammar;
 

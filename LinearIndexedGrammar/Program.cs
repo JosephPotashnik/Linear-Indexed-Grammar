@@ -65,7 +65,7 @@ namespace LinearIndexedGrammar
 
             var stopWatch = StartWatch();
 
-            var learner = new Learner(data, maxWordsInSentence);
+            var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
 
             var targetGrammarEnergy = learner.Energy(targetGrammar);
             var s = string.Format("Target Hypothesis:\r\n{0}\r\n with energy: {1}\r\n", targetGrammar, targetGrammarEnergy);
@@ -87,7 +87,7 @@ namespace LinearIndexedGrammar
             List<double> probs = new List<double>();
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
-                var GA = new GeneticAlgorithm(learner, dataVocabulary);
+                var GA = new GeneticAlgorithm(learner);
                 (var prob, var bestHypothesis) = GA.Run();
                 probs.Add(prob);
             }
