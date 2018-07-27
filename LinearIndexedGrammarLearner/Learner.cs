@@ -82,8 +82,16 @@ namespace LinearIndexedGrammarLearner
 
         public int GetNumberOfParseTrees(Grammar hypothesis, int maxWordsInSentence)
         {
-            //worst case: the tree is non-balanced (fully right or left branching)
+            //best case: tree depth = log (maxWordsInSentence) for a fully balanced tree
+            //if the tree is extremely non-balanced (fully right or left branching)
             var treeDepth = maxWordsInSentence - 1;
+
+            //what happens when there are abstract non-terminals that do not correspond to input nodes?
+            //i.e, say I (auxiliary syntactic poition, not always phonteically overt)
+            //or C (complementizer syntactic position ,not always phonetically overt)
+            //TODO: consider increasing slightly the maximum tree depth to accomodate for such abstract categories?
+
+
             var posInText = voc.POSWithPossibleWords.Keys.ToHashSet();
             var parseTreesCountPerWords = hypothesis.NumberOfParseTreesPerWords(new DerivedCategory(Grammar.StartRule), treeDepth, posInText, 
                 new SubTreeCountsCache(hypothesis, treeDepth));
@@ -98,6 +106,10 @@ namespace LinearIndexedGrammarLearner
             var allParses = ParseAllSentences(currentHypothesis);
             if (allParses != null)
             {
+                //NOT SURE that the statement below is correct.
+                //can a same tree represent two different sentences?
+                //if not - ignore the TODO below. think.
+
                 //TODO: same tree could be produced for different sentences by chance.
                 //here you will count the same parse tree several times instead of once.
                 // fix - count them only once.
@@ -110,17 +122,24 @@ namespace LinearIndexedGrammarLearner
                 }
                 else
                 {
-                    //var generator = new EarleyGenerator(currentHypothesis);
-                    //var possibleTreesOfGrammar = generator.ParseSentence("", maxWordsInSentence);
-
-                    //var totalTreesCountofGrammar = possibleTreesOfGrammar.Count;
                     var totalTreesCountofGrammar = GetNumberOfParseTrees(currentHypothesis, maxWordsInSentence);
                     double probabilityOfInputGivenGrammar = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
                     energy.Probability = probabilityOfInputGivenGrammar;
 
-                    if (probabilityOfInputGivenGrammar < 0 || probabilityOfInputGivenGrammar > 1)
+                    if (probabilityOfInputGivenGrammar > 1)
                     {
-                        throw new Exception("probability is wrong!");
+                        return null;
+                        //the case where probabilityOfInputGivenGrammar > 1 arises when
+                        //totalTreesCountofData > totalTreesCountofGrammar, which can happen because totalTreesCountofGrammar
+                        //is computed only up to a certain depth of the tree.
+                        //so it's possible that the input data is parsed in a tree whose depth exceeds the depth we have allowed above.
+                        
+                        //assumption: we will reject grammars with data parsed too deep.
+                        //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
+                        //right now: it is depth = maxWords -1. change?
+
+
+                        //throw new Exception("probability is wrong!");
                     }
 
 

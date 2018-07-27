@@ -93,9 +93,15 @@ namespace LinearIndexedGrammar
             }
             using (var sw = File.AppendText("SessionReport.txt"))
             {
+                int numTimesAchieveProb1 = probs.Where(x => x == 1).Count();
                 double averageProb = probs.Average();
-                sw.WriteLine($"Average probability is: {averageProb}");
-                Console.WriteLine($"Average probability is: {averageProb}");
+                string s1 = $"Average probability is: {averageProb}";
+                string s2 = $"Achieved Probability=1 in {numTimesAchieveProb1} times out of {programParams.NumberOfRuns} runs";
+                sw.WriteLine(s1);
+                sw.WriteLine(s2);
+                Console.WriteLine(s1);
+                Console.WriteLine(s2);
+
             }
             StopWatch(stopWatch);
         }

@@ -58,13 +58,20 @@ namespace LinearIndexedGrammarLearner
                     Console.WriteLine($"generation {currentGeneration}");
                 try
                 {
-                    Parallel.ForEach(population.Values, (individual) =>
+                    //Parallel.ForEach(population.Values, (individual) =>
+                    //{
+                    //    var mutatedIndividual = Mutate(individual);
+                    //    if (mutatedIndividual.Grammar != null)
+                    //        descendants.Enqueue(new KeyValuePair<double, Grammar>(mutatedIndividual.Probability, mutatedIndividual.Grammar));
+                    //}
+                    //);
+
+                    foreach(var individual in population.Values)
                     {
                         var mutatedIndividual = Mutate(individual);
                         if (mutatedIndividual.Grammar != null)
                             descendants.Enqueue(new KeyValuePair<double, Grammar>(mutatedIndividual.Probability, mutatedIndividual.Grammar));
                     }
-                    );
 
                     InsertDescendantsIntoPopulation(descendants);
                 }
@@ -106,16 +113,13 @@ namespace LinearIndexedGrammarLearner
                 }
             }
 
-            //foreach (var item in bestHypothesis.staticRulesGeneratedForCategory)
-            //{
-            //    if (item.ToString()[0] == 'X')
-            //    {
-            //    }
-
-            //}
+            //rename variables names from serial generated names such as X271618 to X1, X2 etc.
+            bestHypothesis.RenameVariables();
 
             return (bestProbability, bestHypothesis);
         }
+
+        
 
         private void InsertDescendantsIntoPopulation(ConcurrentQueue<KeyValuePair<double, Grammar>> descendants)
         {

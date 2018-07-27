@@ -356,5 +356,26 @@ namespace LinearIndexedGrammarParser
 
             }
         }
+
+        public void RenameVariables()
+        {
+            var xs = staticRulesGeneratedForCategory.Where(x => x.ToString()[0] == 'X').Select(x => x).ToList();
+            var replacedx = new List<DerivedCategory>();
+            for (int i = 0; i < xs.Count; i++)
+                replacedx.Add(new DerivedCategory($"X{i + 1}"));
+            var replaceDic = xs.Zip(replacedx, (x, y) => new { key = x, value = y }).ToDictionary(x => x.key, x => x.value);
+
+            foreach (var rule in Rules)
+            {
+                if (replaceDic.ContainsKey(rule.LeftHandSide))
+                    rule.LeftHandSide = replaceDic[rule.LeftHandSide];
+
+                for (int i = 0; i < rule.RightHandSide.Length; i++)
+                {
+                    if (replaceDic.ContainsKey(rule.RightHandSide[i]))
+                        rule.RightHandSide[i] = replaceDic[rule.RightHandSide[i]];
+                }
+            }
+        }
     }
 }
