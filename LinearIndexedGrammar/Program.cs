@@ -13,7 +13,10 @@ namespace LinearIndexedGrammar
     public class ProgramParams
     {
         [JsonProperty]
-        public bool DataWithMovement { get; set; }
+        public int PopulationSize { get; set; }
+
+        [JsonProperty]
+        public int NumberOfGenerations { get; set; }
 
         [JsonProperty]
         public int NumberOfRuns { get; set; }
@@ -59,17 +62,21 @@ namespace LinearIndexedGrammar
             {
                 sw.WriteLine("-------------------");
                 sw.WriteLine("Session {0} ", DateTime.Now.ToString("MM/dd/yyyy h:mm tt"));
-                sw.WriteLine("runs: {0}, movement: {1}", programParams.NumberOfRuns, programParams.DataWithMovement);
+                sw.WriteLine("runs: {0}, population size: {1}, number of generations: {2}", programParams.NumberOfRuns, programParams.PopulationSize, programParams.NumberOfGenerations);
             }
 
 
             var stopWatch = StartWatch();
 
             var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
-
-            var targetGrammarEnergy = learner.Energy(targetGrammar);
-            var s = string.Format("Target Hypothesis:\r\n{0}\r\n with energy: {1}\r\n", targetGrammar, targetGrammarEnergy);
+            var targetProb = learner.Probability(targetGrammar);
+            var s = string.Format("Target Hypothesis:\r\n{0}\r\n. Verifying probability of target grammar (should be 1): {1}\r\n", targetGrammar, targetProb);
             Console.WriteLine(s);
+            if (targetProb < 1)
+            {
+                Console.WriteLine("probablity incorrect. exit!");
+                return;
+            }
 
             //(var n1, var targetGrammar1) = GrammarFileReader.GenerateSentenceAccordingToGrammar("SolutionCFG.txt", maxWordsInSentence);
             //(var data1, var dataVocabulary1) = GrammarFileReader.GetSentencesOfGenerator(n1, universalVocabulary);
@@ -87,7 +94,7 @@ namespace LinearIndexedGrammar
             List<double> probs = new List<double>();
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
-                var GA = new GeneticAlgorithm(learner);
+                var GA = new GeneticAlgorithm(learner, programParams.PopulationSize, programParams.NumberOfGenerations);
                 (var prob, var bestHypothesis) = GA.Run();
                 probs.Add(prob);
             }

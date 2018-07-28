@@ -97,12 +97,19 @@ namespace LinearIndexedGrammarLearner
                 //create a new Rule, whose LHS is the new category. 
                 //the right hand side of the new rule is chosen randomly
                 //from existing LHS symbols of the grammar, or from POS.
-                var rightHandSide = new DerivedCategory[2];
-                for (var i = 0; i < 2; i++)
+
+                //var rand = ThreadSafeRandom.ThisThreadsRandom;
+                //int p = rand.Next(100);
+                //int len = p < 10 ? 1 : 2;
+                int len = 2;
+
+                var rightHandSide = new DerivedCategory[len];
+                for (var i = 0; i < len; i++)
                 {
                     DerivedCategory randomRightHandSideCategory = GetRandomRightHandSideCategory(startCategory, rightHandSidePOOL);
                     rightHandSide[i] = randomRightHandSideCategory;
                 }
+
                 var newRule = new Rule(newCategory, rightHandSide);
 
                 if (grammar.ContainsSameRHSRule(newRule)) continue;
@@ -132,10 +139,11 @@ namespace LinearIndexedGrammarLearner
                         lhs = lhsCategories[rand.Next(lhsCategories.Length)];
 
 
-                //choose random rule whose LHS we will replace by lhs chosen above.
+                //choose random rule one of its RHS nonterminals we will replace by lhs chosen above.
                 Rule randomRule = GetRandomRule(grammar);
 
-                //choose for now only binary rules.
+                //spread LHS only to binary rules. Spreading the LHS to an unary rule
+                //is equivalent to variable renaming.
                 if (randomRule.RightHandSide.Length < 2)
                     continue;
 

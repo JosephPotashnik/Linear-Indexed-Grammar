@@ -83,15 +83,16 @@ namespace LinearIndexedGrammarLearner
         public int GetNumberOfParseTrees(Grammar hypothesis, int maxWordsInSentence)
         {
             //best case: tree depth = log (maxWordsInSentence) for a fully balanced tree
-            //if the tree is extremely non-balanced (fully right or left branching)
-            var treeDepth = maxWordsInSentence - 1;
-
+            //if the tree is totally binary but extremely non-balanced (fully right or left branching), tree depth = words(leaves) -1.
+            
             //what happens when there are abstract non-terminals that do not correspond to input nodes?
-            //i.e, say I (auxiliary syntactic poition, not always phonteically overt)
-            //or C (complementizer syntactic position ,not always phonetically overt)
-            //TODO: consider increasing slightly the maximum tree depth to accomodate for such abstract categories?
-
-
+            //i.e, say, category I (auxiliary syntactic poition, not always phonteically overt)
+            //or category C (complementizer syntactic position ,not always phonetically overt)
+            
+            //working assumption:
+            var treeDepth = maxWordsInSentence + 2;
+            //TODO: find a safe upper bound to tree depth, which will be a function of
+            //max words in sentence, possibly also a function of the number of different POS.
             var posInText = voc.POSWithPossibleWords.Keys.ToHashSet();
             var parseTreesCountPerWords = hypothesis.NumberOfParseTreesPerWords(new DerivedCategory(Grammar.StartRule), treeDepth, posInText, 
                 new SubTreeCountsCache(hypothesis, treeDepth));
@@ -100,9 +101,10 @@ namespace LinearIndexedGrammarLearner
 
             return numberOfParseTreesBelowMaxWords;
         }
-        public Energy Energy(Grammar currentHypothesis)
+
+        public double Probability(Grammar currentHypothesis)
         {
-            var energy = new Energy();
+            double prob = 0;
             var allParses = ParseAllSentences(currentHypothesis);
             if (allParses != null)
             {
@@ -115,20 +117,14 @@ namespace LinearIndexedGrammarLearner
                 // fix - count them only once.
                 var totalTreesCountofData = allParses.Select(x => x.Trees.Count).Sum();
 
-                if (totalTreesCountofData == 0)
-                {
-                    energy.DataEnergy = int.MaxValue;
-                    energy.Probability = 0.0;
-                }
-                else
+                if (totalTreesCountofData != 0)
                 {
                     var totalTreesCountofGrammar = GetNumberOfParseTrees(currentHypothesis, maxWordsInSentence);
-                    double probabilityOfInputGivenGrammar = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
-                    energy.Probability = probabilityOfInputGivenGrammar;
-
-                    if (probabilityOfInputGivenGrammar > 1)
+                    prob = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
+                
+                    if (prob > 1)
                     {
-                        return null;
+                        return 0;
                         //the case where probabilityOfInputGivenGrammar > 1 arises when
                         //totalTreesCountofData > totalTreesCountofGrammar, which can happen because totalTreesCountofGrammar
                         //is computed only up to a certain depth of the tree.
@@ -136,22 +132,14 @@ namespace LinearIndexedGrammarLearner
                         
                         //assumption: we will reject grammars with data parsed too deep.
                         //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
-                        //right now: it is depth = maxWords -1. change?
+                        //right now: it is depth = maxWords+2. change?
 
 
                         //throw new Exception("probability is wrong!");
                     }
-
-
-                    energy.DataEnergy = (int)(NegativeLogProbability(probabilityOfInputGivenGrammar) * 100);
-                    if (energy.DataEnergy < 0)
-                    {
-                        throw new Exception("energy is wrong!");
-                    }
                 }
-                return energy;
             }
-            return null;
+            return prob;
         }
         public Dictionary<int, int> CollectUsages(Grammar currentHypothesis)
         {
@@ -201,7 +189,7 @@ namespace LinearIndexedGrammarLearner
 
         internal GrammarWithProbability ComputeProbabilityForGrammar(GrammarWithProbability originalGrammar, Grammar mutatedGrammar)
         {
-            double prob = 0.0;
+            double prob = 0;
             if (mutatedGrammar != null)
             {
                 //assuming: insertion of rule adds as of yet unused rule
@@ -209,11 +197,8 @@ namespace LinearIndexedGrammarLearner
                 if (mutatedGrammar.RuleCount > originalGrammar.Grammar.RuleCount )
                     return new GrammarWithProbability(mutatedGrammar, originalGrammar.Probability);
 
-                Energy newEnergy = null;
-                newEnergy = Energy(mutatedGrammar);
+                prob = Probability(mutatedGrammar);
 
-                if (newEnergy != null)
-                    prob = newEnergy.Probability;
             }
             return new GrammarWithProbability(mutatedGrammar, prob);
         }

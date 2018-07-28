@@ -31,20 +31,21 @@ namespace LinearIndexedGrammarLearner
     }
     public class GeneticAlgorithm
     {
-        private GeneticAlgorithmParameters parameters = new GeneticAlgorithmParameters();
+        private readonly int populationSize;
+        private readonly int numberOfGenerations;
         private readonly Learner learner;
         private PriorityQueue<double, GrammarWithProbability> population = new PriorityQueue<double, GrammarWithProbability>();
 
-        public GeneticAlgorithm(Learner l)
+        public GeneticAlgorithm(Learner l, int populationSize, int numberOfGenerations)
         {
-            parameters.NumberOfGenerations = 1000;
-            parameters.PopulationSize = 200;
+            this.numberOfGenerations = numberOfGenerations;
+            this.populationSize = populationSize;
             learner = l;
 
             Grammar initialGrammar = learner.CreateInitialGrammar();
-            var prob = learner.Energy(initialGrammar).Probability;
+            var prob = learner.Probability(initialGrammar);
 
-            for (int i = 0; i < parameters.PopulationSize; i++)
+            for (int i = 0; i < populationSize; i++)
                 population.Enqueue(prob, new GrammarWithProbability(initialGrammar, prob));
         }
 
@@ -52,7 +53,7 @@ namespace LinearIndexedGrammarLearner
         {
             int currentGeneration = 0;
             ConcurrentQueue<KeyValuePair<double, Grammar>> descendants = new ConcurrentQueue<KeyValuePair<double, Grammar>>();
-            while (currentGeneration++ < parameters.NumberOfGenerations)
+            while (currentGeneration++ < numberOfGenerations)
             {
                 if (currentGeneration % 200 == 0)
                     Console.WriteLine($"generation {currentGeneration}");

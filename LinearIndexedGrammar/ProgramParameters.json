@@ -1,4 +1,5 @@
 ﻿{
-  "DataWithMovement": false,
-  "NumberOfRuns": 5
+  "PopulationSize": 200,
+  "NumberOfGenerations": 1000,
+  "NumberOfRuns": 20
 }
