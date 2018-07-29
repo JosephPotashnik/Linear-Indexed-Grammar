@@ -20,6 +20,9 @@ namespace LinearIndexedGrammar
 
         [JsonProperty]
         public int NumberOfRuns { get; set; }
+
+        [JsonProperty]
+        public string GrammarFileName { get; set; }
     }
 
     class Program
@@ -55,7 +58,7 @@ namespace LinearIndexedGrammar
             ProgramParams programParams = ReadProgramParamsFromFile();
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
 
-            (var n, var targetGrammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("SimpleCFG.txt", maxWordsInSentence);
+            (var n, var targetGrammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar(programParams.GrammarFileName, maxWordsInSentence);
             (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(n, universalVocabulary);
 
             using (var sw = File.AppendText("SessionReport.txt"))

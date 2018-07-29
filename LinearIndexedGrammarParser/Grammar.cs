@@ -86,7 +86,9 @@ namespace LinearIndexedGrammarParser
 
         public bool ContainsSameRHSRule(Rule newRule)
         {
+            var newStartVariable = new DerivedCategory(StartRule + "TAG");
             bool bFoundIdentical = false;
+
             //assuming compositionality.
             // if found rule with the same right hand side, do not re-add it.
             //the nonterminal of the left hand side does not matter.
@@ -106,6 +108,16 @@ namespace LinearIndexedGrammarParser
             }
 
             return bFoundIdentical;
+
+            //if (bFoundIdentical) return true;
+
+            //int countStartRHS = 0;
+            //foreach (var RHS in newRule.RightHandSide)
+            //{
+            //    if (RHS.Equals(newStartVariable))
+            //        countStartRHS++;
+            //}
+            //return (countStartRHS == 2);
         }
 
         //takes care properly of staticRules, staticRulesGeneratedForCategory fields of Grammar class.
@@ -356,6 +368,17 @@ namespace LinearIndexedGrammarParser
 
             }
         }
+        public void RenameStartVariable()
+        {
+            var startVariable = new DerivedCategory(StartRule);
+            var newStartVariable = new DerivedCategory(StartRule + "TAG");
+            var replaceDic = new Dictionary<DerivedCategory, DerivedCategory>();
+            replaceDic[startVariable] = newStartVariable;
+            ReplaceVariables(replaceDic);
+            var newStartRule = new Rule(startVariable, new[]  { newStartVariable });
+            AddGrammarRule(newStartRule);
+        }
+
 
         public void RenameVariables()
         {
@@ -365,17 +388,71 @@ namespace LinearIndexedGrammarParser
                 replacedx.Add(new DerivedCategory($"X{i + 1}"));
             var replaceDic = xs.Zip(replacedx, (x, y) => new { key = x, value = y }).ToDictionary(x => x.key, x => x.value);
 
+            var originalStartVariable = new DerivedCategory(StartRule);
+            var startVariable = new DerivedCategory(StartRule + "TAG");
+            replaceDic[startVariable] = originalStartVariable;
+            ReplaceVariables(replaceDic);
+
+            //DismissStartToStartTagRule();
+        }
+
+        private void DismissStartToStartTagRule()
+        {
+            //The initial promiscuous grammar that is the departure point for leanring
+            //contains a rule Start -> Start' (we have replaced each occurrence of start on the right
+            //hand side of rules with a new symbol start', and added start -> start')
+            //discard it now.
+            DerivedCategory originalStartVariable = new DerivedCategory(StartRule);
+            var startRulesLHS = staticRules[originalStartVariable];
+            bool foundStartToStartTagRule = false;
+            Rule dismissedStartRule = null;
+
+            foreach (var rule in startRulesLHS)
+            {
+                if (rule.RightHandSide[0].Equals(originalStartVariable))
+                {
+                    foundStartToStartTagRule = true;
+                    dismissedStartRule = rule;
+                    break;
+                }
+            }
+            if (foundStartToStartTagRule)
+                DeleteGrammarRule(dismissedStartRule);
+        }
+
+
+        private void ReplaceVariables(Dictionary<DerivedCategory, DerivedCategory> replaceDic)
+        {
+            List<Rule> newRules = new List<Rule>();
+            List<Rule> deletedRules = new List<Rule>();
             foreach (var rule in Rules)
             {
+                var newRule = new Rule(rule);
+                bool created = false;
                 if (replaceDic.ContainsKey(rule.LeftHandSide))
-                    rule.LeftHandSide = replaceDic[rule.LeftHandSide];
-
+                {
+                    newRule.LeftHandSide = replaceDic[rule.LeftHandSide];
+                    created = true;
+                }
                 for (int i = 0; i < rule.RightHandSide.Length; i++)
                 {
                     if (replaceDic.ContainsKey(rule.RightHandSide[i]))
-                        rule.RightHandSide[i] = replaceDic[rule.RightHandSide[i]];
+                        newRule.RightHandSide[i] = replaceDic[rule.RightHandSide[i]];
+                    created = true;
+                }
+
+                if (created)
+                {
+                    deletedRules.Add(rule);
+                    newRules.Add(newRule);
                 }
             }
+
+            foreach (var rule in deletedRules)
+                DeleteGrammarRule(rule);
+
+            foreach (var rule in newRules)
+                AddGrammarRule(rule);
         }
     }
 }

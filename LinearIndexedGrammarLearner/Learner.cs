@@ -46,6 +46,8 @@ namespace LinearIndexedGrammarLearner
                 originalGrammar.AddGrammarRule(new Rule(Grammar.StartRule, new[] { pos }));
             }
 
+
+            originalGrammar.RenameStartVariable();
             return originalGrammar;
         }
 
@@ -75,10 +77,6 @@ namespace LinearIndexedGrammarLearner
             }
         }
 
-        public static double NegativeLogProbability(double probability)
-        {
-            return -Math.Log(probability, 2);
-        }
 
         public int GetNumberOfParseTrees(Grammar hypothesis, int maxWordsInSentence)
         {
@@ -90,7 +88,7 @@ namespace LinearIndexedGrammarLearner
             //or category C (complementizer syntactic position ,not always phonetically overt)
             
             //working assumption:
-            var treeDepth = maxWordsInSentence + 2;
+            var treeDepth = maxWordsInSentence + 3;
             //TODO: find a safe upper bound to tree depth, which will be a function of
             //max words in sentence, possibly also a function of the number of different POS.
             var posInText = voc.POSWithPossibleWords.Keys.ToHashSet();
