@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using LinearIndexedGrammarParser;
+using System.Threading;
+using System.IO;
 
 namespace LinearIndexedGrammarLearner
 {
@@ -57,7 +59,9 @@ namespace LinearIndexedGrammarLearner
 
             try
             {
-                Parallel.ForEach(sentencesWithCounts, (sentenceItem, state, i) =>
+                var timeout = 500; // 0.5 seconds
+                var cts = new CancellationTokenSource(timeout);
+                Parallel.ForEach(sentencesWithCounts, new ParallelOptions { CancellationToken = cts.Token, MaxDegreeOfParallelism = Environment.ProcessorCount }, (sentenceItem, loopState, i) =>
                 {
                     var parser = new EarleyParser(currentHypothesis, this.voc);
                     var n = parser.ParseSentence(sentenceItem.Key);
@@ -68,8 +72,23 @@ namespace LinearIndexedGrammarLearner
                         Count = sentenceItem.Value
                     };
                 });
-
                 return allParses;
+            }
+            catch (OperationCanceledException e)
+            {
+                //parse tree too long to parse
+                //the grammar is too recursive,
+                //decision - discard it and continue.
+
+                //string s = "parsing took too long (0.5 second), for the grammar:\r\n" + currentHypothesis.ToString();
+                //using (var sw = File.AppendText("SessionReport.txt"))
+                //{
+                //    sw.WriteLine(s);
+                //}
+
+                //Console.WriteLine(s);
+                return null; //parsing failed.
+
             }
             catch (Exception)
             {
@@ -78,7 +97,7 @@ namespace LinearIndexedGrammarLearner
         }
 
 
-        public int GetNumberOfParseTrees(Grammar hypothesis, int maxWordsInSentence)
+        public int  GetNumberOfParseTrees(Grammar hypothesis, int maxWordsInSentence)
         {
             //best case: tree depth = log (maxWordsInSentence) for a fully balanced tree
             //if the tree is totally binary but extremely non-balanced (fully right or left branching), tree depth = words(leaves) -1.
@@ -92,9 +111,24 @@ namespace LinearIndexedGrammarLearner
             //TODO: find a safe upper bound to tree depth, which will be a function of
             //max words in sentence, possibly also a function of the number of different POS.
             var posInText = voc.POSWithPossibleWords.Keys.ToHashSet();
-            var parseTreesCountPerWords = hypothesis.NumberOfParseTreesPerWords(new DerivedCategory(Grammar.StartRule), treeDepth, posInText, 
-                new SubTreeCountsCache(hypothesis, treeDepth));
+            Task< SubtreeCountsWithNumberOfWords> t = Task.Run( () =>
+                
+                
+                hypothesis.NumberOfParseTreesPerWords(new DerivedCategory(Grammar.StartRule), treeDepth, posInText, 
+                new SubTreeCountsCache(hypothesis, treeDepth)));
 
+            if (!t.Wait(500))
+            {
+                string s = "computing all parse trees took too long (0.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
+                using (var sw = File.AppendText("SessionReport.txt"))
+                {
+                    sw.WriteLine(s);
+                }
+
+                Console.WriteLine(s);
+                throw new Exception();
+            }
+            var parseTreesCountPerWords = t.Result;
             var numberOfParseTreesBelowMaxWords = parseTreesCountPerWords.WordsTreesDic.Values.Where(x => x.WordsCount <= maxWordsInSentence).Select(x => x.TreesCount).Sum();
 
             return numberOfParseTreesBelowMaxWords;

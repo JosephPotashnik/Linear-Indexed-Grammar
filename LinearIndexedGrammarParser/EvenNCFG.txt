@@ -6,11 +6,16 @@
 # comment lines begin with "#"
 # the start symbol is "START"
 #
-START -> T D
-START -> U N
+START -> D START
+START -> N T
 START -> D
-START -> N
-T -> D START
-U -> N START
-T -> D
-U -> N
+T -> D T
+T -> N START
+T -> N
+# A weakly Equivalent Grammar below, but many strings are ambiguous (have multiple parses).
+# I.e,  the grammar below has many more parse trees than the grammar above (but same language).
+#X1 -> N
+#X1 -> X1 D
+#START -> D
+#START -> START START
+#START -> X1 X1

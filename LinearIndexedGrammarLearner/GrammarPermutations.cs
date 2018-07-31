@@ -64,10 +64,39 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
+        public Grammar SpreadPOSToRHS(Grammar grammar)
+        {
+            for (var i = 0; i < NumberOfRetries; i++)
+            {
+                var rand = ThreadSafeRandom.ThisThreadsRandom;
+                DerivedCategory posRHS = PartsOfSpeechCategories[rand.Next(PartsOfSpeechCategories.Length)];
+
+                //choose random rule one of its RHS nonterminals we will replace by the pos chosen above.
+                Rule randomRule = GetRandomRule(grammar);
+                int randomChildIndex = rand.Next(randomRule.RightHandSide.Length);
+
+                var originalRHSSymbol = randomRule.RightHandSide[randomChildIndex];
+
+                if (originalRHSSymbol.Equals(posRHS)) continue;
+
+                randomRule.RightHandSide[randomChildIndex] = new DerivedCategory(posRHS);
+
+                //var replaceRule = new Rule(randomRule);
+                //replaceRule.RightHandSide[randomChildIndex] = new DerivedCategory(posRHS);
+                //if (grammar.ContainsSameRHSRule(replaceRule)) continue;
+
+                //grammar.DeleteGrammarRule(randomRule);
+                //grammar.AddGrammarRule(replaceRule);
+
+                return grammar;
+            }
+            return null;
+        }
+
         //generate a new rule from random existing productions.
         public Grammar InsertRule(Grammar grammar)
         {
-            var startCategory = new DerivedCategory(Grammar.StartRule + "TAG");
+            var startCategory = new DerivedCategory(Grammar.StartRule);
             //we cannot insert a new rule if the number of left hand sided symbols
             //exceeds a certain amount, determined by the number of parts of speech.
 
@@ -137,6 +166,7 @@ namespace LinearIndexedGrammarLearner
                 DerivedCategory lhs = new DerivedCategory(startCategory);
                 var rand = ThreadSafeRandom.ThisThreadsRandom;
 
+                //Do not choose START category to be spread to a LHS
                 while (lhs.Equals(startCategory))
                         lhs = lhsCategories[rand.Next(lhsCategories.Length)];
 
@@ -181,6 +211,7 @@ namespace LinearIndexedGrammarLearner
                 DerivedCategory lhs = new DerivedCategory(startCategory);
                 var rand = ThreadSafeRandom.ThisThreadsRandom;
 
+                //Do not choose START category to be spread to a LHS
                 while (lhs.Equals(startCategory))
                         lhs = lhsCategories[rand.Next(lhsCategories.Length)];
 
@@ -212,7 +243,11 @@ namespace LinearIndexedGrammarLearner
         {
             DerivedCategory randomRightHandSideCategory = startCategory;
             var rand = ThreadSafeRandom.ThisThreadsRandom;
-            randomRightHandSideCategory = rightHandSidePOOL[rand.Next(rightHandSidePOOL.Length)];
+
+            //do not choose START as a right hand side.
+            while (randomRightHandSideCategory.Equals(startCategory))
+                randomRightHandSideCategory = rightHandSidePOOL[rand.Next(rightHandSidePOOL.Length)];
+
             return randomRightHandSideCategory;
         }
 

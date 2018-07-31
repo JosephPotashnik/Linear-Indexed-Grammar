@@ -9,6 +9,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="EvenNCFG.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="PalindromeCFG.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

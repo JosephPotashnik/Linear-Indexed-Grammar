@@ -14,5 +14,9 @@
   {
     "Mutation": "SpreadRuleLHSToLHS",
     "MutationWeight": 10
+  },
+  {
+    "Mutation": "SpreadPOSToRHS",
+    "MutationWeight": 0
   }
 ]

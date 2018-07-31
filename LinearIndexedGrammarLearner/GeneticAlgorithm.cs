@@ -1,13 +1,11 @@
 ﻿using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace LinearIndexedGrammarLearner
 {
@@ -31,6 +29,23 @@ namespace LinearIndexedGrammarLearner
     }
     public class GeneticAlgorithm
     {
+        public static void StopWatch(Stopwatch stopWatch)
+        {
+            stopWatch.Stop();
+            var ts = stopWatch.Elapsed;
+            var elapsedTime = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}.{ts.Milliseconds / 10:00}";
+            var s = "Overall session RunTime " + elapsedTime;
+            Console.WriteLine(s);
+        }
+
+        public static Stopwatch StartWatch()
+        {
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            return stopWatch;
+        }
+
+
         private readonly int populationSize;
         private readonly int numberOfGenerations;
         private readonly Learner learner;
@@ -52,22 +67,14 @@ namespace LinearIndexedGrammarLearner
         public (double prob, Grammar g) Run()
         {
             int currentGeneration = 0;
-            ConcurrentQueue<KeyValuePair<double, Grammar>> descendants = new ConcurrentQueue<KeyValuePair<double, Grammar>>();
+            Queue<KeyValuePair<double, Grammar>> descendants = new Queue<KeyValuePair<double, Grammar>>();
             while (currentGeneration++ < numberOfGenerations)
             {
                 if (currentGeneration % 200 == 0)
                     Console.WriteLine($"generation {currentGeneration}");
                 try
                 {
-                    //Parallel.ForEach(population.Values, (individual) =>
-                    //{
-                    //    var mutatedIndividual = Mutate(individual);
-                    //    if (mutatedIndividual.Grammar != null)
-                    //        descendants.Enqueue(new KeyValuePair<double, Grammar>(mutatedIndividual.Probability, mutatedIndividual.Grammar));
-                    //}
-                    //);
-
-                    foreach(var individual in population.Values)
+                    foreach (var individual in population.Values)
                     {
                         var mutatedIndividual = Mutate(individual);
                         if (mutatedIndividual.Grammar != null)
@@ -122,7 +129,7 @@ namespace LinearIndexedGrammarLearner
 
         
 
-        private void InsertDescendantsIntoPopulation(ConcurrentQueue<KeyValuePair<double, Grammar>> descendants)
+        private void InsertDescendantsIntoPopulation(Queue<KeyValuePair<double, Grammar>> descendants)
         {
             while (descendants.Any())
             {
@@ -145,7 +152,8 @@ namespace LinearIndexedGrammarLearner
         {
             var mutatedIndividual = learner.GetNeighbor(individual.Grammar);
             return learner.ComputeProbabilityForGrammar(individual, mutatedIndividual);
+            
         }
-        
+
     }
 }
