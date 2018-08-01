@@ -79,7 +79,7 @@ namespace LinearIndexedGrammarLearner
 
                 if (originalRHSSymbol.Equals(posRHS)) continue;
 
-                randomRule.RightHandSide[randomChildIndex] = new DerivedCategory(posRHS);
+               randomRule.RightHandSide[randomChildIndex] = new DerivedCategory(posRHS);
 
                 //var replaceRule = new Rule(randomRule);
                 //replaceRule.RightHandSide[randomChildIndex] = new DerivedCategory(posRHS);

@@ -5,7 +5,7 @@
   },
   {
     "Mutation": "DeleteRule",
-    "MutationWeight": 10
+    "MutationWeight": 15
   },
   {
     "Mutation": "SpreadRuleLHSToRHS",
@@ -17,6 +17,6 @@
   },
   {
     "Mutation": "SpreadPOSToRHS",
-    "MutationWeight": 0
+    "MutationWeight": 5
   }
 ]
