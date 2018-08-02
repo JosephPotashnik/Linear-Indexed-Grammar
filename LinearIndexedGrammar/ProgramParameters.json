@@ -2,5 +2,5 @@
   "PopulationSize": 300,
   "NumberOfGenerations": 1000,
   "NumberOfRuns": 20,
-  "GrammarFileName":  "SimpleCFG.txt"
+  "GrammarFileName":  "PalindromeCFG.txt"
 }
