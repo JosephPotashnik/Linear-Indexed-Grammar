@@ -97,35 +97,36 @@ namespace LinearIndexedGrammarLearner
         }
 
 
-        public int  GetNumberOfParseTrees(Grammar hypothesis, int maxWordsInSentence)
+        public int GetNumberOfParseTrees(Grammar hypothesis, int maxWordsInSentence)
         {
             //best case: tree depth = log (maxWordsInSentence) for a fully balanced tree
             //if the tree is totally binary but extremely non-balanced (fully right or left branching), tree depth = words(leaves) -1.
-            
+
             //what happens when there are abstract non-terminals that do not correspond to input nodes?
             //i.e, say, category I (auxiliary syntactic poition, not always phonteically overt)
             //or category C (complementizer syntactic position ,not always phonetically overt)
-            
+
             //working assumption:
             var treeDepth = maxWordsInSentence + 3;
             //TODO: find a safe upper bound to tree depth, which will be a function of
             //max words in sentence, possibly also a function of the number of different POS.
             var posInText = voc.POSWithPossibleWords.Keys.ToHashSet();
-            Task< SubtreeCountsWithNumberOfWords> t = Task.Run( () =>
-                
-                
-                hypothesis.NumberOfParseTreesPerWords(new DerivedCategory(Grammar.StartRule), treeDepth, posInText, 
-                new SubTreeCountsCache(hypothesis, treeDepth)));
+            Task<SubtreeCountsWithNumberOfWords> t = Task.Run(() =>
+            {
+                SubTreeCountsCache cache = new SubTreeCountsCache(hypothesis, treeDepth);
+                GrammarTreeCountsCalculator treeCalculator = new GrammarTreeCountsCalculator(hypothesis, posInText, cache);
+                return treeCalculator.NumberOfParseTreesPerWords(treeDepth);
+            });
 
             if (!t.Wait(500))
             {
-                string s = "computing all parse trees took too long (0.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
-                using (var sw = File.AppendText("SessionReport.txt"))
-                {
-                    sw.WriteLine(s);
-                }
+                //string s = "computing all parse trees took too long (0.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
+                //using (var sw = File.AppendText("SessionReport.txt"))
+                //{
+                //    sw.WriteLine(s);
+                //}
 
-                Console.WriteLine(s);
+                //Console.WriteLine(s);
                 throw new Exception();
             }
             var parseTreesCountPerWords = t.Result;

@@ -105,16 +105,15 @@ namespace LinearIndexedGrammarLearner
             //so at best case, the number of LHS symbols is in the order of the number
             //of different Parts of speech. 
             //we will no assume a full binary tree, so we can increase the upper bound to allow flexibility.
-            //if there are very few parts of speech (in artificial languages, such as the palindrome languages)
-            //allow 10 nonterminals during the evolutionary search for some room to develop fruitful mutations.
-
+       
             int RelationOfLHSToPOS = 2;
             var lhsCategories = grammar.staticRulesGeneratedForCategory.ToArray();
             var rightHandSidePOOL = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
 
-            int upperBoundNonTerminals = Math.Max(10, PartsOfSpeechCategories.Length * RelationOfLHSToPOS);
+            int upperBoundNonTerminals = PartsOfSpeechCategories.Length * RelationOfLHSToPOS;
 
-            if (lhsCategories.Length >= upperBoundNonTerminals)
+            //do not consider START and STARTTAG symbols in the upper bound.
+            if ((lhsCategories.Length - 2) >= upperBoundNonTerminals)
                 return null;
 
             for (var k = 0; k < NumberOfRetries; k++)
