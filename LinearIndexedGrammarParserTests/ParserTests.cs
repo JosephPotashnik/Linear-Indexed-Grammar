@@ -117,8 +117,8 @@ namespace LinearIndexedGrammarParserTests
         public void GeneratCFGGrammarSentencesTest()
         {
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
-            (var n, var grammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("SimpleCFG.txt", 10);
-            (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(n, universalVocabulary);
+            (var nodeList, var grammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("SimpleCFG.txt", 10);
+            (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
 
             JsonSerializerSettings settings = new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
             string actual = JsonConvert.SerializeObject(data, settings);
@@ -130,8 +130,8 @@ namespace LinearIndexedGrammarParserTests
         public void GeneratLIGMovementPPSentencesTest()
         {
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
-            (var n, var grammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("LIGMovementPP.txt", 10);
-            (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(n, universalVocabulary);
+            (var nodeList, var grammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("LIGMovementPP.txt", 10);
+            (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
 
             JsonSerializerSettings settings = new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
             string actual = JsonConvert.SerializeObject(data, settings);
@@ -143,8 +143,8 @@ namespace LinearIndexedGrammarParserTests
         public void GeneratLIGMovementFromSubjectOrNoMovementAmbiguitySentencesTest()
         {
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
-            (var n, var grammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("LIGMovementFromSubjectOrNoMovementAmbiguity.txt", 6);
-            (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(n, universalVocabulary);
+            (var nodeList, var grammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("LIGMovementFromSubjectOrNoMovementAmbiguity.txt", 6);
+            (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
 
             JsonSerializerSettings settings = new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
             string actual = JsonConvert.SerializeObject(data, settings);

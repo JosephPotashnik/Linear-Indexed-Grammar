@@ -81,12 +81,8 @@ namespace LinearIndexedGrammarLearner
                 //decision - discard it and continue.
 
                 //string s = "parsing took too long (0.5 second), for the grammar:\r\n" + currentHypothesis.ToString();
-                //using (var sw = File.AppendText("SessionReport.txt"))
-                //{
-                //    sw.WriteLine(s);
-                //}
+                //NLog.LogManager.GetCurrentClassLogger().Info(s);
 
-                //Console.WriteLine(s);
                 return null; //parsing failed.
 
             }
@@ -121,12 +117,8 @@ namespace LinearIndexedGrammarLearner
             if (!t.Wait(500))
             {
                 //string s = "computing all parse trees took too long (0.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
-                //using (var sw = File.AppendText("SessionReport.txt"))
-                //{
-                //    sw.WriteLine(s);
-                //}
+                //NLog.LogManager.GetCurrentClassLogger().Info(s);
 
-                //Console.WriteLine(s);
                 throw new Exception();
             }
             var parseTreesCountPerWords = t.Result;

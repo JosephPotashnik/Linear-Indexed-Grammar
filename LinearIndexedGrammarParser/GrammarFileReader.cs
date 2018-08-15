@@ -45,14 +45,14 @@ namespace LinearIndexedGrammarParser
             return (sentences.ToArray(), textVocabulary);
         }
         
-        public static (List<EarleyNode> n, Grammar g) GenerateSentenceAccordingToGrammar(string filename, int maxWords)
+        public static (List<EarleyNode> nodeList, Grammar g) GenerateSentenceAccordingToGrammar(string filename, int maxWords)
         {
 
             var grammar = CreateGrammarFromFile(filename);
             EarleyGenerator generator = new EarleyGenerator(grammar);
 
-            var n = generator.ParseSentence("", maxWords);
-            return (n, grammar);
+            var nodeList = generator.ParseSentence("", maxWords);
+            return (nodeList, grammar);
         }
 
         public static List<EarleyNode> ParseSentenceAccordingToGrammar(string filename, string sentence)

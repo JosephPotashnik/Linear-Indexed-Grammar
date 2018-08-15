@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NLog" Version="4.5.8" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LinearIndexedGrammarLearner\LinearIndexedGrammarLearner.csproj" />
     <ProjectReference Include="..\LinearIndexedGrammarParser\LinearIndexedGrammarParser.csproj" />
   </ItemGroup>

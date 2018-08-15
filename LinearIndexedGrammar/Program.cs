@@ -1,6 +1,7 @@
 ﻿using LinearIndexedGrammarLearner;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -29,7 +30,21 @@ namespace LinearIndexedGrammar
     {
         static void Main(string[] args)
         {
+            ConfigureLogger();
             Learn();
+        }
+
+        private static void ConfigureLogger()
+        {
+            var config = new NLog.Config.LoggingConfiguration();
+
+            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = "SessionReport.txt" };
+            var logconsole = new NLog.Targets.ConsoleTarget("logconsole");
+
+            config.AddRule(LogLevel.Info, LogLevel.Fatal, logconsole);
+            config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
+
+            NLog.LogManager.Configuration = config;
         }
 
         public static void StopWatch(Stopwatch stopWatch)
@@ -38,11 +53,7 @@ namespace LinearIndexedGrammar
             var ts = stopWatch.Elapsed;
             var elapsedTime = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}.{ts.Milliseconds / 10:00}";
             var s = "Overall session RunTime " + elapsedTime;
-            Console.WriteLine(s);
-            using (var sw = File.AppendText("SessionReport.txt"))
-            {
-                sw.WriteLine(s);
-            }
+            NLog.LogManager.GetCurrentClassLogger().Info(s);
         }
 
         public static Stopwatch StartWatch()
@@ -58,40 +69,24 @@ namespace LinearIndexedGrammar
             ProgramParams programParams = ReadProgramParamsFromFile();
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
 
-            (var n, var targetGrammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar(programParams.GrammarFileName, maxWordsInSentence);
-            (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(n, universalVocabulary);
+            (var nodeList, var targetGrammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar(programParams.GrammarFileName, maxWordsInSentence);
+            (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
 
-            using (var sw = File.AppendText("SessionReport.txt"))
-            {
-                sw.WriteLine("-------------------");
-                sw.WriteLine("Session {0} ", DateTime.Now.ToString("MM/dd/yyyy h:mm tt"));
-                sw.WriteLine("runs: {0}, population size: {1}, number of generations: {2}", programParams.NumberOfRuns, programParams.PopulationSize, programParams.NumberOfGenerations);
-            }
+            string s = "-------------------\r\n" + 
+                        $"Session {DateTime.Now.ToString("MM/dd/yyyy h:mm tt")}\r\n" +
+                        $"runs: { programParams.NumberOfRuns}, population size: {programParams.PopulationSize}, number of generations: {programParams.NumberOfGenerations}\r\n";
 
-
+            NLog.LogManager.GetCurrentClassLogger().Info(s);
             var stopWatch = StartWatch();
 
             var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
             var targetProb = learner.Probability(targetGrammar);
-            var s = string.Format("Target Hypothesis:\r\n{0}\r\n. Verifying probability of target grammar (should be 1): {1}\r\n", targetGrammar, targetProb);
-            Console.WriteLine(s);
+            s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
+            NLog.LogManager.GetCurrentClassLogger().Info(s);
             if (targetProb < 1)
             {
-                Console.WriteLine("probablity incorrect. exit!");
+                NLog.LogManager.GetCurrentClassLogger().Fatal("probablity incorrect. exit!");
                 return;
-            }
-
-            //(var n1, var targetGrammar1) = GrammarFileReader.GenerateSentenceAccordingToGrammar("SolutionCFG.txt", maxWordsInSentence);
-            //(var data1, var dataVocabulary1) = GrammarFileReader.GetSentencesOfGenerator(n1, universalVocabulary);
-            //var energy1 = learner.Energy(targetGrammar1);
-            //var ruleDistribution = learner.CollectUsages(targetGrammar1);
-            //targetGrammar1.PruneUnusedRules(ruleDistribution);
-            //Console.WriteLine(targetGrammar1);
-
-
-            using (var sw = File.AppendText("SessionReport.txt"))
-            {
-                sw.WriteLine(s);
             }
 
             List<double> probs = new List<double>();
@@ -101,18 +96,12 @@ namespace LinearIndexedGrammar
                 (var prob, var bestHypothesis) = GA.Run();
                 probs.Add(prob);
             }
-            using (var sw = File.AppendText("SessionReport.txt"))
-            {
-                int numTimesAchieveProb1 = probs.Where(x => x == 1).Count();
-                double averageProb = probs.Average();
-                string s1 = $"Average probability is: {averageProb}";
-                string s2 = $"Achieved Probability=1 in {numTimesAchieveProb1} times out of {programParams.NumberOfRuns} runs";
-                sw.WriteLine(s1);
-                sw.WriteLine(s2);
-                Console.WriteLine(s1);
-                Console.WriteLine(s2);
 
-            }
+            int numTimesAchieveProb1 = probs.Where(x => x == 1).Count();
+            double averageProb = probs.Average();
+            s = $"Average probability is: {averageProb}\r\n" + 
+                $"Achieved Probability=1 in {numTimesAchieveProb1} times out of {programParams.NumberOfRuns} runs";
+            NLog.LogManager.GetCurrentClassLogger().Info(s);
             StopWatch(stopWatch);
         }
 

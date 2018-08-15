@@ -118,8 +118,8 @@ namespace LinearIndexedGrammarParser
             catch (LogException e)
             {
                 var s = e.ToString();
-                Console.WriteLine(s);
-                Console.WriteLine(string.Format("sentence: {0}, grammar: {1}", text, grammar));
+                NLog.LogManager.GetCurrentClassLogger().Warn(s);
+                NLog.LogManager.GetCurrentClassLogger().Warn($"sentence: {text}, grammar: {grammar}");  
             }
 
             //if the parse is unsuccessful - nodes will contain an empty list with 0 trees.
@@ -128,7 +128,7 @@ namespace LinearIndexedGrammarParser
             catch (Exception e)
             {
                 var s = e.ToString();
-                Console.WriteLine(s);
+                NLog.LogManager.GetCurrentClassLogger().Warn(s);
             }
             if (nodes.Count > 0)
                 return nodes;

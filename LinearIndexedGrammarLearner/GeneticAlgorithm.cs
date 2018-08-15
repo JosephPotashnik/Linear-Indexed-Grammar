@@ -35,7 +35,7 @@ namespace LinearIndexedGrammarLearner
             var ts = stopWatch.Elapsed;
             var elapsedTime = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}.{ts.Milliseconds / 10:00}";
             var s = "Overall session RunTime " + elapsedTime;
-            Console.WriteLine(s);
+            NLog.LogManager.GetCurrentClassLogger().Info(s);
         }
 
         public static Stopwatch StartWatch()
@@ -71,7 +71,7 @@ namespace LinearIndexedGrammarLearner
             while (currentGeneration++ < numberOfGenerations)
             {
                 if (currentGeneration % 200 == 0)
-                    Console.WriteLine($"generation {currentGeneration}");
+                    NLog.LogManager.GetCurrentClassLogger().Info($"generation {currentGeneration}");
                 try
                 {
                     foreach (var individual in population.Values)
@@ -86,20 +86,15 @@ namespace LinearIndexedGrammarLearner
 
                 catch (Exception e)
                 {
-                    //Console.WriteLine(e.ToString());
+                    //NLog.LogManager.GetCurrentClassLogger().Warn(e.ToString());
                 }
             }
 
             //choosing shortest grammar among all those with the best probability.
             (var bestProbability, var bestHypothesis) = ChooseBestHypothesis();
 
-            var s = string.Format($"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestProbability}");
-
-            Console.WriteLine(s);
-            using (var sw = File.AppendText("SessionReport.txt"))
-            {
-                sw.WriteLine(s);
-            }
+            var s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestProbability}";
+            NLog.LogManager.GetCurrentClassLogger().Info(s);
             return (bestProbability, bestHypothesis);
         }
 
