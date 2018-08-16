@@ -59,14 +59,11 @@ namespace LinearIndexedGrammarParser
             {
                 staticRules.Remove(LHS);
                 staticRulesGeneratedForCategory.Remove(LHS);
-
             }
-
         }
 
         public bool ContainsSameRHSRule(Rule newRule)
         {
-            var newStartVariable = new DerivedCategory(StartRule + "TAG");
             bool bFoundIdentical = false;
 
             //assuming compositionality.
@@ -88,65 +85,38 @@ namespace LinearIndexedGrammarParser
             }
 
             return bFoundIdentical;
-
-            //if (bFoundIdentical) return true;
-
-            //int countStartRHS = 0;
-            //foreach (var RHS in newRule.RightHandSide)
-            //{
-            //    if (RHS.Equals(newStartVariable))
-            //        countStartRHS++;
-            //}
-            //return (countStartRHS == 2);
         }
 
-        //takes care properly of staticRules, staticRulesGeneratedForCategory fields of Grammar class.
-        //TODO: dynamicRules, nullableCategories are not properly handled yet!
         public void AddGrammarRule(Rule r)
         {
             var newRule = new Rule(r);
 
-            //if non-empty stack
-            if (newRule.LeftHandSide.Stack != null)
+            if (newRule.LeftHandSide.Stack != null && newRule.LeftHandSide.Stack.Contains("*"))
             {
-                var stackContents = newRule.LeftHandSide.Stack;
-                //and if the left hand side allows manipulating the stack (has the wildcard)
+                //if the left hand side allows manipulating the stack (has the wildcard)
                 //insert into the stackManipulationRules dictionary.
-                if (stackContents.Contains("*"))
-                {
 
-                    var newSynCat = new SyntacticCategory(newRule.LeftHandSide);
-                    if (!dynamicRules.ContainsKey(newSynCat))
-                        dynamicRules[newSynCat] = new List<Rule>();
+                var newSynCat = new SyntacticCategory(newRule.LeftHandSide);
+                if (!dynamicRules.ContainsKey(newSynCat))
+                    dynamicRules[newSynCat] = new List<Rule>();
 
-                    dynamicRules[newSynCat].Add(newRule);
+                dynamicRules[newSynCat].Add(newRule);
 
-                    var emptyStackRule = new DerivedCategory(newSynCat.ToString());
-                    //generate base form of the rule with the empty stack
-                    //as a starting point of the grammar (= equal to context free case)
-                    staticRulesGeneratedForCategory.Add(emptyStackRule);
-                    var derivedRule = GenerateStaticRuleFromDyamicRule(newRule, emptyStackRule);
-                    if (derivedRule != null)
-                        AddStaticRule(derivedRule);
-
-
-                }
-                else
-                {
-                    staticRulesGeneratedForCategory.Add(newRule.LeftHandSide);
-                    AddStaticRule(newRule);
-                }
+                var leftHandSideWithEmptyStack = new DerivedCategory(newSynCat.ToString());
+                //generate base form of the rule with the empty stack
+                //as a starting point of the grammar (= equal to context free case)
+                var derivedRule = GenerateStaticRuleFromDyamicRule(newRule, leftHandSideWithEmptyStack);
+                AddStaticRule(derivedRule);
             }
             else
-            {
-                staticRulesGeneratedForCategory.Add(newRule.LeftHandSide);
                 AddStaticRule(newRule);
-            }
         }
 
         public void AddStaticRule(Rule r)
         {
             if (r == null) return;
+
+            staticRulesGeneratedForCategory.Add(r.LeftHandSide);
 
             Grammar.ruleCounter++;
             var newRule = new Rule(r);
@@ -226,20 +196,18 @@ namespace LinearIndexedGrammarParser
                 replacedx.Add(new DerivedCategory($"X{i + 1}"));
             var replaceDic = xs.Zip(replacedx, (x, y) => new { key = x, value = y }).ToDictionary(x => x.key, x => x.value);
 
+            //replace all StartTAG symbols with START 
+            //(initially, we changed in the promiscuous grammar all occurrences of START with STARTTAG for simplicity)
             var originalStartVariable = new DerivedCategory(StartRule);
             var startVariable = new DerivedCategory(StartRule + "TAG");
             replaceDic[startVariable] = originalStartVariable;
             ReplaceVariables(replaceDic);
 
-            //DismissStartToStartTagRule();
+            DismissStartToStartTagRule(); //remove START -> START rule  (initially, added START -> STARTTAG to the promiscuous grammar for simplicity)
         }
 
         private void DismissStartToStartTagRule()
         {
-            //The initial promiscuous grammar that is the departure point for leanring
-            //contains a rule Start -> Start' (we have replaced each occurrence of start on the right
-            //hand side of rules with a new symbol start', and added start -> start')
-            //discard it now.
             DerivedCategory originalStartVariable = new DerivedCategory(StartRule);
             var startRulesLHS = staticRules[originalStartVariable];
             bool foundStartToStartTagRule = false;

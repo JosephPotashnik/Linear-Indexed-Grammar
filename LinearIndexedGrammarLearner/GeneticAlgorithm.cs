@@ -132,7 +132,9 @@ namespace LinearIndexedGrammarLearner
                 bool success = descendants.TryDequeue(out descendant);
                 if (success)
                 {
-
+                    //if the probability of the descendant (its key) is higher than the lowest probability
+                    //in the population (population is sorted by increasing probability), remove the old
+                    //item and enqueue the descendant.
                     if (descendant.Key >= population.PeekFirstKey())
                     {
                         population.Dequeue();
