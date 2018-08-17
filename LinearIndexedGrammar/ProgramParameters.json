@@ -1,6 +1,6 @@
 ﻿{
   "PopulationSize": 300,
-  "NumberOfGenerations": 1000,
+  "NumberOfGenerations": 2000,
   "NumberOfRuns": 20,
   "GrammarFileName": "SimpleCFG.txt"
 }

@@ -46,10 +46,49 @@ namespace LinearIndexedGrammarParser
             return string.Join("\r\n", allRules);
         }
 
-        //takes care properly of staticRules, staticRulesGeneratedForCategory fields of Grammar class.
-        //TODO: dynamicRules, nullableCategories are not properly handled yet!
-        public void DeleteGrammarRule(Rule r)
+        private Rule UngenerateStaticRuleFromDyamicRule(Rule oldRule, DerivedCategory leftHandSideWithEmptyStack)
         {
+            Rule derivedRule = null;
+            foreach (var item in staticRules[leftHandSideWithEmptyStack])
+            {
+                if (item.NumberOfGeneratingRule == oldRule.Number)
+                {
+                    derivedRule = item;
+                    break;
+                }
+            }
+            return derivedRule;
+        }
+
+        public void DeleteGrammarRule(Rule oldRule)
+        {
+            if (IsDynamicRule(oldRule))
+            {
+                var synCat = new SyntacticCategory(oldRule.LeftHandSide);
+                if (!dynamicRules.ContainsKey(synCat))
+                    throw new KeyNotFoundException($"syntactic category {synCat} was not found in dynamic rules dictionary");
+
+                var rules = dynamicRules[synCat];
+                if (!rules.Contains(oldRule))
+                    throw new KeyNotFoundException($"rule {oldRule} was not found in dynamic rules dictionary");
+
+                rules.Remove(oldRule);
+                if (rules.Count == 0)
+                    dynamicRules.Remove(synCat);
+
+                var leftHandSideWithEmptyStack = new DerivedCategory(synCat.ToString());
+                var derivedRule = UngenerateStaticRuleFromDyamicRule(oldRule, leftHandSideWithEmptyStack);
+                DeleteStaticRule(derivedRule);
+            }
+            else
+                DeleteStaticRule(oldRule);
+        }
+
+
+        public void DeleteStaticRule(Rule r)
+        {
+            if (r == null) return;
+
             var LHS = r.LeftHandSide;
             var rulesWithSameLHS = staticRules[LHS];
             rulesWithSameLHS.Remove(r);
@@ -60,6 +99,8 @@ namespace LinearIndexedGrammarParser
                 staticRules.Remove(LHS);
                 staticRulesGeneratedForCategory.Remove(LHS);
             }
+
+
         }
 
         public bool ContainsSameRHSRule(Rule newRule)
@@ -86,12 +127,14 @@ namespace LinearIndexedGrammarParser
 
             return bFoundIdentical;
         }
+        private static bool IsDynamicRule(Rule r) =>
+             r.LeftHandSide.Stack != null && r.LeftHandSide.Stack.Contains("*");
 
         public void AddGrammarRule(Rule r)
         {
             var newRule = new Rule(r);
 
-            if (newRule.LeftHandSide.Stack != null && newRule.LeftHandSide.Stack.Contains("*"))
+            if (IsDynamicRule(newRule))
             {
                 //if the left hand side allows manipulating the stack (has the wildcard)
                 //insert into the stackManipulationRules dictionary.
@@ -173,6 +216,7 @@ namespace LinearIndexedGrammarParser
                 newRule.RightHandSide[i].Stack = res;
             }
 
+            newRule.NumberOfGeneratingRule = dynamicGrammarRule.Number;
             return newRule;
         }
 

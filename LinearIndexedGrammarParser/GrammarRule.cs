@@ -14,6 +14,7 @@ namespace LinearIndexedGrammarParser
         public DerivedCategory[] RightHandSide { get; set; }
 
         public int Number { get; set; }
+        public int NumberOfGeneratingRule { get; set; }
 
         public Rule() {}
         public Rule(DerivedCategory leftHandSide, DerivedCategory[] rightHandSide,  int num = -1)
@@ -34,6 +35,7 @@ namespace LinearIndexedGrammarParser
             LeftHandSide = new DerivedCategory(otherRule.LeftHandSide);
             RightHandSide = otherRule.RightHandSide.Select(cat => new DerivedCategory(cat)).ToArray();
             Number = otherRule.Number;
+            NumberOfGeneratingRule = otherRule.NumberOfGeneratingRule;
         }
 
         public override string ToString()
@@ -48,7 +50,6 @@ namespace LinearIndexedGrammarParser
                 return false;
 
             return Number == p.Number;
-
         }
 
         public override int GetHashCode()
@@ -58,7 +59,5 @@ namespace LinearIndexedGrammarParser
         }
 
         public bool IsEpsilonRule() => RightHandSide[0].IsEpsilon();
-
     }
-
 }
