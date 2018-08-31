@@ -77,7 +77,7 @@ namespace LinearIndexedGrammarLearner
                     foreach (var individual in population.Values)
                     {
                         var mutatedIndividual = Mutate(individual);
-                        if (mutatedIndividual.Grammar != null)
+                        if (mutatedIndividual.Grammar != null && mutatedIndividual.Probability > 0)
                             descendants.Enqueue(new KeyValuePair<double, Grammar>(mutatedIndividual.Probability, mutatedIndividual.Grammar));
                     }
 
@@ -86,7 +86,7 @@ namespace LinearIndexedGrammarLearner
 
                 catch (Exception e)
                 {
-                    //NLog.LogManager.GetCurrentClassLogger().Warn(e.ToString());
+                    NLog.LogManager.GetCurrentClassLogger().Warn(e.ToString());
                 }
             }
 
@@ -106,9 +106,9 @@ namespace LinearIndexedGrammarLearner
             foreach (var bestHypothesisCandidates in population.Last().Value)
             {
                 var g = bestHypothesisCandidates.Grammar;
-                var ruleDistribution = learner.CollectUsages(g);
-                g.PruneUnusedRules(ruleDistribution);
-                int numberOfRules = g.RuleCount;
+                //var ruleDistribution = learner.CollectUsages(g);
+                //g.PruneUnusedRules(ruleDistribution);
+                int numberOfRules = g.Rules.Count();
                 if (numberOfRules < minimalNumberOfRules)
                 {
                     bestHypothesis = g;

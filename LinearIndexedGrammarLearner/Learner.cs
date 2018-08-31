@@ -50,6 +50,7 @@ namespace LinearIndexedGrammarLearner
 
 
             //originalGrammar.RenameStartVariable();
+            originalGrammar.GenerateAllStaticRulesFromDynamicRules();
             return originalGrammar;
         }
 
@@ -207,9 +208,10 @@ namespace LinearIndexedGrammarLearner
 
             var newGrammar = new Grammar(currentHypothesis);
 
+
             //mutate the grammar.
             var g =  m(newGrammar);
-            g.GenerateAllStaticRulesFromDynamicRules();
+            g?.GenerateAllStaticRulesFromDynamicRules();
             return g;
 
         }
@@ -221,7 +223,7 @@ namespace LinearIndexedGrammarLearner
             {
                 //assuming: insertion of rule adds as of yet unused rule
                 //so it does not affect the parsibility of the grammar nor its probability.
-                if (mutatedGrammar.RuleCount > originalGrammar.Grammar.RuleCount )
+                if (mutatedGrammar.Rules.Count() > originalGrammar.Grammar.Rules.Count() )
                     return new GrammarWithProbability(mutatedGrammar, originalGrammar.Probability);
 
                 prob = Probability(mutatedGrammar);

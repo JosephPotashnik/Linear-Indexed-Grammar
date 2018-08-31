@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace LinearIndexedGrammarParser
@@ -16,7 +17,8 @@ namespace LinearIndexedGrammarParser
                 CategoriesCache[lhs] = new SubtreeCountsWithNumberOfWords[depth];
 
             RuleCache = new Dictionary<Rule, SubtreeCountsWithNumberOfWords[]>();
-            foreach (var rule in g.Rules)
+            var staticRules = g.staticRules.Values.SelectMany(x => x);
+            foreach (var rule in staticRules)
                 RuleCache[rule] = new SubtreeCountsWithNumberOfWords[depth];
         }
 

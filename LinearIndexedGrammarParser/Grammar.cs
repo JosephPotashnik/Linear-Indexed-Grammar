@@ -25,9 +25,7 @@ namespace LinearIndexedGrammarParser
         public readonly Dictionary<SyntacticCategory, List<Rule>> dynamicRules = new Dictionary<SyntacticCategory, List<Rule>>();
         public readonly HashSet<DerivedCategory> staticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
         public readonly HashSet<DerivedCategory> nullableCategories = new HashSet<DerivedCategory>();
-        internal static int ruleCounter = 0;
-        private int ruleCount = 0;
-        public int RuleCount => ruleCount;
+        private int ruleCounter = 0;
 
         public Grammar(Grammar otherGrammar)
         {
@@ -36,12 +34,13 @@ namespace LinearIndexedGrammarParser
             //the assumption is that the one who calls Grammar(otherGrammar)
             //calls afterwards to  Grammar.GenerateAllStaticRulesFromDynamicRules()
             //to compute the staticRulesGeneratedForCategory and staticRules fields.
-            staticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
-            staticRules = new Dictionary<DerivedCategory, List<Rule>>();
 
             dynamicRules = otherGrammar.dynamicRules.ToDictionary(x => x.Key, x => x.Value.Select(y => new Rule(y)).ToList());
             nullableCategories = new HashSet<DerivedCategory>(otherGrammar.nullableCategories);
-            ruleCount = otherGrammar.ruleCount;
+            ruleCounter = 0;
+            
+            foreach (var rule in Rules)
+                rule.Number = ++ruleCounter;
         }
         public IEnumerable<Rule> Rules
         {
@@ -98,7 +97,6 @@ namespace LinearIndexedGrammarParser
             var LHS = r.LeftHandSide;
             var rulesWithSameLHS = staticRules[LHS];
             rulesWithSameLHS.Remove(r);
-            ruleCount--;
 
             if (rulesWithSameLHS.Count == 0)
             {
@@ -137,9 +135,7 @@ namespace LinearIndexedGrammarParser
         public void AddGrammarRule(Rule r)
         {
             var newRule = new Rule(r);
-
-            //if the left hand side allows manipulating the stack (has the wildcard)
-            //insert into the stackManipulationRules dictionary.
+            newRule.Number = ++ruleCounter;
 
             var newSynCat = new SyntacticCategory(newRule.LeftHandSide);
             if (!dynamicRules.ContainsKey(newSynCat))
@@ -160,15 +156,13 @@ namespace LinearIndexedGrammarParser
         {
             if (r == null) return;
 
-            Grammar.ruleCounter++;
             var newRule = new Rule(r);
-            newRule.Number = Grammar.ruleCounter;
+            newRule.Number = ++ruleCounter;
 
             if (!staticRules.ContainsKey(newRule.LeftHandSide))
                 staticRules[newRule.LeftHandSide] = new List<Rule>();
 
             staticRules[newRule.LeftHandSide].Add(newRule);
-            ruleCount++;
 
         }
 
@@ -234,7 +228,7 @@ namespace LinearIndexedGrammarParser
 
         public void RenameVariables()
         {
-            var xs = staticRulesGeneratedForCategory.Where(x => x.ToString()[0] == 'X').Select(x => x).ToList();
+            var xs = Rules.Where(x => x.ToString()[0] == 'X').Select(x => x.LeftHandSide).ToList();
             var replacedx = new List<DerivedCategory>();
             for (int i = 0; i < xs.Count; i++)
                 replacedx.Add(new DerivedCategory($"X{i + 1}"));
