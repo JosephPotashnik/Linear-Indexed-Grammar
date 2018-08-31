@@ -7,7 +7,7 @@ namespace LinearIndexedGrammarParser
 
     public class SyntacticCategory
     {
-        private readonly string Symbol;
+        protected readonly string Symbol;
         public SyntacticCategory() { }
         public SyntacticCategory(string symbol) => Symbol = symbol;
         public SyntacticCategory(SyntacticCategory otherCategory) => Symbol = otherCategory.Symbol;
@@ -29,7 +29,7 @@ namespace LinearIndexedGrammarParser
     public class DerivedCategory : SyntacticCategory
     {
         public string Stack { get; set; }
-
+        public int StackSymbolsCount { get; set; }
         public DerivedCategory(string baseCategorySymbol, string _stack = "") : base(baseCategorySymbol)
         {
             Stack = _stack;
@@ -39,6 +39,7 @@ namespace LinearIndexedGrammarParser
         public DerivedCategory(DerivedCategory other) : base (other)
         {
             Stack = other.Stack;
+            StackSymbolsCount = other.StackSymbolsCount;
         }
         public override bool Equals(object obj)
         {
@@ -48,8 +49,10 @@ namespace LinearIndexedGrammarParser
             return base.Equals(p) &&  Stack.Equals(p.Stack);
         }
 
-        private string Contents { get { return base.ToString() + Stack; } }
+        private string Contents { get { return Symbol + Stack; } }
         public override int GetHashCode() => Contents.GetHashCode();
         public override string ToString() => Contents;
+        public bool BaseEquals(DerivedCategory other)
+        { return Symbol == other.Symbol; }
     }
 }

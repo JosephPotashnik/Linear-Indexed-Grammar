@@ -20,9 +20,7 @@ namespace LinearIndexedGrammarParser
         {
             voc  = v ?? Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
 
-            //deep copy to a private variable, because the rules of the grammar
-            //are dynamically changeable, do not alter the input grammar.
-            grammar = new Grammar(g);
+            grammar = g;
         }
         
         private void Predict(EarleyColumn col, List<Rule> ruleList)
@@ -85,9 +83,9 @@ namespace LinearIndexedGrammarParser
             EarleyState.stateCounter = 0;
             List<EarleyNode> nodes = new List<EarleyNode>();
 
-            var startGrammarRule = new Rule(Grammar.GammaRule, new[] { Grammar.StartRule });
-            var startRule = new Rule(startGrammarRule);
-            grammar.AddStaticRule(startGrammarRule);
+            //assumption: GenerateAllStaticRulesFromDynamicRules has been called before parsing
+            //and added the GammaRule
+            var startRule = grammar.staticRules[new DerivedCategory(Grammar.GammaRule)][0];
 
             var startState = new EarleyState(startRule, 0, table[0], null);
             table[0].AddState(startState, grammar);
@@ -190,23 +188,11 @@ namespace LinearIndexedGrammarParser
                 count++;
                 //TestForTooManyStatesInColumn(col, count);
 
-                //if static rules have not been generated for this term yet
-                //compute them from dynamaic rules dictionary
-                if (!grammar.staticRulesGeneratedForCategory.Contains(nextTerm))
-                {
-                    grammar.staticRulesGeneratedForCategory.Add(nextTerm);
-                    var baseSyntacticCategory = new SyntacticCategory(nextTerm);
-
-                    if (grammar.dynamicRules.ContainsKey(baseSyntacticCategory))
-                    {
-                        var grammarRuleList = grammar.dynamicRules[baseSyntacticCategory];
-                        foreach (var item in grammarRuleList)
-                        {
-                            var derivedRule = grammar.GenerateStaticRuleFromDyamicRule(item, nextTerm);
-                            grammar.AddStaticRule(derivedRule);
-                        }
-                    }
-                }
+                //important: Static rules are calculated from the dynamic rules before running
+                //the parser in the function Grammar.GenerateAllStaticRulesFromDynamicRules()
+                //thus the code below is commented.
+                //if you do not call to GenerateAllStaticRulesFromDynamicRules(), uncomment the next line.
+                //GenerateAllStaticRulesForCategory(nextTerm);
 
                 if (!grammar.staticRules.ContainsKey(nextTerm)) continue;
 
@@ -215,6 +201,25 @@ namespace LinearIndexedGrammarParser
             }
 
             return count;
+        }
+
+        private void GenerateAllStaticRulesForCategory(DerivedCategory nextTerm)
+        {
+            if (!grammar.staticRulesGeneratedForCategory.Contains(nextTerm))
+            {
+                grammar.staticRulesGeneratedForCategory.Add(nextTerm);
+                var baseSyntacticCategory = new SyntacticCategory(nextTerm);
+
+                if (grammar.dynamicRules.ContainsKey(baseSyntacticCategory))
+                {
+                    var grammarRuleList = grammar.dynamicRules[baseSyntacticCategory];
+                    foreach (var item in grammarRuleList)
+                    {
+                        var derivedRule = grammar.GenerateStaticRuleFromDyamicRule(item, nextTerm);
+                        grammar.AddStaticRule(derivedRule);
+                    }
+                }
+            }
         }
 
         private int TraverseCompletedStates(EarleyColumn col, int count)

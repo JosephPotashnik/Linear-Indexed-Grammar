@@ -49,6 +49,8 @@ namespace LinearIndexedGrammarParser
         {
 
             var grammar = CreateGrammarFromFile(filename);
+            grammar.GenerateAllStaticRulesFromDynamicRules();
+
             EarleyGenerator generator = new EarleyGenerator(grammar);
 
             var nodeList = generator.ParseSentence("", maxWords);
@@ -58,6 +60,8 @@ namespace LinearIndexedGrammarParser
         public static List<EarleyNode> ParseSentenceAccordingToGrammar(string filename, string sentence)
         {
             var grammar = CreateGrammarFromFile(filename);
+            grammar.GenerateAllStaticRulesFromDynamicRules();
+
             EarleyParser parser = new EarleyParser(grammar);
 
             var n = parser.ParseSentence(sentence);
@@ -107,6 +111,13 @@ namespace LinearIndexedGrammarParser
             string[] nonTerminals = removeArrow.Split().Select(p => p.Trim()).Where(p => !string.IsNullOrWhiteSpace(p)).ToArray();
 
             var leftHandCat = CreateDerivedCategory(nonTerminals[0]);
+            bool popRule = false;
+
+            if (leftHandCat.Stack.Contains(Grammar.StarSymbol))
+            {
+                if (leftHandCat.Stack.Length > 1)
+                    popRule = true;
+            }
 
             if (nonTerminals.Length == 1)
             {
@@ -116,7 +127,24 @@ namespace LinearIndexedGrammarParser
 
             var rightHandCategories = new DerivedCategory[nonTerminals.Length - 1];
             for (int i = 1; i < nonTerminals.Length; i++)
+            {
                 rightHandCategories[i - 1] = CreateDerivedCategory(nonTerminals[i]);
+                if (rightHandCategories[i - 1].Stack.Contains(Grammar.StarSymbol))
+                {
+                    if (rightHandCategories[i - 1].Stack.Length > 1)
+                    {
+                        //push rule.
+                        rightHandCategories[i - 1].StackSymbolsCount = 1;
+                        if (popRule)
+                            throw new Exception("illegal LIG format: can't push and pop within the same rule");
+                    }
+                    else
+                    {
+                        if (popRule)
+                            rightHandCategories[i - 1].StackSymbolsCount = -1;
+                    }
+                }
+            }
 
             return new Rule(leftHandCat, rightHandCategories);
         }

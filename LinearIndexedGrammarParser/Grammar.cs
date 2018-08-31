@@ -18,6 +18,8 @@ namespace LinearIndexedGrammarParser
         public const string GammaRule = "Gamma";
         public const string StartRule = "START";
         public const string EpsislonSymbol = "Epsilon";
+        public const string StarSymbol = "*";
+        public const int maxStackDepth = 3;
 
         public readonly Dictionary<DerivedCategory, List<Rule>> staticRules = new Dictionary<DerivedCategory, List<Rule>>();
         public readonly Dictionary<SyntacticCategory, List<Rule>> dynamicRules = new Dictionary<SyntacticCategory, List<Rule>>();
@@ -29,17 +31,25 @@ namespace LinearIndexedGrammarParser
 
         public Grammar(Grammar otherGrammar)
         {
-            staticRules = otherGrammar.staticRules.ToDictionary(x => x.Key, x => x.Value.Select(y => new Rule(y)).ToList());
+            //staticRulesGeneratedForCategory = new HashSet<DerivedCategory>(otherGrammar.staticRulesGeneratedForCategory);
+            //staticRules = otherGrammar.staticRules.ToDictionary(x => x.Key, x => x.Value.Select(y => new Rule(y)).ToList());
+            //the assumption is that the one who calls Grammar(otherGrammar)
+            //calls afterwards to  Grammar.GenerateAllStaticRulesFromDynamicRules()
+            //to compute the staticRulesGeneratedForCategory and staticRules fields.
+            staticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
+            staticRules = new Dictionary<DerivedCategory, List<Rule>>();
+
             dynamicRules = otherGrammar.dynamicRules.ToDictionary(x => x.Key, x => x.Value.Select(y => new Rule(y)).ToList());
-            staticRulesGeneratedForCategory = new HashSet<DerivedCategory>(otherGrammar.staticRulesGeneratedForCategory);
             nullableCategories = new HashSet<DerivedCategory>(otherGrammar.nullableCategories);
             ruleCount = otherGrammar.ruleCount;
         }
         public IEnumerable<Rule> Rules
         {
             //Note: SelectMany here does not deep-copy, we get the reference to the grammar rules.
-            get {  return staticRules.Values.SelectMany(x => x); }
+            get {  return dynamicRules.Values.SelectMany(x => x); }
         }
+
+
         public override string ToString()
         {
             var allRules = Rules;
@@ -62,26 +72,22 @@ namespace LinearIndexedGrammarParser
 
         public void DeleteGrammarRule(Rule oldRule)
         {
-            if (IsDynamicRule(oldRule))
-            {
-                var synCat = new SyntacticCategory(oldRule.LeftHandSide);
-                if (!dynamicRules.ContainsKey(synCat))
-                    throw new KeyNotFoundException($"syntactic category {synCat} was not found in dynamic rules dictionary");
+            var synCat = new SyntacticCategory(oldRule.LeftHandSide);
+     
+            var rules = dynamicRules[synCat];
+            rules.Remove(oldRule);
 
-                var rules = dynamicRules[synCat];
-                if (!rules.Contains(oldRule))
-                    throw new KeyNotFoundException($"rule {oldRule} was not found in dynamic rules dictionary");
+            if (rules.Count == 0)
+                dynamicRules.Remove(synCat);
 
-                rules.Remove(oldRule);
-                if (rules.Count == 0)
-                    dynamicRules.Remove(synCat);
+            if (oldRule.RightHandSide[0].IsEpsilon())
+                nullableCategories.Remove(oldRule.LeftHandSide);
 
-                var leftHandSideWithEmptyStack = new DerivedCategory(synCat.ToString());
-                var derivedRule = UngenerateStaticRuleFromDyamicRule(oldRule, leftHandSideWithEmptyStack);
-                DeleteStaticRule(derivedRule);
-            }
-            else
-                DeleteStaticRule(oldRule);
+            /*
+            var leftHandSideWithEmptyStack = new DerivedCategory(synCat.ToString());
+            var derivedRule = UngenerateStaticRuleFromDyamicRule(oldRule, leftHandSideWithEmptyStack);
+            DeleteStaticRule(derivedRule);
+            */
         }
 
 
@@ -99,8 +105,6 @@ namespace LinearIndexedGrammarParser
                 staticRules.Remove(LHS);
                 staticRulesGeneratedForCategory.Remove(LHS);
             }
-
-
         }
 
         public bool ContainsSameRHSRule(Rule newRule)
@@ -127,39 +131,34 @@ namespace LinearIndexedGrammarParser
 
             return bFoundIdentical;
         }
-        private static bool IsDynamicRule(Rule r) =>
-             r.LeftHandSide.Stack != null && r.LeftHandSide.Stack.Contains("*");
+        //private static bool IsDynamicRule(Rule r) =>
+        //     r.LeftHandSide.Stack != null && r.LeftHandSide.Stack != string.Empty;
 
         public void AddGrammarRule(Rule r)
         {
             var newRule = new Rule(r);
 
-            if (IsDynamicRule(newRule))
-            {
-                //if the left hand side allows manipulating the stack (has the wildcard)
-                //insert into the stackManipulationRules dictionary.
+            //if the left hand side allows manipulating the stack (has the wildcard)
+            //insert into the stackManipulationRules dictionary.
 
-                var newSynCat = new SyntacticCategory(newRule.LeftHandSide);
-                if (!dynamicRules.ContainsKey(newSynCat))
-                    dynamicRules[newSynCat] = new List<Rule>();
+            var newSynCat = new SyntacticCategory(newRule.LeftHandSide);
+            if (!dynamicRules.ContainsKey(newSynCat))
+                dynamicRules[newSynCat] = new List<Rule>();
 
-                dynamicRules[newSynCat].Add(newRule);
+            dynamicRules[newSynCat].Add(newRule);
 
-                var leftHandSideWithEmptyStack = new DerivedCategory(newSynCat.ToString());
-                //generate base form of the rule with the empty stack
-                //as a starting point of the grammar (= equal to context free case)
-                var derivedRule = GenerateStaticRuleFromDyamicRule(newRule, leftHandSideWithEmptyStack);
-                AddStaticRule(derivedRule);
-            }
-            else
-                AddStaticRule(newRule);
+            //TODO: calculate the transitive closure of all nullable symbols.
+            //at the moment you calculate only the rules that directly lead to epsilon.
+            //For instance. C -> D E, D -> epsilon, E-> epsilon. C is not in itself an epsilon rule
+            //yet it is a nullable production.
+            if (newRule.RightHandSide[0].IsEpsilon())
+                nullableCategories.Add(newRule.LeftHandSide);
+
         }
 
         public void AddStaticRule(Rule r)
         {
             if (r == null) return;
-
-            staticRulesGeneratedForCategory.Add(r.LeftHandSide);
 
             Grammar.ruleCounter++;
             var newRule = new Rule(r);
@@ -171,12 +170,6 @@ namespace LinearIndexedGrammarParser
             staticRules[newRule.LeftHandSide].Add(newRule);
             ruleCount++;
 
-            //TODO: calculate the transitive closure of all nullable symbols.
-            //at the moment you calculate only the rules that directly lead to epsilon.
-            //For instance. C -> D E, D -> epsilon, E-> epsilon. C is not in itself an epsilon rule
-            //yet it is a nullable production.
-            if (newRule.RightHandSide[0].IsEpsilon())
-                nullableCategories.Add(newRule.LeftHandSide);
         }
 
         public void PruneUnusedRules(Dictionary<int, int> usagesDic)
@@ -189,15 +182,17 @@ namespace LinearIndexedGrammarParser
 
         public Rule GenerateStaticRuleFromDyamicRule(Rule dynamicGrammarRule, DerivedCategory leftHandSide)
         {
-            if (dynamicGrammarRule.LeftHandSide.Stack == null || dynamicGrammarRule.LeftHandSide.Stack == string.Empty)
-                return null;
-
             string patternStringLeftHandSide = dynamicGrammarRule.LeftHandSide.Stack;
+            var newRule = new Rule(dynamicGrammarRule);
+            newRule.NumberOfGeneratingRule = dynamicGrammarRule.Number;
 
+            if (!patternStringLeftHandSide.Contains(Grammar.StarSymbol))
+                return (dynamicGrammarRule.LeftHandSide.Equals(leftHandSide)) ? newRule : null;
+
+            //if contains a stack with * symbol (dynamically sized stack)
             //1. make the pattern be your Syntactic Category
             //2. then find the stack contents - anything by "*" (the first group)
-            var newRule = new Rule(dynamicGrammarRule);
-            string patternString = patternStringLeftHandSide.Replace("*", "(.*)");
+            string patternString = patternStringLeftHandSide.Replace(Grammar.StarSymbol, "(.*)");
 
             Regex pattern = new Regex(patternString);
 
@@ -212,23 +207,28 @@ namespace LinearIndexedGrammarParser
             for (int i = 0; i < newRule.RightHandSide.Length; i++)
             {
                 string patternRightHandSide = newRule.RightHandSide[i].Stack;
-                string res = patternRightHandSide.Replace("*", stackContents);
-                newRule.RightHandSide[i].Stack = res;
+                if (patternRightHandSide != string.Empty)
+                {
+                    string res = patternRightHandSide.Replace(Grammar.StarSymbol, stackContents);
+                    newRule.RightHandSide[i].Stack = res;
+                    newRule.RightHandSide[i].StackSymbolsCount += newRule.LeftHandSide.StackSymbolsCount;
+
+
+                    if (newRule.RightHandSide[i].StackSymbolsCount > Grammar.maxStackDepth)
+                        return null;
+                }
             }
 
-            newRule.NumberOfGeneratingRule = dynamicGrammarRule.Number;
             return newRule;
         }
 
         public void RenameStartVariable()
         {
-            var startVariable = new DerivedCategory(StartRule);
-            var newStartVariable = new DerivedCategory(StartRule + "TAG");
-            var replaceDic = new Dictionary<DerivedCategory, DerivedCategory>();
-            replaceDic[startVariable] = newStartVariable;
-            ReplaceVariables(replaceDic);
-            var newStartRule = new Rule(startVariable, new[]  { newStartVariable });
-            AddGrammarRule(newStartRule);
+            //var startVariable = new DerivedCategory(StartRule);
+            //var newStartVariable = new DerivedCategory(StartRule + "TAG");
+            //var replaceDic = new Dictionary<DerivedCategory, DerivedCategory>();
+            //replaceDic[startVariable] = newStartVariable;
+            //ReplaceVariables(replaceDic);
         }
 
 
@@ -242,32 +242,32 @@ namespace LinearIndexedGrammarParser
 
             //replace all StartTAG symbols with START 
             //(initially, we changed in the promiscuous grammar all occurrences of START with STARTTAG for simplicity)
-            var originalStartVariable = new DerivedCategory(StartRule);
-            var startVariable = new DerivedCategory(StartRule + "TAG");
-            replaceDic[startVariable] = originalStartVariable;
+            //var originalStartVariable = new DerivedCategory(StartRule);
+            //var startVariable = new DerivedCategory(StartRule + "TAG");
+            //replaceDic[startVariable] = originalStartVariable;
             ReplaceVariables(replaceDic);
 
-            DismissStartToStartTagRule(); //remove START -> START rule  (initially, added START -> STARTTAG to the promiscuous grammar for simplicity)
+            //DismissStartToStartTagRule(); //remove START -> START rule  (initially, added START -> STARTTAG to the promiscuous grammar for simplicity)
         }
 
         private void DismissStartToStartTagRule()
         {
-            DerivedCategory originalStartVariable = new DerivedCategory(StartRule);
-            var startRulesLHS = staticRules[originalStartVariable];
-            bool foundStartToStartTagRule = false;
-            Rule dismissedStartRule = null;
+            //DerivedCategory originalStartVariable = new DerivedCategory(StartRule);
+            //var startRulesLHS = staticRules[originalStartVariable];
+            //bool foundStartToStartTagRule = false;
+            //Rule dismissedStartRule = null;
 
-            foreach (var rule in startRulesLHS)
-            {
-                if (rule.RightHandSide[0].Equals(originalStartVariable))
-                {
-                    foundStartToStartTagRule = true;
-                    dismissedStartRule = rule;
-                    break;
-                }
-            }
-            if (foundStartToStartTagRule)
-                DeleteGrammarRule(dismissedStartRule);
+            //foreach (var rule in startRulesLHS)
+            //{
+            //    if (rule.RightHandSide[0].Equals(originalStartVariable))
+            //    {
+            //        foundStartToStartTagRule = true;
+            //        dismissedStartRule = rule;
+            //        break;
+            //    }
+            //}
+            //if (foundStartToStartTagRule)
+            //    DeleteGrammarRule(dismissedStartRule);
         }
 
 
@@ -303,6 +303,55 @@ namespace LinearIndexedGrammarParser
 
             foreach (var rule in newRules)
                 AddGrammarRule(rule);
+        }
+
+        public void GenerateAllStaticRulesFromDynamicRules()
+        {
+
+            var gammaGrammarRule = new Rule(Grammar.GammaRule, new[] { Grammar.StartRule });
+            AddStaticRule(gammaGrammarRule);
+
+            //DO a BFS
+            Queue<DerivedCategory> toVisit = new Queue<DerivedCategory>();
+            HashSet<DerivedCategory> visited = new HashSet<DerivedCategory>();
+            var startCat = new DerivedCategory(StartRule);
+            toVisit.Enqueue(startCat);
+            visited.Add(startCat);
+
+            while (toVisit.Any())
+            {
+                var nextTerm = toVisit.Dequeue();
+
+                //if static rules have not been generated for this term yet
+                //compute them from dynamaic rules dictionary
+                if (!staticRulesGeneratedForCategory.Contains(nextTerm))
+                {
+                    staticRulesGeneratedForCategory.Add(nextTerm);
+                    var baseSyntacticCategory = new SyntacticCategory(nextTerm);
+
+                    if (dynamicRules.ContainsKey(baseSyntacticCategory))
+                    {
+                        var grammarRuleList = dynamicRules[baseSyntacticCategory];
+                        foreach (var item in grammarRuleList)
+                        {
+                            var derivedRule = GenerateStaticRuleFromDyamicRule(item, nextTerm);
+                            AddStaticRule(derivedRule);
+
+                            if (derivedRule != null)
+                            {
+                                foreach (var rhs in derivedRule.RightHandSide)
+                                {
+                                    if (!visited.Contains(rhs))
+                                    {
+                                        visited.Add(rhs);
+                                        toVisit.Enqueue(rhs);
+                                    }
+                                }     
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

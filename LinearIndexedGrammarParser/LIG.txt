@@ -13,4 +13,4 @@ VP[*NP] -> V0 NP[*]
 VP[*] -> V0
 VP[*] -> V1 NP[*]
 VP[*] -> V1 NP[*NP]
-NP -> D N
+NP[*] -> D N[*]
