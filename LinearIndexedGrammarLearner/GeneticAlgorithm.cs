@@ -106,8 +106,8 @@ namespace LinearIndexedGrammarLearner
             foreach (var bestHypothesisCandidates in population.Last().Value)
             {
                 var g = bestHypothesisCandidates.Grammar;
-                //var ruleDistribution = learner.CollectUsages(g);
-                //g.PruneUnusedRules(ruleDistribution);
+                var ruleDistribution = learner.CollectUsages(g);
+                g.PruneUnusedRules(ruleDistribution);
                 int numberOfRules = g.Rules.Count();
                 if (numberOfRules < minimalNumberOfRules)
                 {

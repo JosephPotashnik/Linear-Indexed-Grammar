@@ -52,6 +52,8 @@ namespace LinearIndexedGrammarParser
             return Number == p.Number;
         }
 
+
+
         public override int GetHashCode()
         {
             // ReSharper disable once NonReadonlyMemberInGetHashCode

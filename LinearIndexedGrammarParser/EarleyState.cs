@@ -93,7 +93,7 @@ namespace LinearIndexedGrammarParser
                 if (!y.HasChildren())
                     y.AddChildren(reductor, predecessorState.Node);
 
-                y.RuleNumber = predecessorState.Rule.Number;
+                y.RuleNumber = predecessorState.Rule.NumberOfGeneratingRule;
             }
 
             return y;

@@ -81,7 +81,7 @@ namespace LinearIndexedGrammarLearner
 
                 var replaceRule = new Rule(randomRule);
                 replaceRule.RightHandSide[randomChildIndex] = posRHS;
-                if (grammar.ContainsSameRHSRule(replaceRule)) continue;
+                if (grammar.ContainsSameRHSRule(replaceRule, PartsOfSpeechCategories)) continue;
 
                 grammar.DeleteGrammarRule(randomRule);
                 grammar.AddGrammarRule(replaceRule);
@@ -120,7 +120,7 @@ namespace LinearIndexedGrammarLearner
 
                 var replaceRule = new Rule(randomRule);
                 replaceRule.RightHandSide[randomChildIndex] = lhs;
-                if (grammar.ContainsSameRHSRule(replaceRule)) continue;
+                if (grammar.ContainsSameRHSRule(replaceRule, PartsOfSpeechCategories)) continue;
 
                 grammar.DeleteGrammarRule(randomRule);
                 grammar.AddGrammarRule(replaceRule);
@@ -217,7 +217,7 @@ namespace LinearIndexedGrammarLearner
 
                 var newRule = new Rule(newCategory, rightHandSide);
 
-                if (grammar.ContainsSameRHSRule(newRule)) continue;
+                if (grammar.ContainsSameRHSRule(newRule, PartsOfSpeechCategories)) continue;
 
                 grammar.AddGrammarRule(newRule);
 

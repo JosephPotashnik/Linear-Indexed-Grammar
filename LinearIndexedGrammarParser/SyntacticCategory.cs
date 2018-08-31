@@ -7,7 +7,7 @@ namespace LinearIndexedGrammarParser
 
     public class SyntacticCategory
     {
-        protected readonly string Symbol;
+        protected string Symbol;
         public SyntacticCategory() { }
         public SyntacticCategory(string symbol) => Symbol = symbol;
         public SyntacticCategory(SyntacticCategory otherCategory) => Symbol = otherCategory.Symbol;
@@ -54,5 +54,7 @@ namespace LinearIndexedGrammarParser
         public override string ToString() => Contents;
         public bool BaseEquals(DerivedCategory other)
         { return Symbol == other.Symbol; }
+
+        public void SetSymbol(string s) { Symbol = s;  }
     }
 }

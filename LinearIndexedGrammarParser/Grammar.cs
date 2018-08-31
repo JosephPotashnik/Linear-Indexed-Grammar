@@ -105,10 +105,10 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        public bool ContainsSameRHSRule(Rule newRule)
+        public bool ContainsSameRHSRule(Rule newRule, SyntacticCategory[] PartsOfSpeechCategories)
         {
             bool bFoundIdentical = false;
-
+            var poses = PartsOfSpeechCategories.Select(x=>x.ToString()).ToHashSet();
             //assuming compositionality.
             // if found rule with the same right hand side, do not re-add it.
             //the nonterminal of the left hand side does not matter.
@@ -120,8 +120,18 @@ namespace LinearIndexedGrammarParser
                     bFoundIdentical = true;
                     for (int i = 0; i < rule.RightHandSide.Length; i++)
                     {
-                        if (!rule.RightHandSide[i].Equals(newRule.RightHandSide[i]))
-                            bFoundIdentical = false;
+                        var b = (SyntacticCategory)newRule.RightHandSide[i];
+                        string pos = b.ToString();
+                        if (poses.Contains(pos))
+                        {
+                            if (!rule.RightHandSide[i].BaseEquals(newRule.RightHandSide[i]))
+                                bFoundIdentical = false;
+                        }
+                        else
+                        {
+                            if (!rule.RightHandSide[i].Equals(newRule.RightHandSide[i]))
+                                bFoundIdentical = false;
+                        }
                     }
                     if (bFoundIdentical) break;
                 }
@@ -216,87 +226,42 @@ namespace LinearIndexedGrammarParser
             return newRule;
         }
 
-        public void RenameStartVariable()
-        {
-            //var startVariable = new DerivedCategory(StartRule);
-            //var newStartVariable = new DerivedCategory(StartRule + "TAG");
-            //var replaceDic = new Dictionary<DerivedCategory, DerivedCategory>();
-            //replaceDic[startVariable] = newStartVariable;
-            //ReplaceVariables(replaceDic);
-        }
-
-
         public void RenameVariables()
         {
-            var xs = Rules.Where(x => x.ToString()[0] == 'X').Select(x => x.LeftHandSide).ToList();
-            var replacedx = new List<DerivedCategory>();
+            var xs = dynamicRules.Keys.Where(x => x.ToString()[0] == 'X').ToList();
+            string s = "variables with X: " +  string.Join(" ", xs);
+            NLog.LogManager.GetCurrentClassLogger().Info(s);
+
+            var replacedx = new List<SyntacticCategory>();
             for (int i = 0; i < xs.Count; i++)
-                replacedx.Add(new DerivedCategory($"X{i + 1}"));
+                replacedx.Add(new SyntacticCategory($"X{i + 1}"));
             var replaceDic = xs.Zip(replacedx, (x, y) => new { key = x, value = y }).ToDictionary(x => x.key, x => x.value);
 
-            //replace all StartTAG symbols with START 
-            //(initially, we changed in the promiscuous grammar all occurrences of START with STARTTAG for simplicity)
-            //var originalStartVariable = new DerivedCategory(StartRule);
-            //var startVariable = new DerivedCategory(StartRule + "TAG");
-            //replaceDic[startVariable] = originalStartVariable;
             ReplaceVariables(replaceDic);
 
-            //DismissStartToStartTagRule(); //remove START -> START rule  (initially, added START -> STARTTAG to the promiscuous grammar for simplicity)
         }
 
-        private void DismissStartToStartTagRule()
+        
+
+
+        private void ReplaceVariables(Dictionary<SyntacticCategory, SyntacticCategory> replaceDic)
         {
-            //DerivedCategory originalStartVariable = new DerivedCategory(StartRule);
-            //var startRulesLHS = staticRules[originalStartVariable];
-            //bool foundStartToStartTagRule = false;
-            //Rule dismissedStartRule = null;
 
-            //foreach (var rule in startRulesLHS)
-            //{
-            //    if (rule.RightHandSide[0].Equals(originalStartVariable))
-            //    {
-            //        foundStartToStartTagRule = true;
-            //        dismissedStartRule = rule;
-            //        break;
-            //    }
-            //}
-            //if (foundStartToStartTagRule)
-            //    DeleteGrammarRule(dismissedStartRule);
-        }
-
-
-        private void ReplaceVariables(Dictionary<DerivedCategory, DerivedCategory> replaceDic)
-        {
-            List<Rule> newRules = new List<Rule>();
-            List<Rule> deletedRules = new List<Rule>();
             foreach (var rule in Rules)
             {
-                var newRule = new Rule(rule);
-                bool created = false;
-                if (replaceDic.ContainsKey(rule.LeftHandSide))
-                {
-                    newRule.LeftHandSide = replaceDic[rule.LeftHandSide];
-                    created = true;
-                }
+                var v = new SyntacticCategory(rule.LeftHandSide);
+                if (replaceDic.ContainsKey(v))
+                    rule.LeftHandSide.SetSymbol(replaceDic[v].ToString());
+
                 for (int i = 0; i < rule.RightHandSide.Length; i++)
                 {
-                    if (replaceDic.ContainsKey(rule.RightHandSide[i]))
-                        newRule.RightHandSide[i] = replaceDic[rule.RightHandSide[i]];
-                    created = true;
-                }
+                    v = new SyntacticCategory(rule.RightHandSide[i]);
 
-                if (created)
-                {
-                    deletedRules.Add(rule);
-                    newRules.Add(newRule);
+                    if (replaceDic.ContainsKey(new SyntacticCategory(v)))
+                        rule.RightHandSide[i].SetSymbol(replaceDic[v].ToString());
+
                 }
             }
-
-            foreach (var rule in deletedRules)
-                DeleteGrammarRule(rule);
-
-            foreach (var rule in newRules)
-                AddGrammarRule(rule);
         }
 
         public void GenerateAllStaticRulesFromDynamicRules()
