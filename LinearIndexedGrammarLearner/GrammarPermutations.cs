@@ -109,6 +109,7 @@ namespace LinearIndexedGrammarLearner
 
                 //spread LHS only to binary rules. Spreading the LHS to an unary rule
                 //is equivalent to variable renaming.
+
                 if (randomRule.RightHandSide.Length < 2)
                     continue;
 
@@ -132,7 +133,7 @@ namespace LinearIndexedGrammarLearner
         
         public Grammar SpreadRuleLHSToLHS(Grammar grammar)
         {
-            var lhsCategories = grammar.staticRulesGeneratedForCategory.ToArray();
+            var lhsCategories = grammar.dynamicRules.Keys.ToArray();
             if (lhsCategories.Length < 2)
                 return null;
 
@@ -166,7 +167,7 @@ namespace LinearIndexedGrammarLearner
             return grammar;
         }
 
-        public Grammar InsertRule(Grammar grammar)
+        public Grammar InsertBinaryRule(Grammar grammar)
         {
             var startCategory = new DerivedCategory(Grammar.StartRule);
             var lhsCategories = grammar.dynamicRules.Keys.ToArray();
@@ -212,6 +213,66 @@ namespace LinearIndexedGrammarLearner
                     if (addStarToRightHandSide)
                         rightHandSide[i].Stack = Grammar.StarSymbol;
                     
+                    addStarToRightHandSide = !addStarToRightHandSide;
+                }
+
+                var newRule = new Rule(newCategory, rightHandSide);
+
+                if (grammar.ContainsSameRHSRule(newRule, PartsOfSpeechCategories)) continue;
+
+                grammar.AddGrammarRule(newRule);
+
+                return grammar;
+            }
+            return null;
+        }
+
+        public Grammar InsertUnaryRule(Grammar grammar)
+        {
+            var startCategory = new DerivedCategory(Grammar.StartRule);
+            var lhsCategories = grammar.dynamicRules.Keys.ToArray();
+            var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
+
+
+            //we cannot insert a new rule if the number of left hand sided symbols
+            //exceeds a certain amount, determined by the number of parts of speech.
+
+            //a full binary tree with N different parts of speech as leaves
+            //requires N-1 non-terminals to parse.
+            //so at best case, the number of LHS symbols is in the order of the number
+            //of different Parts of speech. 
+            //we will no assume a full binary tree, so we can increase the upper bound to allow flexibility.
+            int RelationOfLHSToPOS = 2;
+            int upperBoundNonTerminals = PartsOfSpeechCategories.Length * RelationOfLHSToPOS;
+            //do not consider START in the upper bound.
+            if ((lhsCategories.Length - 1) >= upperBoundNonTerminals)
+                return null;
+
+            for (var k = 0; k < NumberOfRetries; k++)
+            {
+                //create a new non terminal
+                string baseNonTerminal = null;
+                baseNonTerminal = $"X{newNonTerminalCounter++}";
+
+                var newCategory = new DerivedCategory(baseNonTerminal, Grammar.StarSymbol);
+
+                //create a new unary Rule, whose LHS is the new category. 
+                //the right hand side of the new rule is chosen randomly from POS.
+
+                //assuming unary rules.
+                int len = 1;
+                var rand = ThreadSafeRandom.ThisThreadsRandom;
+                bool addStarToRightHandSide = true;
+
+                var rightHandSide = new DerivedCategory[len];
+                for (var i = 0; i < len; i++)
+                {
+                    DerivedCategory randomRightHandSideCategory = new DerivedCategory(PartsOfSpeechCategories[rand.Next(PartsOfSpeechCategories.Length)].ToString());
+
+                    rightHandSide[i] = randomRightHandSideCategory;
+                    if (addStarToRightHandSide)
+                        rightHandSide[i].Stack = Grammar.StarSymbol;
+
                     addStarToRightHandSide = !addStarToRightHandSide;
                 }
 
