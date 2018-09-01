@@ -6,11 +6,11 @@
 # comment lines begin with "#"
 # the start symbol is "START"
 #
-START -> T D
-START -> U N
-START -> D
-START -> N
-T -> D START
-U -> N START
-T -> D
-U -> N
+START[*] -> T D[*]
+START[*] -> U N[*]
+START[*] -> D[*]
+START[*] -> N[*]
+T[*] -> D START[*]
+U[*] -> N START[*]
+#T[*] -> D[*]
+#U[*] -> N[*]

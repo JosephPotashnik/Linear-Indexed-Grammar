@@ -60,7 +60,7 @@ namespace LinearIndexedGrammarLearner
 
             try
             {
-                var timeout = 2500; // 2.5 seconds
+                var timeout = 500; // 0.5 seconds
                 var cts = new CancellationTokenSource(timeout);
                 Parallel.ForEach(sentencesWithCounts, new ParallelOptions { CancellationToken = cts.Token, MaxDegreeOfParallelism = Environment.ProcessorCount }, (sentenceItem, loopState, i) =>
                 {
@@ -115,12 +115,12 @@ namespace LinearIndexedGrammarLearner
                 return treeCalculator.NumberOfParseTreesPerWords(treeDepth);
             });
 
-            if (!t.Wait(2500))
+            if (!t.Wait(500))
             {
-                string s = "computing all parse trees took too long (2.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
-                NLog.LogManager.GetCurrentClassLogger().Info(s);
+                //string s = "computing all parse trees took too long (2.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
+                //NLog.LogManager.GetCurrentClassLogger().Info(s);
 
-                throw new Exception();
+                //throw new Exception();
             }
             var parseTreesCountPerWords = t.Result;
             var numberOfParseTreesBelowMaxWords = parseTreesCountPerWords.WordsTreesDic.Values.Where(x => x.WordsCount <= maxWordsInSentence).Select(x => x.TreesCount).Sum();

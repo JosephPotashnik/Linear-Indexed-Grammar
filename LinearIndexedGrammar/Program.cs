@@ -64,7 +64,7 @@ namespace LinearIndexedGrammar
         }
 
 
-        private static void Learn(int maxWordsInSentence = 6)
+        private static void Learn(int maxWordsInSentence = 7)
         {
             ProgramParams programParams = ReadProgramParamsFromFile();
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");

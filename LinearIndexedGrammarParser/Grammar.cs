@@ -229,9 +229,6 @@ namespace LinearIndexedGrammarParser
         public void RenameVariables()
         {
             var xs = dynamicRules.Keys.Where(x => x.ToString()[0] == 'X').ToList();
-            string s = "variables with X: " +  string.Join(" ", xs);
-            NLog.LogManager.GetCurrentClassLogger().Info(s);
-
             var replacedx = new List<SyntacticCategory>();
             for (int i = 0; i < xs.Count; i++)
                 replacedx.Add(new SyntacticCategory($"X{i + 1}"));
