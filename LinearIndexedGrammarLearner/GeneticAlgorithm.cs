@@ -45,7 +45,7 @@ namespace LinearIndexedGrammarLearner
             return stopWatch;
         }
 
-
+        private const int numberOfSufficientSolutions = 20;
         private readonly int populationSize;
         private readonly int numberOfGenerations;
         private readonly Learner learner;
@@ -61,7 +61,7 @@ namespace LinearIndexedGrammarLearner
             var prob = learner.Probability(initialGrammar);
 
             for (int i = 0; i < populationSize; i++)
-                population.Enqueue(prob, new GrammarWithProbability(initialGrammar, prob));
+                population.Enqueue(prob, new GrammarWithProbability(new Grammar(initialGrammar), prob));
         }
 
         public (double prob, Grammar g) Run()
@@ -82,6 +82,9 @@ namespace LinearIndexedGrammarLearner
                     }
 
                     InsertDescendantsIntoPopulation(descendants);
+                    bool enoughSolutions = CheckForSufficientSolutions();
+
+                    if (enoughSolutions) break;
                 }
 
                 catch (Exception e)
@@ -98,6 +101,18 @@ namespace LinearIndexedGrammarLearner
             return (bestProbability, bestHypothesis);
         }
 
+        private bool CheckForSufficientSolutions()
+        {
+            bool enoughSolutions = false;
+            double bestProbability = population.Last().Key;
+            if (bestProbability == 1)
+            {
+                var numberOfSolutions = population.Last().Value.Count();
+                enoughSolutions = (numberOfSolutions >= GeneticAlgorithm.numberOfSufficientSolutions);
+            }
+
+            return enoughSolutions;
+        }
         private (double bestProbability, Grammar bestHypothesis) ChooseBestHypothesis()
         {
             double bestProbability = population.Last().Key;
@@ -137,7 +152,8 @@ namespace LinearIndexedGrammarLearner
                     //item and enqueue the descendant.
                     if (descendant.Key >= population.PeekFirstKey())
                     {
-                        population.Dequeue();
+                        var old = population.Dequeue();
+                        old.Dispose();
                         population.Enqueue(descendant.Key, new GrammarWithProbability(descendant.Value, descendant.Key));
                     }
 

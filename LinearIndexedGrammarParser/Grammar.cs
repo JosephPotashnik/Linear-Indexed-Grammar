@@ -12,7 +12,7 @@ namespace LinearIndexedGrammarParser
         public int WordsCount { get; set; }
         public int TreesCount { get; set; }
     }
-    public class Grammar
+    public class Grammar : IDisposable
     {
         public Grammar() { }
         public const string GammaRule = "Gamma";
@@ -36,16 +36,23 @@ namespace LinearIndexedGrammarParser
             //to compute the staticRulesGeneratedForCategory and staticRules fields.
 
             dynamicRules = otherGrammar.dynamicRules.ToDictionary(x => x.Key, x => x.Value.Select(y => new Rule(y)).ToList());
+
+
+            //foreach (var rule in otherGrammar.Rules)
+            //{
+            //    AddGrammarRule(rule);
+            //}
+
             nullableCategories = new HashSet<DerivedCategory>(otherGrammar.nullableCategories);
             ruleCounter = 0;
-            
+
             foreach (var rule in Rules)
                 rule.Number = ++ruleCounter;
         }
         public IEnumerable<Rule> Rules
         {
             //Note: SelectMany here does not deep-copy, we get the reference to the grammar rules.
-            get {  return dynamicRules.Values.SelectMany(x => x); }
+            get { return dynamicRules.Values.SelectMany(x => x); }
         }
 
 
@@ -72,7 +79,7 @@ namespace LinearIndexedGrammarParser
         public void DeleteGrammarRule(Rule oldRule)
         {
             var synCat = new SyntacticCategory(oldRule.LeftHandSide);
-     
+
             var rules = dynamicRules[synCat];
             rules.Remove(oldRule);
 
@@ -108,7 +115,7 @@ namespace LinearIndexedGrammarParser
         public bool ContainsSameRHSRule(Rule newRule, SyntacticCategory[] PartsOfSpeechCategories)
         {
             bool bFoundIdentical = false;
-            var poses = PartsOfSpeechCategories.Select(x=>x.ToString()).ToHashSet();
+            var poses = PartsOfSpeechCategories.Select(x => x.ToString()).ToHashSet();
             //assuming compositionality.
             // if found rule with the same right hand side, do not re-add it.
             //the nonterminal of the left hand side does not matter.
@@ -120,18 +127,9 @@ namespace LinearIndexedGrammarParser
                     bFoundIdentical = true;
                     for (int i = 0; i < rule.RightHandSide.Length; i++)
                     {
-                        var b = (SyntacticCategory)newRule.RightHandSide[i];
-                        string pos = b.ToString();
-                        if (poses.Contains(pos))
-                        {
-                            if (!rule.RightHandSide[i].BaseEquals(newRule.RightHandSide[i]))
-                                bFoundIdentical = false;
-                        }
-                        else
-                        {
-                            if (!rule.RightHandSide[i].Equals(newRule.RightHandSide[i]))
-                                bFoundIdentical = false;
-                        }
+                        if (!rule.RightHandSide[i].BaseEquals(newRule.RightHandSide[i]))
+                            bFoundIdentical = false;
+
                     }
                     if (bFoundIdentical) break;
                 }
@@ -180,7 +178,7 @@ namespace LinearIndexedGrammarParser
         {
             var unusedRules = Rules.Where(x => !usagesDic.ContainsKey(x.Number)).ToArray();
 
-            foreach (var rule in unusedRules)      
+            foreach (var rule in unusedRules)
                 DeleteGrammarRule(rule);
         }
 
@@ -226,6 +224,17 @@ namespace LinearIndexedGrammarParser
             return newRule;
         }
 
+        public void RenameStartVariable()
+        {
+            var startVariable = new DerivedCategory(StartRule);
+            var newStartVariable = new DerivedCategory(StartRule + "TAG");
+            var replaceDic = new Dictionary<SyntacticCategory, SyntacticCategory>();
+            replaceDic[startVariable] = newStartVariable;
+            ReplaceVariables(replaceDic);
+            var newStartRule = new Rule(startVariable, new[] { newStartVariable });
+            AddGrammarRule(newStartRule);
+        }
+
         public void RenameVariables()
         {
             var xs = dynamicRules.Keys.Where(x => x.ToString()[0] == 'X').ToList();
@@ -234,11 +243,38 @@ namespace LinearIndexedGrammarParser
                 replacedx.Add(new SyntacticCategory($"X{i + 1}"));
             var replaceDic = xs.Zip(replacedx, (x, y) => new { key = x, value = y }).ToDictionary(x => x.key, x => x.value);
 
+            var originalStartVariable = new DerivedCategory(StartRule);
+            var startVariable = new DerivedCategory(StartRule + "TAG");
+            replaceDic[startVariable] = originalStartVariable;
             ReplaceVariables(replaceDic);
 
+            DismissStartToStartTagRule();
         }
 
-        
+        private void DismissStartToStartTagRule()
+        {
+            //The initial promiscuous grammar that is the departure point for leanring
+            //contains a rule Start -> Start' (we have replaced each occurrence of start on the right
+            //hand side of rules with a new symbol start', and added start -> start')
+            //discard it now.
+            DerivedCategory originalStartVariable = new DerivedCategory(StartRule);
+            var startRulesLHS = staticRules[originalStartVariable];
+            bool foundStartToStartTagRule = false;
+            Rule dismissedStartRule = null;
+
+            foreach (var rule in startRulesLHS)
+            {
+                if (rule.RightHandSide[0].Equals(originalStartVariable))
+                {
+                    foundStartToStartTagRule = true;
+                    dismissedStartRule = rule;
+                    break;
+                }
+            }
+            if (foundStartToStartTagRule)
+                DeleteGrammarRule(dismissedStartRule);
+        }
+
 
 
         private void ReplaceVariables(Dictionary<SyntacticCategory, SyntacticCategory> replaceDic)
@@ -302,12 +338,20 @@ namespace LinearIndexedGrammarParser
                                         visited.Add(rhs);
                                         toVisit.Enqueue(rhs);
                                     }
-                                }     
+                                }
                             }
                         }
                     }
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            staticRules.Clear();
+            dynamicRules.Clear();
+            staticRulesGeneratedForCategory.Clear();
+            nullableCategories.Clear();
         }
     }
 }

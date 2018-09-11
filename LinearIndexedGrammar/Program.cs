@@ -92,6 +92,7 @@ namespace LinearIndexedGrammar
             List<double> probs = new List<double>();
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
+                NLog.LogManager.GetCurrentClassLogger().Info($"Run {i+1}:");
                 var GA = new GeneticAlgorithm(learner, programParams.PopulationSize, programParams.NumberOfGenerations);
                 (var prob, var bestHypothesis) = GA.Run();
                 probs.Add(prob);

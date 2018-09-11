@@ -8,7 +8,7 @@ using System.IO;
 
 namespace LinearIndexedGrammarLearner
 {
-    public class GrammarWithProbability
+    public class GrammarWithProbability : IDisposable
     {
         public readonly Grammar Grammar;
         public readonly double Probability;
@@ -17,6 +17,11 @@ namespace LinearIndexedGrammarLearner
         {
             this.Grammar = g;
             this.Probability = probability;
+        }
+
+        public void Dispose()
+        {
+            Grammar.Dispose();
         }
     }
     public class Learner
@@ -49,7 +54,7 @@ namespace LinearIndexedGrammarLearner
             }
 
 
-            //originalGrammar.RenameStartVariable();
+            originalGrammar.RenameStartVariable();
             originalGrammar.GenerateAllStaticRulesFromDynamicRules();
             return originalGrammar;
         }
