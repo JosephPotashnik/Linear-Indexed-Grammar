@@ -224,17 +224,6 @@ namespace LinearIndexedGrammarParser
             return newRule;
         }
 
-        public void RenameStartVariable()
-        {
-            var startVariable = new DerivedCategory(StartRule);
-            var newStartVariable = new DerivedCategory(StartRule + "TAG");
-            var replaceDic = new Dictionary<SyntacticCategory, SyntacticCategory>();
-            replaceDic[startVariable] = newStartVariable;
-            ReplaceVariables(replaceDic);
-            var newStartRule = new Rule(startVariable, new[] { newStartVariable });
-            AddGrammarRule(newStartRule);
-        }
-
         public void RenameVariables()
         {
             var xs = dynamicRules.Keys.Where(x => x.ToString()[0] == 'X').ToList();
@@ -243,12 +232,12 @@ namespace LinearIndexedGrammarParser
                 replacedx.Add(new SyntacticCategory($"X{i + 1}"));
             var replaceDic = xs.Zip(replacedx, (x, y) => new { key = x, value = y }).ToDictionary(x => x.key, x => x.value);
 
-            var originalStartVariable = new DerivedCategory(StartRule);
-            var startVariable = new DerivedCategory(StartRule + "TAG");
-            replaceDic[startVariable] = originalStartVariable;
+            //var originalStartVariable = new DerivedCategory(StartRule);
+            //var startVariable = new DerivedCategory(StartRule + "TAG");
+            //replaceDic[startVariable] = originalStartVariable;
             ReplaceVariables(replaceDic);
 
-            DismissStartToStartTagRule();
+            //DismissStartToStartTagRule();
         }
 
         private void DismissStartToStartTagRule()

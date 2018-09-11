@@ -1,6 +1,0 @@
-﻿{
-  "PopulationSize": 300,
-  "NumberOfGenerations": 2000,
-  "NumberOfRuns": 20,
-  "GrammarFileName": "SimpleCFGLIGNotation.txt"
-}

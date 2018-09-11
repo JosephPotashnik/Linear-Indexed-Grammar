@@ -24,7 +24,7 @@
     <None Update="PalindromeCFG.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="ProgramParameters.json">
+    <None Update="ProgramsToRun.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="SimpleCFGLIGNotation.txt">

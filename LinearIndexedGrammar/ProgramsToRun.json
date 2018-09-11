@@ -1,0 +1,10 @@
+﻿{
+  "ProgramsToRun": [
+    {
+      "PopulationSize": 300,
+      "NumberOfGenerations": 1000,
+      "NumberOfRuns": 3,
+      "GrammarFileName": "SimpleCFGLIGNotation.txt"
+    }
+  ]
+}

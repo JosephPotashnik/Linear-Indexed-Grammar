@@ -11,6 +11,13 @@ using System.Linq;
 namespace LinearIndexedGrammar
 {
     [JsonObject(MemberSerialization.OptIn)]
+    public class ProgramParamsList
+    {
+        [JsonProperty]
+        public ProgramParams[] ProgramsToRun { get; set; }
+    }
+
+    [JsonObject(MemberSerialization.OptIn)]
     public class ProgramParams
     {
         [JsonProperty]
@@ -66,13 +73,22 @@ namespace LinearIndexedGrammar
 
         private static void Learn(int maxWordsInSentence = 7)
         {
-            ProgramParams programParams = ReadProgramParamsFromFile();
+            var programParamsList = ReadProgramParamsFromFile();
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
 
+            foreach (var programParams in programParamsList.ProgramsToRun)
+            {
+                RunProgram(programParams, maxWordsInSentence, universalVocabulary);
+
+            }
+        }
+
+        private static void RunProgram(ProgramParams programParams, int maxWordsInSentence, Vocabulary universalVocabulary)
+        {
             (var nodeList, var targetGrammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar(programParams.GrammarFileName, maxWordsInSentence);
             (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
 
-            string s = "-------------------\r\n" + 
+            string s = "-------------------\r\n" +
                         $"Session {DateTime.Now.ToString("MM/dd/yyyy h:mm tt")}\r\n" +
                         $"runs: { programParams.NumberOfRuns}, population size: {programParams.PopulationSize}, number of generations: {programParams.NumberOfGenerations}\r\n";
 
@@ -92,7 +108,7 @@ namespace LinearIndexedGrammar
             List<double> probs = new List<double>();
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
-                NLog.LogManager.GetCurrentClassLogger().Info($"Run {i+1}:");
+                NLog.LogManager.GetCurrentClassLogger().Info($"Run {i + 1}:");
                 var GA = new GeneticAlgorithm(learner, programParams.PopulationSize, programParams.NumberOfGenerations);
                 (var prob, var bestHypothesis) = GA.Run();
                 probs.Add(prob);
@@ -100,22 +116,22 @@ namespace LinearIndexedGrammar
 
             int numTimesAchieveProb1 = probs.Where(x => x == 1).Count();
             double averageProb = probs.Average();
-            s = $"Average probability is: {averageProb}\r\n" + 
+            s = $"Average probability is: {averageProb}\r\n" +
                 $"Achieved Probability=1 in {numTimesAchieveProb1} times out of {programParams.NumberOfRuns} runs";
             NLog.LogManager.GetCurrentClassLogger().Info(s);
             StopWatch(stopWatch);
         }
 
-        private static ProgramParams ReadProgramParamsFromFile()
+        private static ProgramParamsList ReadProgramParamsFromFile()
         {
-            ProgramParams programParams;
-            using (var file = File.OpenText(@"ProgramParameters.json"))
+            ProgramParamsList programParamsList;
+            using (var file = File.OpenText(@"ProgramsToRun.json"))
             {
                 var serializer = new JsonSerializer();
-                programParams = (ProgramParams)serializer.Deserialize(file, typeof(ProgramParams));
+                programParamsList = (ProgramParamsList)serializer.Deserialize(file, typeof(ProgramParamsList));
             }
 
-            return programParams;
+            return programParamsList;
         }
 
 
