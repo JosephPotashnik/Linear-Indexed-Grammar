@@ -45,7 +45,7 @@ namespace LinearIndexedGrammarLearner
             return stopWatch;
         }
 
-        private const int numberOfSufficientSolutions = 20;
+        private const int numberOfSufficientSolutions = 10;
         private readonly int populationSize;
         private readonly int numberOfGenerations;
         private readonly Learner learner;
@@ -83,7 +83,6 @@ namespace LinearIndexedGrammarLearner
 
                     InsertDescendantsIntoPopulation(descendants);
                     bool enoughSolutions = CheckForSufficientSolutions();
-
                     if (enoughSolutions) break;
                 }
 

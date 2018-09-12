@@ -1,0 +1,16 @@
+﻿{
+  "ProgramsToRun": [
+    {
+      "PopulationSize": 500,
+      "NumberOfGenerations": 2000,
+      "NumberOfRuns": 5,
+      "GrammarFileName": "YesNPNoV3.txt"
+    },
+    {
+      "PopulationSize": 500,
+      "NumberOfGenerations": 2000,
+      "NumberOfRuns": 5,
+      "GrammarFileName": "YesNPYesV3.txt"
+    }
+  ]
+}

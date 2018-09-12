@@ -73,7 +73,10 @@ namespace LinearIndexedGrammar
 
         private static void Learn(int maxWordsInSentence = 7)
         {
-            var programParamsList = ReadProgramParamsFromFile();
+            string fileName = @"ProgramsToRun.json";
+            fileName = @"NightRun.json";
+
+            var programParamsList = ReadProgramParamsFromFile(fileName);
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
 
             foreach (var programParams in programParamsList.ProgramsToRun)
@@ -122,10 +125,10 @@ namespace LinearIndexedGrammar
             StopWatch(stopWatch);
         }
 
-        private static ProgramParamsList ReadProgramParamsFromFile()
+        private static ProgramParamsList ReadProgramParamsFromFile(string fileName)
         {
             ProgramParamsList programParamsList;
-            using (var file = File.OpenText(@"ProgramsToRun.json"))
+            using (var file = File.OpenText(fileName))
             {
                 var serializer = new JsonSerializer();
                 programParamsList = (ProgramParamsList)serializer.Deserialize(file, typeof(ProgramParamsList));

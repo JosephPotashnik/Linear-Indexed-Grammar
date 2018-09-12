@@ -1,7 +1,7 @@
 ﻿[
   {
     "Mutation": "InsertBinaryRule",
-    "MutationWeight": 10
+    "MutationWeight": 15
   },
   {
     "Mutation": "InsertUnaryRule",
@@ -9,7 +9,7 @@
   },
   {
     "Mutation": "DeleteRule",
-    "MutationWeight": 15
+    "MutationWeight": 20
   },
   {
     "Mutation": "SpreadRuleLHSToRHS",

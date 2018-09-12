@@ -53,7 +53,7 @@ namespace LinearIndexedGrammarLearner
                 originalGrammar.AddGrammarRule(new Rule(Grammar.StartRule, new[] { pos }));
             }
 
-
+            //originalGrammar.RenameStartVariable();
             originalGrammar.GenerateAllStaticRulesFromDynamicRules();
             return originalGrammar;
         }
@@ -66,7 +66,7 @@ namespace LinearIndexedGrammarLearner
             {
                 var timeout = 500; // 0.5 seconds
                 var cts = new CancellationTokenSource(timeout);
-                Parallel.ForEach(sentencesWithCounts, new ParallelOptions { CancellationToken = cts.Token }, (sentenceItem, loopState, i) =>
+                Parallel.ForEach(sentencesWithCounts, new ParallelOptions { CancellationToken = cts.Token}, (sentenceItem, loopState, i) =>
                 {
                     var parser = new EarleyParser(currentHypothesis, this.voc);
                     var n = parser.ParseSentence(sentenceItem.Key);

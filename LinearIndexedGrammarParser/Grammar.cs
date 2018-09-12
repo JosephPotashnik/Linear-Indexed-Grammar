@@ -112,7 +112,24 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        public bool ContainsSameRHSRule(Rule newRule, SyntacticCategory[] PartsOfSpeechCategories)
+        public bool OnlyStartSymbolsRHS(Rule newRule)
+        {
+            bool onlyStartSymbols = true ;
+            DerivedCategory startCategory = new DerivedCategory(Grammar.StartRule);
+
+            for (int i = 0; i < newRule.RightHandSide.Length; i++)
+            {
+                if (!newRule.RightHandSide[i].BaseEquals(startCategory))
+                {
+                    onlyStartSymbols = false;
+                    break;
+                }
+            }
+
+            return onlyStartSymbols;
+        }
+
+            public bool ContainsSameRHSRule(Rule newRule, SyntacticCategory[] PartsOfSpeechCategories)
         {
             bool bFoundIdentical = false;
             var poses = PartsOfSpeechCategories.Select(x => x.ToString()).ToHashSet();
@@ -224,6 +241,17 @@ namespace LinearIndexedGrammarParser
             return newRule;
         }
 
+        public void RenameStartVariable()
+        {
+            var startVariable = new DerivedCategory(StartRule);
+            var newStartVariable = new DerivedCategory(StartRule + "TAG");
+            var replaceDic = new Dictionary<SyntacticCategory, SyntacticCategory>();
+            replaceDic[startVariable] = newStartVariable;
+            ReplaceVariables(replaceDic);
+            var newStartRule = new Rule(startVariable, new[] { newStartVariable });
+            AddGrammarRule(newStartRule);
+        }
+
         public void RenameVariables()
         {
             var xs = dynamicRules.Keys.Where(x => x.ToString()[0] == 'X').ToList();
@@ -231,42 +259,37 @@ namespace LinearIndexedGrammarParser
             for (int i = 0; i < xs.Count; i++)
                 replacedx.Add(new SyntacticCategory($"X{i + 1}"));
             var replaceDic = xs.Zip(replacedx, (x, y) => new { key = x, value = y }).ToDictionary(x => x.key, x => x.value);
-
-            //var originalStartVariable = new DerivedCategory(StartRule);
-            //var startVariable = new DerivedCategory(StartRule + "TAG");
-            //replaceDic[startVariable] = originalStartVariable;
+            var originalStartVariable = new DerivedCategory(StartRule);
+            var startVariable = new DerivedCategory(StartRule + "TAG");
+            replaceDic[startVariable] = originalStartVariable;
             ReplaceVariables(replaceDic);
-
-            //DismissStartToStartTagRule();
+            DismissStartToStartTagRule();
         }
-
-        private void DismissStartToStartTagRule()
+    private void DismissStartToStartTagRule()
+    {
+        //The initial promiscuous grammar that is the departure point for leanring
+        //contains a rule Start -> Start' (we have replaced each occurrence of start on the right
+        //hand side of rules with a new symbol start', and added start -> start')
+        //discard it now.
+        DerivedCategory originalStartVariable = new DerivedCategory(StartRule);
+        var startRulesLHS = staticRules[originalStartVariable];
+        bool foundStartToStartTagRule = false;
+        Rule dismissedStartRule = null;
+        foreach (var rule in startRulesLHS)
         {
-            //The initial promiscuous grammar that is the departure point for leanring
-            //contains a rule Start -> Start' (we have replaced each occurrence of start on the right
-            //hand side of rules with a new symbol start', and added start -> start')
-            //discard it now.
-            DerivedCategory originalStartVariable = new DerivedCategory(StartRule);
-            var startRulesLHS = staticRules[originalStartVariable];
-            bool foundStartToStartTagRule = false;
-            Rule dismissedStartRule = null;
-
-            foreach (var rule in startRulesLHS)
+            if (rule.RightHandSide[0].Equals(originalStartVariable))
             {
-                if (rule.RightHandSide[0].Equals(originalStartVariable))
-                {
-                    foundStartToStartTagRule = true;
-                    dismissedStartRule = rule;
-                    break;
-                }
+                foundStartToStartTagRule = true;
+                dismissedStartRule = rule;
+                break;
             }
-            if (foundStartToStartTagRule)
-                DeleteGrammarRule(dismissedStartRule);
         }
+        if (foundStartToStartTagRule)
+            DeleteGrammarRule(dismissedStartRule);
+    }
 
 
-
-        private void ReplaceVariables(Dictionary<SyntacticCategory, SyntacticCategory> replaceDic)
+    private void ReplaceVariables(Dictionary<SyntacticCategory, SyntacticCategory> replaceDic)
         {
 
             foreach (var rule in Rules)

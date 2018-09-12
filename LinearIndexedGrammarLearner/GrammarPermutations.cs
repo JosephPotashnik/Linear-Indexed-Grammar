@@ -11,7 +11,7 @@ namespace LinearIndexedGrammarLearner
     public class GrammarPermutations
     {
         public delegate Grammar GrammarMutation(Grammar grammar);
-        private const int NumberOfRetries = 10;
+        private const int NumberOfRetries = 3;
         private static Tuple<GrammarMutation, int>[] mutations;
         private static int totalWeights;
         private static int newNonTerminalCounter = 1;
@@ -93,9 +93,9 @@ namespace LinearIndexedGrammarLearner
 
         public Grammar SpreadRuleLHSToRHS(Grammar grammar)
         {
-            DerivedCategory startCategory = new DerivedCategory(Grammar.StartRule);
-
             var lhsCategories = grammar.dynamicRules.Keys.ToArray();
+
+            //optimization: if there is only one LHS category (START), don't spread it.
             if (lhsCategories.Length < 2)
                 return null;
 
@@ -104,9 +104,7 @@ namespace LinearIndexedGrammarLearner
                 //find LHS to spread:
                 var rand = ThreadSafeRandom.ThisThreadsRandom;
 
-                DerivedCategory lhs = new DerivedCategory(Grammar.StartRule);
-                while (lhs.BaseEquals(startCategory))
-                    lhs = new DerivedCategory(lhsCategories[rand.Next(lhsCategories.Length)].ToString());
+                DerivedCategory lhs = new DerivedCategory(lhsCategories[rand.Next(lhsCategories.Length)].ToString());
 
                 //choose random rule one of its RHS nonterminals we will replace by lhs chosen above.
                 Rule randomRule = GetRandomRule(grammar);
@@ -118,13 +116,15 @@ namespace LinearIndexedGrammarLearner
                     continue;
 
                 //select a right hand side category randomly.
-                int randomChildIndex = GetRandomChildIndex();
+                int randomChildIndex = GetRandomChildIndex(randomRule.RightHandSide.Length);
                 var originalRHSSymbol = randomRule.RightHandSide[randomChildIndex];
 
                 if (originalRHSSymbol.Equals(lhs)) continue;
 
                 var replaceRule = new Rule(randomRule);
                 replaceRule.RightHandSide[randomChildIndex] = lhs;
+
+                if (grammar.OnlyStartSymbolsRHS(replaceRule)) continue;
                 if (grammar.ContainsSameRHSRule(replaceRule, PartsOfSpeechCategories)) continue;
 
                 grammar.DeleteGrammarRule(randomRule);
@@ -170,13 +170,8 @@ namespace LinearIndexedGrammarLearner
             grammar.DeleteGrammarRule(randomRule);
             return grammar;
         }
-
-        public Grammar InsertBinaryRule(Grammar grammar)
+        private bool DoesNumberOfLHSCategoriesExceedMax(SyntacticCategory[] lhsCategories)
         {
-            var startCategory = new DerivedCategory(Grammar.StartRule);
-            var lhsCategories = grammar.dynamicRules.Keys.ToArray();
-            var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
-
             //we cannot insert a new rule if the number of left hand sided symbols
             //exceeds a certain amount, determined by the number of parts of speech.
 
@@ -188,8 +183,15 @@ namespace LinearIndexedGrammarLearner
             int RelationOfLHSToPOS = 2;
             int upperBoundNonTerminals = PartsOfSpeechCategories.Length * RelationOfLHSToPOS;
             //do not consider START in the upper bound.
-            if ((lhsCategories.Length - 1) >= upperBoundNonTerminals)
-                return null;
+            return ((lhsCategories.Length - 1) >= upperBoundNonTerminals);
+            
+        }
+        public Grammar InsertBinaryRule(Grammar grammar)
+        {
+            var lhsCategories = grammar.dynamicRules.Keys.ToArray();
+            var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
+
+            if (DoesNumberOfLHSCategoriesExceedMax(lhsCategories)) return null;
 
             for (var k = 0; k < NumberOfRetries; k++)
             {
@@ -211,9 +213,7 @@ namespace LinearIndexedGrammarLearner
                 var rightHandSide = new DerivedCategory[len];
                 for (var i = 0; i < len; i++)
                 {
-                    DerivedCategory randomRightHandSideCategory = new DerivedCategory(Grammar.StartRule);
-                    while (randomRightHandSideCategory.BaseEquals(startCategory))
-                        randomRightHandSideCategory = new DerivedCategory(categoriesPool[rand.Next(categoriesPool.Length)].ToString());
+                    DerivedCategory randomRightHandSideCategory = new DerivedCategory(categoriesPool[rand.Next(categoriesPool.Length)].ToString());
 
                     rightHandSide[i] = randomRightHandSideCategory;
                     if (addStarToRightHandSide)
@@ -223,7 +223,7 @@ namespace LinearIndexedGrammarLearner
                 }
 
                 var newRule = new Rule(newCategory, rightHandSide);
-
+                if (grammar.OnlyStartSymbolsRHS(newRule)) continue;
                 if (grammar.ContainsSameRHSRule(newRule, PartsOfSpeechCategories)) continue;
 
                 grammar.AddGrammarRule(newRule);
@@ -238,21 +238,7 @@ namespace LinearIndexedGrammarLearner
             var startCategory = new DerivedCategory(Grammar.StartRule);
             var lhsCategories = grammar.dynamicRules.Keys.ToArray();
             var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
-
-
-            //we cannot insert a new rule if the number of left hand sided symbols
-            //exceeds a certain amount, determined by the number of parts of speech.
-
-            //a full binary tree with N different parts of speech as leaves
-            //requires N-1 non-terminals to parse.
-            //so at best case, the number of LHS symbols is in the order of the number
-            //of different Parts of speech. 
-            //we will no assume a full binary tree, so we can increase the upper bound to allow flexibility.
-            int RelationOfLHSToPOS = 2;
-            int upperBoundNonTerminals = PartsOfSpeechCategories.Length * RelationOfLHSToPOS;
-            //do not consider START in the upper bound.
-            if ((lhsCategories.Length - 1) >= upperBoundNonTerminals)
-                return null;
+            if (DoesNumberOfLHSCategoriesExceedMax(lhsCategories)) return null;
 
             for (var k = 0; k < NumberOfRetries; k++)
             {
@@ -293,11 +279,11 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
-        private static int GetRandomChildIndex()
+        private static int GetRandomChildIndex(int rhsLength)
         {
             int randomChildIndex = 0;
             var rand = ThreadSafeRandom.ThisThreadsRandom;
-            randomChildIndex = rand.Next(2);
+            randomChildIndex = rand.Next(rhsLength);
             return randomChildIndex;
         }
 
