@@ -24,7 +24,10 @@
     <None Update="NightRunFull.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="PalindromeCFG.txt">
+    <None Update="PalindromeCFGNoTD.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="PalindromeCFGWithTD.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="NightRun.json">

@@ -4,7 +4,7 @@
       "PopulationSize": 300,
       "NumberOfGenerations": 1000,
       "NumberOfRuns": 5,
-      "GrammarFileName": "SimpleCFGLIGNotation.txt"
+      "GrammarFileName": "YesNPYesV3.txt"
     }
   ]
 }

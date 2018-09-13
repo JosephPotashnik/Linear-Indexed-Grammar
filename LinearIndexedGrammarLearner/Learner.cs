@@ -121,9 +121,8 @@ namespace LinearIndexedGrammarLearner
 
             if (!t.Wait(500))
             {
-                //string s = "computing all parse trees took too long (2.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
+                //string s = "computing all parse trees took too long (0.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
                 //NLog.LogManager.GetCurrentClassLogger().Info(s);
-
                 //throw new Exception();
             }
             var parseTreesCountPerWords = t.Result;

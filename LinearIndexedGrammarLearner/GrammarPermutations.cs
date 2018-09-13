@@ -182,6 +182,8 @@ namespace LinearIndexedGrammarLearner
             //we will no assume a full binary tree, so we can increase the upper bound to allow flexibility.
             int RelationOfLHSToPOS = 2;
             int upperBoundNonTerminals = PartsOfSpeechCategories.Length * RelationOfLHSToPOS;
+            if (upperBoundNonTerminals < 6) upperBoundNonTerminals = 6;
+
             //do not consider START in the upper bound.
             return ((lhsCategories.Length - 1) >= upperBoundNonTerminals);
             
