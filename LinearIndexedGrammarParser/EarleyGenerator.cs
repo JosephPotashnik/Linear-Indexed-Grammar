@@ -7,7 +7,7 @@ namespace LinearIndexedGrammarParser
 {
     public class EarleyGenerator : EarleyParser
     {
-        public EarleyGenerator(Grammar g) : base(g) { }
+        public EarleyGenerator(ContextFreeGrammar g) : base(g) { }
 
         protected override (EarleyColumn[], int[])  PrepareEarleyTable(string text, int maxWords)
         {

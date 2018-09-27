@@ -57,17 +57,17 @@ namespace LinearIndexedGrammarLearner
             this.populationSize = populationSize;
             learner = l;
 
-            Grammar initialGrammar = learner.CreateInitialGrammar();
+            ContextSensitiveGrammar initialGrammar = learner.CreateInitialGrammar();
             var prob = learner.Probability(initialGrammar);
 
             for (int i = 0; i < populationSize; i++)
-                population.Enqueue(prob, new GrammarWithProbability(new Grammar(initialGrammar), prob));
+                population.Enqueue(prob, new GrammarWithProbability(new ContextSensitiveGrammar(initialGrammar), prob));
         }
 
-        public (double prob, Grammar g) Run()
+        public (double prob, ContextSensitiveGrammar g) Run()
         {
             int currentGeneration = 0;
-            Queue<KeyValuePair<double, Grammar>> descendants = new Queue<KeyValuePair<double, Grammar>>();
+            var descendants = new Queue<KeyValuePair<double, ContextSensitiveGrammar>>();
             while (currentGeneration++ < numberOfGenerations)
             {
                 if (currentGeneration % 200 == 0)
@@ -78,7 +78,7 @@ namespace LinearIndexedGrammarLearner
                     {
                         var mutatedIndividual = Mutate(individual);
                         if (mutatedIndividual.Grammar != null && mutatedIndividual.Probability > 0)
-                            descendants.Enqueue(new KeyValuePair<double, Grammar>(mutatedIndividual.Probability, mutatedIndividual.Grammar));
+                            descendants.Enqueue(new KeyValuePair<double, ContextSensitiveGrammar>(mutatedIndividual.Probability, mutatedIndividual.Grammar));
                     }
 
                     InsertDescendantsIntoPopulation(descendants);
@@ -112,11 +112,11 @@ namespace LinearIndexedGrammarLearner
 
             return enoughSolutions;
         }
-        private (double bestProbability, Grammar bestHypothesis) ChooseBestHypothesis()
+        private (double bestProbability, ContextSensitiveGrammar bestHypothesis) ChooseBestHypothesis()
         {
             double bestProbability = population.Last().Key;
             int minimalNumberOfRules = int.MaxValue;
-            Grammar bestHypothesis = null;
+            ContextSensitiveGrammar bestHypothesis = null;
             foreach (var bestHypothesisCandidates in population.Last().Value)
             {
                 var g = bestHypothesisCandidates.Grammar;
@@ -138,11 +138,11 @@ namespace LinearIndexedGrammarLearner
 
         
 
-        private void InsertDescendantsIntoPopulation(Queue<KeyValuePair<double, Grammar>> descendants)
+        private void InsertDescendantsIntoPopulation(Queue<KeyValuePair<double, ContextSensitiveGrammar>> descendants)
         {
             while (descendants.Any())
             {
-                KeyValuePair<double, Grammar> descendant;
+                KeyValuePair<double, ContextSensitiveGrammar> descendant;
                 bool success = descendants.TryDequeue(out descendant);
                 if (success)
                 {

@@ -14,9 +14,9 @@ namespace LinearIndexedGrammarParser
     public class EarleyParser
     {
         protected Vocabulary voc;
-        private Grammar grammar;
+        private ContextFreeGrammar grammar;
 
-        public EarleyParser(Grammar g, Vocabulary v = null)
+        public EarleyParser(ContextFreeGrammar g, Vocabulary v = null)
         {
             voc  = v ?? Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
 
@@ -46,7 +46,7 @@ namespace LinearIndexedGrammarParser
 
         private void Complete(EarleyColumn col, EarleyState state)
         {
-            if (state.Rule.LeftHandSide.ToString() == Grammar.GammaRule)
+            if (state.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
             {
                 col.GammaStates.Add(state);
                 return;
@@ -85,7 +85,7 @@ namespace LinearIndexedGrammarParser
 
             //assumption: GenerateAllStaticRulesFromDynamicRules has been called before parsing
             //and added the GammaRule
-            var startRule = grammar.staticRules[new DerivedCategory(Grammar.GammaRule)][0];
+            var startRule = grammar.staticRules[new DerivedCategory(ContextFreeGrammar.GammaRule)][0];
 
             var startState = new EarleyState(startRule, 0, table[0], null);
             table[0].AddState(startState, grammar);
@@ -188,12 +188,6 @@ namespace LinearIndexedGrammarParser
                 count++;
                 //TestForTooManyStatesInColumn(col, count);
 
-                //important: Static rules are calculated from the dynamic rules before running
-                //the parser in the function Grammar.GenerateAllStaticRulesFromDynamicRules()
-                //thus the code below is commented.
-                //if you do not call to GenerateAllStaticRulesFromDynamicRules(), uncomment the next line.
-                //GenerateAllStaticRulesForCategory(nextTerm);
-
                 if (!grammar.staticRules.ContainsKey(nextTerm)) continue;
 
                 var ruleList = grammar.staticRules[nextTerm];
@@ -201,25 +195,6 @@ namespace LinearIndexedGrammarParser
             }
 
             return count;
-        }
-
-        private void GenerateAllStaticRulesForCategory(DerivedCategory nextTerm)
-        {
-            if (!grammar.staticRulesGeneratedForCategory.Contains(nextTerm))
-            {
-                grammar.staticRulesGeneratedForCategory.Add(nextTerm);
-                var baseSyntacticCategory = new SyntacticCategory(nextTerm);
-
-                if (grammar.dynamicRules.ContainsKey(baseSyntacticCategory))
-                {
-                    var grammarRuleList = grammar.dynamicRules[baseSyntacticCategory];
-                    foreach (var item in grammarRuleList)
-                    {
-                        var derivedRule = grammar.GenerateStaticRuleFromDyamicRule(item, nextTerm);
-                        grammar.AddStaticRule(derivedRule);
-                    }
-                }
-            }
         }
 
         private int TraverseCompletedStates(EarleyColumn col, int count)

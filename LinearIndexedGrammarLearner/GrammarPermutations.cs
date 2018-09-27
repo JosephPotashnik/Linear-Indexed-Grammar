@@ -10,7 +10,7 @@ namespace LinearIndexedGrammarLearner
 {
     public class GrammarPermutations
     {
-        public delegate Grammar GrammarMutation(Grammar grammar);
+        public delegate ContextSensitiveGrammar GrammarMutation(ContextSensitiveGrammar grammar);
         private const int NumberOfRetries = 3;
         private static Tuple<GrammarMutation, int>[] mutations;
         private static int totalWeights;
@@ -64,7 +64,7 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
-        public Grammar SpreadPOSToRHS(Grammar grammar)
+        public ContextSensitiveGrammar SpreadPOSToRHS(ContextSensitiveGrammar grammar)
         {
             for (var i = 0; i < NumberOfRetries; i++)
             {
@@ -91,7 +91,7 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
-        public Grammar SpreadRuleLHSToRHS(Grammar grammar)
+        public ContextSensitiveGrammar SpreadRuleLHSToRHS(ContextSensitiveGrammar grammar)
         {
             var lhsCategories = grammar.dynamicRules.Keys.ToArray();
 
@@ -135,7 +135,7 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
         
-        public Grammar SpreadRuleLHSToLHS(Grammar grammar)
+        public ContextSensitiveGrammar SpreadRuleLHSToLHS(ContextSensitiveGrammar grammar)
         {
             var lhsCategories = grammar.dynamicRules.Keys.ToArray();
             if (lhsCategories.Length < 2)
@@ -164,7 +164,7 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
-        public Grammar DeleteRule(Grammar grammar)
+        public ContextSensitiveGrammar DeleteRule(ContextSensitiveGrammar grammar)
         {
             Rule randomRule = GetRandomRule(grammar);
             grammar.DeleteGrammarRule(randomRule);
@@ -188,7 +188,7 @@ namespace LinearIndexedGrammarLearner
             return ((lhsCategories.Length - 1) >= upperBoundNonTerminals);
             
         }
-        public Grammar InsertBinaryRule(Grammar grammar)
+        public ContextSensitiveGrammar InsertBinaryRule(ContextSensitiveGrammar grammar)
         {
             var lhsCategories = grammar.dynamicRules.Keys.ToArray();
             var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
@@ -201,7 +201,7 @@ namespace LinearIndexedGrammarLearner
                 string baseNonTerminal = null;
                 baseNonTerminal = $"X{newNonTerminalCounter++}";
 
-                var newCategory = new DerivedCategory(baseNonTerminal, Grammar.StarSymbol);
+                var newCategory = new DerivedCategory(baseNonTerminal, ContextFreeGrammar.StarSymbol);
 
                 //create a new Rule, whose LHS is the new category. 
                 //the right hand side of the new rule is chosen randomly
@@ -219,7 +219,7 @@ namespace LinearIndexedGrammarLearner
 
                     rightHandSide[i] = randomRightHandSideCategory;
                     if (addStarToRightHandSide)
-                        rightHandSide[i].Stack = Grammar.StarSymbol;
+                        rightHandSide[i].Stack = ContextFreeGrammar.StarSymbol;
                     
                     addStarToRightHandSide = !addStarToRightHandSide;
                 }
@@ -235,9 +235,9 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
-        public Grammar InsertUnaryRule(Grammar grammar)
+        public ContextSensitiveGrammar InsertUnaryRule(ContextSensitiveGrammar grammar)
         {
-            var startCategory = new DerivedCategory(Grammar.StartRule);
+            var startCategory = new DerivedCategory(ContextFreeGrammar.StartRule);
             var lhsCategories = grammar.dynamicRules.Keys.ToArray();
             var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
             if (DoesNumberOfLHSCategoriesExceedMax(lhsCategories)) return null;
@@ -248,7 +248,7 @@ namespace LinearIndexedGrammarLearner
                 string baseNonTerminal = null;
                 baseNonTerminal = $"X{newNonTerminalCounter++}";
 
-                var newCategory = new DerivedCategory(baseNonTerminal, Grammar.StarSymbol);
+                var newCategory = new DerivedCategory(baseNonTerminal, ContextFreeGrammar.StarSymbol);
 
                 //create a new unary Rule, whose LHS is the new category. 
                 //the right hand side of the new rule is chosen randomly from POS.
@@ -265,7 +265,7 @@ namespace LinearIndexedGrammarLearner
 
                     rightHandSide[i] = randomRightHandSideCategory;
                     if (addStarToRightHandSide)
-                        rightHandSide[i].Stack = Grammar.StarSymbol;
+                        rightHandSide[i].Stack = ContextFreeGrammar.StarSymbol;
 
                     addStarToRightHandSide = !addStarToRightHandSide;
                 }
@@ -291,7 +291,7 @@ namespace LinearIndexedGrammarLearner
 
       
 
-        private static Rule GetRandomRule(Grammar grammar)
+        private static Rule GetRandomRule(ContextSensitiveGrammar grammar)
         {
             var rules = grammar.Rules.ToArray();
             var rand = ThreadSafeRandom.ThisThreadsRandom;

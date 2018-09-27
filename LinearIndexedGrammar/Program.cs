@@ -74,7 +74,7 @@ namespace LinearIndexedGrammar
         private static void Learn(int maxWordsInSentence = 6)
         {
             string fileName = @"ProgramsToRun.json";
-            //fileName = @"NightRunFull.json";
+            //fileName = @"NightRun.json";
 
             var programParamsList = ReadProgramParamsFromFile(fileName);
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");

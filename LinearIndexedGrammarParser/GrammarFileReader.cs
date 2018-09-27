@@ -45,32 +45,32 @@ namespace LinearIndexedGrammarParser
             return (sentences.ToArray(), textVocabulary);
         }
         
-        public static (List<EarleyNode> nodeList, Grammar g) GenerateSentenceAccordingToGrammar(string filename, int maxWords)
+        public static (List<EarleyNode> nodeList, ContextSensitiveGrammar g) GenerateSentenceAccordingToGrammar(string filename, int maxWords)
         {
 
-            var grammar = CreateGrammarFromFile(filename);
-            grammar.GenerateAllStaticRulesFromDynamicRules();
+            var CSgrammar = CreateGrammarFromFile(filename);
+            var CFGrammar = new ContextFreeGrammar(CSgrammar);
 
-            EarleyGenerator generator = new EarleyGenerator(grammar);
+            EarleyGenerator generator = new EarleyGenerator(CFGrammar);
 
             var nodeList = generator.ParseSentence("", maxWords);
-            return (nodeList, grammar);
+            return (nodeList, CSgrammar);
         }
 
         public static List<EarleyNode> ParseSentenceAccordingToGrammar(string filename, string sentence)
         {
-            var grammar = CreateGrammarFromFile(filename);
-            grammar.GenerateAllStaticRulesFromDynamicRules();
+            var CSgrammar = CreateGrammarFromFile(filename);
+            var CFgrammar = new ContextFreeGrammar(CSgrammar);
 
-            EarleyParser parser = new EarleyParser(grammar);
+            EarleyParser parser = new EarleyParser(CFgrammar);
 
             var n = parser.ParseSentence(sentence);
             return n;
         }
-        public static Grammar CreateGrammarFromFile(string filename)
+        public static ContextSensitiveGrammar CreateGrammarFromFile(string filename)
         {
             var rules = ReadRulesFromFile(filename);
-            Grammar grammar = new Grammar();
+            ContextSensitiveGrammar grammar = new ContextSensitiveGrammar();
             foreach (var item in rules)
                 grammar.AddGrammarRule(item);
 
@@ -113,7 +113,7 @@ namespace LinearIndexedGrammarParser
             var leftHandCat = CreateDerivedCategory(nonTerminals[0]);
             bool popRule = false;
 
-            if (leftHandCat.Stack.Contains(Grammar.StarSymbol))
+            if (leftHandCat.Stack.Contains(ContextFreeGrammar.StarSymbol))
             {
                 if (leftHandCat.Stack.Length > 1)
                     popRule = true;
@@ -129,7 +129,7 @@ namespace LinearIndexedGrammarParser
             for (int i = 1; i < nonTerminals.Length; i++)
             {
                 rightHandCategories[i - 1] = CreateDerivedCategory(nonTerminals[i]);
-                if (rightHandCategories[i - 1].Stack.Contains(Grammar.StarSymbol))
+                if (rightHandCategories[i - 1].Stack.Contains(ContextFreeGrammar.StarSymbol))
                 {
                     if (rightHandCategories[i - 1].Stack.Length > 1)
                     {

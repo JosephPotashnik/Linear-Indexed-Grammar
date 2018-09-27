@@ -7,11 +7,11 @@ namespace LinearIndexedGrammarParser
 {
     public class GrammarTreeCountsCalculator
     {
-        private Grammar g;
+        private ContextFreeGrammar g;
         private HashSet<string> POS;
         private SubTreeCountsCache cache;
 
-        public GrammarTreeCountsCalculator(Grammar g, HashSet<string> POS, SubTreeCountsCache cache)
+        public GrammarTreeCountsCalculator(ContextFreeGrammar g, HashSet<string> POS, SubTreeCountsCache cache)
         {
             this.g = g;
             this.POS = POS;
@@ -20,7 +20,7 @@ namespace LinearIndexedGrammarParser
 
         public SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(int treeDepth)
         {
-            return NumberOfParseTreesPerWords(new DerivedCategory(Grammar.StartRule), treeDepth);
+            return NumberOfParseTreesPerWords(new DerivedCategory(ContextFreeGrammar.StartRule), treeDepth);
         }
 
         private SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(DerivedCategory[] RHS, int treeDepth)

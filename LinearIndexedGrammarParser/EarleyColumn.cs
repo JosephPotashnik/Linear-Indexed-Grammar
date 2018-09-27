@@ -38,7 +38,7 @@ namespace LinearIndexedGrammarParser
         internal Queue<DerivedCategory> CategoriesToPredict;
         public List<EarleyState> GammaStates { get; set; }
 
-        private void EpsilonComplete(EarleyState state, Grammar grammar)
+        private void EpsilonComplete(EarleyState state, ContextFreeGrammar grammar)
         {
             var v = new EarleyNode("trace", Index, Index);
             var y = EarleyState.MakeNode(state, Index, v);
@@ -49,7 +49,7 @@ namespace LinearIndexedGrammarParser
         //The responsibility not to add a state that already exists in the columnn
         //lays with the caller to AddState(). i.e, either predict, scan or complete,
         //or epsilon complete.
-        public void AddState(EarleyState newState, Grammar grammar)
+        public void AddState(EarleyState newState, ContextFreeGrammar grammar)
         {
             newState.EndColumn = this;
 

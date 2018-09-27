@@ -10,7 +10,7 @@ namespace LinearIndexedGrammarParser
         public Dictionary<DerivedCategory, SubtreeCountsWithNumberOfWords[]> CategoriesCache;
         public Dictionary<Rule, SubtreeCountsWithNumberOfWords[]> RuleCache;
 
-        public SubTreeCountsCache(Grammar g, int depth)
+        public SubTreeCountsCache(ContextFreeGrammar g, int depth)
         {
             CategoriesCache = new Dictionary<DerivedCategory, SubtreeCountsWithNumberOfWords[]>();
             foreach (var lhs in g.staticRulesGeneratedForCategory)

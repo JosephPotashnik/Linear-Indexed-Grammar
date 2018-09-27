@@ -22,7 +22,7 @@ namespace LinearIndexedGrammarParser
 
         public override int GetHashCode() => Symbol.GetHashCode();
         public override string ToString() => Symbol;
-        internal bool IsEpsilon() =>  Symbol == Grammar.EpsislonSymbol;
+        internal bool IsEpsilon() =>  Symbol == ContextFreeGrammar.EpsislonSymbol;
 
     }
 

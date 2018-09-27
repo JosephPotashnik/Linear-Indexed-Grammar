@@ -10,10 +10,10 @@ namespace LinearIndexedGrammarLearner
 {
     public class GrammarWithProbability : IDisposable
     {
-        public readonly Grammar Grammar;
+        public readonly ContextSensitiveGrammar Grammar;
         public readonly double Probability;
 
-        public GrammarWithProbability(Grammar g, double probability)
+        public GrammarWithProbability(ContextSensitiveGrammar g, double probability)
         {
             this.Grammar = g;
             this.Probability = probability;
@@ -27,7 +27,7 @@ namespace LinearIndexedGrammarLearner
     public class Learner
     {
         private readonly Dictionary<string, int> sentencesWithCounts;
-        public Grammar originalGrammar;
+        public ContextSensitiveGrammar originalGrammar;
         private GrammarPermutations gp;
         private Vocabulary voc;
         private int maxWordsInSentence;
@@ -40,25 +40,23 @@ namespace LinearIndexedGrammarLearner
         }
 
         ////We create the "promiscuous grammar" as initial grammar.
-        public Grammar CreateInitialGrammar()
+        public ContextSensitiveGrammar CreateInitialGrammar()
         {
-            originalGrammar = new Grammar();
+            originalGrammar = new ContextSensitiveGrammar();
             var posInText = voc.POSWithPossibleWords.Keys;
             gp = new GrammarPermutations(posInText.ToArray());
             gp.ReadPermutationWeightsFromFile();
 
             foreach (var pos in posInText)
             {
-                originalGrammar.AddGrammarRule(new Rule(Grammar.StartRule, new[] { pos, Grammar.StartRule }));
-                originalGrammar.AddGrammarRule(new Rule(Grammar.StartRule, new[] { pos }));
+                originalGrammar.AddGrammarRule(new Rule(ContextFreeGrammar.StartRule, new[] { pos, ContextFreeGrammar.StartRule }));
+                originalGrammar.AddGrammarRule(new Rule(ContextFreeGrammar.StartRule, new[] { pos }));
             }
 
-            //originalGrammar.RenameStartVariable();
-            originalGrammar.GenerateAllStaticRulesFromDynamicRules();
             return originalGrammar;
         }
 
-        private SentenceParsingResults[] ParseAllSentences(Grammar currentHypothesis)
+        private SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis)
         {
             SentenceParsingResults[] allParses = new SentenceParsingResults[sentencesWithCounts.Count];
 
@@ -98,7 +96,7 @@ namespace LinearIndexedGrammarLearner
         }
 
 
-        public int GetNumberOfParseTrees(Grammar hypothesis, int maxWordsInSentence)
+        public int GetNumberOfParseTrees(ContextFreeGrammar hypothesis, int maxWordsInSentence)
         {
             //best case: tree depth = log (maxWordsInSentence) for a fully balanced tree
             //if the tree is totally binary but extremely non-balanced (fully right or left branching), tree depth = words(leaves) -1.
@@ -131,24 +129,18 @@ namespace LinearIndexedGrammarLearner
             return numberOfParseTreesBelowMaxWords;
         }
 
-        public double Probability(Grammar currentHypothesis)
+        public double Probability(ContextSensitiveGrammar currentHypothesis)
         {
+            var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
             double prob = 0;
-            var allParses = ParseAllSentences(currentHypothesis);
+            var allParses = ParseAllSentences(currentCFHypothesis);
             if (allParses != null)
             {
-                //NOT SURE that the statement below is correct.
-                //can a same tree represent two different sentences?
-                //if not - ignore the TODO below. think.
-
-                //TODO: same tree could be produced for different sentences by chance.
-                //here you will count the same parse tree several times instead of once.
-                // fix - count them only once.
                 var totalTreesCountofData = allParses.Select(x => x.Trees.Count).Sum();
 
                 if (totalTreesCountofData != 0)
                 {
-                    var totalTreesCountofGrammar = GetNumberOfParseTrees(currentHypothesis, maxWordsInSentence);
+                    var totalTreesCountofGrammar = GetNumberOfParseTrees(currentCFHypothesis, maxWordsInSentence);
                     prob = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
                 
                     if (prob > 1)
@@ -168,11 +160,14 @@ namespace LinearIndexedGrammarLearner
                     }
                 }
             }
+            currentCFHypothesis.Dispose();
             return prob;
         }
-        public Dictionary<int, int> CollectUsages(Grammar currentHypothesis)
+        public Dictionary<int, int> CollectUsages(ContextSensitiveGrammar currentHypothesis)
         {
-            var allParses = ParseAllSentences(currentHypothesis);
+            var CFGrammar = new ContextFreeGrammar(currentHypothesis);
+
+            var allParses = ParseAllSentences(CFGrammar);
             var usagesDic = new Dictionary<int, int>();
 
             if (allParses != null)
@@ -204,22 +199,20 @@ namespace LinearIndexedGrammarLearner
             }
         }
 
-        internal Grammar GetNeighbor(Grammar currentHypothesis)
+        internal ContextSensitiveGrammar GetNeighbor(ContextSensitiveGrammar currentHypothesis)
         {
             //choose mutation function in random (weighted according to weights file)
             var m = GrammarPermutations.GetWeightedRandomMutation();
 
-            var newGrammar = new Grammar(currentHypothesis);
-
+            var newGrammar = new ContextSensitiveGrammar(currentHypothesis);
 
             //mutate the grammar.
             var g =  m(newGrammar);
-            g?.GenerateAllStaticRulesFromDynamicRules();
             return g;
 
         }
 
-        internal GrammarWithProbability ComputeProbabilityForGrammar(GrammarWithProbability originalGrammar, Grammar mutatedGrammar)
+        internal GrammarWithProbability ComputeProbabilityForGrammar(GrammarWithProbability originalGrammar, ContextSensitiveGrammar mutatedGrammar)
         {
             double prob = 0;
             if (mutatedGrammar != null)
