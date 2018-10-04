@@ -62,4 +62,10 @@ namespace LinearIndexedGrammarParser
 
         public bool IsEpsilonRule() => RightHandSide[0].IsEpsilon();
     }
+
+    public class StackChangingRule : Rule
+    {
+        public StackChangingRule(DerivedCategory leftHandSide, DerivedCategory[] rightHandSide, int num = -1) : base (leftHandSide, rightHandSide, num)
+        {}
+    }
 }

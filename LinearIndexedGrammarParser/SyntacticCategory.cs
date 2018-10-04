@@ -54,6 +54,8 @@ namespace LinearIndexedGrammarParser
         public override string ToString() => Contents;
         public bool BaseEquals(DerivedCategory other)
         { return Symbol == other.Symbol; }
+        public void SetBase(DerivedCategory other)
+        {  Symbol = other.Symbol; }
 
         public void SetSymbol(string s) { Symbol = s;  }
     }

@@ -1,8 +1,8 @@
 ﻿{
   "ProgramsToRun": [
     {
-      "PopulationSize": 300,
-      "NumberOfGenerations": 1000,
+      "PopulationSize": 500,
+      "NumberOfGenerations": 2000,
       "NumberOfRuns": 5,
       "GrammarFileName": "YesNPYesV3.txt"
     }

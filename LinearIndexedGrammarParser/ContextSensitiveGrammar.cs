@@ -61,6 +61,15 @@ namespace LinearIndexedGrammarParser
             return onlyStartSymbols;
         }
 
+        public bool ContainsSameEpsilonRule(Rule newRule)
+        {
+            foreach (var rule in Rules)
+            {
+                if (rule.RightHandSide[0].IsEpsilon() && rule.LeftHandSide.BaseEquals(newRule.LeftHandSide))
+                    return true;
+            }
+            return false;
+        }
         public bool ContainsSameRHSRule(Rule newRule, SyntacticCategory[] PartsOfSpeechCategories)
         {
             bool bFoundIdentical = false;

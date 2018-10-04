@@ -22,5 +22,13 @@
   {
     "Mutation": "SpreadPOSToRHS",
     "MutationWeight": 5
+  },
+  {
+    "Mutation": "InsertPush1Rule",
+    "MutationWeight": 0
+  },
+  {
+    "Mutation": "InsertPop1Rule",
+    "MutationWeight": 0
   }
 ]

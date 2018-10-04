@@ -4,18 +4,6 @@
       "PopulationSize": 300,
       "NumberOfGenerations": 1000,
       "NumberOfRuns": 5,
-      "GrammarFileName": "PalindromeCFGNoTD.txt"
-    },
-    {
-      "PopulationSize": 500,
-      "NumberOfGenerations": 1000,
-      "NumberOfRuns": 5,
-      "GrammarFileName": "PalindromeCFGWithTD.txt"
-    },
-    {
-      "PopulationSize": 300,
-      "NumberOfGenerations": 1000,
-      "NumberOfRuns": 5,
       "GrammarFileName": "NoNPNoV3.txt"
     },
     {
@@ -35,6 +23,18 @@
       "NumberOfGenerations": 2000,
       "NumberOfRuns": 5,
       "GrammarFileName": "YesNPYesV3.txt"
+    },
+    {
+      "PopulationSize": 300,
+      "NumberOfGenerations": 1000,
+      "NumberOfRuns": 5,
+      "GrammarFileName": "PalindromeCFGNoTD.txt"
+    },
+    {
+      "PopulationSize": 500,
+      "NumberOfGenerations": 1000,
+      "NumberOfRuns": 5,
+      "GrammarFileName": "PalindromeCFGWithTD.txt"
     }
   ]
 }
