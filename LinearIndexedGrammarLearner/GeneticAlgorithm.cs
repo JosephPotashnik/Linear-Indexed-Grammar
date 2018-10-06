@@ -122,7 +122,7 @@ namespace LinearIndexedGrammarLearner
                 var g = bestHypothesisCandidates.Grammar;
                 var ruleDistribution = learner.CollectUsages(g);
                 g.PruneUnusedRules(ruleDistribution);
-                int numberOfRules = g.Rules.Count();
+                int numberOfRules = g.StackConstantRules.Count();
                 if (numberOfRules < minimalNumberOfRules)
                 {
                     bestHypothesis = g;

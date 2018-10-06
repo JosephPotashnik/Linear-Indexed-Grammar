@@ -69,12 +69,12 @@ namespace LinearIndexedGrammarParser
         //so a very large amount of earley states is not necessarily a a bug.
         private void TestForTooManyStatesInColumn(EarleyColumn col, int count)
         {
-            //if (count > 100000)
-            //{
-            //    Console.WriteLine("More than 10000 states in a single column. Suspicious. Grammar is : {0}",
-            //        grammar);
-            //    throw new Exception("Grammar with infinite parse. abort this grammar..");
-            //}
+            if (count > 100000)
+            {
+                Console.WriteLine("More than 10000 states in a single column. Suspicious. Grammar is : {0}",
+                    grammar);
+                throw new Exception("Grammar with infinite parse. abort this grammar..");
+            }
         }
         
         public List<EarleyNode> ParseSentence(string text, int maxWords = 0)
@@ -186,7 +186,7 @@ namespace LinearIndexedGrammarParser
                     throw new Exception(
                         "completed states queue should always be empty while processing predicted states.");
                 count++;
-                //TestForTooManyStatesInColumn(col, count);
+                TestForTooManyStatesInColumn(col, count);
 
                 if (!grammar.staticRules.ContainsKey(nextTerm)) continue;
 
@@ -202,7 +202,7 @@ namespace LinearIndexedGrammarParser
             while (col.ActionableCompleteStates.Any())
             {
                 count++;
-                //TestForTooManyStatesInColumn(col, count);
+                TestForTooManyStatesInColumn(col, count);
 
                 var completedStatesQueueKey = col.ActionableCompleteStates.First().Key;
                 var completedStatesQueue = col.ActionableCompleteStates.First().Value;

@@ -25,10 +25,15 @@ namespace LinearIndexedGrammarParser
         public readonly HashSet<DerivedCategory> nullableCategories = new HashSet<DerivedCategory>();
         private int ruleCounter = 0;
 
+        public override string ToString()
+        {
+            var allRules = staticRules.Values.SelectMany(x => x); 
+            return string.Join("\r\n", allRules);
+        }
 
         public ContextFreeGrammar(ContextSensitiveGrammar cs)
         {
-            GenerateAllStaticRulesFromDynamicRules(cs.dynamicRules);
+            GenerateAllStaticRulesFromDynamicRules(cs.stackConstantRules);
         }
         public ContextFreeGrammar(ContextFreeGrammar otherGrammar)
         {

@@ -125,6 +125,8 @@ namespace LinearIndexedGrammarParser
             }
             else if (POS.Contains(cat.ToString()))
                 CountTerminal(res);
+            else if (cat.ToString() == "Epsilon")
+                CountEpsilon(res);
 
             return res;
 
@@ -135,6 +137,14 @@ namespace LinearIndexedGrammarParser
             WordsTreesCounts c = new WordsTreesCounts();
             c.TreesCount = 1;
             c.WordsCount = 1;
+            res.WordsTreesDic[c.WordsCount] = c;
+        }
+
+        private static void CountEpsilon(SubtreeCountsWithNumberOfWords res)
+        {
+            WordsTreesCounts c = new WordsTreesCounts();
+            c.TreesCount = 1;
+            c.WordsCount = 0;
             res.WordsTreesDic[c.WordsCount] = c;
         }
 

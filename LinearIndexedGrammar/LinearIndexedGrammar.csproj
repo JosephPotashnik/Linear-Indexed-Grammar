@@ -24,6 +24,9 @@
     <None Update="NightRunFull.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="NoNPNoV3MoveN.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="PalindromeCFGNoTD.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

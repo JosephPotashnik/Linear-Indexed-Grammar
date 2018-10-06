@@ -72,7 +72,7 @@ namespace LinearIndexedGrammarParser
             var rules = ReadRulesFromFile(filename);
             ContextSensitiveGrammar grammar = new ContextSensitiveGrammar();
             foreach (var item in rules)
-                grammar.AddGrammarRule(item);
+                grammar.AddStackConstantRule(item);
 
             return grammar;
         }

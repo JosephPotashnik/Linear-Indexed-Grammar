@@ -49,8 +49,8 @@ namespace LinearIndexedGrammarLearner
 
             foreach (var pos in posInText)
             {
-                originalGrammar.AddGrammarRule(new Rule(ContextFreeGrammar.StartRule, new[] { pos, ContextFreeGrammar.StartRule }));
-                originalGrammar.AddGrammarRule(new Rule(ContextFreeGrammar.StartRule, new[] { pos }));
+                originalGrammar.AddStackConstantRule(new Rule(ContextFreeGrammar.StartRule, new[] { pos, ContextFreeGrammar.StartRule }));
+                originalGrammar.AddStackConstantRule(new Rule(ContextFreeGrammar.StartRule, new[] { pos }));
             }
 
             return originalGrammar;
@@ -119,8 +119,8 @@ namespace LinearIndexedGrammarLearner
 
             if (!t.Wait(500))
             {
-                //string s = "computing all parse trees took too long (0.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
-                //NLog.LogManager.GetCurrentClassLogger().Info(s);
+                string s = "computing all parse trees took too long (0.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
+                NLog.LogManager.GetCurrentClassLogger().Info(s);
                 //throw new Exception();
             }
             var parseTreesCountPerWords = t.Result;
@@ -219,7 +219,7 @@ namespace LinearIndexedGrammarLearner
             {
                 //assuming: insertion of rule adds as of yet unused rule
                 //so it does not affect the parsibility of the grammar nor its probability.
-                if (mutatedGrammar.Rules.Count() > originalGrammar.Grammar.Rules.Count() )
+                if (mutatedGrammar.StackConstantRules.Count() > originalGrammar.Grammar.StackConstantRules.Count() )
                     return new GrammarWithProbability(mutatedGrammar, originalGrammar.Probability);
 
                 prob = Probability(mutatedGrammar);
