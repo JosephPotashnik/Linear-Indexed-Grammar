@@ -33,7 +33,21 @@ namespace LinearIndexedGrammarParser
 
         public ContextFreeGrammar(ContextSensitiveGrammar cs)
         {
-            GenerateAllStaticRulesFromDynamicRules(cs.stackConstantRules);
+            var stackConstantRules = cs.stackConstantRules.ToDictionary(x => x.Key, x => x.Value.Select(y => new Rule(y)).ToList());
+            var rulesDic = new Dictionary<SyntacticCategory, List<Rule>>(stackConstantRules);
+
+            var xy = cs.StackChangingRules;
+
+            foreach (var stackChangingRule in xy)
+            {
+                var newSynCat = new SyntacticCategory(stackChangingRule.LeftHandSide);
+                if (!rulesDic.ContainsKey(newSynCat))
+                    rulesDic[newSynCat] = new List<Rule>();
+
+                rulesDic[newSynCat].Add(new Rule(stackChangingRule));
+            }
+
+            GenerateAllStaticRulesFromDynamicRules(rulesDic);
         }
         public ContextFreeGrammar(ContextFreeGrammar otherGrammar)
         {

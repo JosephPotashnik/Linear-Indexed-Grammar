@@ -72,7 +72,8 @@ namespace LinearIndexedGrammarLearner
                 DerivedCategory posRHS = new DerivedCategory(PartsOfSpeechCategories[rand.Next(PartsOfSpeechCategories.Length)].ToString());
 
                 //choose random rule one of its RHS nonterminals we will replace by the pos chosen above.
-                Rule randomRule = GetRandomNonStackChangingRule(grammar);
+                Rule randomRule = GetRandomStackConstantRule(grammar);
+
                 int randomChildIndex = rand.Next(randomRule.RightHandSide.Length);
 
                 var originalRHSSymbol = randomRule.RightHandSide[randomChildIndex];
@@ -91,7 +92,7 @@ namespace LinearIndexedGrammarLearner
 
         public ContextSensitiveGrammar SpreadRuleLHSToRHS(ContextSensitiveGrammar grammar)
         {
-            var lhsCategories = grammar.stackConstantRules.Keys.ToArray();
+            var lhsCategories = grammar.LHSCategories;
 
             //optimization: if there is only one LHS category (START), don't spread it.
             if (lhsCategories.Length < 2)
@@ -105,7 +106,7 @@ namespace LinearIndexedGrammarLearner
                 DerivedCategory lhs = new DerivedCategory(lhsCategories[rand.Next(lhsCategories.Length)].ToString());
 
                 //choose random rule one of its RHS nonterminals we will replace by lhs chosen above.
-                Rule randomRule = GetRandomNonStackChangingRule(grammar);
+                Rule randomRule = GetRandomStackConstantRule(grammar);
 
                 //spread LHS only to binary rules. Spreading the LHS to an unary rule
                 //is equivalent to variable renaming.
@@ -133,7 +134,7 @@ namespace LinearIndexedGrammarLearner
         
         public ContextSensitiveGrammar SpreadRuleLHSToLHS(ContextSensitiveGrammar grammar)
         {
-            var lhsCategories = grammar.stackConstantRules.Keys.ToArray();
+            var lhsCategories = grammar.LHSCategories;
             if (lhsCategories.Length < 2)
                 return null;
 
@@ -145,7 +146,7 @@ namespace LinearIndexedGrammarLearner
                 DerivedCategory lhs = new DerivedCategory(lhsCategories[rand.Next(lhsCategories.Length)].ToString());
 
                 //choose random rule whose LHS we will replace by lhs chosen above.
-                Rule randomRule = GetRandomRule(grammar);
+                Rule randomRule = GetRandomStackConstantRule(grammar);
                 var originalLHSSymbol = randomRule.LeftHandSide;
 
                 if (originalLHSSymbol.Equals(lhs)) continue;
@@ -160,9 +161,11 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
+        //DeleteRule == Delete StackConstantRule. perahps change notation.
+
         public ContextSensitiveGrammar DeleteRule(ContextSensitiveGrammar grammar)
         {
-            Rule randomRule = GetRandomRule(grammar);
+            Rule randomRule = GetRandomStackConstantRule(grammar);
             grammar.DeleteStackConstantRule(randomRule);
             return grammar;
         }
@@ -186,7 +189,7 @@ namespace LinearIndexedGrammarLearner
         }
         public ContextSensitiveGrammar InsertBinaryRule(ContextSensitiveGrammar grammar)
         {
-            var lhsCategories = grammar.stackConstantRules.Keys.ToArray();
+            var lhsCategories = grammar.LHSCategories;
             var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
 
             if (DoesNumberOfLHSCategoriesExceedMax(lhsCategories)) return null;
@@ -228,72 +231,126 @@ namespace LinearIndexedGrammarLearner
             }
             return null;
         }
-        public ContextSensitiveGrammar InsertPop1Rule(ContextSensitiveGrammar grammar)
+
+        public ContextSensitiveGrammar DeleteMovement(ContextSensitiveGrammar grammar)
         {
-            //var rand = ThreadSafeRandom.ThisThreadsRandom;
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+            var keys = grammar.stackChangingRules.Keys.ToArray();
+            if (keys.Length == 0) return null;
+            var moveable = keys[rand.Next(keys.Length)];
 
-            //var lhsCategories = grammar.stackConstantRules.Keys.ToArray();
-            //var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
+            if (grammar.stackChangingRules[moveable].MoveOps.ContainsKey(MoveableOperationsKey.Push1))
+            {
+                //if there is more than one push1 rule, delete only push1 rule, 
+                //do not delete the pop1 rule.
+                var oldRule = grammar.stackChangingRules[moveable].GetRandomRule(MoveableOperationsKey.Push1);
+                grammar.stackChangingRules[moveable].DeleteRule(oldRule, MoveableOperationsKey.Push1);
 
-            //for (var k = 0; k < NumberOfRetries; k++)
-            //{
-            //    string moveable = categoriesPool[rand.Next(categoriesPool.Length)].ToString();
-            //    var lhs = new DerivedCategory(moveable, moveable);
-            //    var epsiloncat = new DerivedCategory("Epsilon");
-            //    epsiloncat.StackSymbolsCount = -1;
-            //    var newRule = new StackChangingRule(lhs, new[] { epsiloncat });
+                if (grammar.stackChangingRules[moveable].MoveOps[MoveableOperationsKey.Push1].Count > 0)
+                   return grammar;
+                else
+                {
+                    //only one push1 rule, delete both push1 and pop1 rules.
+                    oldRule = grammar.stackChangingRules[moveable].GetRandomRule(MoveableOperationsKey.Pop1);
+                    grammar.stackChangingRules[moveable].DeleteRule(oldRule, MoveableOperationsKey.Pop1);
 
-            //    if (grammar.ContainsSameEpsilonRule(newRule)) continue;
-            //    !grammar.AddStackConstantRule(newRule);
-            //    return grammar;
-            //}
-
+                }
+            }
             return null;
         }
 
-        public ContextSensitiveGrammar InsertPush1Rule(ContextSensitiveGrammar grammar)
+        public ContextSensitiveGrammar InsertMovement(ContextSensitiveGrammar grammar)
         {
-            //var lhsCategories = grammar.stackConstantRules.Keys.ToArray();
-            //var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+            var lhsCategories = grammar.LHSCategories;
+            var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
+            string moveable = ContextFreeGrammar.StartRule;
 
-            //if (DoesNumberOfLHSCategoriesExceedMax(lhsCategories)) return null;
+            //Don't allow the moveable category to be START Category (for now)
+            while (moveable == ContextFreeGrammar.StartRule)
+                 moveable = categoriesPool[rand.Next(categoriesPool.Length)].ToString();
 
-            //for (var k = 0; k < NumberOfRetries; k++)
-            //{
-            //    //create a new non terminal
-            //    string baseNonTerminal = null;
-            //    baseNonTerminal = $"X{newNonTerminalCounter++}";
-
-            //    var newCategory = new DerivedCategory(baseNonTerminal, ContextFreeGrammar.StarSymbol);
-
-            //    int len = 2;
-            //    var rand = ThreadSafeRandom.ThisThreadsRandom;
-            //    int spinePositionInRHS = rand.Next(len);
-            //    spinePositionInRHS = 1; //initially, constrain moveables to be the first position, spine to the right (=movement to left only)
-
-            //    string moveable = categoriesPool[rand.Next(categoriesPool.Length)].ToString();
-            //    var moveableCategory = new DerivedCategory(moveable);
-            //    var spineCategory = new DerivedCategory(lhsCategories[rand.Next(lhsCategories.Length)].ToString(), ContextFreeGrammar.StarSymbol + moveable);
-            //    spineCategory.StackSymbolsCount = 1;
-
-            //    var rightHandSide = new DerivedCategory[len];
-            //    for (var i = 0; i < len; i++)
-            //        rightHandSide[i] = (spinePositionInRHS == i) ? spineCategory : moveableCategory;
-
-            //    var newRule = new StackChangingRule(newCategory, rightHandSide);
-            //    if (grammar.OnlyStartSymbolsRHS(newRule)) continue;
-
-            //    !grammar.AddStackConstantRule(newRule);
-            //    return grammar;
-            //}
+            if (InsertPush1Rule(grammar, moveable))
+            {
+                //if Inserting pop1 does not succeed (i.e, of the form NP[NP] -> epsilon)
+                //it means the pop1 rule already exists, so it is still OK.
+                InsertPop1Rule(grammar, moveable);
+                return grammar;
+            }
             return null;
+        }
+
+        private bool InsertPop1Rule(ContextSensitiveGrammar grammar, string moveable = null)
+        {
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+
+            if (moveable == null)
+            {
+                var lhsCategories = grammar.LHSCategories;
+                var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
+                moveable = categoriesPool[rand.Next(categoriesPool.Length)].ToString();
+
+            }
+
+            for (var k = 0; k < NumberOfRetries; k++)
+            {
+                var moveableCategory = new DerivedCategory(moveable);
+                var lhs = new DerivedCategory(moveable, moveable);
+                var epsiloncat = new DerivedCategory("Epsilon");
+                epsiloncat.StackSymbolsCount = -1;
+                var newRule = new StackChangingRule(lhs, new[] { epsiloncat });
+
+                if (!grammar.AddStackChangingRule(moveableCategory, newRule, MoveableOperationsKey.Pop1)) continue;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool InsertPush1Rule(ContextSensitiveGrammar grammar, string moveable = null)
+        {
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+            var lhsCategories = grammar.LHSCategories;
+            var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
+
+            if (moveable == null)
+              moveable = categoriesPool[rand.Next(categoriesPool.Length)].ToString();
+
+            if (DoesNumberOfLHSCategoriesExceedMax(lhsCategories)) return false;
+
+            for (var k = 0; k < NumberOfRetries; k++)
+            {
+                //create a new non terminal
+                string baseNonTerminal = null;
+                baseNonTerminal = $"X{newNonTerminalCounter++}";
+
+                var newCategory = new DerivedCategory(baseNonTerminal, ContextFreeGrammar.StarSymbol);
+
+                int len = 2;
+                int spinePositionInRHS = rand.Next(len);
+                spinePositionInRHS = 1; //initially, constrain moveables to be the first position, spine to the right (=movement to left only)
+                var moveableCategory = new DerivedCategory(moveable);
+                var spineCategory = new DerivedCategory(lhsCategories[rand.Next(lhsCategories.Length)].ToString(), ContextFreeGrammar.StarSymbol + moveable);
+                spineCategory.StackSymbolsCount = 1;
+
+                var rightHandSide = new DerivedCategory[len];
+                for (var i = 0; i < len; i++)
+                    rightHandSide[i] = (spinePositionInRHS == i) ? spineCategory : moveableCategory;
+
+                var newRule = new StackChangingRule(newCategory, rightHandSide);
+                if (grammar.OnlyStartSymbolsRHS(newRule)) continue;
+
+                if (!grammar.AddStackChangingRule(moveableCategory, newRule, MoveableOperationsKey.Push1)) continue;
+                return true;
+            }
+            return false;
         }
 
         public ContextSensitiveGrammar InsertUnaryRule(ContextSensitiveGrammar grammar)
         {
             var startCategory = new DerivedCategory(ContextFreeGrammar.StartRule);
-            var lhsCategories = grammar.stackConstantRules.Keys.ToArray();
-            var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
+            var lhsCategories = grammar.LHSCategories;
+
             if (DoesNumberOfLHSCategoriesExceedMax(lhsCategories)) return null;
 
             for (var k = 0; k < NumberOfRetries; k++)
@@ -342,19 +399,29 @@ namespace LinearIndexedGrammarLearner
 
       
 
-        private static Rule GetRandomRule(ContextSensitiveGrammar grammar)
-        {
-            var rules = grammar.StackConstantRules.ToArray();
-            var rand = ThreadSafeRandom.ThisThreadsRandom;
-            Rule randomRule = rules[rand.Next(rules.Length)];
-            return randomRule;
-        }
+        //private static Rule GetRandomRule(ContextSensitiveGrammar grammar)
+        //{
+        //    var rules = grammar.StackConstantRules.ToArray();
+        //    var rand = ThreadSafeRandom.ThisThreadsRandom;
+        //    Rule randomRule = rules[rand.Next(rules.Length)];
+        //    return randomRule;
+        //}
 
-        private static Rule GetRandomNonStackChangingRule(ContextSensitiveGrammar grammar)
+        private static Rule GetRandomStackConstantRule(ContextSensitiveGrammar grammar)
         {
             var rules = grammar.StackConstantRules.ToArray();
             var rand = ThreadSafeRandom.ThisThreadsRandom;
             Rule randomRule = rules[rand.Next(rules.Length)];
+
+            
+            if (randomRule.RightHandSide.Length == 1)
+            {
+                if (randomRule.LeftHandSide.BaseEquals(randomRule.RightHandSide[0]))
+                {
+                    int x = 1;
+
+                }
+            }
             return randomRule;
         }
 

@@ -15,6 +15,11 @@ namespace LinearIndexedGrammarParser
         {
 
         }
+
+        public StackChangingRule(DerivedCategory leftHandSide, DerivedCategory[] rightHandSide, int num = -1) : base(leftHandSide, rightHandSide, num)
+        {
+        }
+
         public override bool Equals(object obj)
         {
             return base.Equals(obj);

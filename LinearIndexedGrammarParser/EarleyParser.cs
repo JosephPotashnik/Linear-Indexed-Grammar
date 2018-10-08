@@ -9,6 +9,11 @@ namespace LinearIndexedGrammarParser
         public LogException(string str) : base(str) { }
     }
 
+    public class InfiniteParseException : Exception
+    {
+        public InfiniteParseException(string str) : base(str) { }
+    }
+
     public class GenerateException : Exception { }
     
     public class EarleyParser
@@ -71,9 +76,7 @@ namespace LinearIndexedGrammarParser
         {
             if (count > 100000)
             {
-                Console.WriteLine("More than 10000 states in a single column. Suspicious. Grammar is : {0}",
-                    grammar);
-                throw new Exception("Grammar with infinite parse. abort this grammar..");
+                throw new InfiniteParseException("Grammar with infinite parse. abort this grammar..");
             }
         }
         
@@ -113,16 +116,13 @@ namespace LinearIndexedGrammarParser
                 }
                 
             }
-            catch (LogException e)
-            {
-                var s = e.ToString();
-                NLog.LogManager.GetCurrentClassLogger().Warn(s);
-                NLog.LogManager.GetCurrentClassLogger().Warn($"sentence: {text}, grammar: {grammar}");  
-            }
 
             //if the parse is unsuccessful - nodes will contain an empty list with 0 trees.
             //return nodes;
-
+            catch (InfiniteParseException e)
+            {
+                throw;
+            }
             catch (Exception e)
             {
                 var s = e.ToString();
@@ -131,7 +131,7 @@ namespace LinearIndexedGrammarParser
             if (nodes.Count > 0)
                 return nodes;
 
-            throw new Exception("Parsing Failed!");
+            throw new Exception("parsing failed!");
         }
 
         virtual protected (EarleyColumn[], int[]) PrepareEarleyTable(string text, int maxWord)

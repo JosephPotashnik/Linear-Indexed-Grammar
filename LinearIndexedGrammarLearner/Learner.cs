@@ -85,9 +85,14 @@ namespace LinearIndexedGrammarLearner
 
                 string s = "parsing took too long (0.5 second), for the grammar:\r\n" + currentHypothesis.ToString();
                 NLog.LogManager.GetCurrentClassLogger().Info(s);
-
                 return null; //parsing failed.
 
+            }
+            catch (AggregateException e) when(e.InnerExceptions.OfType<InfiniteParseException>().Any())
+            {
+                var s = e.ToString();
+                NLog.LogManager.GetCurrentClassLogger().Warn(s);
+                throw;
             }
             catch (Exception)
             {
@@ -132,8 +137,18 @@ namespace LinearIndexedGrammarLearner
         public double Probability(ContextSensitiveGrammar currentHypothesis)
         {
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
+            SentenceParsingResults[] allParses = null;
             double prob = 0;
-            var allParses = ParseAllSentences(currentCFHypothesis);
+            try
+            {
+                allParses = ParseAllSentences(currentCFHypothesis);
+            }
+            catch (AggregateException e) when (e.InnerExceptions.OfType<InfiniteParseException>().Any())
+            {
+                var s = e.ToString();
+                NLog.LogManager.GetCurrentClassLogger().Warn(s);
+                return 0;
+            }
             if (allParses != null)
             {
                 var totalTreesCountofData = allParses.Select(x => x.Trees.Count).Sum();

@@ -9,6 +9,13 @@ namespace LinearIndexedGrammarParser
 {
     public class GrammarFileReader
     {
+
+        public class RuleInfo
+        {
+            public Rule Rule { get; set; }
+            public SyntacticCategory Moveable { get; set; }
+            public MoveableOperationsKey MoveOpKey { get; set; }
+        }
         private static List<string> GetSentencesNonTerminals(List<EarleyNode> n)
         {
             return n.Select(x => x.GetNonTerminalStringUnderNode()).ToList();
@@ -72,7 +79,16 @@ namespace LinearIndexedGrammarParser
             var rules = ReadRulesFromFile(filename);
             ContextSensitiveGrammar grammar = new ContextSensitiveGrammar();
             foreach (var item in rules)
-                grammar.AddStackConstantRule(item);
+            {
+                if (item.Rule is StackChangingRule)
+                {
+                    var r = item.Rule as StackChangingRule;
+                    grammar.AddStackChangingRule(item.Moveable, r, item.MoveOpKey);
+                }
+                else
+                    grammar.AddStackConstantRule(item.Rule);
+
+            }
 
             return grammar;
         }
@@ -82,18 +98,18 @@ namespace LinearIndexedGrammarParser
             Match match = pattern.Match(s);
             return new DerivedCategory(match.Groups["BaseCategory"].Value, match.Groups["Stack"].Value);
         }
-        private static List<Rule> ReadRulesFromFile(string filename)
+        private static List<RuleInfo> ReadRulesFromFile(string filename)
         {
             string line;
             char comment = '#';
 
-            List<Rule> rules = new List<Rule>();
+            List<RuleInfo> rules = new List<RuleInfo>();
             using (var file = File.OpenText(filename))
             {
                 while ((line = file.ReadLine()) != null)
                 {
                     if (line[0] == comment) continue;
-                    Rule r = CreateRule(line);
+                    RuleInfo r = CreateRule(line);
                     if (r != null)
                         rules.Add(r);
                 }
@@ -101,7 +117,7 @@ namespace LinearIndexedGrammarParser
             }
             return rules;
         }
-        private static Rule CreateRule(string s)
+        private static RuleInfo CreateRule(string s)
         {
             string removeArrow = s.Replace("->", "");
 
@@ -112,17 +128,27 @@ namespace LinearIndexedGrammarParser
 
             var leftHandCat = CreateDerivedCategory(nonTerminals[0]);
             bool popRule = false;
+            bool pushRule = false;
+            var ruleInfo = new RuleInfo();
 
             if (leftHandCat.Stack.Contains(ContextFreeGrammar.StarSymbol))
             {
                 if (leftHandCat.Stack.Length > 1)
+                {
                     popRule = true;
+                    ruleInfo.MoveOpKey = MoveableOperationsKey.Pop2;
+                    ruleInfo.Moveable = new SyntacticCategory(leftHandCat.Stack.Substring(1));
+                }
             }
 
             if (nonTerminals.Length == 1)
             {
                 var epsiloncat = new DerivedCategory("Epsilon");
-                return new Rule(leftHandCat, new[] { epsiloncat });
+                epsiloncat.StackSymbolsCount = -1;
+                ruleInfo.Rule = new StackChangingRule(leftHandCat, new[] { epsiloncat });
+                ruleInfo.MoveOpKey = MoveableOperationsKey.Pop1;
+                ruleInfo.Moveable = new SyntacticCategory(leftHandCat);
+                return ruleInfo;
             }
 
             var rightHandCategories = new DerivedCategory[nonTerminals.Length - 1];
@@ -133,7 +159,11 @@ namespace LinearIndexedGrammarParser
                 {
                     if (rightHandCategories[i - 1].Stack.Length > 1)
                     {
+                        pushRule = true;
                         //push rule.
+                        var moveable = new SyntacticCategory(rightHandCategories[i - 1].Stack.Substring(1));
+                        ruleInfo.Moveable = moveable;
+                        ruleInfo.MoveOpKey = MoveableOperationsKey.Push1;
                         rightHandCategories[i - 1].StackSymbolsCount = 1;
                         if (popRule)
                             throw new Exception("illegal LIG format: can't push and pop within the same rule");
@@ -145,8 +175,16 @@ namespace LinearIndexedGrammarParser
                     }
                 }
             }
+            if (!pushRule && !popRule)
+            {
+                ruleInfo.Rule = new Rule(leftHandCat, rightHandCategories);
+            }
+            else
+            {
+                ruleInfo.Rule =  new StackChangingRule(leftHandCat, rightHandCategories);
+            }
+            return ruleInfo;
 
-            return new Rule(leftHandCat, rightHandCategories);
         }
     }
 }

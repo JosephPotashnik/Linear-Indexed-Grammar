@@ -24,11 +24,11 @@
     "MutationWeight": 5
   },
   {
-    "Mutation": "InsertPush1Rule",
+    "Mutation": "InsertMovement",
     "MutationWeight": 0
   },
   {
-    "Mutation": "InsertPop1Rule",
+    "Mutation": "DeleteMovement",
     "MutationWeight": 0
   }
 ]
