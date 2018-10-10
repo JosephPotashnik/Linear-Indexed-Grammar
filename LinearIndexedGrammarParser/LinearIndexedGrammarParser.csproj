@@ -13,6 +13,15 @@
     <None Update="LIGMovementFromSubjectOrNoMovementAmbiguity.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="NullableTransitiveClosureMovement3.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NullableTransitiveClosureMovement2.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NullableTransitiveClosureMovement.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="LIGMovementPP.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

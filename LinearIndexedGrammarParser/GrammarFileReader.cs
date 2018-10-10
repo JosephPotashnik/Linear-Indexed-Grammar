@@ -143,7 +143,7 @@ namespace LinearIndexedGrammarParser
 
             if (nonTerminals.Length == 1)
             {
-                var epsiloncat = new DerivedCategory("Epsilon");
+                var epsiloncat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol);
                 epsiloncat.StackSymbolsCount = -1;
                 ruleInfo.Rule = new StackChangingRule(leftHandCat, new[] { epsiloncat });
                 ruleInfo.MoveOpKey = MoveableOperationsKey.Pop1;

@@ -94,6 +94,26 @@ namespace LinearIndexedGrammarParserTests
         }
 
         [Fact]
+        public void TransitiveClosureMovementTest()
+        {
+            var n = GrammarFileReader.ParseSentenceAccordingToGrammar("NullableTransitiveClosureMovement.txt", "the went");
+            JsonSerializerSettings settings = new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
+            string actual = JsonConvert.SerializeObject(n, settings);
+            string expected = (File.ReadAllText(@"NullableTransitiveClosureMovement.json"));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void TransitiveClosureMovement2Test()
+        {
+            var n = GrammarFileReader.ParseSentenceAccordingToGrammar("NullableTransitiveClosureMovement2.txt", "the kissed went");
+            JsonSerializerSettings settings = new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
+            string actual = JsonConvert.SerializeObject(n, settings);
+            string expected = (File.ReadAllText(@"NullableTransitiveClosureMovement2.json"));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
         public void LIGMovementPPStrandingTest()
         {
             var n = GrammarFileReader.ParseSentenceAccordingToGrammar("LIGMovementPP.txt", "a girl the man went to");
@@ -111,6 +131,33 @@ namespace LinearIndexedGrammarParserTests
             string actual = JsonConvert.SerializeObject(n, settings);
             string expected = (File.ReadAllText(@"LIGMovementFromSubjectOrNoMovementAmbiguity.json"));
             Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GeneratNullableCategoriesSentencesTest()
+        {
+            Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
+            (var nodeList, var grammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("NullableTransitiveClosureMovement2.txt", 10);
+            (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
+
+            JsonSerializerSettings settings = new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
+            string actual = JsonConvert.SerializeObject(data, settings);
+            string expected = (File.ReadAllText(@"GeneratNullableCategoriesSentences.json"));
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void GeneratNullableCategoriesSentencesTest2()
+        {
+            Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
+            (var nodeList, var grammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("NullableTransitiveClosureMovement3.txt", 10);
+            (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
+
+            JsonSerializerSettings settings = new JsonSerializerSettings { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
+            string actual = JsonConvert.SerializeObject(data, settings);
+            string expected = (File.ReadAllText(@"GeneratNullableCategoriesSentences2.json"));
+            Assert.Equal(expected, actual);
+
         }
 
         [Fact]

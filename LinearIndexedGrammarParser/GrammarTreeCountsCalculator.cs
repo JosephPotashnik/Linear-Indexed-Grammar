@@ -125,7 +125,7 @@ namespace LinearIndexedGrammarParser
             }
             else if (POS.Contains(cat.ToString()))
                 CountTerminal(res);
-            else if (cat.ToString() == "Epsilon")
+            else if (cat.ToString() == ContextFreeGrammar.EpsilonSymbol)
                 CountEpsilon(res);
 
             return res;

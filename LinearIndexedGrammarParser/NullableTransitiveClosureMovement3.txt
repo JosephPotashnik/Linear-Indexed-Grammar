@@ -1,0 +1,20 @@
+﻿# Grammar Rules for --- Context Free Language with Left Recursion
+#
+# The context free rules must be in the Format: A -> B C or A -> B
+# The indexed grammar rules must be in the format A[*Y] -> B[*] C or A[*] -> B[*Y] C or A[*] -> B[*] C etc
+# epsilon rule has the format: (nothing follows the arrow) A[X] ->
+# comment lines begin with "#"
+# the start symbol is "START"
+#
+START -> D X1
+X1 -> X2 X5
+X2 -> X3 X4
+X3 -> V1
+X3 ->
+X4 -> V0
+X4 ->
+X5 -> X6 X7
+X6 ->
+X6 -> V3
+X7 ->
+X7 -> V2

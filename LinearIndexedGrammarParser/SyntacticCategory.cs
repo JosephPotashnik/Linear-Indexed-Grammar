@@ -22,7 +22,7 @@ namespace LinearIndexedGrammarParser
 
         public override int GetHashCode() => Symbol.GetHashCode();
         public override string ToString() => Symbol;
-        internal bool IsEpsilon() =>  Symbol == ContextFreeGrammar.EpsislonSymbol;
+        internal bool IsEpsilon() =>  Symbol == ContextFreeGrammar.EpsilonSymbol;
 
     }
 
@@ -57,6 +57,25 @@ namespace LinearIndexedGrammarParser
         public void SetBase(DerivedCategory other)
         {  Symbol = other.Symbol; }
 
-        public void SetSymbol(string s) { Symbol = s;  }
+        public void Replace(Dictionary<string, string> replaceDic)
+        {
+            if (replaceDic.ContainsKey(Symbol))
+                Symbol = replaceDic[Symbol];
+
+            string moveable = null;
+            if (Stack.Length > 0)
+            {
+                if (Stack.Contains(ContextFreeGrammar.StarSymbol))
+                    moveable = Stack.Substring(1);
+                else
+                    moveable = Stack;
+            }
+
+            if (moveable != null)
+            {
+                if (replaceDic.ContainsKey(moveable))
+                    Stack = Stack.Replace(moveable, replaceDic[moveable]);
+            }
+        }
     }
 }

@@ -4,10 +4,6 @@ using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
-    public class LogException : Exception
-    {
-        public LogException(string str) : base(str) { }
-    }
 
     public class InfiniteParseException : Exception
     {
@@ -28,10 +24,18 @@ namespace LinearIndexedGrammarParser
             grammar = g;
         }
         
-        private void Predict(EarleyColumn col, List<Rule> ruleList)
+        private void Predict(EarleyColumn col, List<Rule> ruleList, DerivedCategory nextTerm)
         {
+            bool isPossibleNullable = grammar.possibleNullableCategories.Contains(nextTerm);
+
             foreach (var rule in ruleList)
             {
+
+                //if the rule obligatorily expands to the nullable production,
+                //do not predict it. you have already performed a spontaneous dot-shift
+                //in EarleyColumn.AddState().
+                if (isPossibleNullable && grammar.IsObligatoryNullableRule(rule)) continue;
+                
                 var newState = new EarleyState(rule, 0, col, null);
                 col.AddState(newState, grammar);
             }
@@ -116,13 +120,11 @@ namespace LinearIndexedGrammarParser
                 }
                 
             }
-
-            //if the parse is unsuccessful - nodes will contain an empty list with 0 trees.
-            //return nodes;
-            catch (InfiniteParseException e)
+            catch (InfiniteParseException)
             {
                 throw;
             }
+
             catch (Exception e)
             {
                 var s = e.ToString();
@@ -183,15 +185,20 @@ namespace LinearIndexedGrammarParser
                 var nextTerm = col.CategoriesToPredict.Dequeue();
 
                 if (col.ActionableCompleteStates.Any())
-                    throw new Exception(
-                        "completed states queue should always be empty while processing predicted states.");
+                {
+                    //completed states in the prediction step result only from epsilon transitions.
+                    //we can discard them because we have already inserted the appropriate epsilon
+                    //transition in EarleyColumn.AddState().
+                    col.ActionableCompleteStates.Clear();
+                }
+
                 count++;
                 TestForTooManyStatesInColumn(col, count);
 
                 if (!grammar.staticRules.ContainsKey(nextTerm)) continue;
 
                 var ruleList = grammar.staticRules[nextTerm];
-                Predict(col, ruleList);
+                Predict(col, ruleList, nextTerm);
             }
 
             return count;

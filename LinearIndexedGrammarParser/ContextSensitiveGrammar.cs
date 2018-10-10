@@ -224,33 +224,27 @@ namespace LinearIndexedGrammarParser
 
         public void RenameVariables()
         {
-            var xs = stackConstantRules.Keys.Where(x => x.ToString()[0] == 'X').ToList();
-            var replacedx = new List<SyntacticCategory>();
+            var xs = LHSCategories.Select(x => x.ToString()).Where(x => x[0] == 'X').ToList();
+            var replacedx = new List<string>();
             for (int i = 0; i < xs.Count; i++)
-                replacedx.Add(new SyntacticCategory($"X{i + 1}"));
+                replacedx.Add($"X{i + 1}");
             var replaceDic = xs.Zip(replacedx, (x, y) => new { key = x, value = y }).ToDictionary(x => x.key, x => x.value);
             ReplaceVariables(replaceDic);
         }
 
 
-        private void ReplaceVariables(Dictionary<SyntacticCategory, SyntacticCategory> replaceDic)
+        private void ReplaceVariables(Dictionary<string, string> replaceDic)
         {
+            var joinedSequences = StackConstantRules.Concat(StackChangingRules);
 
-            foreach (var rule in StackConstantRules)
+            foreach (var rule in joinedSequences)
             {
-                var v = new SyntacticCategory(rule.LeftHandSide);
-                if (replaceDic.ContainsKey(v))
-                    rule.LeftHandSide.SetSymbol(replaceDic[v].ToString());
+                rule.LeftHandSide.Replace(replaceDic);
 
                 for (int i = 0; i < rule.RightHandSide.Length; i++)
-                {
-                    v = new SyntacticCategory(rule.RightHandSide[i]);
-
-                    if (replaceDic.ContainsKey(new SyntacticCategory(v)))
-                        rule.RightHandSide[i].SetSymbol(replaceDic[v].ToString());
-
-                }
+                    rule.RightHandSide[i].Replace(replaceDic);
             }
+            
         }
 
         public void PruneUnusedRules(Dictionary<int, int> usagesDic)

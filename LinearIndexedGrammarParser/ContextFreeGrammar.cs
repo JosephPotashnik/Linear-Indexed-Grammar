@@ -16,13 +16,15 @@ namespace LinearIndexedGrammarParser
         public ContextFreeGrammar() { }
         public const string GammaRule = "Gamma";
         public const string StartRule = "START";
-        public const string EpsislonSymbol = "Epsilon";
+        public const string EpsilonSymbol = "Epsilon";
         public const string StarSymbol = "*";
         public const int maxStackDepth = 3;
 
         public readonly Dictionary<DerivedCategory, List<Rule>> staticRules = new Dictionary<DerivedCategory, List<Rule>>();
         public readonly HashSet<DerivedCategory> staticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
-        public readonly HashSet<DerivedCategory> nullableCategories = new HashSet<DerivedCategory>();
+        public readonly HashSet<DerivedCategory> possibleNullableCategories = new HashSet<DerivedCategory>();
+        public readonly HashSet<DerivedCategory> obligatoryNullableCategories = new HashSet<DerivedCategory>();
+
         private int ruleCounter = 0;
 
         public override string ToString()
@@ -33,6 +35,7 @@ namespace LinearIndexedGrammarParser
 
         public ContextFreeGrammar(ContextSensitiveGrammar cs)
         {
+            ruleCounter = 0;
             var stackConstantRules = cs.stackConstantRules.ToDictionary(x => x.Key, x => x.Value.Select(y => new Rule(y)).ToList());
             var rulesDic = new Dictionary<SyntacticCategory, List<Rule>>(stackConstantRules);
 
@@ -48,12 +51,7 @@ namespace LinearIndexedGrammarParser
             }
 
             GenerateAllStaticRulesFromDynamicRules(rulesDic);
-        }
-        public ContextFreeGrammar(ContextFreeGrammar otherGrammar)
-        {
-            nullableCategories = new HashSet<DerivedCategory>(otherGrammar.nullableCategories);
-            ruleCounter = 0;
-
+            ComputeTransitiveClosureOfNullableCategories();
         }
 
         public void AddStaticRule(Rule r)
@@ -67,15 +65,77 @@ namespace LinearIndexedGrammarParser
                 staticRules[newRule.LeftHandSide] = new List<Rule>();
 
             staticRules[newRule.LeftHandSide].Add(newRule);
-
-            //TODO: calculate the transitive closure of all nullable symbols.
-            //at the moment you calculate only the rules that directly lead to epsilon.
-            //For instance. C -> D E, D -> epsilon, E-> epsilon. C is not in itself an epsilon rule
-            //yet it is a nullable production.
-            if (newRule.RightHandSide[0].IsEpsilon())
-                nullableCategories.Add(newRule.LeftHandSide);
         }
 
+        private void ComputeTransitiveClosureOfNullableCategories()
+        {
+            var allRules = staticRules.Values.SelectMany(x => x);
+            var epsilonCat = new DerivedCategory(EpsilonSymbol);
+            possibleNullableCategories.Add(epsilonCat);
+            bool added = true;
+
+            while (added)
+            {
+                added = false;
+                List<DerivedCategory> toAddToPossibleNullableCategories = new List<DerivedCategory>();
+
+                foreach (var r in allRules)
+                {
+                    if (!possibleNullableCategories.Contains(r.LeftHandSide))
+                    {
+                        if (r.RightHandSide.All(x => possibleNullableCategories.Contains(x)))
+                        {
+                            added = true;
+                            toAddToPossibleNullableCategories.Add(new DerivedCategory(r.LeftHandSide));
+                        }
+                    }
+                }
+
+                foreach (var cat in toAddToPossibleNullableCategories)
+                    possibleNullableCategories.Add(cat);                
+            }
+
+            //the nullable categories here are for left hand side symbols checks,
+            //(i.e, left-hand side nullable categories).
+            //epsilon symbol appears only right hand; remove it. Epsilon was used internally above 
+            //for the transitive closure only.
+            possibleNullableCategories.Remove(epsilonCat);
+
+            obligatoryNullableCategories.Add(epsilonCat);
+            added = true;
+
+            while (added)
+            {
+                added = false;
+                List<DerivedCategory> toAddToObligatoryNullableCategories = new List<DerivedCategory>();
+
+                foreach (var cat in staticRules.Keys)
+                {
+                    if (!obligatoryNullableCategories.Contains(cat))
+                    {
+                        if (IsObligatoryNullableCategory(cat))
+                        {
+                            added = true;
+                            toAddToObligatoryNullableCategories.Add(cat);
+                        }
+                    }
+                }
+
+                foreach (var cat in toAddToObligatoryNullableCategories)
+                    obligatoryNullableCategories.Add(cat);
+            }
+
+        }
+
+        private bool IsObligatoryNullableCategory(DerivedCategory cat)
+        {
+            return staticRules[cat].All(r => IsObligatoryNullableRule(r));
+        }
+
+        public bool IsObligatoryNullableRule(Rule r)
+        {
+            return r.RightHandSide.All(x => obligatoryNullableCategories.Contains(x));
+        }
 
         public Rule GenerateStaticRuleFromDyamicRule(Rule dynamicGrammarRule, DerivedCategory leftHandSide)
         {
@@ -171,7 +231,8 @@ namespace LinearIndexedGrammarParser
         {
             staticRules.Clear();
             staticRulesGeneratedForCategory.Clear();
-            nullableCategories.Clear();
+            possibleNullableCategories.Clear();
+            obligatoryNullableCategories.Clear();
         }
     }
 }

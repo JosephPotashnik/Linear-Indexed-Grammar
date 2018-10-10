@@ -90,10 +90,9 @@ namespace LinearIndexedGrammarLearner
             }
             catch (AggregateException e) when(e.InnerExceptions.OfType<InfiniteParseException>().Any())
             {
-                var s = e.ToString();
-                NLog.LogManager.GetCurrentClassLogger().Warn(s);
                 throw;
             }
+
             catch (Exception)
             {
                 return null; //parsing failed.

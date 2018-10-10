@@ -162,7 +162,6 @@ namespace LinearIndexedGrammarLearner
         }
 
         //DeleteRule == Delete StackConstantRule. perahps change notation.
-
         public ContextSensitiveGrammar DeleteRule(ContextSensitiveGrammar grammar)
         {
             Rule randomRule = GetRandomStackConstantRule(grammar);
@@ -296,7 +295,7 @@ namespace LinearIndexedGrammarLearner
             {
                 var moveableCategory = new DerivedCategory(moveable);
                 var lhs = new DerivedCategory(moveable, moveable);
-                var epsiloncat = new DerivedCategory("Epsilon");
+                var epsiloncat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol);
                 epsiloncat.StackSymbolsCount = -1;
                 var newRule = new StackChangingRule(lhs, new[] { epsiloncat });
 
@@ -397,31 +396,11 @@ namespace LinearIndexedGrammarLearner
             return randomChildIndex;
         }
 
-      
-
-        //private static Rule GetRandomRule(ContextSensitiveGrammar grammar)
-        //{
-        //    var rules = grammar.StackConstantRules.ToArray();
-        //    var rand = ThreadSafeRandom.ThisThreadsRandom;
-        //    Rule randomRule = rules[rand.Next(rules.Length)];
-        //    return randomRule;
-        //}
-
         private static Rule GetRandomStackConstantRule(ContextSensitiveGrammar grammar)
         {
             var rules = grammar.StackConstantRules.ToArray();
             var rand = ThreadSafeRandom.ThisThreadsRandom;
             Rule randomRule = rules[rand.Next(rules.Length)];
-
-            
-            if (randomRule.RightHandSide.Length == 1)
-            {
-                if (randomRule.LeftHandSide.BaseEquals(randomRule.RightHandSide[0]))
-                {
-                    int x = 1;
-
-                }
-            }
             return randomRule;
         }
 
