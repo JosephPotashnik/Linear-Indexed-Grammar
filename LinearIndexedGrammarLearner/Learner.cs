@@ -83,8 +83,8 @@ namespace LinearIndexedGrammarLearner
                 //the grammar is too recursive,
                 //decision - discard it and continue.
 
-                string s = "parsing took too long (0.5 second), for the grammar:\r\n" + currentHypothesis.ToString();
-                NLog.LogManager.GetCurrentClassLogger().Info(s);
+                //string s = "parsing took too long (0.5 second), for the grammar:\r\n" + currentHypothesis.ToString();
+                //NLog.LogManager.GetCurrentClassLogger().Info(s);
                 return null; //parsing failed.
 
             }
@@ -123,8 +123,8 @@ namespace LinearIndexedGrammarLearner
 
             if (!t.Wait(500))
             {
-                string s = "computing all parse trees took too long (0.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
-                NLog.LogManager.GetCurrentClassLogger().Info(s);
+                //string s = "computing all parse trees took too long (0.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
+                //NLog.LogManager.GetCurrentClassLogger().Info(s);
                 //throw new Exception();
             }
             var parseTreesCountPerWords = t.Result;

@@ -14,13 +14,13 @@
     },
     {
       "PopulationSize": 500,
-      "NumberOfGenerations": 2000,
+      "NumberOfGenerations": 1000,
       "NumberOfRuns": 10,
       "GrammarFileName": "YesNPNoV3.txt"
     },
     {
       "PopulationSize": 500,
-      "NumberOfGenerations": 2000,
+      "NumberOfGenerations": 1000,
       "NumberOfRuns": 10,
       "GrammarFileName": "YesNPYesV3.txt"
     },

@@ -74,7 +74,7 @@ namespace LinearIndexedGrammar
         private static void Learn(int maxWordsInSentence = 6)
         {
             string fileName = @"ProgramsToRun.json";
-            fileName = @"NightRunFull.json";
+            //fileName = @"NightRunFull.json";
 
             var programParamsList = ReadProgramParamsFromFile(fileName);
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
@@ -91,6 +91,7 @@ namespace LinearIndexedGrammar
             (var nodeList, var targetGrammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar(programParams.GrammarFileName, maxWordsInSentence);
             (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
 
+
             string s = "-------------------\r\n" +
                         $"Session {DateTime.Now.ToString("MM/dd/yyyy h:mm tt")}\r\n" +
                         $"runs: { programParams.NumberOfRuns}, population size: {programParams.PopulationSize}, number of generations: {programParams.NumberOfGenerations}\r\n";
@@ -100,6 +101,7 @@ namespace LinearIndexedGrammar
 
             var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
             var targetProb = learner.Probability(targetGrammar);
+
             s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
             NLog.LogManager.GetCurrentClassLogger().Info(s);
             if (targetProb < 1)

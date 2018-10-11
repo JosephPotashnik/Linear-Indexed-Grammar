@@ -214,12 +214,24 @@ namespace LinearIndexedGrammarParser
             if (!stackChangingRules.ContainsKey(moveable))
                 stackChangingRules[moveable] = new MoveableOperations();
 
-            return stackChangingRules[moveable].AddRule(r, key, ruleCounter);
+            var isAdded = stackChangingRules[moveable].AddRule(r, key, ruleCounter);
+            if (isAdded) ruleCounter++;
+            return isAdded;
         }
 
         public void DeleteStackChangingRule(SyntacticCategory moveable, StackChangingRule oldRule, MoveableOperationsKey key)
         {
             stackChangingRules[moveable].DeleteRule(oldRule, key);
+        }
+
+        public void DeleteStackChangingRule(StackChangingRule oldRule)
+        {
+            foreach (var moveable in stackChangingRules.Keys)
+            {
+                var moveops = stackChangingRules[moveable];
+                foreach (var opKey in moveops.MoveOps.Keys)
+                    DeleteStackChangingRule(moveable, oldRule, opKey);
+            }
         }
 
         public void RenameVariables()
@@ -249,10 +261,18 @@ namespace LinearIndexedGrammarParser
 
         public void PruneUnusedRules(Dictionary<int, int> usagesDic)
         {
-            var unusedRules = StackConstantRules.Where(x => !usagesDic.ContainsKey(x.Number)).ToArray();
+            var unusedContantRules = StackConstantRules.Where(x => !usagesDic.ContainsKey(x.Number)).ToArray();
 
-            foreach (var rule in unusedRules)
+            foreach (var rule in unusedContantRules)
                 DeleteStackConstantRule(rule);
+
+            var unusedStackRules = StackChangingRules.Where(x => !usagesDic.ContainsKey(x.Number)).ToArray();
+
+            foreach (var rule in unusedStackRules)
+            {
+                var r = rule as StackChangingRule;
+                DeleteStackChangingRule(r);
+            }
         }
 
         public void Dispose()
