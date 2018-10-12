@@ -6,8 +6,16 @@ using System.Text;
 namespace LinearIndexedGrammarParser
 {
 
+    public class RuleInfo
+    {
+        public Rule Rule { get; set; }
+        public SyntacticCategory Moveable { get; set; }
+        public MoveableOperationsKey MoveOpKey { get; set; }
+    }
+
     public enum MoveableOperationsKey
     {
+        NoOp,
         Push1,
         Pop1,
         Pop2
@@ -17,12 +25,12 @@ namespace LinearIndexedGrammarParser
     {
         public readonly Dictionary<MoveableOperationsKey, List<StackChangingRule>> MoveOps = new Dictionary<MoveableOperationsKey, List<StackChangingRule>>();
 
-        public bool AddRule(StackChangingRule r, MoveableOperationsKey k, int ruleCounter)
+        public bool AddRule(StackChangingRule r, MoveableOperationsKey k, int ruleCounter, bool forceAdd = false)
         {
             if (!MoveOps.ContainsKey(k))
                 MoveOps[k] = new List<StackChangingRule>();
 
-            if (ContextSensitiveGrammar.ContainsRule(r, MoveOps[k])) return false;
+            if (!forceAdd && ContextSensitiveGrammar.ContainsRule(r, MoveOps[k])) return false;
 
             StackChangingRule newRule = new StackChangingRule(r);
             newRule.Number = ++ruleCounter;
@@ -209,12 +217,12 @@ namespace LinearIndexedGrammarParser
             return true;
         }
 
-        public bool AddStackChangingRule(SyntacticCategory moveable, StackChangingRule r, MoveableOperationsKey key)
+        public bool AddStackChangingRule(SyntacticCategory moveable, StackChangingRule r, MoveableOperationsKey key, bool forceAdd = false)
         {
             if (!stackChangingRules.ContainsKey(moveable))
                 stackChangingRules[moveable] = new MoveableOperations();
 
-            var isAdded = stackChangingRules[moveable].AddRule(r, key, ruleCounter);
+            var isAdded = stackChangingRules[moveable].AddRule(r, key, ruleCounter, forceAdd);
             if (isAdded) ruleCounter++;
             return isAdded;
         }

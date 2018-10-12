@@ -10,12 +10,7 @@ namespace LinearIndexedGrammarParser
     public class GrammarFileReader
     {
 
-        public class RuleInfo
-        {
-            public Rule Rule { get; set; }
-            public SyntacticCategory Moveable { get; set; }
-            public MoveableOperationsKey MoveOpKey { get; set; }
-        }
+
         private static List<string> GetSentencesNonTerminals(List<EarleyNode> n)
         {
             return n.Select(x => x.GetNonTerminalStringUnderNode()).ToList();

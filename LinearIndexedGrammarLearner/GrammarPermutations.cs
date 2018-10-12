@@ -90,6 +90,7 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
+        
         public ContextSensitiveGrammar SpreadRuleLHSToRHS(ContextSensitiveGrammar grammar)
         {
             var lhsCategories = grammar.LHSCategories;
@@ -106,28 +107,50 @@ namespace LinearIndexedGrammarLearner
                 DerivedCategory lhs = new DerivedCategory(lhsCategories[rand.Next(lhsCategories.Length)].ToString());
 
                 //choose random rule one of its RHS nonterminals we will replace by lhs chosen above.
-                Rule randomRule = GetRandomStackConstantRule(grammar);
+                RuleInfo randomRule = GetRandomRule(grammar);
 
                 //spread LHS only to binary rules. Spreading the LHS to an unary rule
-                //is equivalent to variable renaming.
-
-                if (randomRule.RightHandSide.Length < 2)
+                //is equivalent to variable renaming. 
+                //Note: it also excludes pop1 by definition since pop1 has epsilon as RHS
+                
+                if (randomRule.Rule.RightHandSide.Length < 2)
                     continue;
+                //if (randomRule.MoveOpKey == MoveableOperationsKey.Pop1) continue;
 
                 //select a right hand side category randomly.
-                int randomChildIndex = GetRandomChildIndex(randomRule.RightHandSide.Length);
-                var originalRHSSymbol = randomRule.RightHandSide[randomChildIndex];
+                int randomChildIndex = GetRandomChildIndex(randomRule.Rule.RightHandSide.Length);
+                var originalRHSSymbol = randomRule.Rule.RightHandSide[randomChildIndex];
 
                 if (originalRHSSymbol.Equals(lhs)) continue;
 
-                var replaceRule = new Rule(randomRule);
-                replaceRule.RightHandSide[randomChildIndex].SetBase(lhs);
+                //in push rules, you can change only the spine symbol, i.e. the one that
+                //contains * symbol.
+                if (randomRule.MoveOpKey == MoveableOperationsKey.Push1 && !originalRHSSymbol.Stack.Contains(ContextFreeGrammar.StarSymbol))
+                    continue;
 
-                if (grammar.OnlyStartSymbolsRHS(replaceRule)) continue;
-                if (!grammar.AddStackConstantRule(replaceRule)) continue;
-                grammar.DeleteStackConstantRule(randomRule);
+                //TODO: refactor the functions into normal code.!!!!
 
-                return grammar;
+                if (randomRule.MoveOpKey == MoveableOperationsKey.NoOp)
+                {
+                    var replaceRule = new Rule(randomRule.Rule);
+                    replaceRule.RightHandSide[randomChildIndex].SetBase(lhs);
+                    if (grammar.OnlyStartSymbolsRHS(replaceRule)) continue;
+
+                    if (!grammar.AddStackConstantRule(replaceRule)) continue;
+                    grammar.DeleteStackConstantRule(randomRule.Rule);
+                    return grammar;
+                }
+                else if (randomRule.MoveOpKey == MoveableOperationsKey.Push1)
+                {
+                    var replaceRule = new StackChangingRule(randomRule.Rule.LeftHandSide, randomRule.Rule.RightHandSide);
+                    replaceRule.RightHandSide[randomChildIndex].SetBase(lhs);
+                    if (grammar.OnlyStartSymbolsRHS(replaceRule)) continue;
+
+                    var r2 = randomRule.Rule as StackChangingRule;
+                    if (!grammar.AddStackChangingRule(randomRule.Moveable, replaceRule, randomRule.MoveOpKey)) continue;
+                    grammar.DeleteStackChangingRule(randomRule.Moveable,r2,randomRule.MoveOpKey);
+                    return grammar;
+                }
             }
             return null;
         }
@@ -146,17 +169,35 @@ namespace LinearIndexedGrammarLearner
                 DerivedCategory lhs = new DerivedCategory(lhsCategories[rand.Next(lhsCategories.Length)].ToString());
 
                 //choose random rule whose LHS we will replace by lhs chosen above.
-                Rule randomRule = GetRandomStackConstantRule(grammar);
-                var originalLHSSymbol = randomRule.LeftHandSide;
+                RuleInfo randomRule = GetRandomRule(grammar);
+                var originalLHSSymbol = randomRule.Rule.LeftHandSide;
 
-                if (originalLHSSymbol.Equals(lhs)) continue;
+                if (originalLHSSymbol.BaseEquals(lhs)) continue;
 
-                var replaceRule = new Rule(randomRule);
-                replaceRule.LeftHandSide.SetBase(lhs);
-                grammar.DeleteStackConstantRule(randomRule);
-                grammar.AddStackConstantRule(replaceRule, true);
+                //you can't change the left hand side of pop1 rule (it is of the form NP[NP] ->epsilon)
+                if (randomRule.MoveOpKey == MoveableOperationsKey.Pop1) continue;
 
-                return grammar;
+                if (randomRule.MoveOpKey == MoveableOperationsKey.NoOp)
+                {
+
+                    var replaceRule = new Rule(randomRule.Rule);
+                    replaceRule.LeftHandSide.SetBase(lhs);
+                    grammar.DeleteStackConstantRule(randomRule.Rule);
+                    grammar.AddStackConstantRule(replaceRule, true);
+                    return grammar;
+                }
+                else if (randomRule.MoveOpKey == MoveableOperationsKey.Push1)
+                {
+
+                    var replaceRule = new StackChangingRule(randomRule.Rule.LeftHandSide, randomRule.Rule.RightHandSide);
+                    replaceRule.LeftHandSide.SetBase(lhs);
+                    var r2 = randomRule.Rule as StackChangingRule;
+                    grammar.DeleteStackChangingRule(randomRule.Moveable, r2, randomRule.MoveOpKey);
+                    grammar.AddStackChangingRule(randomRule.Moveable, replaceRule, randomRule.MoveOpKey, true);
+                    return grammar;
+                }
+
+
             }
             return null;
         }
@@ -401,6 +442,37 @@ namespace LinearIndexedGrammarLearner
             var rules = grammar.StackConstantRules.ToArray();
             var rand = ThreadSafeRandom.ThisThreadsRandom;
             Rule randomRule = rules[rand.Next(rules.Length)];
+            return randomRule;
+        }
+
+        private static RuleInfo GetRandomRule(ContextSensitiveGrammar grammar)
+        {
+            var ruleInfos = new List<RuleInfo>();
+
+            foreach (var rule in grammar.StackConstantRules)
+            {
+                var ruleInfo = new RuleInfo();
+                ruleInfo.Rule = rule;
+                ruleInfos.Add(ruleInfo);
+            }
+
+            foreach (var moveable in grammar.stackChangingRules.Keys)
+            {
+                var moveOps = grammar.stackChangingRules[moveable];
+                foreach (var moveOpKey in moveOps.MoveOps.Keys)
+                {
+                    foreach (var item in moveOps.MoveOps[moveOpKey])
+                    {
+                        var ruleInfo = new RuleInfo();
+                        ruleInfo.Rule = item;
+                        ruleInfo.MoveOpKey = moveOpKey;
+                        ruleInfo.Moveable = moveable;
+                        ruleInfos.Add(ruleInfo);
+                    }
+                }
+            }
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+            RuleInfo randomRule = ruleInfos[rand.Next(ruleInfos.Count)];
             return randomRule;
         }
 

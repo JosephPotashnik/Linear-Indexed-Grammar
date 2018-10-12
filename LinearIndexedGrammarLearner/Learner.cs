@@ -30,7 +30,7 @@ namespace LinearIndexedGrammarLearner
         public ContextSensitiveGrammar originalGrammar;
         private GrammarPermutations gp;
         private Vocabulary voc;
-        private int maxWordsInSentence;
+        private readonly int maxWordsInSentence;
 
         public Learner(string[] sentences, int maxWordsInSentence, Vocabulary voc)
         {
@@ -77,7 +77,7 @@ namespace LinearIndexedGrammarLearner
                 });
                 return allParses;
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException)
             {
                 //parse tree too long to parse
                 //the grammar is too recursive,
