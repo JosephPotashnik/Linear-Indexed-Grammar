@@ -57,18 +57,17 @@ namespace LinearIndexedGrammarParser
             {
                 var term = newState.NextTerm();
 
-                if (!grammar.obligatoryNullableCategories.Contains(term))
+                if (!StatesWithNextSyntacticCategory.ContainsKey(term))
                 {
-                    if (!StatesWithNextSyntacticCategory.ContainsKey(term))
-                    {
-                        //TODO: consider if is necessary to enqueue a category that is part of speech
-                        //is there any derivation rule with part of speech on the left hand side?
-                        CategoriesToPredict.Enqueue(term);
-                        StatesWithNextSyntacticCategory[term] = new List<EarleyState>();
-                    }
+                    //TODO: consider if is necessary to enqueue a category that is part of speech
+                    //is there any derivation rule with part of speech on the left hand side?
+                    StatesWithNextSyntacticCategory[term] = new List<EarleyState>();
 
-                    StatesWithNextSyntacticCategory[term].Add(newState);
+                    if (!grammar.obligatoryNullableCategories.Contains(term))
+                        CategoriesToPredict.Enqueue(term);
                 }
+
+                StatesWithNextSyntacticCategory[term].Add(newState);
 
                 //check if the next nonterminal leads to an expansion of null production, if yes,
                 //then perform a spontaneous dot shift.

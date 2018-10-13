@@ -18,7 +18,7 @@ namespace LinearIndexedGrammarParser
         public const string StartRule = "START";
         public const string EpsilonSymbol = "Epsilon";
         public const string StarSymbol = "*";
-        public const int maxStackDepth = 1;
+        public const int maxStackDepth = 3;
 
         public readonly Dictionary<DerivedCategory, List<Rule>> staticRules = new Dictionary<DerivedCategory, List<Rule>>();
         public readonly HashSet<DerivedCategory> staticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
