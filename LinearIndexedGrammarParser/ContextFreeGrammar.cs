@@ -52,6 +52,7 @@ namespace LinearIndexedGrammarParser
 
             GenerateAllStaticRulesFromDynamicRules(rulesDic);
             ComputeTransitiveClosureOfNullableCategories();
+
         }
 
         public void AddStaticRule(Rule r)
@@ -65,6 +66,52 @@ namespace LinearIndexedGrammarParser
                 staticRules[newRule.LeftHandSide] = new List<Rule>();
 
             staticRules[newRule.LeftHandSide].Add(newRule);
+        }
+
+        private bool ContainsCycle(DerivedCategory root, HashSet<DerivedCategory> visited, Dictionary<DerivedCategory, List<DerivedCategory>> dic)
+        {
+            if (visited.Contains(root)) return true;
+            visited.Add(root);
+
+            if (dic.ContainsKey(root))
+            { 
+                var neighbors = dic[root];
+                foreach (var neighbor in neighbors)
+                {
+                    bool containsCycle = ContainsCycle(neighbor, visited, dic);
+                    if (containsCycle) return true;
+                }
+            }
+
+            return false;
+
+        }
+        public bool ContainsCyclicUnitPrdouction()
+        {
+            var allRules = staticRules.Values.SelectMany(x => x);
+            Dictionary<DerivedCategory, List<DerivedCategory>> unitProductions = new Dictionary<DerivedCategory, List<DerivedCategory>>();
+
+            foreach (var r in allRules)
+            {
+                if (!unitProductions.ContainsKey(r.LeftHandSide))
+                    unitProductions[r.LeftHandSide] = new List<DerivedCategory>();
+
+                if (r.RightHandSide.Length == 1)
+                    unitProductions[r.LeftHandSide].Add(r.RightHandSide[0]);
+                else if (possibleNullableCategories.Contains(r.RightHandSide[0]))
+                    unitProductions[r.LeftHandSide].Add(r.RightHandSide[1]);
+                else if (possibleNullableCategories.Contains(r.RightHandSide[1]))
+                    unitProductions[r.LeftHandSide].Add(r.RightHandSide[0]);
+            }
+
+            foreach (var root in unitProductions.Keys)
+            {
+                HashSet<DerivedCategory> visited = new HashSet<DerivedCategory>();
+                if (ContainsCycle(root, visited, unitProductions))
+                    return true;
+            }
+
+            return false;
         }
 
         private void ComputeTransitiveClosureOfNullableCategories()

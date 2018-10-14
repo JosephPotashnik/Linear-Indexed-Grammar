@@ -136,6 +136,9 @@ namespace LinearIndexedGrammarLearner
         public double Probability(ContextSensitiveGrammar currentHypothesis)
         {
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
+            if (currentCFHypothesis.ContainsCyclicUnitPrdouction())
+                return 0;
+
             SentenceParsingResults[] allParses = null;
             double prob = 0;
             try

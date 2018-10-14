@@ -4,7 +4,7 @@
       "PopulationSize": 500,
       "NumberOfGenerations": 1200,
       "NumberOfRuns": 10,
-      "GrammarFileName": "NoNPNoV3MoveNP.txt"
+      "GrammarFileName": "NoNPNoV3MoveZ1.txt"
     }
   ]
 }

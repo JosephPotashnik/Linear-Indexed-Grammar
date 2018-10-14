@@ -74,7 +74,7 @@ namespace LinearIndexedGrammar
         private static void Learn(int maxWordsInSentence = 6)
         {
             string fileName = @"ProgramsToRun.json";
-            fileName = @"NightRunFull.json";
+            //fileName = @"NightRunFull.json";
 
             var programParamsList = ReadProgramParamsFromFile(fileName);
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
@@ -117,7 +117,7 @@ namespace LinearIndexedGrammar
                 var GA = new GeneticAlgorithm(learner, programParams.PopulationSize, programParams.NumberOfGenerations);
                 (var prob, var bestHypothesis) = GA.Run();
                 probs.Add(prob);
-                if (prob == 1) break;
+                //if (prob == 1) break;
             }
 
             int numTimesAchieveProb1 = probs.Where(x => x == 1).Count();

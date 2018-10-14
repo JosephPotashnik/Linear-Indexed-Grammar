@@ -373,12 +373,18 @@ namespace LinearIndexedGrammarLearner
                 var spineCategory = new DerivedCategory(lhsCategories[rand.Next(lhsCategories.Length)].ToString(), ContextFreeGrammar.StarSymbol + moveable);
                 spineCategory.StackSymbolsCount = 1;
 
+                //if the form is Y[*] -> X1 X1[*X1], it's also like Y -> X1 X1[X1], 
+                //since there's a pop rule for the moveable X1: X1[X1] -> epsilon,
+                //overall it's like inserting Y -> X1 rule in an overcomplicated way.
+                if (spineCategory.BaseEquals(moveableCategory)) continue;
+
                 var rightHandSide = new DerivedCategory[len];
                 for (var i = 0; i < len; i++)
                     rightHandSide[i] = (spinePositionInRHS == i) ? spineCategory : moveableCategory;
 
                 var newRule = new StackChangingRule(newCategory, rightHandSide);
                 if (grammar.OnlyStartSymbolsRHS(newRule)) continue;
+
 
                 if (!grammar.AddStackChangingRule(moveableCategory, newRule, MoveableOperationsKey.Push1)) continue;
                 return true;
