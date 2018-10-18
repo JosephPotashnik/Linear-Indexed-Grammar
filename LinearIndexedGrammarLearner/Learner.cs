@@ -40,7 +40,7 @@ namespace LinearIndexedGrammarLearner
         }
 
         ////We create the "promiscuous grammar" as initial grammar.
-        public ContextSensitiveGrammar CreateInitialGrammar()
+        public ContextSensitiveGrammar CreateInitialGrammars()
         {
             originalGrammar = new ContextSensitiveGrammar();
             var posInText = voc.POSWithPossibleWords.Keys;
@@ -159,7 +159,8 @@ namespace LinearIndexedGrammarLearner
                 {
                     var totalTreesCountofGrammar = GetNumberOfParseTrees(currentCFHypothesis, maxWordsInSentence);
                     prob = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
-                
+                    
+
                     if (prob > 1)
                     {
                         return 0;

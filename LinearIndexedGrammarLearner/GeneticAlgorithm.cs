@@ -57,14 +57,14 @@ namespace LinearIndexedGrammarLearner
             this.populationSize = populationSize;
             learner = l;
 
-            ContextSensitiveGrammar initialGrammar = learner.CreateInitialGrammar();
+            ContextSensitiveGrammar initialGrammar = learner.CreateInitialGrammars();
             var prob = learner.Probability(initialGrammar);
 
             for (int i = 0; i < populationSize; i++)
                 population.Enqueue(prob, new GrammarWithProbability(new ContextSensitiveGrammar(initialGrammar), prob));
         }
 
-        public (double prob, ContextSensitiveGrammar g) Run()
+        public GrammarWithProbability[] Run()
         {
             int currentGeneration = 0;
             var descendants = new Queue<KeyValuePair<double, ContextSensitiveGrammar>>();
@@ -93,11 +93,11 @@ namespace LinearIndexedGrammarLearner
             }
 
             //choosing shortest grammar among all those with the best probability.
-            (var bestProbability, var bestHypothesis) = ChooseBestHypothesis();
+            var bestHypotheses = ChooseBestHypotheses().ToArray();
 
-            var s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestProbability}";
+            var s = $"Best Hypothesis:\r\n{bestHypotheses[0].Grammar} \r\n with probability {bestHypotheses[0].Probability}";
             NLog.LogManager.GetCurrentClassLogger().Info(s);
-            return (bestProbability, bestHypothesis);
+            return bestHypotheses;
         }
 
         private bool CheckForSufficientSolutions()
@@ -112,28 +112,22 @@ namespace LinearIndexedGrammarLearner
 
             return enoughSolutions;
         }
-        private (double bestProbability, ContextSensitiveGrammar bestHypothesis) ChooseBestHypothesis()
+        private IEnumerable<GrammarWithProbability> ChooseBestHypotheses()
         {
-            double bestProbability = population.Last().Key;
-            int minimalNumberOfRules = int.MaxValue;
-            ContextSensitiveGrammar bestHypothesis = null;
-            foreach (var bestHypothesisCandidates in population.Last().Value)
+            var bestGrammars = population.Last().Value.Select(x =>
             {
-                var g = bestHypothesisCandidates.Grammar;
+                var g = x.Grammar;
                 var ruleDistribution = learner.CollectUsages(g);
                 g.PruneUnusedRules(ruleDistribution);
-                int numberOfRules = g.StackConstantRules.Count();
-                if (numberOfRules < minimalNumberOfRules)
-                {
-                    bestHypothesis = g;
-                    minimalNumberOfRules = numberOfRules;
-                }
+                //rename variables names from serial generated names such as X271618 to X1, X2 etc.
+                g.RenameVariables();
+
+                return x;
             }
+            );
 
-            //rename variables names from serial generated names such as X271618 to X1, X2 etc.
-            bestHypothesis.RenameVariables();
-
-            return (bestProbability, bestHypothesis);
+            var y = bestGrammars.OrderBy(x => x.Grammar.StackConstantRules.Count());
+            return y;
         }
 
         
