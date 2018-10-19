@@ -275,24 +275,24 @@ namespace LinearIndexedGrammarLearner
         public ContextSensitiveGrammar DeleteMovement(ContextSensitiveGrammar grammar)
         {
             var rand = ThreadSafeRandom.ThisThreadsRandom;
-            var keys = grammar.stackChangingRules.Keys.ToArray();
+            var keys = grammar.StackChangingRules.Keys.ToArray();
             if (keys.Length == 0) return null;
             var moveable = keys[rand.Next(keys.Length)];
 
-            if (grammar.stackChangingRules[moveable].MoveOps.ContainsKey(MoveableOperationsKey.Push1))
+            if (grammar.StackChangingRules[moveable].MoveOps.ContainsKey(MoveableOperationsKey.Push1))
             {
                 //if there is more than one push1 rule, delete only push1 rule, 
                 //do not delete the pop1 rule.
-                var oldRule = grammar.stackChangingRules[moveable].GetRandomRule(MoveableOperationsKey.Push1);
-                grammar.stackChangingRules[moveable].DeleteRule(oldRule, MoveableOperationsKey.Push1);
+                var oldRule = grammar.StackChangingRules[moveable].GetRandomRule(MoveableOperationsKey.Push1);
+                grammar.StackChangingRules[moveable].DeleteRule(oldRule, MoveableOperationsKey.Push1);
 
-                if (grammar.stackChangingRules[moveable].MoveOps[MoveableOperationsKey.Push1].Count > 0)
+                if (grammar.StackChangingRules[moveable].MoveOps[MoveableOperationsKey.Push1].Count > 0)
                    return grammar;
                 else
                 {
                     //only one push1 rule, delete both push1 and pop1 rules.
-                    oldRule = grammar.stackChangingRules[moveable].GetRandomRule(MoveableOperationsKey.Pop1);
-                    grammar.stackChangingRules[moveable].DeleteRule(oldRule, MoveableOperationsKey.Pop1);
+                    oldRule = grammar.StackChangingRules[moveable].GetRandomRule(MoveableOperationsKey.Pop1);
+                    grammar.StackChangingRules[moveable].DeleteRule(oldRule, MoveableOperationsKey.Pop1);
 
                 }
             }
@@ -336,8 +336,7 @@ namespace LinearIndexedGrammarLearner
             {
                 var moveableCategory = new DerivedCategory(moveable);
                 var lhs = new DerivedCategory(moveable, moveable);
-                var epsiloncat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol);
-                epsiloncat.StackSymbolsCount = -1;
+                var epsiloncat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol) {StackSymbolsCount = -1};
                 var newRule = new StackChangingRule(lhs, new[] { epsiloncat });
 
                 if (!grammar.AddStackChangingRule(moveableCategory, newRule, MoveableOperationsKey.Pop1)) continue;
@@ -370,8 +369,8 @@ namespace LinearIndexedGrammarLearner
                 int spinePositionInRHS = rand.Next(len);
                 spinePositionInRHS = 1; //initially, constrain moveables to be the first position, spine to the right (=movement to left only)
                 var moveableCategory = new DerivedCategory(moveable);
-                var spineCategory = new DerivedCategory(lhsCategories[rand.Next(lhsCategories.Length)].ToString(), ContextFreeGrammar.StarSymbol + moveable);
-                spineCategory.StackSymbolsCount = 1;
+                var spineCategory = new DerivedCategory(lhsCategories[rand.Next(lhsCategories.Length)].ToString(),
+                    ContextFreeGrammar.StarSymbol + moveable) {StackSymbolsCount = 1};
 
                 //if the form is Y[*] -> X1 X1[*X1], it's also like Y -> X1 X1[X1], 
                 //since there's a pop rule for the moveable X1: X1[X1] -> epsilon,
@@ -445,7 +444,7 @@ namespace LinearIndexedGrammarLearner
 
         private static Rule GetRandomStackConstantRule(ContextSensitiveGrammar grammar)
         {
-            var rules = grammar.StackConstantRules.ToArray();
+            var rules = grammar.StackConstantRulesArray.ToArray();
             var rand = ThreadSafeRandom.ThisThreadsRandom;
             Rule randomRule = rules[rand.Next(rules.Length)];
             return randomRule;
@@ -455,24 +454,20 @@ namespace LinearIndexedGrammarLearner
         {
             var ruleInfos = new List<RuleInfo>();
 
-            foreach (var rule in grammar.StackConstantRules)
+            foreach (var rule in grammar.StackConstantRulesArray)
             {
-                var ruleInfo = new RuleInfo();
-                ruleInfo.Rule = rule;
+                var ruleInfo = new RuleInfo {Rule = rule};
                 ruleInfos.Add(ruleInfo);
             }
 
-            foreach (var moveable in grammar.stackChangingRules.Keys)
+            foreach (var moveable in grammar.StackChangingRules.Keys)
             {
-                var moveOps = grammar.stackChangingRules[moveable];
+                var moveOps = grammar.StackChangingRules[moveable];
                 foreach (var moveOpKey in moveOps.MoveOps.Keys)
                 {
                     foreach (var item in moveOps.MoveOps[moveOpKey])
                     {
-                        var ruleInfo = new RuleInfo();
-                        ruleInfo.Rule = item;
-                        ruleInfo.MoveOpKey = moveOpKey;
-                        ruleInfo.Moveable = moveable;
+                        var ruleInfo = new RuleInfo {Rule = item, MoveOpKey = moveOpKey, Moveable = moveable};
                         ruleInfos.Add(ruleInfo);
                     }
                 }

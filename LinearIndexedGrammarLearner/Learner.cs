@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using LinearIndexedGrammarParser;
 using System.Threading;
-using System.IO;
 
 namespace LinearIndexedGrammarLearner
 {
@@ -136,7 +135,7 @@ namespace LinearIndexedGrammarLearner
         public double Probability(ContextSensitiveGrammar currentHypothesis)
         {
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
-            if (currentCFHypothesis.ContainsCyclicUnitPrdouction())
+            if (currentCFHypothesis.ContainsCyclicUnitProduction())
                 return 0;
 
             SentenceParsingResults[] allParses = null;
@@ -237,7 +236,7 @@ namespace LinearIndexedGrammarLearner
             {
                 //assuming: insertion of rule adds as of yet unused rule
                 //so it does not affect the parsibility of the grammar nor its probability.
-                if (mutatedGrammar.StackConstantRules.Count() > originalGrammar.Grammar.StackConstantRules.Count() )
+                if (mutatedGrammar.StackConstantRulesArray.Length > originalGrammar.Grammar.StackConstantRulesArray.Length )
                     return new GrammarWithProbability(mutatedGrammar, originalGrammar.Probability);
 
                 prob = Probability(mutatedGrammar);

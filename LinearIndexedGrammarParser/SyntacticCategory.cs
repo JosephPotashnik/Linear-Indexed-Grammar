@@ -1,16 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace LinearIndexedGrammarParser
 {
-
     public class SyntacticCategory
     {
         protected string Symbol;
-        public SyntacticCategory() { }
-        public SyntacticCategory(string symbol) => Symbol = symbol;
-        public SyntacticCategory(SyntacticCategory otherCategory) => Symbol = otherCategory.Symbol;
+
+        public SyntacticCategory()
+        {
+        }
+
+        public SyntacticCategory(string symbol)
+        {
+            Symbol = symbol;
+        }
+
+        public SyntacticCategory(SyntacticCategory otherCategory)
+        {
+            Symbol = otherCategory.Symbol;
+        }
 
         public override bool Equals(object obj)
         {
@@ -20,42 +28,69 @@ namespace LinearIndexedGrammarParser
             return Symbol == p.Symbol;
         }
 
-        public override int GetHashCode() => Symbol.GetHashCode();
-        public override string ToString() => Symbol;
-        internal bool IsEpsilon() =>  Symbol == ContextFreeGrammar.EpsilonSymbol;
+        public override int GetHashCode()
+        {
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
+            return Symbol.GetHashCode();
+        }
 
+        public override string ToString()
+        {
+            return Symbol;
+        }
+
+        internal bool IsEpsilon()
+        {
+            return Symbol == ContextFreeGrammar.EpsilonSymbol;
+        }
     }
 
     public class DerivedCategory : SyntacticCategory
     {
-        public string Stack { get; set; }
-        public int StackSymbolsCount { get; set; }
-        public DerivedCategory(string baseCategorySymbol, string _stack = "") : base(baseCategorySymbol)
+        public DerivedCategory(string baseCategorySymbol, string stack = "") : base(baseCategorySymbol)
         {
-            Stack = _stack;
+            Stack = stack;
         }
 
 
-        public DerivedCategory(DerivedCategory other) : base (other)
+        public DerivedCategory(DerivedCategory other) : base(other)
         {
             Stack = other.Stack;
             StackSymbolsCount = other.StackSymbolsCount;
         }
+
+        public string Stack { get; set; }
+        public int StackSymbolsCount { get; set; }
+
+        private string Contents => Symbol + Stack;
+
         public override bool Equals(object obj)
         {
             if (!(obj is DerivedCategory p))
                 return false;
 
-            return base.Equals(p) &&  Stack.Equals(p.Stack);
+            return base.Equals(p) && Stack.Equals(p.Stack);
         }
 
-        private string Contents { get { return Symbol + Stack; } }
-        public override int GetHashCode() => Contents.GetHashCode();
-        public override string ToString() => Contents;
+        public override int GetHashCode()
+        {
+            return Contents.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return Contents;
+        }
+
         public bool BaseEquals(DerivedCategory other)
-        { return Symbol == other.Symbol; }
+        {
+            return Symbol == other.Symbol;
+        }
+
         public void SetBase(DerivedCategory other)
-        {  Symbol = other.Symbol; }
+        {
+            Symbol = other.Symbol;
+        }
 
         public void Replace(Dictionary<string, string> replaceDic)
         {
@@ -72,10 +107,8 @@ namespace LinearIndexedGrammarParser
             }
 
             if (moveable != null)
-            {
                 if (replaceDic.ContainsKey(moveable))
                     Stack = Stack.Replace(moveable, replaceDic[moveable]);
-            }
         }
     }
 }

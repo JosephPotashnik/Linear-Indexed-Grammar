@@ -1,43 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NLog;
 
 namespace LinearIndexedGrammarParser
 {
-
     public class InfiniteParseException : Exception
     {
-        public InfiniteParseException(string str) : base(str) { }
+        public InfiniteParseException(string str) : base(str)
+        {
+        }
     }
 
-    public class GenerateException : Exception { }
-    
     public class EarleyParser
     {
-        protected Vocabulary voc;
-        private ContextFreeGrammar grammar;
+        private readonly ContextFreeGrammar _grammar;
+        protected Vocabulary Voc;
 
         public EarleyParser(ContextFreeGrammar g, Vocabulary v = null)
         {
-            voc  = v ?? Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
+            Voc = v ?? Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
 
-            grammar = g;
+            _grammar = g;
         }
-        
+
         private void Predict(EarleyColumn col, List<Rule> ruleList, DerivedCategory nextTerm)
         {
-            bool isPossibleNullable = grammar.possibleNullableCategories.Contains(nextTerm);
+            var isPossibleNullable = _grammar.PossibleNullableCategories.Contains(nextTerm);
 
             foreach (var rule in ruleList)
             {
-
                 //if the rule obligatorily expands to the nullable production,
                 //do not predict it. you have already performed a spontaneous dot-shift
                 //in EarleyColumn.AddState().
-                if (isPossibleNullable && grammar.IsObligatoryNullableRule(rule)) continue;
-                
+                if (isPossibleNullable && _grammar.IsObligatoryNullableRule(rule)) continue;
+
                 var newState = new EarleyState(rule, 0, col, null);
-                col.AddState(newState, grammar);
+                col.AddState(newState, _grammar);
             }
         }
 
@@ -50,7 +49,7 @@ namespace LinearIndexedGrammarParser
             var y = EarleyState.MakeNode(state, col.Index, v);
             var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn, y);
 
-            col.AddState(newState, grammar);
+            col.AddState(newState, _grammar);
         }
 
         private void Complete(EarleyColumn col, EarleyState state)
@@ -69,33 +68,30 @@ namespace LinearIndexedGrammarParser
             {
                 var y = EarleyState.MakeNode(st, state.EndColumn.Index, state.Node);
                 var newState = new EarleyState(st.Rule, st.DotIndex + 1, st.StartColumn, y);
-                col.AddState(newState, grammar);       
+                col.AddState(newState, _grammar);
             }
         }
 
         //inactive. use for debugging when you suspect program stuck.
         //at the moment, the promiscuous grammar could generate +100,000 earley states
         //so a very large amount of earley states is not necessarily a a bug.
-        private void TestForTooManyStatesInColumn(EarleyColumn col, int count)
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
+        private static void TestForTooManyStatesInColumn(int count)
         {
-            if (count > 100000)
-            {
-                throw new InfiniteParseException("Grammar with infinite parse. abort this grammar..");
-            }
+            if (count > 100000) throw new InfiniteParseException("Grammar with infinite parse. abort this grammar..");
         }
-        
+
         public List<EarleyNode> ParseSentence(string text, int maxWords = 0)
         {
-            (EarleyColumn[] table, int[] finalColumns) = PrepareEarleyTable(text, maxWords);
-            EarleyState.stateCounter = 0;
-            List<EarleyNode> nodes = new List<EarleyNode>();
+            var (table, finalColumns) = PrepareEarleyTable(text, maxWords);
+            var nodes = new List<EarleyNode>();
 
             //assumption: GenerateAllStaticRulesFromDynamicRules has been called before parsing
             //and added the GammaRule
-            var startRule = grammar.staticRules[new DerivedCategory(ContextFreeGrammar.GammaRule)][0];
+            var startRule = _grammar.StaticRules[new DerivedCategory(ContextFreeGrammar.GammaRule)][0];
 
             var startState = new EarleyState(startRule, 0, table[0], null);
-            table[0].AddState(startState, grammar);
+            table[0].AddState(startState, _grammar);
             try
             {
                 foreach (var col in table)
@@ -106,19 +102,18 @@ namespace LinearIndexedGrammarParser
                     count = TraverseCompletedStates(col, count);
 
                     //2. predict after complete:
+                    // ReSharper disable once RedundantAssignment
                     count = TraversePredictableStates(col, count);
 
                     //3. scan after predict.
                     TraverseScannableStates(table, col);
                 }
 
-                int numOfColumnsToLookForGamma = finalColumns.Length;
                 foreach (var index in finalColumns)
                 {
                     var n = table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
                     nodes.AddRange(n);
                 }
-                
             }
             catch (InfiniteParseException)
             {
@@ -128,19 +123,20 @@ namespace LinearIndexedGrammarParser
             catch (Exception e)
             {
                 var s = e.ToString();
-                NLog.LogManager.GetCurrentClassLogger().Warn(s);
+                LogManager.GetCurrentClassLogger().Warn(s);
             }
+
             if (nodes.Count > 0)
                 return nodes;
 
             throw new Exception("parsing failed!");
         }
 
-        virtual protected (EarleyColumn[], int[]) PrepareEarleyTable(string text, int maxWord)
+        protected virtual (EarleyColumn[], int[]) PrepareEarleyTable(string text, int maxWord)
         {
-            string[] arr = text.Split();
+            var arr = text.Split();
             //check below that the text appears in the vocabulary
-            if (arr.Any(str => !voc.ContainsWord(str)))
+            if (arr.Any(str => !Voc.ContainsWord(str)))
                 throw new Exception("word in text does not appear in the vocabulary.");
 
             var table = new EarleyColumn[arr.Length + 1];
@@ -149,12 +145,12 @@ namespace LinearIndexedGrammarParser
                 table[i] = new EarleyColumn(i, arr[i - 1]);
 
             table[0] = new EarleyColumn(0, "");
-            return (table, new[] { table.Length - 1 });
+            return (table, new[] {table.Length - 1});
         }
 
         protected virtual HashSet<string> GetPossibleSyntacticCategoriesForToken(string nextScannableTerm)
         {
-            return voc[nextScannableTerm];
+            return Voc[nextScannableTerm];
         }
 
 
@@ -170,12 +166,9 @@ namespace LinearIndexedGrammarParser
                 var currentCategory = new DerivedCategory(item);
 
                 if (col.StatesWithNextSyntacticCategory.ContainsKey(currentCategory))
-                {
                     foreach (var state in col.StatesWithNextSyntacticCategory[currentCategory])
                         Scan(table[col.Index + 1], state, currentCategory, nextScannableTerm);
-                }
             }
-                
         }
 
         private int TraversePredictableStates(EarleyColumn col, int count)
@@ -184,20 +177,14 @@ namespace LinearIndexedGrammarParser
             {
                 var nextTerm = col.CategoriesToPredict.Dequeue();
 
-                if (col.ActionableCompleteStates.Any())
-                {
-                    //completed states in the prediction step result only from epsilon transitions.
-                    //we can discard them because we have already inserted the appropriate epsilon
-                    //transition in EarleyColumn.AddState().
-                    col.ActionableCompleteStates.Clear();
-                }
+                if (col.ActionableCompleteStates.Any()) col.ActionableCompleteStates.Clear();
 
                 count++;
-                TestForTooManyStatesInColumn(col, count);
+                TestForTooManyStatesInColumn(count);
 
-                if (!grammar.staticRules.ContainsKey(nextTerm)) continue;
+                if (!_grammar.StaticRules.ContainsKey(nextTerm)) continue;
 
-                var ruleList = grammar.staticRules[nextTerm];
+                var ruleList = _grammar.StaticRules[nextTerm];
                 Predict(col, ruleList, nextTerm);
             }
 
@@ -209,7 +196,7 @@ namespace LinearIndexedGrammarParser
             while (col.ActionableCompleteStates.Any())
             {
                 count++;
-                TestForTooManyStatesInColumn(col, count);
+                TestForTooManyStatesInColumn(count);
 
                 var completedStatesQueueKey = col.ActionableCompleteStates.First().Key;
                 var completedStatesQueue = col.ActionableCompleteStates.First().Value;

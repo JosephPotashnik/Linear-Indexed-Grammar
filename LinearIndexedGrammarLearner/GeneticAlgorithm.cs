@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -126,7 +125,7 @@ namespace LinearIndexedGrammarLearner
             }
             );
 
-            var y = bestGrammars.OrderBy(x => x.Grammar.StackConstantRules.Count());
+            var y = bestGrammars.OrderBy(x => x.Grammar.StackConstantRulesArray.Count());
             return y;
         }
 
@@ -136,8 +135,7 @@ namespace LinearIndexedGrammarLearner
         {
             while (descendants.Any())
             {
-                KeyValuePair<double, ContextSensitiveGrammar> descendant;
-                bool success = descendants.TryDequeue(out descendant);
+                bool success = descendants.TryDequeue(out var descendant);
                 if (success)
                 {
                     //if the probability of the descendant (its key) is higher than the lowest probability

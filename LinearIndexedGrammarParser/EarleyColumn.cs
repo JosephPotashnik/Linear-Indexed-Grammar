@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace LinearIndexedGrammarParser
 {
@@ -15,28 +14,28 @@ namespace LinearIndexedGrammarParser
         }
     }
 
-    public class EarleyColumn 
+    public class EarleyColumn
     {
+        internal Queue<DerivedCategory> CategoriesToPredict;
+        internal Dictionary<DerivedCategory, List<EarleyState>> StatesWithNextSyntacticCategory;
+
         public EarleyColumn(int index, string token)
         {
             Index = index;
             Token = token;
 
             //completed agenda is ordered in decreasing order of start indices (see Stolcke 1995 about completion priority queue).
-            ActionableCompleteStates = new SortedDictionary<EarleyState, Queue<EarleyState>>(new CompletedStateComparer());
+            ActionableCompleteStates =
+                new SortedDictionary<EarleyState, Queue<EarleyState>>(new CompletedStateComparer());
             StatesWithNextSyntacticCategory = new Dictionary<DerivedCategory, List<EarleyState>>();
             GammaStates = new List<EarleyState>();
             CategoriesToPredict = new Queue<DerivedCategory>();
-
         }
 
-        public int Index { get; set; }
-        public string Token { get; set; }
-
         internal SortedDictionary<EarleyState, Queue<EarleyState>> ActionableCompleteStates { get; set; }
-        internal Dictionary<DerivedCategory, List<EarleyState>> StatesWithNextSyntacticCategory;
-        internal Queue<DerivedCategory> CategoriesToPredict;
         public List<EarleyState> GammaStates { get; set; }
+        public int Index { get; }
+        public string Token { get; set; }
 
         private void EpsilonComplete(EarleyState state, ContextFreeGrammar grammar)
         {
@@ -46,24 +45,22 @@ namespace LinearIndexedGrammarParser
             AddState(newState, grammar);
         }
 
-        //The responsibility not to add a state that already exists in the columnn
+        //The responsibility not to add a state that already exists in the column
         //lays with the caller to AddState(). i.e, either predict, scan or complete,
         //or epsilon complete.
         public void AddState(EarleyState newState, ContextFreeGrammar grammar)
         {
             newState.EndColumn = this;
 
-            if (!newState.IsCompleted())
+            if (!newState.IsCompleted)
             {
-                var term = newState.NextTerm();
+                var term = newState.NextTerm;
 
                 if (!StatesWithNextSyntacticCategory.ContainsKey(term))
                 {
-                    //TODO: consider if is necessary to enqueue a category that is part of speech
-                    //is there any derivation rule with part of speech on the left hand side?
                     StatesWithNextSyntacticCategory[term] = new List<EarleyState>();
 
-                    if (!grammar.obligatoryNullableCategories.Contains(term))
+                    if (!grammar.ObligatoryNullableCategories.Contains(term))
                         CategoriesToPredict.Enqueue(term);
                 }
 
@@ -71,17 +68,15 @@ namespace LinearIndexedGrammarParser
 
                 //check if the next nonterminal leads to an expansion of null production, if yes,
                 //then perform a spontaneous dot shift.
-                if (grammar.possibleNullableCategories.Contains(term))
+                if (grammar.PossibleNullableCategories.Contains(term))
                     EpsilonComplete(newState, grammar);
-
             }
-            else 
+            else
             {
                 if (!ActionableCompleteStates.ContainsKey(newState))
                     ActionableCompleteStates[newState] = new Queue<EarleyState>();
 
                 ActionableCompleteStates[newState].Enqueue(newState);
-
             }
         }
     }

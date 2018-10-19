@@ -15,9 +15,9 @@ namespace LinearIndexedGrammarParser
 
         // key = word, value = possible POS
         public Dictionary<string, HashSet<string>> WordWithPossiblePOS { get; set; }
+
         // key = POS, value = words.
-        [JsonProperty]
-        public Dictionary<string, HashSet<string>> POSWithPossibleWords { get; set; }
+        [JsonProperty] public Dictionary<string, HashSet<string>> POSWithPossibleWords { get; set; }
 
         public HashSet<string> this[string word]
         {
@@ -37,8 +37,9 @@ namespace LinearIndexedGrammarParser
             using (var file = File.OpenText(jsonFileName))
             {
                 var serializer = new JsonSerializer();
-                voc = (Vocabulary)serializer.Deserialize(file, typeof(Vocabulary));
+                voc = (Vocabulary) serializer.Deserialize(file, typeof(Vocabulary));
             }
+
             voc.PopulateDependentJsonPropertys();
             return voc;
         }

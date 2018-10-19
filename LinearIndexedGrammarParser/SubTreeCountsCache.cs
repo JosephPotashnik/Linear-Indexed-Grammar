@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace LinearIndexedGrammarParser
 {
@@ -13,15 +11,14 @@ namespace LinearIndexedGrammarParser
         public SubTreeCountsCache(ContextFreeGrammar g, int depth)
         {
             CategoriesCache = new Dictionary<DerivedCategory, SubtreeCountsWithNumberOfWords[]>();
-            foreach (var lhs in g.staticRulesGeneratedForCategory)
+            foreach (var lhs in g.StaticRulesGeneratedForCategory)
                 CategoriesCache[lhs] = new SubtreeCountsWithNumberOfWords[depth];
 
             RuleCache = new Dictionary<Rule, SubtreeCountsWithNumberOfWords[]>();
-            var staticRules = g.staticRules.Values.SelectMany(x => x);
+            var staticRules = g.StaticRules.Values.SelectMany(x => x);
             foreach (var rule in staticRules)
                 RuleCache[rule] = new SubtreeCountsWithNumberOfWords[depth];
         }
-
     }
 
     public class SubtreeCountsWithNumberOfWords

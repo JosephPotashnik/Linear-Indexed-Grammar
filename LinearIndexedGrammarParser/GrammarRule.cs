@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
@@ -7,23 +6,18 @@ namespace LinearIndexedGrammarParser
     [JsonObject(MemberSerialization.OptIn)]
     public class Rule
     {
-        [JsonProperty]
-        public DerivedCategory LeftHandSide { get; set; }
+        public Rule()
+        {
+        }
 
-        [JsonProperty]
-        public DerivedCategory[] RightHandSide { get; set; }
-
-        public int Number { get; set; }
-        public int NumberOfGeneratingRule { get; set; }
-
-        public Rule() {}
-        public Rule(DerivedCategory leftHandSide, DerivedCategory[] rightHandSide,  int num = -1)
+        public Rule(DerivedCategory leftHandSide, DerivedCategory[] rightHandSide, int num = -1)
         {
             LeftHandSide = new DerivedCategory(leftHandSide);
             RightHandSide = rightHandSide?.Select(cat => new DerivedCategory(cat)).ToArray();
             Number = num;
         }
-        public Rule(string leftHandSide, string[] rightHandSide,  int num = -1)
+
+        public Rule(string leftHandSide, string[] rightHandSide, int num = -1)
         {
             LeftHandSide = new DerivedCategory(leftHandSide);
             RightHandSide = rightHandSide?.Select(cat => new DerivedCategory(cat)).ToArray();
@@ -37,6 +31,13 @@ namespace LinearIndexedGrammarParser
             Number = otherRule.Number;
             NumberOfGeneratingRule = otherRule.NumberOfGeneratingRule;
         }
+
+        [JsonProperty] public DerivedCategory LeftHandSide { get; set; }
+
+        [JsonProperty] public DerivedCategory[] RightHandSide { get; set; }
+
+        public int Number { get; set; }
+        public int NumberOfGeneratingRule { get; set; }
 
         public override string ToString()
         {
@@ -53,13 +54,15 @@ namespace LinearIndexedGrammarParser
         }
 
 
-
         public override int GetHashCode()
         {
             // ReSharper disable once NonReadonlyMemberInGetHashCode
             return Number;
         }
 
-        public bool IsEpsilonRule() => RightHandSide[0].IsEpsilon();
+        public bool IsEpsilonRule()
+        {
+            return RightHandSide[0].IsEpsilon();
+        }
     }
 }

@@ -1,12 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
     public class EarleyState
     {
-        public static int stateCounter;
-
         public EarleyState(Rule r, int dotIndex, EarleyColumn c, EarleyNode n)
         {
             Rule = r;
@@ -14,18 +11,13 @@ namespace LinearIndexedGrammarParser
             StartColumn = c;
             EndColumn = null;
             Node = n;
-            StateNumber = stateCounter;
-            stateCounter += 1;
         }
 
-        public Rule Rule { get; set; }
-        public EarleyColumn StartColumn { get; set; }
+        public Rule Rule { get; }
+        public EarleyColumn StartColumn { get; }
         public EarleyColumn EndColumn { get; set; }
-        public int DotIndex { get; set; }
+        public int DotIndex { get; }
         public EarleyNode Node { get; set; }
-
-        public int StateNumber { get; set; }
-
 
         private static string RuleWithDotNotation(Rule rule, int dotIndex)
         {
@@ -34,15 +26,9 @@ namespace LinearIndexedGrammarParser
             return string.Format("{0} -> {1}", rule.LeftHandSide, string.Join(" ", terms));
         }
 
-        public bool IsCompleted() => DotIndex >= Rule.RightHandSide.Length;
+        public bool IsCompleted => DotIndex >= Rule.RightHandSide.Length;
 
-
-        public DerivedCategory NextTerm()
-        {
-            if (IsCompleted())
-                return null;
-            return Rule.RightHandSide[DotIndex];
-        }
+        public DerivedCategory NextTerm => IsCompleted? null : Rule.RightHandSide[DotIndex];
 
         public override string ToString()
         {
@@ -58,7 +44,7 @@ namespace LinearIndexedGrammarParser
             if (!(obj is EarleyState s))
                 return false;
 
-            var val = Rule.Equals(s.Rule) && (DotIndex == s.DotIndex) && (StartColumn.Index == s.StartColumn.Index);
+            var val = Rule.Equals(s.Rule) && DotIndex == s.DotIndex && StartColumn.Index == s.StartColumn.Index;
 
             if (Node == null || s.Node == null)
                 return val;

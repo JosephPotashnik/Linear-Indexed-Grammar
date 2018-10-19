@@ -35,7 +35,7 @@ namespace LinearIndexedGrammar
 
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             ConfigureLogger();
             Learn();
@@ -46,12 +46,12 @@ namespace LinearIndexedGrammar
             var config = new NLog.Config.LoggingConfiguration();
 
             var logfile = new NLog.Targets.FileTarget("logfile") { FileName = "SessionReport.txt" };
-            var logconsole = new NLog.Targets.ConsoleTarget("logconsole");
+            var logConsole = new NLog.Targets.ConsoleTarget("logConsole");
 
-            config.AddRule(LogLevel.Info, LogLevel.Fatal, logconsole);
+            config.AddRule(LogLevel.Info, LogLevel.Fatal, logConsole);
             config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
 
-            NLog.LogManager.Configuration = config;
+            LogManager.Configuration = config;
         }
 
         public static void StopWatch(Stopwatch stopWatch)
@@ -60,7 +60,7 @@ namespace LinearIndexedGrammar
             var ts = stopWatch.Elapsed;
             var elapsedTime = $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00}.{ts.Milliseconds / 10:00}";
             var s = "Overall session RunTime " + elapsedTime;
-            NLog.LogManager.GetCurrentClassLogger().Info(s);
+            LogManager.GetCurrentClassLogger().Info(s);
         }
 
         public static Stopwatch StartWatch()
@@ -74,7 +74,7 @@ namespace LinearIndexedGrammar
         private static void Learn(int maxWordsInSentence = 6)
         {
             string fileName = @"ProgramsToRun.json";
-            fileName = @"NightRunFull.json";
+            //fileName = @"NightRunFull.json";
 
             var programParamsList = ReadProgramParamsFromFile(fileName);
             Vocabulary universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
@@ -88,45 +88,47 @@ namespace LinearIndexedGrammar
 
         private static void RunProgram(ProgramParams programParams, int maxWordsInSentence, Vocabulary universalVocabulary)
         {
-            (var nodeList, var targetGrammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar(programParams.GrammarFileName, maxWordsInSentence);
-            (var data, var dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
+            var (nodeList, targetGrammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar(programParams.GrammarFileName, maxWordsInSentence);
+            var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
 
 
-            string s = "-------------------\r\n" +
-                        $"Session {DateTime.Now.ToString("MM/dd/yyyy h:mm tt")}\r\n" +
+            var s = "-------------------\r\n" +
+                        $"Session {DateTime.Now:MM/dd/yyyy h:mm tt}\r\n" +
                         $"runs: { programParams.NumberOfRuns}, population size: {programParams.PopulationSize}, number of generations: {programParams.NumberOfGenerations}\r\n";
 
-            NLog.LogManager.GetCurrentClassLogger().Info(s);
+            LogManager.GetCurrentClassLogger().Info(s);
             var stopWatch = StartWatch();
 
             var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
             var targetProb = learner.Probability(targetGrammar);
 
             s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
-            NLog.LogManager.GetCurrentClassLogger().Info(s);
+            LogManager.GetCurrentClassLogger().Info(s);
             if (targetProb < 1)
             {
-                NLog.LogManager.GetCurrentClassLogger().Fatal("probablity incorrect. exit!");
+                LogManager.GetCurrentClassLogger().Fatal("probablity incorrect. exit!");
                 return;
             }
 
-            List<double> probs = new List<double>();
+            var probs = new List<double>();
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
-                NLog.LogManager.GetCurrentClassLogger().Info($"Run {i + 1}:");
-                var GA = new GeneticAlgorithm(learner, programParams.PopulationSize, programParams.NumberOfGenerations);
-                var hypotheses = GA.Run();
+                LogManager.GetCurrentClassLogger().Info($"Run {i + 1}:");
+                var ga = new GeneticAlgorithm(learner, programParams.PopulationSize, programParams.NumberOfGenerations);
+                var hypotheses = ga.Run();
                 probs.Add(hypotheses[0].Probability);
-                if (hypotheses[0].Probability == 1) break;
+                //if (Math.Abs(hypotheses[0].Probability - 1) < Tolerance) break;
             }
 
-            int numTimesAchieveProb1 = probs.Where(x => x == 1).Count();
+            int numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < Tolerance);
             double averageProb = probs.Average();
             s = $"Average probability is: {averageProb}\r\n" +
                 $"Achieved Probability=1 in {numTimesAchieveProb1} times out of {programParams.NumberOfRuns} runs";
-            NLog.LogManager.GetCurrentClassLogger().Info(s);
+            LogManager.GetCurrentClassLogger().Info(s);
             StopWatch(stopWatch);
         }
+
+        public const double Tolerance = 0.0001;
 
         private static ProgramParamsList ReadProgramParamsFromFile(string fileName)
         {

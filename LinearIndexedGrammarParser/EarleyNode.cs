@@ -1,15 +1,13 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
     public class EarleyNode
     {
         private const int ScanRuleNumber = 0;
-
-        public EarleyNode() {}
 
         public EarleyNode(string nodeName, int startIndex, int endIndex)
         {
@@ -20,25 +18,24 @@ namespace LinearIndexedGrammarParser
         }
 
 
-        public string Name { get; set; }
+        public string Name { get; }
 
-        public int StartIndex { get; set; }
+        public int StartIndex { get; }
 
-        public int EndIndex { get; set; }
+        public int EndIndex { get; }
 
         public List<EarleyNode> Children { get; set; }
 
         public string AssociatedTerminal { get; set; }
 
-        [JsonIgnore]
-        public int RuleNumber { get; set; }
+        [JsonIgnore] public int RuleNumber { get; set; }
 
         public override bool Equals(object obj)
         {
             if (!(obj is EarleyNode n))
                 return false;
 
-            return (Name == n.Name) && (StartIndex == n.StartIndex) && (EndIndex == n.EndIndex);
+            return Name == n.Name && StartIndex == n.StartIndex && EndIndex == n.EndIndex;
         }
 
         public override int GetHashCode()
@@ -63,10 +60,7 @@ namespace LinearIndexedGrammarParser
             if (Children == null)
                 Children = new List<EarleyNode>();
             Children.Add(v);
-            if (w != null)
-            {
-                Children.Insert(0, w);
-            }
+            if (w != null) Children.Insert(0, w);
         }
 
         public override string ToString()
@@ -84,16 +78,14 @@ namespace LinearIndexedGrammarParser
 
         public string TreeString(int level = 0)
         {
-            StringBuilder builder = new StringBuilder();
-            string s = ToString();
-            string s1 = s.PadLeft(level * 4 + s.Length, '_');
+            var builder = new StringBuilder();
+            var s = ToString();
+            var s1 = s.PadLeft(level * 4 + s.Length, '_');
 
             builder.AppendLine(s1);
             if (Children != null)
-            {
                 foreach (var child in Children)
                     builder.Append(child.TreeString(level + 1));
-            }
             return builder.ToString();
         }
 
@@ -120,6 +112,5 @@ namespace LinearIndexedGrammarParser
                     child.GetNonTerminalStringUnderNode(leavesList);
             }
         }
-        
     }
 }
