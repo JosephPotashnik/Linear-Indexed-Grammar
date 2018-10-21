@@ -25,10 +25,10 @@
   },
   {
     "Mutation": "InsertMovement",
-    "MutationWeight": 10
+    "MutationWeight": 0
   },
   {
     "Mutation": "DeleteMovement",
-    "MutationWeight": 10
+    "MutationWeight": 0
   }
 ]

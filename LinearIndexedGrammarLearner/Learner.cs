@@ -14,8 +14,8 @@ namespace LinearIndexedGrammarLearner
 
         public GrammarWithProbability(ContextSensitiveGrammar g, double probability)
         {
-            this.Grammar = g;
-            this.Probability = probability;
+            Grammar = g;
+            Probability = probability;
         }
 
         public void Dispose()
@@ -25,26 +25,25 @@ namespace LinearIndexedGrammarLearner
     }
     public class Learner
     {
-        private readonly Dictionary<string, int> sentencesWithCounts;
-        public ContextSensitiveGrammar originalGrammar;
-        private GrammarPermutations gp;
-        private Vocabulary voc;
-        private readonly int maxWordsInSentence;
+        private readonly Dictionary<string, int> _sentencesWithCounts;
+        private GrammarPermutations _gp;
+        private readonly Vocabulary _voc;
+        private readonly int _maxWordsInSentence;
 
         public Learner(string[] sentences, int maxWordsInSentence, Vocabulary voc)
         {
-            this.voc = voc;
-            this.maxWordsInSentence = maxWordsInSentence;
-            sentencesWithCounts = sentences.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
+            _voc = voc;
+            _maxWordsInSentence = maxWordsInSentence;
+            _sentencesWithCounts = sentences.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
         }
 
         ////We create the "promiscuous grammar" as initial grammar.
         public ContextSensitiveGrammar CreateInitialGrammars()
         {
-            originalGrammar = new ContextSensitiveGrammar();
-            var posInText = voc.POSWithPossibleWords.Keys;
-            gp = new GrammarPermutations(posInText.ToArray());
-            gp.ReadPermutationWeightsFromFile();
+            var originalGrammar = new ContextSensitiveGrammar();
+            var posInText = _voc.POSWithPossibleWords.Keys;
+            _gp = new GrammarPermutations(posInText.ToArray());
+            _gp.ReadPermutationWeightsFromFile();
 
             foreach (var pos in posInText)
             {
@@ -57,15 +56,15 @@ namespace LinearIndexedGrammarLearner
 
         private SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis)
         {
-            SentenceParsingResults[] allParses = new SentenceParsingResults[sentencesWithCounts.Count];
+            SentenceParsingResults[] allParses = new SentenceParsingResults[_sentencesWithCounts.Count];
 
             try
             {
                 var timeout = 500; // 0.5 seconds
                 var cts = new CancellationTokenSource(timeout);
-                Parallel.ForEach(sentencesWithCounts, new ParallelOptions { CancellationToken = cts.Token}, (sentenceItem, loopState, i) =>
+                Parallel.ForEach(_sentencesWithCounts, new ParallelOptions { CancellationToken = cts.Token}, (sentenceItem, loopState, i) =>
                 {
-                    var parser = new EarleyParser(currentHypothesis, this.voc);
+                    var parser = new EarleyParser(currentHypothesis, _voc);
                     var n = parser.ParseSentence(sentenceItem.Key);
                     allParses[i] = new SentenceParsingResults()
                     {
@@ -112,7 +111,7 @@ namespace LinearIndexedGrammarLearner
             var treeDepth = maxWordsInSentence + 3;
             //TODO: find a safe upper bound to tree depth, which will be a function of
             //max words in sentence, possibly also a function of the number of different POS.
-            var posInText = voc.POSWithPossibleWords.Keys.ToHashSet();
+            var posInText = _voc.POSWithPossibleWords.Keys.ToHashSet();
             Task<SubtreeCountsWithNumberOfWords> t = Task.Run(() =>
             {
                 SubTreeCountsCache cache = new SubTreeCountsCache(hypothesis, treeDepth);
@@ -138,7 +137,7 @@ namespace LinearIndexedGrammarLearner
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
                 return 0;
 
-            SentenceParsingResults[] allParses = null;
+            SentenceParsingResults[] allParses;
             double prob = 0;
             try
             {
@@ -156,7 +155,7 @@ namespace LinearIndexedGrammarLearner
 
                 if (totalTreesCountofData != 0)
                 {
-                    var totalTreesCountofGrammar = GetNumberOfParseTrees(currentCFHypothesis, maxWordsInSentence);
+                    var totalTreesCountofGrammar = GetNumberOfParseTrees(currentCFHypothesis, _maxWordsInSentence);
                     prob = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
                     
 
@@ -182,9 +181,9 @@ namespace LinearIndexedGrammarLearner
         }
         public Dictionary<int, int> CollectUsages(ContextSensitiveGrammar currentHypothesis)
         {
-            var CFGrammar = new ContextFreeGrammar(currentHypothesis);
+            var cfGrammar = new ContextFreeGrammar(currentHypothesis);
 
-            var allParses = ParseAllSentences(CFGrammar);
+            var allParses = ParseAllSentences(cfGrammar);
             var usagesDic = new Dictionary<int, int>();
 
             if (allParses != null)
@@ -236,7 +235,12 @@ namespace LinearIndexedGrammarLearner
             {
                 //assuming: insertion of rule adds as of yet unused rule
                 //so it does not affect the parsibility of the grammar nor its probability.
-                if (mutatedGrammar.StackConstantRulesArray.Length > originalGrammar.Grammar.StackConstantRulesArray.Length )
+                //this is going to be wrong if you relax the assumption that grammars always parse all their sentences.
+
+                if (mutatedGrammar.StackConstantRulesArray.Length > originalGrammar.Grammar.StackConstantRulesArray.Length 
+                    ||
+                 mutatedGrammar.StackChangingRulesArray.Length > originalGrammar.Grammar.StackChangingRulesArray.Length)
+
                     return new GrammarWithProbability(mutatedGrammar, originalGrammar.Probability);
 
                 prob = Probability(mutatedGrammar);

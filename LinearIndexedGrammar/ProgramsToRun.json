@@ -1,10 +1,10 @@
 ﻿{
   "ProgramsToRun": [
     {
-      "PopulationSize": 300,
+      "PopulationSize": 500,
       "NumberOfGenerations": 1000,
       "NumberOfRuns": 10,
-      "GrammarFileName": "NoNPNoV3MoveN.txt"
+      "GrammarFileName": "YesNPYesV3.txt"
     }
   ]
 }

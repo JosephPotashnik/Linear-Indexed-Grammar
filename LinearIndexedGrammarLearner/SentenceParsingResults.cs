@@ -8,7 +8,7 @@ namespace LinearIndexedGrammarLearner
         //the sentence being parsed
         public string Sentence { get; set; }
 
-        //the set of trees coresponding to the sentence, given a grammar.
+        //the set of trees corresponding to the sentence, given a grammar.
         public List<EarleyNode> Trees { get; set; }
 
         //the number of times the sentence was encountered in the corpus.

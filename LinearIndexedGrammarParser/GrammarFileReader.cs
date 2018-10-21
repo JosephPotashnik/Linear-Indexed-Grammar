@@ -74,15 +74,10 @@ namespace LinearIndexedGrammarParser
             var rules = ReadRulesFromFile(filename);
             var grammar = new ContextSensitiveGrammar();
             foreach (var item in rules)
-                if (item.Rule is StackChangingRule)
-                {
-                    var r = item.Rule as StackChangingRule;
-                    grammar.AddStackChangingRule(item.Moveable, r, item.MoveOpKey);
-                }
+                if (item.Rule is StackChangingRule r)
+                grammar.AddStackChangingRule(item.Moveable, r, item.MoveOpKey, true);
                 else
-                {
-                    grammar.AddStackConstantRule(item.Rule);
-                }
+                    grammar.AddStackConstantRule(item.Rule, true);
 
             return grammar;
         }
