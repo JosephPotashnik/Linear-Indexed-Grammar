@@ -32,6 +32,10 @@ namespace LinearIndexedGrammarParser
             NumberOfGeneratingRule = otherRule.NumberOfGeneratingRule;
         }
 
+        public virtual Rule Clone()
+        {
+            return new Rule(this);
+        }
         [JsonProperty] public DerivedCategory LeftHandSide { get; set; }
 
         [JsonProperty] public DerivedCategory[] RightHandSide { get; set; }
@@ -53,16 +57,22 @@ namespace LinearIndexedGrammarParser
             return Number == p.Number;
         }
 
-
         public override int GetHashCode()
         {
             // ReSharper disable once NonReadonlyMemberInGetHashCode
             return Number;
         }
 
-        public bool IsEpsilonRule()
+        public bool IsEpsilonRule() => RightHandSide[0].IsEpsilon();
+
+        public virtual bool AddRuleToGrammar(ContextSensitiveGrammar grammar, bool forceAdd = false)
         {
-            return RightHandSide[0].IsEpsilon();
+            return grammar.AddStackConstantRule(this, forceAdd);
+        }
+
+        public virtual void DeleteRuleFromGrammar(ContextSensitiveGrammar grammar)
+        {
+            grammar.DeleteStackConstantRule(this);
         }
     }
 }

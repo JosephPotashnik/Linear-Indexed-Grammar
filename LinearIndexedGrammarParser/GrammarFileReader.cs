@@ -74,10 +74,7 @@ namespace LinearIndexedGrammarParser
             var rules = ReadRulesFromFile(filename);
             var grammar = new ContextSensitiveGrammar();
             foreach (var item in rules)
-                if (item.Rule is StackChangingRule r)
-                grammar.AddStackChangingRule(item.Moveable, r, item.MoveOpKey, true);
-                else
-                    grammar.AddStackConstantRule(item.Rule, true);
+                item.AddRuleToGrammar(grammar, true);
 
             return grammar;
         }
@@ -89,12 +86,12 @@ namespace LinearIndexedGrammarParser
             return new DerivedCategory(match.Groups["BaseCategory"].Value, match.Groups["Stack"].Value);
         }
 
-        private static List<RuleInfo> ReadRulesFromFile(string filename)
+        private static List<Rule> ReadRulesFromFile(string filename)
         {
             string line;
             var comment = '#';
 
-            var rules = new List<RuleInfo>();
+            var rules = new List<Rule>();
             using (var file = File.OpenText(filename))
             {
                 while ((line = file.ReadLine()) != null)
@@ -109,7 +106,7 @@ namespace LinearIndexedGrammarParser
             return rules;
         }
 
-        private static RuleInfo CreateRule(string s)
+        private static Rule CreateRule(string s)
         {
             var removeArrow = s.Replace("->", "");
 
@@ -122,24 +119,27 @@ namespace LinearIndexedGrammarParser
             var leftHandCat = CreateDerivedCategory(nonTerminals[0]);
             var popRule = false;
             var pushRule = false;
-            var ruleInfo = new RuleInfo();
+            Rule baseRule;
+            SyntacticCategory moveable = null;
+            MoveableOperationsKey key = MoveableOperationsKey.NoOp;
 
             if (leftHandCat.Stack.Contains(ContextFreeGrammar.StarSymbol))
                 if (leftHandCat.Stack.Length > 1)
                 {
                     popRule = true;
-                    ruleInfo.MoveOpKey = MoveableOperationsKey.Pop2;
-                    ruleInfo.Moveable = new SyntacticCategory(leftHandCat.Stack.Substring(1));
+                    //TODO: in future, implement pop2 stack changing operation.
+                    key = MoveableOperationsKey.Pop2;
+                    moveable = new SyntacticCategory(leftHandCat.Stack.Substring(1));
                 }
 
             if (nonTerminals.Length == 1)
             {
-                var epsiloncat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol);
-                epsiloncat.StackSymbolsCount = -1;
-                ruleInfo.Rule = new StackChangingRule(leftHandCat, new[] {epsiloncat});
-                ruleInfo.MoveOpKey = MoveableOperationsKey.Pop1;
-                ruleInfo.Moveable = new SyntacticCategory(leftHandCat);
-                return ruleInfo;
+                var epsilonCat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol);
+                epsilonCat.StackSymbolsCount = -1;
+                baseRule = new Rule(leftHandCat, new[] {epsilonCat});
+                moveable = new SyntacticCategory(leftHandCat);
+                key = MoveableOperationsKey.Pop1;
+                return new StackChangingRule(baseRule, key , moveable);
             }
 
             var rightHandCategories = new DerivedCategory[nonTerminals.Length - 1];
@@ -152,9 +152,8 @@ namespace LinearIndexedGrammarParser
                     {
                         pushRule = true;
                         //push rule.
-                        var moveable = new SyntacticCategory(rightHandCategories[i - 1].Stack.Substring(1));
-                        ruleInfo.Moveable = moveable;
-                        ruleInfo.MoveOpKey = MoveableOperationsKey.Push1;
+                        moveable = new SyntacticCategory(rightHandCategories[i - 1].Stack.Substring(1));
+                        key = MoveableOperationsKey.Push1;
                         rightHandCategories[i - 1].StackSymbolsCount = 1;
                         if (popRule)
                             throw new Exception("illegal LIG format: can't push and pop within the same rule");
@@ -168,10 +167,12 @@ namespace LinearIndexedGrammarParser
             }
 
             if (!pushRule && !popRule)
-                ruleInfo.Rule = new Rule(leftHandCat, rightHandCategories);
+                return new Rule(leftHandCat, rightHandCategories);
             else
-                ruleInfo.Rule = new StackChangingRule(leftHandCat, rightHandCategories);
-            return ruleInfo;
+            {
+                baseRule = new Rule(leftHandCat, rightHandCategories);
+                return new StackChangingRule(baseRule, key, moveable);
+            }
         }
     }
 }
