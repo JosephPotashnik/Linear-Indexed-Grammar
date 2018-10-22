@@ -4,12 +4,7 @@ using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
-    public class RuleInfo
-    {
-        public SyntacticCategory Moveable { get; set; }
-        public Rule Rule { get; set; }
-        public MoveableOperationsKey MoveOpKey { get; set; }
-    }
+
 
     public enum MoveableOperationsKey
     {

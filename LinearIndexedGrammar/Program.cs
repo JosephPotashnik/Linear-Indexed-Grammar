@@ -108,10 +108,9 @@ namespace LinearIndexedGrammar
             }
 
             var probs = new List<double>();
-            int i = 0;
-            for (i = 0; i < programParams.NumberOfRuns; i++)
+            for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
-                LogManager.GetCurrentClassLogger().Info($"Run {i + 1}:");
+                LogManager.GetCurrentClassLogger().Info($"Run {i+1}:");
                 var ga = new GeneticAlgorithm(learner, programParams.PopulationSize, programParams.NumberOfGenerations);
                 var hypotheses = ga.Run();
                 probs.Add(hypotheses[0].Probability);
@@ -121,7 +120,7 @@ namespace LinearIndexedGrammar
             var numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < GeneticAlgorithm.Tolerance);
             var averageProb = probs.Average();
             s = $"Average probability is: {averageProb}\r\n" +
-                $"Achieved Probability=1 in {numTimesAchieveProb1} times out of {i+1} runs";
+                $"Achieved Probability=1 in {numTimesAchieveProb1} times out of {programParams.NumberOfRuns} runs";
             LogManager.GetCurrentClassLogger().Info(s);
             StopWatch(stopWatch);
         }

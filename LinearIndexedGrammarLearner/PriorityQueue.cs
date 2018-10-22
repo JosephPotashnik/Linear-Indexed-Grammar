@@ -10,8 +10,7 @@ namespace LinearIndexedGrammarLearner
         private SortedDictionary<P, Queue<V>> list = new SortedDictionary<P, Queue<V>>();
         public void Enqueue(P priority, V value)
         {
-            Queue<V> q;
-            if (!list.TryGetValue(priority, out q))
+            if (!list.TryGetValue(priority, out var q))
             {
                 q = new Queue<V>();
                 list.Add(priority, q);
