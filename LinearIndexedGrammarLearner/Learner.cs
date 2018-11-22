@@ -28,11 +28,13 @@ namespace LinearIndexedGrammarLearner
         private readonly Dictionary<string, int> _sentencesWithCounts;
         private GrammarPermutations _gp;
         private readonly Vocabulary _voc;
+        private readonly HashSet<string> _posInText;
         private readonly int _maxWordsInSentence;
 
         public Learner(string[] sentences, int maxWordsInSentence, Vocabulary voc)
         {
             _voc = voc;
+            _posInText = _voc.POSWithPossibleWords.Keys.ToHashSet();
             _maxWordsInSentence = maxWordsInSentence;
             _sentencesWithCounts = sentences.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
         }
@@ -41,11 +43,10 @@ namespace LinearIndexedGrammarLearner
         public ContextSensitiveGrammar CreateInitialGrammars()
         {
             var originalGrammar = new ContextSensitiveGrammar();
-            var posInText = _voc.POSWithPossibleWords.Keys;
-            _gp = new GrammarPermutations(posInText.ToArray());
+            _gp = new GrammarPermutations(_posInText.ToArray());
             _gp.ReadPermutationWeightsFromFile();
 
-            foreach (var pos in posInText)
+            foreach (var pos in _posInText)
             {
                 originalGrammar.AddStackConstantRule(new Rule(ContextFreeGrammar.StartRule, new[] { pos, ContextFreeGrammar.StartRule }));
                 originalGrammar.AddStackConstantRule(new Rule(ContextFreeGrammar.StartRule, new[] { pos }));
@@ -54,7 +55,7 @@ namespace LinearIndexedGrammarLearner
             return originalGrammar;
         }
 
-        private SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis)
+        public SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis)
         {
             SentenceParsingResults[] allParses = new SentenceParsingResults[_sentencesWithCounts.Count];
 
@@ -98,7 +99,7 @@ namespace LinearIndexedGrammarLearner
         }
 
 
-        public int GetNumberOfParseTrees(ContextFreeGrammar hypothesis, int maxWordsInSentence)
+        public int GetNumberOfParseTrees(ContextFreeGrammar hypothesis)
         {
             //best case: tree depth = log (maxWordsInSentence) for a fully balanced tree
             //if the tree is totally binary but extremely non-balanced (fully right or left branching), tree depth = words(leaves) -1.
@@ -108,14 +109,13 @@ namespace LinearIndexedGrammarLearner
             //or category C (complementizer syntactic position ,not always phonetically overt)
 
             //working assumption:
-            var treeDepth = maxWordsInSentence + 3;
+            var treeDepth = _maxWordsInSentence + 3;
             //TODO: find a safe upper bound to tree depth, which will be a function of
             //max words in sentence, possibly also a function of the number of different POS.
-            var posInText = _voc.POSWithPossibleWords.Keys.ToHashSet();
             Task<SubtreeCountsWithNumberOfWords> t = Task.Run(() =>
             {
                 SubTreeCountsCache cache = new SubTreeCountsCache(hypothesis, treeDepth);
-                GrammarTreeCountsCalculator treeCalculator = new GrammarTreeCountsCalculator(hypothesis, posInText, cache);
+                GrammarTreeCountsCalculator treeCalculator = new GrammarTreeCountsCalculator(hypothesis, _posInText, cache);
                 return treeCalculator.NumberOfParseTreesPerWords(treeDepth);
             });
 
@@ -126,59 +126,12 @@ namespace LinearIndexedGrammarLearner
                 //throw new Exception();
             }
             var parseTreesCountPerWords = t.Result;
-            var numberOfParseTreesBelowMaxWords = parseTreesCountPerWords.WordsTreesDic.Values.Where(x => x.WordsCount <= maxWordsInSentence).Select(x => x.TreesCount).Sum();
+            var numberOfParseTreesBelowMaxWords = parseTreesCountPerWords.WordsTreesDic.Values.Where(x => x.WordsCount <= _maxWordsInSentence).Select(x => x.TreesCount).Sum();
 
             return numberOfParseTreesBelowMaxWords;
         }
 
-        public double Probability(ContextSensitiveGrammar currentHypothesis)
-        {
-            var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
-            if (currentCFHypothesis.ContainsCyclicUnitProduction())
-                return 0;
-
-            SentenceParsingResults[] allParses;
-            double prob = 0;
-            try
-            {
-                allParses = ParseAllSentences(currentCFHypothesis);
-            }
-            catch (AggregateException e) when (e.InnerExceptions.OfType<InfiniteParseException>().Any())
-            {
-                var s = e.ToString();
-                NLog.LogManager.GetCurrentClassLogger().Warn(s);
-                return 0;
-            }
-            if (allParses != null)
-            {
-                var totalTreesCountofData = allParses.Select(x => x.Trees.Count).Sum();
-
-                if (totalTreesCountofData != 0)
-                {
-                    var totalTreesCountofGrammar = GetNumberOfParseTrees(currentCFHypothesis, _maxWordsInSentence);
-                    prob = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
-                    
-
-                    if (prob > 1)
-                    {
-                        return 0;
-                        //the case where probabilityOfInputGivenGrammar > 1 arises when
-                        //totalTreesCountofData > totalTreesCountofGrammar, which can happen because totalTreesCountofGrammar
-                        //is computed only up to a certain depth of the tree.
-                        //so it's possible that the input data is parsed in a tree whose depth exceeds the depth we have allowed above.
-                        
-                        //assumption: we will reject grammars with data parsed too deep.
-                        //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
-                        //right now: it is depth = maxWords+2. change?
-
-
-                        //throw new Exception("probability is wrong!");
-                    }
-                }
-            }
-            currentCFHypothesis.Dispose();
-            return prob;
-        }
+            
         public Dictionary<int, int> CollectUsages(ContextSensitiveGrammar currentHypothesis)
         {
             var cfGrammar = new ContextFreeGrammar(currentHypothesis);
@@ -226,27 +179,6 @@ namespace LinearIndexedGrammarLearner
             var g =  m(newGrammar);
             return g;
 
-        }
-
-        internal GrammarWithProbability ComputeProbabilityForGrammar(GrammarWithProbability originalGrammar, ContextSensitiveGrammar mutatedGrammar)
-        {
-            double prob = 0;
-            if (mutatedGrammar != null)
-            {
-                //assuming: insertion of rule adds as of yet unused rule
-                //so it does not affect the parsibility of the grammar nor its probability.
-                //this is going to be wrong if you relax the assumption that grammars always parse all their sentences.
-
-                if (mutatedGrammar.StackConstantRulesArray.Length > originalGrammar.Grammar.StackConstantRulesArray.Length 
-                    ||
-                 mutatedGrammar.StackChangingRulesArray.Length > originalGrammar.Grammar.StackChangingRulesArray.Length)
-
-                    return new GrammarWithProbability(mutatedGrammar, originalGrammar.Probability);
-
-                prob = Probability(mutatedGrammar);
-
-            }
-            return new GrammarWithProbability(mutatedGrammar, prob);
         }
     }
 }

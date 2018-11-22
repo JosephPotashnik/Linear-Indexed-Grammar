@@ -126,9 +126,9 @@ namespace LinearIndexedGrammarParser
                 LogManager.GetCurrentClassLogger().Warn(s);
             }
 
+            //return nodes;
             if (nodes.Count > 0)
                 return nodes;
-
             throw new Exception("parsing failed!");
         }
 
