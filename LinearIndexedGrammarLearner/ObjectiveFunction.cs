@@ -71,12 +71,11 @@ namespace LinearIndexedGrammarLearner
                         //throw new Exception("probability is wrong!");
                     }
 
-                    //int numberOfSentenceParsed = allParses.Count(x => x.Trees.Count > 0);
+                    int numberOfSentenceParsed = allParses.Count(x => x.Trees.Count > 0);
 
-
-                    //double unexplainedSentencePercentage = (1.0 - (numberOfSentenceParsed / (double)allParses.Length));
-                    //prob -= unexplainedSentencePercentage;
-                    //if (prob < 0) prob = 0;
+                    double unexplainedSentencePercentage = (1.0 - (numberOfSentenceParsed / (double)allParses.Length));
+                    prob -= unexplainedSentencePercentage;
+                    if (prob < 0) prob = 0;
 
                 }
             }

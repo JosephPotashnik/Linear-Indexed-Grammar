@@ -115,19 +115,19 @@ namespace LinearIndexedGrammarLearner
         {
 
             T objectiveFunctionValue;
-            if (mutatedGrammar.StackConstantRulesArray.Length >
-                originalGrammar.StackConstantRulesArray.Length
-                ||
-                mutatedGrammar.StackChangingRulesArray.Length >
-                originalGrammar.StackChangingRulesArray.Length)
+            //if (mutatedGrammar.StackConstantRulesArray.Length >
+            //    originalGrammar.StackConstantRulesArray.Length
+            //    ||
+            //    mutatedGrammar.StackChangingRulesArray.Length >
+            //    originalGrammar.StackChangingRulesArray.Length)
 
-            {
-                objectiveFunctionValue = originalGrammarValue;
-            }
-            else
-            {
+            //{
+            //    objectiveFunctionValue = originalGrammarValue;
+            //}
+            //else
+            //{
                 objectiveFunctionValue = _objectiveFunction.Compute(mutatedGrammar);
-            }
+            //}
 
             return objectiveFunctionValue;
         }
