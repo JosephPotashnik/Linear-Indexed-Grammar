@@ -77,9 +77,10 @@ namespace LinearIndexedGrammarLearner
                     LogManager.GetCurrentClassLogger().Info($"generation {currentGeneration}");
                 try
                 {
-                    foreach (var individual in _population.Values)
+                    foreach (var individualkeyValuePair in _population.KeyValuePairs)
                     {
-                        var mutatedIndividual = _learner.GetNeighbor(individual);
+                        var mutatedIndividual = _learner.GetNeighbor(individualkeyValuePair.Value);
+
                         var obectiveFunctionValue = _objectiveFunction.Compute(mutatedIndividual);
 
                         if (mutatedIndividual != null && _objectiveFunction.ConsiderValue(obectiveFunctionValue))

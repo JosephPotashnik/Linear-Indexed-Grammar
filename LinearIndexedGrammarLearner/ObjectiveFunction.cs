@@ -27,6 +27,7 @@ namespace LinearIndexedGrammarLearner
 
         public double Compute(ContextSensitiveGrammar currentHypothesis)
         {
+
             if (currentHypothesis == null) return 0;
 
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
