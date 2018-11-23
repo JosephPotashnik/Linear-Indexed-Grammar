@@ -11,7 +11,7 @@ namespace LinearIndexedGrammarParser
         public int TreesCount { get; set; }
     }
 
-    public class ContextFreeGrammar : IDisposable
+    public class ContextFreeGrammar 
     {
         public const string GammaRule = "Gamma";
         public const string StartRule = "START";
@@ -54,13 +54,6 @@ namespace LinearIndexedGrammarParser
             ComputeTransitiveClosureOfNullableCategories();
         }
 
-        public void Dispose()
-        {
-            StaticRules.Clear();
-            StaticRulesGeneratedForCategory.Clear();
-            PossibleNullableCategories.Clear();
-            ObligatoryNullableCategories.Clear();
-        }
 
         public override string ToString()
         {

@@ -43,21 +43,17 @@ namespace LinearIndexedGrammarLearner
             return pair.Key;
         }
 
-        public IEnumerable<KeyValuePair<P, V>> KeyValuePairs
+        public IEnumerable<(P, V)> KeyValuePairs
         {
             get
             {
-                List<KeyValuePair<P,V>> kvp = new List<KeyValuePair<P, V>>();
-                foreach (var keyandList in list)
-                {
-                    foreach (var keyandValue in keyandList.Value)
-                    {
-                        var z = new KeyValuePair<P, V>(keyandList.Key, keyandValue);
-                        kvp.Add(z);
-                    }
-                }
 
-                return kvp;
+                var q = from i in list
+                    from j in i.Value
+                    select (i.Key, j);
+
+                return q;
+               
             }
 
         }

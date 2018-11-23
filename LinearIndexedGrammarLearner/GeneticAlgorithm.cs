@@ -70,6 +70,7 @@ namespace LinearIndexedGrammarLearner
         public (ContextSensitiveGrammar bestGrammar, T bestValue) Run()
         {
             var currentGeneration = 0;
+            T objectiveFunctionValue;
             var descendants = new Queue<KeyValuePair<T, ContextSensitiveGrammar>>();
             while (currentGeneration++ < _numberOfGenerations)
             {
@@ -79,14 +80,18 @@ namespace LinearIndexedGrammarLearner
                 {
                     foreach (var individualkeyValuePair in _population.KeyValuePairs)
                     {
-                        var mutatedIndividual = _learner.GetNeighbor(individualkeyValuePair.Value);
+                        var originalGrammar = individualkeyValuePair.Item2;
+                        var originalGrammarValue = individualkeyValuePair.Item1;
 
-                        var obectiveFunctionValue = _objectiveFunction.Compute(mutatedIndividual);
+                        var mutatedGrammar = _learner.GetNeighbor(originalGrammar);
 
-                        if (mutatedIndividual != null && _objectiveFunction.ConsiderValue(obectiveFunctionValue))
+                        if (mutatedGrammar == null) continue;
+                        objectiveFunctionValue = EvaluateObjectiveFunction(mutatedGrammar, originalGrammar, originalGrammarValue);
+
+                        if (_objectiveFunction.ConsiderValue(objectiveFunctionValue))
                             descendants.Enqueue(
-                                new KeyValuePair<T, ContextSensitiveGrammar>(obectiveFunctionValue,
-                                    mutatedIndividual));
+                                new KeyValuePair<T, ContextSensitiveGrammar>(objectiveFunctionValue,
+                                    mutatedGrammar));
                     }
 
                     InsertDescendantsIntoPopulation(descendants);
@@ -103,6 +108,28 @@ namespace LinearIndexedGrammarLearner
             //choosing shortest grammar among all those with the best probability.
             var (value, bestGrammars) = ChooseBestHypotheses();
             return (bestGrammars.First(), value);
+        }
+
+        private T EvaluateObjectiveFunction(ContextSensitiveGrammar mutatedGrammar, ContextSensitiveGrammar originalGrammar,
+            T originalGrammarValue)
+        {
+
+            T objectiveFunctionValue;
+            if (mutatedGrammar.StackConstantRulesArray.Length >
+                originalGrammar.StackConstantRulesArray.Length
+                ||
+                mutatedGrammar.StackChangingRulesArray.Length >
+                originalGrammar.StackChangingRulesArray.Length)
+
+            {
+                objectiveFunctionValue = originalGrammarValue;
+            }
+            else
+            {
+                objectiveFunctionValue = _objectiveFunction.Compute(mutatedGrammar);
+            }
+
+            return objectiveFunctionValue;
         }
 
         private bool CheckForSufficientSolutions()
@@ -146,7 +173,6 @@ namespace LinearIndexedGrammarLearner
                     if (descendant.Key.CompareTo(_population.PeekFirstKey()) > 0)
                     {
                         var old = _population.Dequeue();
-                        old.Dispose();
                         _population.Enqueue(descendant.Key, descendant.Value);
                     }
             }

@@ -80,7 +80,6 @@ namespace LinearIndexedGrammarLearner
 
                 }
             }
-            currentCFHypothesis.Dispose();
             return prob;
         }
     }

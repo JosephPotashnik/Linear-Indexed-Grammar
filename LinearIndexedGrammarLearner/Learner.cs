@@ -7,22 +7,6 @@ using System.Threading;
 
 namespace LinearIndexedGrammarLearner
 {
-    public class GrammarWithProbability : IDisposable
-    {
-        public readonly ContextSensitiveGrammar Grammar;
-        public readonly double Probability;
-
-        public GrammarWithProbability(ContextSensitiveGrammar g, double probability)
-        {
-            Grammar = g;
-            Probability = probability;
-        }
-
-        public void Dispose()
-        {
-            Grammar.Dispose();
-        }
-    }
     public class Learner
     {
         private readonly Dictionary<string, int> _sentencesWithCounts;
