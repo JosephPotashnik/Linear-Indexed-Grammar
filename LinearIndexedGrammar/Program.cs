@@ -94,6 +94,10 @@ namespace LinearIndexedGrammar
             LogManager.GetCurrentClassLogger().Info(s);
             var stopWatch = StartWatch();
 
+            var posInText = dataVocabulary.POSWithPossibleWords.Keys.ToArray();
+            var rulespaceGenerator = new RuleSpaceGenerator(posInText);
+            rulespaceGenerator.GenerateSpaceUpToNonTerminal(10);
+
             var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
             IObjectiveFunction<double> objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
 
