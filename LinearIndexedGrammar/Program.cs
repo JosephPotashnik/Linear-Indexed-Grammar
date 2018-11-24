@@ -71,7 +71,7 @@ namespace LinearIndexedGrammar
         private static void Learn(int maxWordsInSentence = 6)
         {
             var fileName = @"ProgramsToRun.json";
-            fileName = @"NightRunFull.json";
+            //fileName = @"NightRunFull.json";
 
             var programParamsList = ReadProgramParamsFromFile(fileName);
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
@@ -87,7 +87,6 @@ namespace LinearIndexedGrammar
                 GrammarFileReader.GenerateSentenceAccordingToGrammar(programParams.GrammarFileName, maxWordsInSentence);
             var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
 
-
             var s = "-------------------\r\n" +
                     $"Session {DateTime.Now:MM/dd/yyyy h:mm tt}\r\n" +
                     $"runs: {programParams.NumberOfRuns}, population size: {programParams.PopulationSize}, number of generations: {programParams.NumberOfGenerations}\r\n";
@@ -96,7 +95,9 @@ namespace LinearIndexedGrammar
             var stopWatch = StartWatch();
 
             var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
-            var targetProb = learner.Probability(targetGrammar);
+            IObjectiveFunction<double> objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
+
+            var targetProb = objectiveFunction.Compute(targetGrammar);
 
             s =
                 $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
@@ -111,13 +112,20 @@ namespace LinearIndexedGrammar
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
                 LogManager.GetCurrentClassLogger().Info($"Run {i+1}:");
-                var ga = new GeneticAlgorithm(learner, programParams.PopulationSize, programParams.NumberOfGenerations);
-                var hypotheses = ga.Run();
-                probs.Add(hypotheses[0].Probability);
-                if (Math.Abs(hypotheses[0].Probability - 1) < GeneticAlgorithm.Tolerance) break;
+                var ga = new GeneticAlgorithm<double>(learner, programParams.PopulationSize, programParams.NumberOfGenerations, objectiveFunction);
+                (var bestHypothesis, var bestValue) = ga.Run();
+                probs.Add(bestValue);
+
+                s =
+                    $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";
+                LogManager.GetCurrentClassLogger().Info(s);
+
+                //the following line should be uncommented for sanity checks (i.e, it suffices to see that
+                //we arrived at a possible solution), for night run / unit tests, etc.
+                if (objectiveFunction.IsMaximalValue(bestValue)) break;
             }
 
-            var numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < GeneticAlgorithm.Tolerance);
+            var numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < GeneticAlgorithm<double>.Tolerance);
             var averageProb = probs.Average();
             s = $"Average probability is: {averageProb}\r\n" +
                 $"Achieved Probability=1 in {numTimesAchieveProb1} times out of {programParams.NumberOfRuns} runs";

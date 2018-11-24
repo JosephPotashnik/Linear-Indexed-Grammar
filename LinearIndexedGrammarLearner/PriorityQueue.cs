@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LinearIndexedGrammarLearner
@@ -34,12 +35,30 @@ namespace LinearIndexedGrammarLearner
         public KeyValuePair<P, Queue<V>> Last() => list.Last();
 
 
+
         public P PeekFirstKey()
         {
             // will throw if there isn’t any first element!
             var pair = list.First();
             return pair.Key;
         }
+
+        public IEnumerable<(P, V)> KeyValuePairs
+        {
+            get
+            {
+
+                var q = from i in list
+                    from j in i.Value
+                    select (i.Key, j);
+
+                return q;
+               
+            }
+
+        }
+
+
         public IEnumerable<V> Values
         {
             get

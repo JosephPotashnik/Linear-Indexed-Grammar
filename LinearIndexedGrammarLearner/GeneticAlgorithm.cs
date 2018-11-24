@@ -26,28 +26,29 @@ namespace LinearIndexedGrammarLearner
                                                                            Thread.CurrentThread.ManagedThreadId)));
     }
 
-    public class GeneticAlgorithm
+    public class GeneticAlgorithm<T> where T : IComparable
     {
         public const double Tolerance = 0.0001;
 
         private const int NumberOfSufficientSolutions = 10;
         private readonly Learner _learner;
         private readonly int _numberOfGenerations;
+        private IObjectiveFunction<T> _objectiveFunction;
 
-        private readonly PriorityQueue<double, GrammarWithProbability> _population =
-            new PriorityQueue<double, GrammarWithProbability>();
+        private readonly PriorityQueue<T, ContextSensitiveGrammar> _population =
+            new PriorityQueue<T, ContextSensitiveGrammar>();
 
-        public GeneticAlgorithm(Learner l, int populationSize, int numberOfGenerations)
+        public GeneticAlgorithm(Learner l, int populationSize, int numberOfGenerations, IObjectiveFunction<T> objectiveFunction)
         {
             _numberOfGenerations = numberOfGenerations;
             _learner = l;
-
+            _objectiveFunction = objectiveFunction;
             var initialGrammar = _learner.CreateInitialGrammars();
-            var prob = _learner.Probability(initialGrammar);
+            var obectiveFunctionValue = _objectiveFunction.Compute(initialGrammar);
 
             for (var i = 0; i < populationSize; i++)
-                _population.Enqueue(prob,
-                    new GrammarWithProbability(new ContextSensitiveGrammar(initialGrammar), prob));
+                _population.Enqueue(obectiveFunctionValue,
+                    new ContextSensitiveGrammar(initialGrammar));
         }
 
         public static void StopWatch(Stopwatch stopWatch)
@@ -66,23 +67,31 @@ namespace LinearIndexedGrammarLearner
             return stopWatch;
         }
 
-        public GrammarWithProbability[] Run()
+        public (ContextSensitiveGrammar bestGrammar, T bestValue) Run()
         {
             var currentGeneration = 0;
-            var descendants = new Queue<KeyValuePair<double, ContextSensitiveGrammar>>();
+            T objectiveFunctionValue;
+            var descendants = new Queue<KeyValuePair<T, ContextSensitiveGrammar>>();
             while (currentGeneration++ < _numberOfGenerations)
             {
                 if (currentGeneration % 200 == 0)
                     LogManager.GetCurrentClassLogger().Info($"generation {currentGeneration}");
                 try
                 {
-                    foreach (var individual in _population.Values)
+                    foreach (var individualkeyValuePair in _population.KeyValuePairs)
                     {
-                        var mutatedIndividual = Mutate(individual);
-                        if (mutatedIndividual.Grammar != null && mutatedIndividual.Probability > 0)
+                        var originalGrammar = individualkeyValuePair.Item2;
+                        var originalGrammarValue = individualkeyValuePair.Item1;
+
+                        var mutatedGrammar = _learner.GetNeighbor(originalGrammar);
+
+                        if (mutatedGrammar == null) continue;
+                        objectiveFunctionValue = EvaluateObjectiveFunction(mutatedGrammar, originalGrammar, originalGrammarValue);
+
+                        if (_objectiveFunction.ConsiderValue(objectiveFunctionValue))
                             descendants.Enqueue(
-                                new KeyValuePair<double, ContextSensitiveGrammar>(mutatedIndividual.Probability,
-                                    mutatedIndividual.Grammar));
+                                new KeyValuePair<T, ContextSensitiveGrammar>(objectiveFunctionValue,
+                                    mutatedGrammar));
                     }
 
                     InsertDescendantsIntoPopulation(descendants);
@@ -97,19 +106,37 @@ namespace LinearIndexedGrammarLearner
             }
 
             //choosing shortest grammar among all those with the best probability.
-            var bestHypotheses = ChooseBestHypotheses().ToArray();
+            var (value, bestGrammars) = ChooseBestHypotheses();
+            return (bestGrammars.First(), value);
+        }
 
-            var s =
-                $"Best Hypothesis:\r\n{bestHypotheses[0].Grammar} \r\n with probability {bestHypotheses[0].Probability}";
-            LogManager.GetCurrentClassLogger().Info(s);
-            return bestHypotheses;
+        private T EvaluateObjectiveFunction(ContextSensitiveGrammar mutatedGrammar, ContextSensitiveGrammar originalGrammar,
+            T originalGrammarValue)
+        {
+
+            T objectiveFunctionValue;
+            //if (mutatedGrammar.StackConstantRulesArray.Length >
+            //    originalGrammar.StackConstantRulesArray.Length
+            //    ||
+            //    mutatedGrammar.StackChangingRulesArray.Length >
+            //    originalGrammar.StackChangingRulesArray.Length)
+
+            //{
+            //    objectiveFunctionValue = originalGrammarValue;
+            //}
+            //else
+            //{
+                objectiveFunctionValue = _objectiveFunction.Compute(mutatedGrammar);
+            //}
+
+            return objectiveFunctionValue;
         }
 
         private bool CheckForSufficientSolutions()
         {
             var enoughSolutions = false;
             var bestProbability = _population.Last().Key;
-            if (Math.Abs(bestProbability - 1) < Tolerance)
+            if (_objectiveFunction.IsMaximalValue(bestProbability))
             {
                 var numberOfSolutions = _population.Last().Value.Count();
                 enoughSolutions = numberOfSolutions >= NumberOfSufficientSolutions;
@@ -118,45 +145,39 @@ namespace LinearIndexedGrammarLearner
             return enoughSolutions;
         }
 
-        private IEnumerable<GrammarWithProbability> ChooseBestHypotheses()
+        private (T value, IEnumerable<ContextSensitiveGrammar> bestGrammars) ChooseBestHypotheses()
         {
+
             var bestGrammars = _population.Last().Value.Select(x =>
                 {
-                    var g = x.Grammar;
-                    var ruleDistribution = _learner.CollectUsages(g);
-                    g.PruneUnusedRules(ruleDistribution);
+                    var ruleDistribution = _learner.CollectUsages(x);
+                    x.PruneUnusedRules(ruleDistribution);
                     //rename variables names from serial generated names such as X271618 to X1, X2 etc.
-                    g.RenameVariables();
+                    x.RenameVariables();
 
                     return x;
                 }
             );
 
-            var y = bestGrammars.OrderBy(x => x.Grammar.StackConstantRulesArray.Count());
-            return y;
+            var y = bestGrammars.OrderBy(x => x.StackConstantRulesArray.Count());
+            return (_population.Last().Key, y);
         }
 
 
-        private void InsertDescendantsIntoPopulation(Queue<KeyValuePair<double, ContextSensitiveGrammar>> descendants)
+        private void InsertDescendantsIntoPopulation(Queue<KeyValuePair<T, ContextSensitiveGrammar>> descendants)
         {
             while (descendants.Any())
             {
                 var success = descendants.TryDequeue(out var descendant);
                 if (success)
-                    if (descendant.Key >= _population.PeekFirstKey())
+                    if (descendant.Key.CompareTo(_population.PeekFirstKey()) > 0)
                     {
                         var old = _population.Dequeue();
-                        old.Dispose();
-                        _population.Enqueue(descendant.Key,
-                            new GrammarWithProbability(descendant.Value, descendant.Key));
+                        _population.Enqueue(descendant.Key, descendant.Value);
                     }
             }
         }
 
-        private GrammarWithProbability Mutate(GrammarWithProbability individual)
-        {
-            var mutatedIndividual = _learner.GetNeighbor(individual.Grammar);
-            return _learner.ComputeProbabilityForGrammar(individual, mutatedIndividual);
-        }
+
     }
 }

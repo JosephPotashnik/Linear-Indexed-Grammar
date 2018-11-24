@@ -50,7 +50,7 @@ namespace LinearIndexedGrammarParser
         }
     }
 
-    public class ContextSensitiveGrammar : IDisposable
+    public class ContextSensitiveGrammar 
     {
         public readonly Dictionary<SyntacticCategory, MoveableOperations> StackChangingRules =
             new Dictionary<SyntacticCategory, MoveableOperations>();
@@ -124,12 +124,6 @@ namespace LinearIndexedGrammarParser
             //Note: SelectMany here does not deep-copy, we get the reference to the grammar rules.
             get { return StackChangingRules.Values.SelectMany(x => x.MoveOps.Values).SelectMany(x => x).ToArray(); }
         }
-
-        public void Dispose()
-        {
-            StackConstantRules.Clear();
-        }
-
 
         public override string ToString()
         {
