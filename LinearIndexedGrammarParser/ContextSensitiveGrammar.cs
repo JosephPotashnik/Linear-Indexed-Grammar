@@ -4,8 +4,6 @@ using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
-
-
     public enum MoveableOperationsKey
     {
         NoOp,
@@ -25,7 +23,7 @@ namespace LinearIndexedGrammarParser
                 MoveOps[k] = new List<StackChangingRule>();
 
             // ReSharper disable once CoVariantArrayConversion
-            if (!forceAdd && ContextSensitiveGrammar.ContainsRule(r, MoveOps[k].ToArray())) return false;
+            //if (!forceAdd && ContextSensitiveGrammar.ContainsRule(r, MoveOps[k].ToArray())) return false;
 
             var newRule = new StackChangingRule(r) {Number = ++ruleCounter};
             MoveOps[k].Add(newRule);
@@ -50,29 +48,70 @@ namespace LinearIndexedGrammarParser
         }
     }
 
-    public class ContextSensitiveGrammar 
+    
+    public class RuleCoordinates
     {
+        //the LHS index in the Rule Space (index 0 = LHS "X1", index 1 = LHS "X2", etc)
+        public int LHSIndex { get; set; }
+        //the RHS index in the Rule Space ( same RHS index for different LHS indices means they share the same RHS)
+        public int RHSIndex { get; set; }
+
+        public RuleCoordinates() { }
+        public RuleCoordinates(RuleCoordinates other)
+        {
+            LHSIndex = other.LHSIndex;
+            RHSIndex = other.RHSIndex;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is RuleCoordinates other)
+                return (LHSIndex == other.LHSIndex && RHSIndex == other.RHSIndex);
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hash = 17;
+                hash = hash * 23 + LHSIndex;
+                hash = hash * 23 + RHSIndex;
+                return hash;
+            }
+        }
+    }
+
+    public class ContextSensitiveGrammar
+    {
+        //Rule space is a 2D array,
+        //first index is LHS ([0] = "X1", [1] = "X2", [2] = "X3" etc)
+        //second index is RHS, such that [0][i] = [1][i] = [2][i] etc. 
+        public readonly RuleSpace RuleSpace;
+
         public readonly Dictionary<SyntacticCategory, MoveableOperations> StackChangingRules =
             new Dictionary<SyntacticCategory, MoveableOperations>();
 
-        public readonly Dictionary<SyntacticCategory, List<Rule>> StackConstantRules =
-            new Dictionary<SyntacticCategory, List<Rule>>();
-
-        private int _ruleCounter;
+        public readonly List<RuleCoordinates> StackConstantRules = new List<RuleCoordinates>();
 
         public ContextSensitiveGrammar()
         {
+                
+        }
+        public ContextSensitiveGrammar(RuleSpace ruleSpace, Rule[] grammarRules)
+        {
+            RuleSpace = ruleSpace;
+            foreach (var rule in grammarRules)
+            {
+                var rc = RuleSpace.FindRule(rule);
+                StackConstantRules.Add(rc);
+            }
         }
 
         public ContextSensitiveGrammar(ContextSensitiveGrammar otherGrammar)
         {
-            StackConstantRules =
-                otherGrammar.StackConstantRules.ToDictionary(x => x.Key,
-                    x => x.Value.Select(y => new Rule(y)).ToList());
-            _ruleCounter = 0;
-
-            foreach (var rule in StackConstantRulesArray)
-                rule.Number = ++_ruleCounter;
+            StackConstantRules = otherGrammar.StackConstantRules.Select(x => new RuleCoordinates(x)).ToList();
 
             foreach (var moveable in otherGrammar.StackChangingRules.Keys)
             {
@@ -83,125 +122,60 @@ namespace LinearIndexedGrammarParser
 
                     foreach (var rule in otherGrammar.StackChangingRules[moveable].MoveOps[moveOp])
                     {
-                        var newRule = new StackChangingRule(rule) {Number = ++_ruleCounter};
+                        var newRule = new StackChangingRule(rule);
                         StackChangingRules[moveable].MoveOps[moveOp].Add(newRule);
                     }
                 }
             }
         }
-
-        public SyntacticCategory[] LHSCategories
-        {
-            //LHS categories are all LHS categories of the stack constant rules,
-            // plus all LHS from non-epsilon rules of the stack changing rules 
-            //                                  X3[*NP] -> NP[NP] VP[*] (pop)
-            //(i,e, X1 or X3 from rules such as X1[*] -> NP X2[*NP] (push)
-
-            //the epsilon rule of the movement operation pop1 such as NP[NP] -> epsilon
-            //is not a rule that serves as a possible development of the grammar. why?
-            //because it is intended to terminate with epsilon by definition, and not
-            // have its LHS to be with a subtree of arbitrary depth.
-            get
-            {
-                var lhsCategories = StackConstantRules.Keys.ToHashSet();
-
-                var xy = StackChangingRules.Values.SelectMany(x => x.MoveOps.Values);
-                var xyz = xy.SelectMany(x => x).Where(x => !x.IsEpsilonRule());
-                foreach (var rule in xyz) lhsCategories.Add(new SyntacticCategory(rule.LeftHandSide));
-
-                return lhsCategories.ToArray();
-            }
-        }
-
-        public Rule[] StackConstantRulesArray
-        {
-            //Note: SelectMany here does not deep-copy, we get the reference to the grammar rules.
-            get { return StackConstantRules.Values.SelectMany(x => x).ToArray(); }
-        }
-
+        
         public StackChangingRule[] StackChangingRulesArray
         {
             //Note: SelectMany here does not deep-copy, we get the reference to the grammar rules.
             get { return StackChangingRules.Values.SelectMany(x => x.MoveOps.Values).SelectMany(x => x).ToArray(); }
         }
 
+        
         public override string ToString()
         {
             var s1 = "Stack Constant Rules:\r\n" +
-                     string.Join("\r\n", StackConstantRulesArray.Select(x => x.ToString()));
+                     string.Join("\r\n", StackConstantRules.Select(x => RuleSpace[x].ToString()));
             var s2 = "Stack Changing Rules:\r\n" +
                      string.Join("\r\n", StackChangingRulesArray.Select(x => x.ToString()));
             return s1 + "\r\n" + s2;
         }
 
-        public void DeleteStackConstantRule(Rule oldRule)
+        public void DeleteStackConstantRule(int ruleIndex)
         {
-            var synCat = new SyntacticCategory(oldRule.LeftHandSide);
-
-            var rules = StackConstantRules[synCat];
-            rules.Remove(oldRule);
-
-            if (rules.Count == 0)
-                StackConstantRules.Remove(synCat);
+            StackConstantRules.RemoveAt(ruleIndex);
         }
+    
 
-        public bool OnlyStartSymbolsRHS(Rule newRule)
+        //if there is a rule that has the same RHS side, i.e. the same RHS index
+        public bool ContainsRule(RuleCoordinates rc)
         {
-            var onlyStartSymbols = true;
-            var startCategory = new DerivedCategory(ContextFreeGrammar.StartRule);
+            //RHSIndex 0 is a special index, reserved for rules of the type
+            //S -> X1, S -> X2, S -> X3. so if RHSIndex = 0 we check that exactly the same rule (same LHS) is in the grammar)
+            if (rc.RHSIndex == 0)
+                return (StackConstantRules.Contains(rc));
 
-            for (var i = 0; i < newRule.RightHandSide.Length; i++)
-                if (!newRule.RightHandSide[i].BaseEquals(startCategory))
-                {
-                    onlyStartSymbols = false;
-                    break;
-                }
+            foreach (var ruleCoord in StackConstantRules)
+                if (ruleCoord.RHSIndex == rc.RHSIndex) return true;
 
-            return onlyStartSymbols;
-        }
-
-        public static bool ContainsRule(Rule newRule, Rule[] ruleList)
-        {
-            var bFoundIdentical = false;
-            //assuming compositionality.
-            // if found rule with the same right hand side, do not re-add it.
-            //the nonterminal of the left hand side does not matter.
-
-            if (!newRule.RightHandSide[0].IsEpsilon())
-                foreach (var rule in ruleList)
-                    if (!rule.RightHandSide[0].IsEpsilon() && rule.RightHandSide.Length == newRule.RightHandSide.Length)
-                    {
-                        bFoundIdentical = true;
-                        for (var i = 0; i < rule.RightHandSide.Length; i++)
-                            if (!rule.RightHandSide[i].BaseEquals(newRule.RightHandSide[i]))
-                                bFoundIdentical = false;
-                        if (bFoundIdentical) break;
-                    }
-                    else
-                    {
-                        foreach (var rule1 in ruleList)
-                            if (rule1.RightHandSide[0].IsEpsilon() &&
-                                rule1.LeftHandSide.BaseEquals(newRule.LeftHandSide))
-                            {
-                                bFoundIdentical = true;
-                                break;
-                            }
-                    }
-
-            return bFoundIdentical;
+            return false;
         }
 
         public bool AddStackConstantRule(Rule r, bool forceAdd = false)
         {
-            if (!forceAdd && ContainsRule(r, StackConstantRulesArray)) return false;
+            //if (!forceAdd && ContainsRule(r, StackConstantRulesArray)) return false;
 
-            var newRule = new Rule(r) {Number = ++_ruleCounter};
+            //var newRule = new Rule(r) {Number = ++_ruleCounter};
 
-            var newSynCat = new SyntacticCategory(newRule.LeftHandSide);
-            if (!StackConstantRules.ContainsKey(newSynCat))
-                StackConstantRules[newSynCat] = new List<Rule>();
+            //var newSynCat = new SyntacticCategory(newRule.LeftHandSide);
+            //if (!StackConstantRules.ContainsKey(newSynCat))
+            //    StackConstantRules[newSynCat] = new List<Rule>();
 
-            StackConstantRules[newSynCat].Add(newRule);
+            //StackConstantRules[newSynCat].Add(newRule);
             return true;
         }
 
@@ -211,8 +185,8 @@ namespace LinearIndexedGrammarParser
             if (!StackChangingRules.ContainsKey(moveable))
                 StackChangingRules[moveable] = new MoveableOperations();
 
-            var isAdded = StackChangingRules[moveable].AddRule(r, key, _ruleCounter, forceAdd);
-            if (isAdded) _ruleCounter++;
+            var isAdded = StackChangingRules[moveable].AddRule(r, key, 0, forceAdd);
+            //if (isAdded) _ruleCounter++;
             return isAdded;
         }
 
@@ -232,37 +206,13 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        public void RenameVariables()
-        {
-            var xs = LHSCategories.Select(x => x.ToString()).Where(x => x[0] == 'X').ToList();
-            var replacedx = new List<string>();
-            for (var i = 0; i < xs.Count; i++)
-                replacedx.Add($"X{i + 1}");
-            var replaceDic = xs.Zip(replacedx, (x, y) => new {key = x, value = y})
-                .ToDictionary(x => x.key, x => x.value);
-            ReplaceVariables(replaceDic);
-        }
-
-
-        private void ReplaceVariables(Dictionary<string, string> replaceDic)
-        {
-            var joinedSequences = StackConstantRulesArray.Concat(StackChangingRulesArray);
-
-            foreach (var rule in joinedSequences)
-            {
-                rule.LeftHandSide.Replace(replaceDic);
-
-                for (var i = 0; i < rule.RightHandSide.Length; i++)
-                    rule.RightHandSide[i].Replace(replaceDic);
-            }
-        }
-
+        
         public void PruneUnusedRules(Dictionary<int, int> usagesDic)
         {
-            var unusedConstantRules = StackConstantRulesArray.Where(x => !usagesDic.ContainsKey(x.Number)).ToArray();
+            var unusedConstantRules = StackConstantRules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].Number)).ToArray();
 
-            foreach (var rule in unusedConstantRules)
-                DeleteStackConstantRule(rule);
+            foreach (var unusedRule in unusedConstantRules.ToList())
+                StackConstantRules.Remove(unusedRule);
 
             var unusedStackRules = StackChangingRulesArray.Where(x => !usagesDic.ContainsKey(x.Number)).ToArray();
 

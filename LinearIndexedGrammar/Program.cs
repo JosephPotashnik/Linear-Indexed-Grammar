@@ -83,7 +83,7 @@ namespace LinearIndexedGrammar
         private static void RunProgram(ProgramParams programParams, int maxWordsInSentence,
             Vocabulary universalVocabulary)
         {
-            var (nodeList, targetGrammar) =
+            var (nodeList, grammarRules) =
                 GrammarFileReader.GenerateSentenceAccordingToGrammar(programParams.GrammarFileName, maxWordsInSentence);
             var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
 
@@ -95,11 +95,25 @@ namespace LinearIndexedGrammar
             var stopWatch = StartWatch();
 
             var posInText = dataVocabulary.POSWithPossibleWords.Keys.ToArray();
-            var rulespaceGenerator = new RuleSpaceGenerator(posInText);
-            rulespaceGenerator.GenerateSpaceUpToNonTerminal(10);
+            var ruleSpace = new RuleSpace(posInText, 5);
+
+            //TODO: add new unit tests for rule space generation.
+            //int ans = ruleSpace.FindRHSIndex(new[] { "D", "N" });
+            //ans = ruleSpace.FindRHSIndex(new[] { "D", "X2" });
+            //var ans2 = ruleSpace.FindRHSIndex(new[] { "X3", "P" });
+            //ans = ruleSpace.FindRHSIndex(new[] { "X3" });
+            //ans = ruleSpace.FindRHSIndex(new[] { "D" });
+            //ans = ruleSpace.FindLHSIndex("X1");
+            //ans = ruleSpace.FindLHSIndex("X3");
+
+            //var r = new Rule("X2", new[] { "V", "X3" });
+            //var rc = ruleSpace.FindRule(r);
+            //var res = ruleSpace[rc];
 
             var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
             IObjectiveFunction<double> objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
+
+            ContextSensitiveGrammar targetGrammar = new ContextSensitiveGrammar(ruleSpace, grammarRules);
 
             var targetProb = objectiveFunction.Compute(targetGrammar);
 

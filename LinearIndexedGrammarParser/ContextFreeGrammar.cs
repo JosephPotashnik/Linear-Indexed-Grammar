@@ -32,26 +32,37 @@ namespace LinearIndexedGrammarParser
         {
         }
 
+        public ContextFreeGrammar(Rule[] ruleList)
+        {
+            var rulesDic = CreateRulesDictionary(ruleList);
+            GenerateAllStaticRulesFromDynamicRules(rulesDic);
+            ComputeTransitiveClosureOfNullableCategories();
+        }
+
         public ContextFreeGrammar(ContextSensitiveGrammar cs)
         {
-            _ruleCounter = 0;
-            var stackConstantRules =
-                cs.StackConstantRules.ToDictionary(x => x.Key, x => x.Value.Select(y => new Rule(y)).ToList());
-            var rulesDic = new Dictionary<SyntacticCategory, List<Rule>>(stackConstantRules);
+            var xy = cs.StackConstantRules.Select(x => cs.RuleSpace[x]);
+            var rulesArr = xy.Concat(cs.StackChangingRulesArray).ToArray();
 
-            var xy = cs.StackChangingRulesArray;
+            var rulesDic = CreateRulesDictionary(rulesArr);
+            GenerateAllStaticRulesFromDynamicRules(rulesDic);
+            ComputeTransitiveClosureOfNullableCategories();
+        }
 
-            foreach (var stackChangingRule in xy)
+        private static Dictionary<SyntacticCategory, List<Rule>> CreateRulesDictionary(Rule[] xy)
+        {
+            var rulesDic = new Dictionary<SyntacticCategory, List<Rule>>();
+
+            foreach (var rule in xy)
             {
-                var newSynCat = new SyntacticCategory(stackChangingRule.LeftHandSide);
+                var newSynCat = new SyntacticCategory(rule.LeftHandSide);
                 if (!rulesDic.ContainsKey(newSynCat))
                     rulesDic[newSynCat] = new List<Rule>();
 
-                rulesDic[newSynCat].Add(new Rule(stackChangingRule));
+                rulesDic[newSynCat].Add(new Rule(rule));
             }
 
-            GenerateAllStaticRulesFromDynamicRules(rulesDic);
-            ComputeTransitiveClosureOfNullableCategories();
+            return rulesDic;
         }
 
 

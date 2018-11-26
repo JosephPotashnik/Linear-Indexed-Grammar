@@ -153,13 +153,13 @@ namespace LinearIndexedGrammarLearner
                     var ruleDistribution = _learner.CollectUsages(x);
                     x.PruneUnusedRules(ruleDistribution);
                     //rename variables names from serial generated names such as X271618 to X1, X2 etc.
-                    x.RenameVariables();
+                    //x.RenameVariables();
 
                     return x;
                 }
             );
 
-            var y = bestGrammars.OrderBy(x => x.StackConstantRulesArray.Count());
+            var y = bestGrammars.OrderBy(x => x.StackConstantRules.Count());
             return (_population.Last().Key, y);
         }
 

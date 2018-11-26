@@ -72,7 +72,7 @@ namespace LinearIndexedGrammarParser
 
         public virtual void DeleteRuleFromGrammar(ContextSensitiveGrammar grammar)
         {
-            grammar.DeleteStackConstantRule(this);
+            //grammar.DeleteStackConstantRule(this);
         }
     }
 }

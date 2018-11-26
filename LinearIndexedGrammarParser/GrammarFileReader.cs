@@ -46,16 +46,21 @@ namespace LinearIndexedGrammarParser
             return (sentences.ToArray(), textVocabulary);
         }
 
-        public static (List<EarleyNode> nodeList, ContextSensitiveGrammar g) GenerateSentenceAccordingToGrammar(
+        public static (List<EarleyNode> nodeList, Rule[] grammarRules) GenerateSentenceAccordingToGrammar(
             string filename, int maxWords)
         {
-            var cSgrammar = CreateGrammarFromFile(filename);
-            var cfGrammar = new ContextFreeGrammar(cSgrammar);
+            //var cSgrammar = CreateGrammarFromFile(filename);
+            //var cfGrammar = new ContextFreeGrammar(cSgrammar);
+
+            var grammarRules = ReadRulesFromFile(filename).ToArray();
+            var cfGrammar = new ContextFreeGrammar(grammarRules);
 
             var generator = new EarleyGenerator(cfGrammar);
 
             var nodeList = generator.ParseSentence("", maxWords);
-            return (nodeList, cSgrammar);
+            //return (nodeList, cSgrammar);
+            return (nodeList, grammarRules);
+
         }
 
         public static List<EarleyNode> ParseSentenceAccordingToGrammar(string filename, string sentence)
@@ -68,6 +73,8 @@ namespace LinearIndexedGrammarParser
             var n = parser.ParseSentence(sentence);
             return n;
         }
+
+
 
         public static ContextSensitiveGrammar CreateGrammarFromFile(string filename)
         {
