@@ -9,20 +9,42 @@ namespace LinearIndexedGrammarLearner
     public interface IObjectiveFunction<T> where T : IComparable
     {
         T Compute(ContextSensitiveGrammar currentHypothesis);
-        bool ConsiderValue(T val);
+        bool ConsiderValue(T newVal, T oldVal, int iteration);
         bool IsMaximalValue(T val);
 
     }
 
     public class GrammarFitnessObjectiveFunction : IObjectiveFunction<double>
     {
-        public const double Tolerance = 0.0001;
+        public const double Tolerance = 0.000001;
+        public const double CoolingFactor = 0.9999;
 
         private readonly Learner _learner;
+        private double _initialTemperature = 1000;
 
         public GrammarFitnessObjectiveFunction(Learner l) => _learner = l;
 
-        public bool ConsiderValue(double val) => (val > 0);
+        public bool ConsiderValue(double newval, double oldval, int iteration)
+        {
+            //improvement - accept.
+            if (newval > oldval) return true;
+            if (Math.Abs(newval) < Tolerance) return false;
+
+            //neval =< oldval (our objective function is to maximize value)
+            //degration - accept with a probability proportional to the delta and the iteration
+            //bigger delta (bigger degradation) => lower probability.
+            //bigger temperature => higher probability
+            double delta = newval - oldval;
+            double temperature = _initialTemperature * Math.Pow(CoolingFactor, iteration);
+
+            double exponent = delta / temperature;
+            double prob = Math.Exp(exponent);
+
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+            var randomThrow = rand.NextDouble();
+            return (randomThrow < prob);
+        }
+
         public bool IsMaximalValue(double val) => (Math.Abs(val - 1) < Tolerance);
 
         public double Compute(ContextSensitiveGrammar currentHypothesis)
@@ -74,6 +96,10 @@ namespace LinearIndexedGrammarLearner
                     int numberOfSentenceParsed = allParses.Count(x => x.Trees.Count > 0);
 
                     double unexplainedSentencePercentage = (1.0 - (numberOfSentenceParsed / (double)allParses.Length));
+
+                    //pass only through fully parsable inputs.
+                    if (unexplainedSentencePercentage > 0) return 0;
+
                     prob -= unexplainedSentencePercentage;
                     if (prob < 0) prob = 0;
 

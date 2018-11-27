@@ -9,15 +9,15 @@
   },
   {
     "Mutation": "ChangeLHS",
-    "MutationWeight": 10
+    "MutationWeight": 20
   },
   {
     "Mutation": "ChangeRHS",
-    "MutationWeight": 10
+    "MutationWeight": 20
   },
   {
     "Mutation": "SwapTwoRulesLHS",
-    "MutationWeight": 10
+    "MutationWeight": 0
   },
   {
     "Mutation": "InsertBinaryRule",

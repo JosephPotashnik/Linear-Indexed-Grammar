@@ -2,9 +2,9 @@
   "ProgramsToRun": [
     {
       "PopulationSize": 300,
-      "NumberOfGenerations": 500,
+      "NumberOfGenerations": 1000,
       "NumberOfRuns": 10,
-      "GrammarFileName": "NoNPNoV3.txt"
+      "GrammarFileName": "NoNPWithV3.txt"
     }
   ]
 }

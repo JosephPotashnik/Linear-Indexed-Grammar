@@ -89,7 +89,7 @@ namespace LinearIndexedGrammarParser
             for (int j = 0; j < _ruleSpace.Length; j++)
             {
                 for (int i = 0; i < _ruleSpace[j].Length; i++)
-                    _ruleSpace[j][i].Number = (j * _ruleSpace[0].Length) + i;
+                    _ruleSpace[j][i].Number = (j * _ruleSpace[0].Length) + i + 1;
             }
         }
 

@@ -160,8 +160,6 @@ namespace LinearIndexedGrammarParser
             return StackConstantRules[rand.Next(StackConstantRules.Count)];
         }
 
-    
-
         //if there is a rule that has the same RHS side, i.e. the same RHS index
         public bool ContainsRuleWithSameRHS(RuleCoordinates rc)
         {

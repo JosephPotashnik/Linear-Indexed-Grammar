@@ -81,7 +81,7 @@ namespace LinearIndexedGrammarLearner
                         if (mutatedGrammar == null) continue;
                         objectiveFunctionValue = EvaluateObjectiveFunction(mutatedGrammar, originalGrammar, originalGrammarValue);
 
-                        if (_objectiveFunction.ConsiderValue(objectiveFunctionValue))
+                        if (_objectiveFunction.ConsiderValue(objectiveFunctionValue, originalGrammarValue, currentGeneration))
                             descendants.Enqueue(
                                 new KeyValuePair<T, ContextSensitiveGrammar>(objectiveFunctionValue,
                                     mutatedGrammar));
@@ -107,21 +107,7 @@ namespace LinearIndexedGrammarLearner
             T originalGrammarValue)
         {
 
-            T objectiveFunctionValue;
-            //if (mutatedGrammar.StackConstantRulesArray.Length >
-            //    originalGrammar.StackConstantRulesArray.Length
-            //    ||
-            //    mutatedGrammar.StackChangingRulesArray.Length >
-            //    originalGrammar.StackChangingRulesArray.Length)
-
-            //{
-            //    objectiveFunctionValue = originalGrammarValue;
-            //}
-            //else
-            //{
-                objectiveFunctionValue = _objectiveFunction.Compute(mutatedGrammar);
-            //}
-
+            T objectiveFunctionValue = _objectiveFunction.Compute(mutatedGrammar);
             return objectiveFunctionValue;
         }
 
@@ -145,9 +131,6 @@ namespace LinearIndexedGrammarLearner
                 {
                     var ruleDistribution = _learner.CollectUsages(x);
                     x.PruneUnusedRules(ruleDistribution);
-                    //rename variables names from serial generated names such as X271618 to X1, X2 etc.
-                    //x.RenameVariables();
-
                     return x;
                 }
             );
