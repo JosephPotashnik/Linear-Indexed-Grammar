@@ -65,14 +65,5 @@ namespace LinearIndexedGrammarParser
 
         public bool IsEpsilonRule() => RightHandSide[0].IsEpsilon();
 
-        public virtual bool AddRuleToGrammar(ContextSensitiveGrammar grammar, bool forceAdd = false)
-        {
-            return grammar.AddStackConstantRule(this, forceAdd);
-        }
-
-        public virtual void DeleteRuleFromGrammar(ContextSensitiveGrammar grammar)
-        {
-            //grammar.DeleteStackConstantRule(this);
-        }
     }
 }

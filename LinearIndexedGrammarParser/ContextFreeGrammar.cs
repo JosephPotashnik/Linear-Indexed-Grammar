@@ -38,10 +38,9 @@ namespace LinearIndexedGrammarParser
             GenerateAllStaticRulesFromDynamicRules(rulesDic);
             ComputeTransitiveClosureOfNullableCategories();
         }
-
         public ContextFreeGrammar(ContextSensitiveGrammar cs)
         {
-            var xy = cs.StackConstantRules.Select(x => cs.RuleSpace[x]);
+            var xy = cs.StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]);
             var rulesArr = xy.Concat(cs.StackChangingRulesArray).ToArray();
 
             var rulesDic = CreateRulesDictionary(rulesArr);

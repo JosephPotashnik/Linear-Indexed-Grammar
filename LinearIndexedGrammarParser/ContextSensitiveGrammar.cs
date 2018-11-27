@@ -88,7 +88,7 @@ namespace LinearIndexedGrammarParser
         //Rule space is a 2D array,
         //first index is LHS ([0] = "X1", [1] = "X2", [2] = "X3" etc)
         //second index is RHS, such that [0][i] = [1][i] = [2][i] etc. 
-        public readonly RuleSpace RuleSpace;
+        public static RuleSpace RuleSpace;
 
         public readonly Dictionary<SyntacticCategory, MoveableOperations> StackChangingRules =
             new Dictionary<SyntacticCategory, MoveableOperations>();
@@ -99,13 +99,19 @@ namespace LinearIndexedGrammarParser
         {
                 
         }
-        public ContextSensitiveGrammar(RuleSpace ruleSpace, Rule[] grammarRules)
+        public ContextSensitiveGrammar(Rule[] grammarRules)
         {
-            RuleSpace = ruleSpace;
             foreach (var rule in grammarRules)
             {
-                var rc = RuleSpace.FindRule(rule);
-                StackConstantRules.Add(rc);
+                if (rule is StackChangingRule r)
+                {
+
+                }
+                else
+                {
+                    var rc = RuleSpace.FindRule(rule);
+                    StackConstantRules.Add(rc);
+                }
             }
         }
 
@@ -145,14 +151,19 @@ namespace LinearIndexedGrammarParser
             return s1 + "\r\n" + s2;
         }
 
-        public void DeleteStackConstantRule(int ruleIndex)
+        public void AddStackConstantRule(RuleCoordinates rc) => StackConstantRules.Add(rc);
+        public void DeleteStackConstantRule(RuleCoordinates rc) => StackConstantRules.Remove(rc);
+
+        public RuleCoordinates GetRandomStackConstantRule()
         {
-            StackConstantRules.RemoveAt(ruleIndex);
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+            return StackConstantRules[rand.Next(StackConstantRules.Count)];
         }
+
     
 
         //if there is a rule that has the same RHS side, i.e. the same RHS index
-        public bool ContainsRule(RuleCoordinates rc)
+        public bool ContainsRuleWithSameRHS(RuleCoordinates rc)
         {
             //RHSIndex 0 is a special index, reserved for rules of the type
             //S -> X1, S -> X2, S -> X3. so if RHSIndex = 0 we check that exactly the same rule (same LHS) is in the grammar)
@@ -165,19 +176,6 @@ namespace LinearIndexedGrammarParser
             return false;
         }
 
-        public bool AddStackConstantRule(Rule r, bool forceAdd = false)
-        {
-            //if (!forceAdd && ContainsRule(r, StackConstantRulesArray)) return false;
-
-            //var newRule = new Rule(r) {Number = ++_ruleCounter};
-
-            //var newSynCat = new SyntacticCategory(newRule.LeftHandSide);
-            //if (!StackConstantRules.ContainsKey(newSynCat))
-            //    StackConstantRules[newSynCat] = new List<Rule>();
-
-            //StackConstantRules[newSynCat].Add(newRule);
-            return true;
-        }
 
         public bool AddStackChangingRule(SyntacticCategory moveable, StackChangingRule r, MoveableOperationsKey key,
             bool forceAdd = false)

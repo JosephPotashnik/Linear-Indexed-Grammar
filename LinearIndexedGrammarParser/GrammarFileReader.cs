@@ -80,8 +80,8 @@ namespace LinearIndexedGrammarParser
         {
             var rules = ReadRulesFromFile(filename);
             var grammar = new ContextSensitiveGrammar();
-            foreach (var item in rules)
-                item.AddRuleToGrammar(grammar, true);
+            //foreach (var item in rules)
+            //    item.AddRuleToGrammar(grammar, true);
 
             return grammar;
         }

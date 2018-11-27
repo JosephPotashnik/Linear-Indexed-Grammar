@@ -26,15 +26,18 @@ namespace LinearIndexedGrammarLearner
         ////We create the "promiscuous grammar" as initial grammar.
         public ContextSensitiveGrammar CreateInitialGrammars()
         {
-            var originalGrammar = new ContextSensitiveGrammar();
             _gp = new GrammarPermutations(_posInText.ToArray());
             _gp.ReadPermutationWeightsFromFile();
 
+            List<Rule> rules = new List<Rule>();
             foreach (var pos in _posInText)
             {
-                originalGrammar.AddStackConstantRule(new Rule(ContextFreeGrammar.StartRule, new[] { pos, ContextFreeGrammar.StartRule }));
-                originalGrammar.AddStackConstantRule(new Rule(ContextFreeGrammar.StartRule, new[] { pos }));
+                rules.Add(new Rule("X1", new[] { pos, "X1" }));
+                rules.Add(new Rule("X1", new[] { pos }));
             }
+            rules.Add(new Rule(ContextFreeGrammar.StartRule, new [] { "X1"}));
+
+            var originalGrammar = new ContextSensitiveGrammar(rules.ToArray());
 
             return originalGrammar;
         }

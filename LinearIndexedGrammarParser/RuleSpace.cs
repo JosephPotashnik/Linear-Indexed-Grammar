@@ -1,19 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 
 namespace LinearIndexedGrammarParser
 {
+    public static class ThreadSafeRandom
+    {
+        [ThreadStatic] private static Random _local;
+
+        public static Random ThisThreadsRandom => _local ?? (_local =
+                                                      new Random(unchecked(Environment.TickCount * 31 +
+                                                                           Thread.CurrentThread.ManagedThreadId)));
+    }
+
     public class RuleSpace
     {
-        public Rule[][] _ruleSpace { get; set; }
-
+        public Rule[][] _ruleSpace { get; }
+        private List<int> _allowedRHSIndices; 
         readonly Dictionary<string, int> nonTerminalsRHS = new Dictionary<string, int>();
         readonly Dictionary<string, int> nonTerminalLHS = new Dictionary<string, int>();
 
         public RuleSpace(string[] partsOfSpeechCategories, int maxNonTerminals)
         {
+            _allowedRHSIndices = new List<int>();
             List<string> rhsStore = new List<string>();
             List<string> nonTerminals = new List<string>();
             _ruleSpace = new Rule[maxNonTerminals][];
@@ -30,9 +41,7 @@ namespace LinearIndexedGrammarParser
             for (int i = 0; i < rhsStore.Count; i++)
                 nonTerminalsRHS[rhsStore[i]] = i;
             
-            Rule newRule;
 
-            string currentLHSNonterminal = "X1";
             var currentCategory = new DerivedCategory("X1", ContextFreeGrammar.StarSymbol);
             var startCategory = new DerivedCategory(ContextFreeGrammar.StartRule, ContextFreeGrammar.StarSymbol);
             int length = rhsStore.Count;
@@ -40,6 +49,7 @@ namespace LinearIndexedGrammarParser
 
             _ruleSpace[0] = new Rule[numberOfPossibleRHS - length + 1];
             _ruleSpace[0][0] = new Rule(startCategory, new[] { currentCategory });
+            _allowedRHSIndices.Add(0);
 
             for (int i = length; i < numberOfPossibleRHS; i++)
             {
@@ -48,6 +58,12 @@ namespace LinearIndexedGrammarParser
                 {
                     var rhs1cat = new DerivedCategory(rhs1);
                     _ruleSpace[0][i - length + 1] = new Rule(currentCategory, new[] { rhs1cat });
+
+                    //add to excluded rhs indices list: unit production such as x1 -> x2
+                    //note:  S -> Xi is allowed (in index 0).
+                    if (rhs1cat.ToString()[0] != 'X')
+                        _allowedRHSIndices.Add(i - length + 1);
+
                 }
                 else
                 {
@@ -56,13 +72,13 @@ namespace LinearIndexedGrammarParser
                     var rhs2cat = new DerivedCategory(rhs2);
                     var rhs1cat = new DerivedCategory(rhs1, ContextFreeGrammar.StarSymbol);
                     _ruleSpace[0][i - length + 1] = new Rule(currentCategory, new[] {rhs1cat, rhs2cat});
+                    _allowedRHSIndices.Add(i - length + 1);
                 }
-                
             }
 
             for (int i = 1; i < maxNonTerminals; i++)
             {
-                currentLHSNonterminal = $"X{i+1}";
+                var currentLHSNonterminal = $"X{i+1}";
                 currentCategory = new DerivedCategory(currentLHSNonterminal, ContextFreeGrammar.StarSymbol);
 
                 _ruleSpace[i] = _ruleSpace[0]
@@ -75,6 +91,18 @@ namespace LinearIndexedGrammarParser
                 for (int i = 0; i < _ruleSpace[j].Length; i++)
                     _ruleSpace[j][i].Number = (j * _ruleSpace[0].Length) + i;
             }
+        }
+
+        public int GetRandomRHSIndex()
+        {
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+            return _allowedRHSIndices[rand.Next(_allowedRHSIndices.Count)];
+        }
+
+        public int GetRandomLHSIndex()
+        {
+            var rand = ThreadSafeRandom.ThisThreadsRandom;
+            return rand.Next(_ruleSpace.Length);
         }
 
         public Rule this[RuleCoordinates rc] => _ruleSpace[rc.LHSIndex][rc.RHSIndex];

@@ -20,15 +20,5 @@
         {
             return new StackChangingRule(this);
         }
-
-        public override bool AddRuleToGrammar(ContextSensitiveGrammar grammar, bool forceAdd = false)
-        {
-            return grammar.AddStackChangingRule(Moveable, this, OperationKey, forceAdd);
-        }
-
-        public override void DeleteRuleFromGrammar(ContextSensitiveGrammar grammar)
-        {
-            grammar.DeleteStackChangingRule(Moveable, this, OperationKey);
-        }
     }
 }

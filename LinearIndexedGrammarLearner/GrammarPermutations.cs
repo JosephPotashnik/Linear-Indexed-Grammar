@@ -22,7 +22,6 @@ namespace LinearIndexedGrammarLearner
         private const int NumberOfRetries = 3;
         private static Tuple<GrammarMutation, int>[] mutations;
         private static int totalWeights;
-        private static int newNonTerminalCounter = 1;
         private SyntacticCategory[] PartsOfSpeechCategories;
 
         public GrammarPermutations(string[] POS)
@@ -72,41 +71,84 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
-        private (Rule replaceRule, Rule originalRule) BuildNewMutation(Rule[] candidateSourceRules, LeftOrRightMutation mutationSide, SyntacticCategory[] candidateSourceCategories )
+        public ContextSensitiveGrammar InsertStackConstantRule(ContextSensitiveGrammar grammar)
         {
-            var rand = ThreadSafeRandom.ThisThreadsRandom;
-            var randomRule = candidateSourceRules[rand.Next(candidateSourceRules.Length)];
-            var randomCategory = new DerivedCategory(candidateSourceCategories[rand.Next(candidateSourceCategories.Length)].ToString());
-
-            var replaceRule = randomRule.Clone();
-
-            if (mutationSide == LeftOrRightMutation.MutationOnLeftHandSide)
-                replaceRule.LeftHandSide.SetBase(randomCategory);
-            else
+            RuleCoordinates rc = new RuleCoordinates
             {
-                int randomChildIndex = rand.Next(randomRule.RightHandSide.Length);
-                replaceRule.RightHandSide[randomChildIndex].SetBase(randomCategory);
-            }
-
-            return (replaceRule, randomRule);
+                LHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex(),
+                RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex()
+            };
+            if (grammar.ContainsRuleWithSameRHS(rc)) return null;
+            grammar.AddStackConstantRule(rc);
+            return grammar;
         }
+
+        public ContextSensitiveGrammar DeleteStackConstantRule(ContextSensitiveGrammar grammar)
+        {
+            grammar.DeleteStackConstantRule(grammar.GetRandomStackConstantRule());
+            return grammar;
+        }
+
+        public ContextSensitiveGrammar ChangeLHS(ContextSensitiveGrammar grammar)
+        {
+            var rc = grammar.GetRandomStackConstantRule();
+            int newLHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex();
+            if (rc.LHSIndex == newLHSIndex) return null;
+
+            rc.LHSIndex = newLHSIndex;
+            return grammar;
+        }
+
+        public ContextSensitiveGrammar ChangeRHS(ContextSensitiveGrammar grammar)
+        {
+            var rc = grammar.GetRandomStackConstantRule();
+            RuleCoordinates changedRC = new RuleCoordinates
+            {
+                LHSIndex = rc.LHSIndex,
+                RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex()
+            };
+            if (grammar.ContainsRuleWithSameRHS(changedRC)) return null;
+
+            rc.RHSIndex = changedRC.RHSIndex;
+            return grammar;
+        }
+
+        public ContextSensitiveGrammar SwapTwoRulesLHS(ContextSensitiveGrammar grammar)
+        {
+            var rc1 = grammar.GetRandomStackConstantRule();
+            var rc2 = grammar.GetRandomStackConstantRule();
+
+            while (rc2.Equals(rc1))
+                rc2 = grammar.GetRandomStackConstantRule();
+
+            if (rc1.LHSIndex == rc2.LHSIndex) return null;
+
+            var temp = new RuleCoordinates(rc1);
+            rc1.LHSIndex = rc2.LHSIndex;
+            rc2.LHSIndex = temp.LHSIndex;
+            return grammar;
+        }
+
+
+
+
         public ContextSensitiveGrammar SpreadPOSToRHS(ContextSensitiveGrammar grammar)
         {
-            Rule[] candidateSourceRules = null;
-            //var candidateSourceRules = grammar.StackConstantRulesArray.ToArray();
-            var candidateSourceCategories = PartsOfSpeechCategories;
+            //var rand = ThreadSafeRandom.ThisThreadsRandom;
+            //var rulesCoordinates  = grammar.StackConstantRules;
+            //var ruleCoord = rulesCoordinates[rand.Next(rulesCoordinates.Count)];
+            //var pos = new DerivedCategory(PartsOfSpeechCategories[rand.Next(PartsOfSpeechCategories.Length)].ToString());
 
-            for (var i = 0; i < NumberOfRetries; i++)
-            {
-                var (replaceRule, originalRule) = BuildNewMutation(candidateSourceRules, LeftOrRightMutation.MutationOnRightHandSide,
-                    candidateSourceCategories);
+            //var newRule = new Rule(ContextSensitiveGrammar.RuleSpace[ruleCoord]);
+            //int randomChildIndex = rand.Next(newRule.RightHandSide.Length);
+            //newRule.RightHandSide[randomChildIndex].SetBase(pos);
 
-                //if (grammar.OnlyStartSymbolsRHS(replaceRule)) continue;
-                if (!replaceRule.AddRuleToGrammar(grammar)) continue;
-                originalRule.DeleteRuleFromGrammar((grammar));
-                return grammar;
-            }
-            return null;
+            //var newRuleCoord = ContextSensitiveGrammar.RuleSpace.FindRule(newRule);
+
+            //if (grammar.ContainsRuleWithSameRHS(newRuleCoord)) return null;
+
+            //ruleCoord.RHSIndex = newRuleCoord.RHSIndex;
+            return grammar;
         }
 
         
@@ -163,7 +205,14 @@ namespace LinearIndexedGrammarLearner
             //}
             return null;
         }
-        
+
+        public ContextSensitiveGrammar DeleteRule(ContextSensitiveGrammar grammar)
+        {
+            return null;
+        }
+
+
+
         public ContextSensitiveGrammar SpreadRuleLHSToLHS(ContextSensitiveGrammar grammar)
         {
             //var lhsCategories = grammar.LHSCategories;
@@ -192,13 +241,6 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
-        //DeleteRule == Delete StackConstantRule. Perhaps change notation.
-        public ContextSensitiveGrammar DeleteRule(ContextSensitiveGrammar grammar)
-        {
-            //Rule randomRule = GetRandomStackConstantRule(grammar);
-            //grammar.DeleteStackConstantRule(randomRule);
-            return grammar;
-        }
         private bool DoesNumberOfLHSCategoriesExceedMax(SyntacticCategory[] lhsCategories)
         {
             //we cannot insert a new rule if the number of left hand sided symbols

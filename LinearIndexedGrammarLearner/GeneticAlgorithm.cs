@@ -17,14 +17,7 @@ namespace LinearIndexedGrammarLearner
         [JsonProperty] public float PopulationSize { get; set; }
     }
 
-    public static class ThreadSafeRandom
-    {
-        [ThreadStatic] private static Random _local;
 
-        public static Random ThisThreadsRandom => _local ?? (_local =
-                                                      new Random(unchecked(Environment.TickCount * 31 +
-                                                                           Thread.CurrentThread.ManagedThreadId)));
-    }
 
     public class GeneticAlgorithm<T> where T : IComparable
     {
@@ -33,7 +26,7 @@ namespace LinearIndexedGrammarLearner
         private const int NumberOfSufficientSolutions = 10;
         private readonly Learner _learner;
         private readonly int _numberOfGenerations;
-        private IObjectiveFunction<T> _objectiveFunction;
+        private readonly IObjectiveFunction<T> _objectiveFunction;
 
         private readonly PriorityQueue<T, ContextSensitiveGrammar> _population =
             new PriorityQueue<T, ContextSensitiveGrammar>();
@@ -44,10 +37,10 @@ namespace LinearIndexedGrammarLearner
             _learner = l;
             _objectiveFunction = objectiveFunction;
             var initialGrammar = _learner.CreateInitialGrammars();
-            var obectiveFunctionValue = _objectiveFunction.Compute(initialGrammar);
+            var objectiveFunctionValue = _objectiveFunction.Compute(initialGrammar);
 
             for (var i = 0; i < populationSize; i++)
-                _population.Enqueue(obectiveFunctionValue,
+                _population.Enqueue(objectiveFunctionValue,
                     new ContextSensitiveGrammar(initialGrammar));
         }
 

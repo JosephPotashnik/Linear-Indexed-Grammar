@@ -95,7 +95,7 @@ namespace LinearIndexedGrammar
             var stopWatch = StartWatch();
 
             var posInText = dataVocabulary.POSWithPossibleWords.Keys.ToArray();
-            var ruleSpace = new RuleSpace(posInText, 5);
+            ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, 5);
 
             //TODO: add new unit tests for rule space generation.
             //int ans = ruleSpace.FindRHSIndex(new[] { "D", "N" });
@@ -113,12 +113,11 @@ namespace LinearIndexedGrammar
             var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
             IObjectiveFunction<double> objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
 
-            ContextSensitiveGrammar targetGrammar = new ContextSensitiveGrammar(ruleSpace, grammarRules);
+            ContextSensitiveGrammar targetGrammar = new ContextSensitiveGrammar(grammarRules);
 
             var targetProb = objectiveFunction.Compute(targetGrammar);
 
-            s =
-                $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
+            s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
             LogManager.GetCurrentClassLogger().Info(s);
             if (targetProb < 1)
             {
@@ -134,13 +133,12 @@ namespace LinearIndexedGrammar
                 (var bestHypothesis, var bestValue) = ga.Run();
                 probs.Add(bestValue);
 
-                s =
-                    $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";
+                s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";
                 LogManager.GetCurrentClassLogger().Info(s);
 
                 //the following line should be uncommented for sanity checks (i.e, it suffices to see that
                 //we arrived at a possible solution), for night run / unit tests, etc.
-                if (objectiveFunction.IsMaximalValue(bestValue)) break;
+                //if (objectiveFunction.IsMaximalValue(bestValue)) break;
             }
 
             var numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < GeneticAlgorithm<double>.Tolerance);
