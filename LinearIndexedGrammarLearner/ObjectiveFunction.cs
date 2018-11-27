@@ -9,7 +9,8 @@ namespace LinearIndexedGrammarLearner
     public interface IObjectiveFunction<T> where T : IComparable
     {
         T Compute(ContextSensitiveGrammar currentHypothesis);
-        bool ConsiderValue(T newVal, T oldVal, int iteration);
+        bool ConsiderValue(T newVal);
+        bool AcceptNewValue(T newVal, T oldVal, int iteration);
         bool IsMaximalValue(T val);
 
     }
@@ -17,15 +18,21 @@ namespace LinearIndexedGrammarLearner
     public class GrammarFitnessObjectiveFunction : IObjectiveFunction<double>
     {
         public const double Tolerance = 0.000001;
-        public const double CoolingFactor = 0.9999;
+        public const double CoolingFactor = 0.99;
 
         private readonly Learner _learner;
         private double _initialTemperature = 1000;
 
         public GrammarFitnessObjectiveFunction(Learner l) => _learner = l;
 
-        public bool ConsiderValue(double newval, double oldval, int iteration)
+        public bool ConsiderValue(double newval)
         {
+            return (newval > 0);
+        }
+
+        public bool AcceptNewValue(double newval, double oldval, int iteration)
+        {
+
             //improvement - accept.
             if (newval > oldval) return true;
             if (Math.Abs(newval) < Tolerance) return false;
@@ -34,12 +41,11 @@ namespace LinearIndexedGrammarLearner
             //degration - accept with a probability proportional to the delta and the iteration
             //bigger delta (bigger degradation) => lower probability.
             //bigger temperature => higher probability
-            double delta = newval - oldval;
+            double delta = (newval - oldval) * 1000 * 10;
             double temperature = _initialTemperature * Math.Pow(CoolingFactor, iteration);
 
             double exponent = delta / temperature;
             double prob = Math.Exp(exponent);
-
             var rand = ThreadSafeRandom.ThisThreadsRandom;
             var randomThrow = rand.NextDouble();
             return (randomThrow < prob);

@@ -4,7 +4,7 @@
       "PopulationSize": 300,
       "NumberOfGenerations": 1000,
       "NumberOfRuns": 10,
-      "GrammarFileName": "NoNPWithV3.txt"
+      "GrammarFileName": "YesNPNoV3.txt"
     }
   ]
 }

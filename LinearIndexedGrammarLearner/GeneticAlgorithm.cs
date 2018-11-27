@@ -81,13 +81,13 @@ namespace LinearIndexedGrammarLearner
                         if (mutatedGrammar == null) continue;
                         objectiveFunctionValue = EvaluateObjectiveFunction(mutatedGrammar, originalGrammar, originalGrammarValue);
 
-                        if (_objectiveFunction.ConsiderValue(objectiveFunctionValue, originalGrammarValue, currentGeneration))
+                        if (_objectiveFunction.ConsiderValue(objectiveFunctionValue))
                             descendants.Enqueue(
                                 new KeyValuePair<T, ContextSensitiveGrammar>(objectiveFunctionValue,
                                     mutatedGrammar));
                     }
 
-                    InsertDescendantsIntoPopulation(descendants);
+                    InsertDescendantsIntoPopulation(descendants, currentGeneration);
                     var enoughSolutions = CheckForSufficientSolutions();
                     if (enoughSolutions) break;
                 }
@@ -140,7 +140,7 @@ namespace LinearIndexedGrammarLearner
         }
 
 
-        private void InsertDescendantsIntoPopulation(Queue<KeyValuePair<T, ContextSensitiveGrammar>> descendants)
+        private void InsertDescendantsIntoPopulation(Queue<KeyValuePair<T, ContextSensitiveGrammar>> descendants, int iteration)
         {
             while (descendants.Any())
             {
@@ -150,6 +150,17 @@ namespace LinearIndexedGrammarLearner
                     {
                         var old = _population.Dequeue();
                         _population.Enqueue(descendant.Key, descendant.Value);
+                    }
+                    else
+                    {
+                        //var newval = descendant.Key;
+                        //var oldval = _population.PeekFirstKey();
+                        //bool accept = _objectiveFunction.AcceptNewValue(newval, oldval, iteration);
+                        //if (accept)
+                        //{
+                        //    var old = _population.Dequeue();
+                        //    _population.Enqueue(descendant.Key, descendant.Value);
+                        //}
                     }
             }
         }
