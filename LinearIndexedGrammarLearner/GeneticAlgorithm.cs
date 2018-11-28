@@ -37,7 +37,7 @@ namespace LinearIndexedGrammarLearner
             _learner = l;
             _objectiveFunction = objectiveFunction;
             var initialGrammar = _learner.CreateInitialGrammars();
-            var objectiveFunctionValue = _objectiveFunction.Compute(initialGrammar);
+            var objectiveFunctionValue = _objectiveFunction.Compute(initialGrammar, false);
 
             for (var i = 0; i < populationSize; i++)
                 _population.Enqueue(objectiveFunctionValue,
@@ -107,7 +107,7 @@ namespace LinearIndexedGrammarLearner
             T originalGrammarValue)
         {
 
-            T objectiveFunctionValue = _objectiveFunction.Compute(mutatedGrammar);
+            T objectiveFunctionValue = _objectiveFunction.Compute(mutatedGrammar, false);
             return objectiveFunctionValue;
         }
 

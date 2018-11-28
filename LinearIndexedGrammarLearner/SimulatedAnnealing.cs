@@ -35,16 +35,14 @@ namespace LinearIndexedGrammarLearner
                     currentTemp *= _coolingFactor;
                     if (mutatedGrammar == null) continue;
 
-                    var newValue = _objectiveFunction.Compute(mutatedGrammar);
+                    //var newValue = _objectiveFunction.Compute(mutatedGrammar, (currentTemp < 100));
+                    var newValue = _objectiveFunction.Compute(mutatedGrammar, false);
 
-                    if (_objectiveFunction.ConsiderValue(newValue))
+                    bool accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
+                    if (accept)
                     {
-                        bool accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
-                        if (accept)
-                        {
-                            currentValue = newValue;
-                            currentGrammar = mutatedGrammar;
-                        }
+                        currentValue = newValue;
+                        currentGrammar = mutatedGrammar;
                     }
 
                     if (_objectiveFunction.IsMaximalValue(currentValue)) break;
@@ -65,7 +63,7 @@ namespace LinearIndexedGrammarLearner
         {
             var currentIteration = 0;
             var currentGrammar = _learner.CreateInitialGrammars();
-            var currentValue = _objectiveFunction.Compute(currentGrammar);
+            var currentValue = _objectiveFunction.Compute(currentGrammar, false);
 
             while (currentIteration++ < _numberOfIterations)
             {

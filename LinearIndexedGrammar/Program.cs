@@ -115,7 +115,7 @@ namespace LinearIndexedGrammar
 
             ContextSensitiveGrammar targetGrammar = new ContextSensitiveGrammar(grammarRules);
 
-            var targetProb = objectiveFunction.Compute(targetGrammar);
+            var targetProb = objectiveFunction.Compute(targetGrammar, false);
 
             s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
             LogManager.GetCurrentClassLogger().Info(s);
