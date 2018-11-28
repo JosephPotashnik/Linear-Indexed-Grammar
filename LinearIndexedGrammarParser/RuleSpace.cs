@@ -18,7 +18,8 @@ namespace LinearIndexedGrammarParser
     public class RuleSpace
     {
         public Rule[][] _ruleSpace { get; }
-        private List<int> _allowedRHSIndices; 
+        private List<int> _allowedRHSIndices;
+        private HashSet<string> _partsOfSpeechCategories { get;  }
         readonly Dictionary<string, int> nonTerminalsRHS = new Dictionary<string, int>();
         readonly Dictionary<string, int> nonTerminalLHS = new Dictionary<string, int>();
 
@@ -27,6 +28,7 @@ namespace LinearIndexedGrammarParser
             _allowedRHSIndices = new List<int>();
             List<string> rhsStore = new List<string>();
             List<string> nonTerminals = new List<string>();
+            _partsOfSpeechCategories = new HashSet<string>(partsOfSpeechCategories);
             _ruleSpace = new Rule[maxNonTerminals][];
             for (int i = 1; i <= maxNonTerminals; i++)
             {
@@ -72,7 +74,13 @@ namespace LinearIndexedGrammarParser
                     var rhs2cat = new DerivedCategory(rhs2);
                     var rhs1cat = new DerivedCategory(rhs1, ContextFreeGrammar.StarSymbol);
                     _ruleSpace[0][i - length + 1] = new Rule(currentCategory, new[] {rhs1cat, rhs2cat});
-                    _allowedRHSIndices.Add(i - length + 1);
+
+                    //Assumption: we allow only different RHS sides.
+                    //to be relaxed later.
+                    //note: in future, make sure not to relax it include the form Xi -> Xi Xi
+                    //(perhaps allow Xj -> Xi Xi)
+                    if (rhs1 != rhs2)
+                        _allowedRHSIndices.Add(i - length + 1);
                 }
             }
 

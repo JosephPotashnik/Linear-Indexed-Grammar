@@ -71,7 +71,7 @@ namespace LinearIndexedGrammar
         private static void Learn(int maxWordsInSentence = 6)
         {
             var fileName = @"ProgramsToRun.json";
-            //fileName = @"NightRunFull.json";
+            fileName = @"NightRunFull.json";
 
             var programParamsList = ReadProgramParamsFromFile(fileName);
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
@@ -129,8 +129,11 @@ namespace LinearIndexedGrammar
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
                 LogManager.GetCurrentClassLogger().Info($"Run {i+1}:");
-                var ga = new GeneticAlgorithm<double>(learner, programParams.PopulationSize, programParams.NumberOfGenerations, objectiveFunction);
-                (var bestHypothesis, var bestValue) = ga.Run();
+
+                //var algorithm = new GeneticAlgorithm<double>(learner, programParams.PopulationSize, programParams.NumberOfGenerations, objectiveFunction);
+                var algorithm = new SimulatedAnnealing<double>(learner, programParams.NumberOfGenerations, 0.99, 2000, objectiveFunction);
+
+                (var bestHypothesis, var bestValue) = algorithm.Run();
                 probs.Add(bestValue);
 
                 s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";
@@ -138,7 +141,7 @@ namespace LinearIndexedGrammar
 
                 //the following line should be uncommented for sanity checks (i.e, it suffices to see that
                 //we arrived at a possible solution), for night run / unit tests, etc.
-                //if (objectiveFunction.IsMaximalValue(bestValue)) break;
+                if (objectiveFunction.IsMaximalValue(bestValue)) break;
             }
 
             var numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < GeneticAlgorithm<double>.Tolerance);

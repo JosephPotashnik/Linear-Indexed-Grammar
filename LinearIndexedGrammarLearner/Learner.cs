@@ -78,11 +78,6 @@ namespace LinearIndexedGrammarLearner
             {
                 throw;
             }
-
-            catch (Exception)
-            {
-                return null; //parsing failed.
-            }
         }
 
 

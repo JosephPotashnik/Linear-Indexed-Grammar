@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using LinearIndexedGrammarParser;
 
 namespace LinearIndexedGrammarLearner
@@ -10,39 +8,35 @@ namespace LinearIndexedGrammarLearner
     {
         T Compute(ContextSensitiveGrammar currentHypothesis);
         bool ConsiderValue(T newVal);
-        bool AcceptNewValue(T newVal, T oldVal, int iteration);
+        bool AcceptNewValue(T newVal, T oldVal, double temperature);
         bool IsMaximalValue(T val);
-
     }
 
     public class GrammarFitnessObjectiveFunction : IObjectiveFunction<double>
     {
         public const double Tolerance = 0.000001;
-        public const double CoolingFactor = 0.99;
-
         private readonly Learner _learner;
-        private double _initialTemperature = 1000;
-
         public GrammarFitnessObjectiveFunction(Learner l) => _learner = l;
+        public bool ConsiderValue(double newval) => (newval > 0);
 
-        public bool ConsiderValue(double newval)
+        public bool AcceptNewValue(double newval, double oldval, double temperature)
         {
-            return (newval > 0);
-        }
-
-        public bool AcceptNewValue(double newval, double oldval, int iteration)
-        {
-
             //improvement - accept.
             if (newval > oldval) return true;
             if (Math.Abs(newval) < Tolerance) return false;
+
+            //if the change is too small or zero, reject.
+            //many times the new grammar does not change the value,
+            //experimentally, I found out we don't want to accept that move. 
+            //or maybe accept the move with some probability? definitely not 100%!
+            if (Math.Abs(newval - oldval) < Tolerance) return false;
 
             //neval =< oldval (our objective function is to maximize value)
             //degration - accept with a probability proportional to the delta and the iteration
             //bigger delta (bigger degradation) => lower probability.
             //bigger temperature => higher probability
             double delta = (newval - oldval) * 1000 * 10;
-            double temperature = _initialTemperature * Math.Pow(CoolingFactor, iteration);
+            //double temperature = _initialTemperature * Math.Pow(CoolingFactor, iteration);
 
             double exponent = delta / temperature;
             double prob = Math.Exp(exponent);
@@ -55,7 +49,6 @@ namespace LinearIndexedGrammarLearner
 
         public double Compute(ContextSensitiveGrammar currentHypothesis)
         {
-
             if (currentHypothesis == null) return 0;
 
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
@@ -95,7 +88,6 @@ namespace LinearIndexedGrammarLearner
                         //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
                         //right now: it is depth = maxWords+2. change?
 
-
                         //throw new Exception("probability is wrong!");
                     }
 
@@ -103,7 +95,8 @@ namespace LinearIndexedGrammarLearner
 
                     double unexplainedSentencePercentage = (1.0 - (numberOfSentenceParsed / (double)allParses.Length));
 
-                    //pass only through fully parsable inputs.
+                    //pass only through fully parsable inputs. comment the following line
+                    //to allow hypotheses parsing only part of the input 
                     if (unexplainedSentencePercentage > 0) return 0;
 
                     prob -= unexplainedSentencePercentage;
