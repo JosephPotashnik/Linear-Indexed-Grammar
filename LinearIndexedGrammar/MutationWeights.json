@@ -20,30 +20,6 @@
     "MutationWeight": 0
   },
   {
-    "Mutation": "InsertBinaryRule",
-    "MutationWeight": 0
-  },
-  {
-    "Mutation": "InsertUnaryRule",
-    "MutationWeight": 0
-  },
-  {
-    "Mutation": "DeleteRule",
-    "MutationWeight": 0
-  },
-  {
-    "Mutation": "SpreadRuleLHSToRHS",
-    "MutationWeight": 0
-  },
-  {
-    "Mutation": "SpreadRuleLHSToLHS",
-    "MutationWeight": 0
-  },
-  {
-    "Mutation": "SpreadPOSToRHS",
-    "MutationWeight": 0
-  },
-  {
     "Mutation": "InsertMovement",
     "MutationWeight": 0
   },

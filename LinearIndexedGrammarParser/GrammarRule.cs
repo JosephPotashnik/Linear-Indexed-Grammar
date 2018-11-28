@@ -32,10 +32,6 @@ namespace LinearIndexedGrammarParser
             NumberOfGeneratingRule = otherRule.NumberOfGeneratingRule;
         }
 
-        public virtual Rule Clone()
-        {
-            return new Rule(this);
-        }
         [JsonProperty] public DerivedCategory LeftHandSide { get; set; }
 
         [JsonProperty] public DerivedCategory[] RightHandSide { get; set; }
@@ -63,7 +59,9 @@ namespace LinearIndexedGrammarParser
             return Number;
         }
 
-        public bool IsEpsilonRule() => RightHandSide[0].IsEpsilon();
-
+        public bool IsEpsilonRule()
+        {
+            return RightHandSide[0].IsEpsilon();
+        }
     }
 }

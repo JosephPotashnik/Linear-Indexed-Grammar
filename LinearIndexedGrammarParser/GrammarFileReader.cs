@@ -60,7 +60,6 @@ namespace LinearIndexedGrammarParser
             var nodeList = generator.ParseSentence("", maxWords);
             //return (nodeList, cSgrammar);
             return (nodeList, grammarRules);
-
         }
 
         public static List<EarleyNode> ParseSentenceAccordingToGrammar(string filename, string sentence)
@@ -73,7 +72,6 @@ namespace LinearIndexedGrammarParser
             var n = parser.ParseSentence(sentence);
             return n;
         }
-
 
 
         public static ContextSensitiveGrammar CreateGrammarFromFile(string filename)
@@ -128,7 +126,7 @@ namespace LinearIndexedGrammarParser
             var pushRule = false;
             Rule baseRule;
             SyntacticCategory moveable = null;
-            MoveableOperationsKey key = MoveableOperationsKey.NoOp;
+            var key = MoveableOperationsKey.NoOp;
 
             if (leftHandCat.Stack.Contains(ContextFreeGrammar.StarSymbol))
                 if (leftHandCat.Stack.Length > 1)
@@ -145,7 +143,7 @@ namespace LinearIndexedGrammarParser
                 baseRule = new Rule(leftHandCat, new[] {epsilonCat});
                 moveable = new SyntacticCategory(leftHandCat);
                 key = MoveableOperationsKey.Pop1;
-                return new StackChangingRule(baseRule, key , moveable);
+                return new StackChangingRule(baseRule, key, moveable);
             }
 
             var rightHandCategories = new DerivedCategory[nonTerminals.Length - 1];
@@ -173,12 +171,12 @@ namespace LinearIndexedGrammarParser
             }
 
             if (!pushRule && !popRule)
-                return new Rule(leftHandCat, rightHandCategories);
-            else
             {
-                baseRule = new Rule(leftHandCat, rightHandCategories);
-                return new StackChangingRule(baseRule, key, moveable);
+                return new Rule(leftHandCat, rightHandCategories);
             }
+
+            baseRule = new Rule(leftHandCat, rightHandCategories);
+            return new StackChangingRule(baseRule, key, moveable);
         }
     }
 }

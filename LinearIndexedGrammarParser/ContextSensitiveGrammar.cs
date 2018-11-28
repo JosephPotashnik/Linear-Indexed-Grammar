@@ -48,25 +48,29 @@ namespace LinearIndexedGrammarParser
         }
     }
 
-    
+
     public class RuleCoordinates
     {
-        //the LHS index in the Rule Space (index 0 = LHS "X1", index 1 = LHS "X2", etc)
-        public int LHSIndex { get; set; }
-        //the RHS index in the Rule Space ( same RHS index for different LHS indices means they share the same RHS)
-        public int RHSIndex { get; set; }
+        public RuleCoordinates()
+        {
+        }
 
-        public RuleCoordinates() { }
         public RuleCoordinates(RuleCoordinates other)
         {
             LHSIndex = other.LHSIndex;
             RHSIndex = other.RHSIndex;
         }
 
+        //the LHS index in the Rule Space (index 0 = LHS "X1", index 1 = LHS "X2", etc)
+        public int LHSIndex { get; set; }
+
+        //the RHS index in the Rule Space ( same RHS index for different LHS indices means they share the same RHS)
+        public int RHSIndex { get; set; }
+
         public override bool Equals(object obj)
         {
             if (obj is RuleCoordinates other)
-                return (LHSIndex == other.LHSIndex && RHSIndex == other.RHSIndex);
+                return LHSIndex == other.LHSIndex && RHSIndex == other.RHSIndex;
 
             return false;
         }
@@ -97,22 +101,19 @@ namespace LinearIndexedGrammarParser
 
         public ContextSensitiveGrammar()
         {
-                
         }
+
         public ContextSensitiveGrammar(Rule[] grammarRules)
         {
             foreach (var rule in grammarRules)
-            {
                 if (rule is StackChangingRule r)
                 {
-
                 }
                 else
                 {
                     var rc = RuleSpace.FindRule(rule);
                     StackConstantRules.Add(rc);
                 }
-            }
         }
 
         public ContextSensitiveGrammar(ContextSensitiveGrammar otherGrammar)
@@ -134,14 +135,14 @@ namespace LinearIndexedGrammarParser
                 }
             }
         }
-        
+
         public StackChangingRule[] StackChangingRulesArray
         {
             //Note: SelectMany here does not deep-copy, we get the reference to the grammar rules.
             get { return StackChangingRules.Values.SelectMany(x => x.MoveOps.Values).SelectMany(x => x).ToArray(); }
         }
 
-        
+
         public override string ToString()
         {
             var s1 = "Stack Constant Rules:\r\n" +
@@ -151,8 +152,15 @@ namespace LinearIndexedGrammarParser
             return s1 + "\r\n" + s2;
         }
 
-        public void AddStackConstantRule(RuleCoordinates rc) => StackConstantRules.Add(rc);
-        public void DeleteStackConstantRule(RuleCoordinates rc) => StackConstantRules.Remove(rc);
+        public void AddStackConstantRule(RuleCoordinates rc)
+        {
+            StackConstantRules.Add(rc);
+        }
+
+        public void DeleteStackConstantRule(RuleCoordinates rc)
+        {
+            StackConstantRules.Remove(rc);
+        }
 
         public RuleCoordinates GetRandomStackConstantRule()
         {
@@ -166,10 +174,11 @@ namespace LinearIndexedGrammarParser
             //RHSIndex 0 is a special index, reserved for rules of the type
             //S -> X1, S -> X2, S -> X3. so if RHSIndex = 0 we check that exactly the same rule (same LHS) is in the grammar)
             if (rc.RHSIndex == 0)
-                return (StackConstantRules.Contains(rc));
+                return StackConstantRules.Contains(rc);
 
             foreach (var ruleCoord in StackConstantRules)
-                if (ruleCoord.RHSIndex == rc.RHSIndex) return true;
+                if (ruleCoord.RHSIndex == rc.RHSIndex)
+                    return true;
 
             return false;
         }
@@ -202,10 +211,11 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        
+
         public void PruneUnusedRules(Dictionary<int, int> usagesDic)
         {
-            var unusedConstantRules = StackConstantRules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].Number)).ToArray();
+            var unusedConstantRules =
+                StackConstantRules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].Number)).ToArray();
 
             foreach (var unusedRule in unusedConstantRules.ToList())
                 StackConstantRules.Remove(unusedRule);

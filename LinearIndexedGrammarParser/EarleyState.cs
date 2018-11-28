@@ -19,16 +19,16 @@ namespace LinearIndexedGrammarParser
         public int DotIndex { get; }
         public EarleyNode Node { get; set; }
 
+        public bool IsCompleted => DotIndex >= Rule.RightHandSide.Length;
+
+        public DerivedCategory NextTerm => IsCompleted ? null : Rule.RightHandSide[DotIndex];
+
         private static string RuleWithDotNotation(Rule rule, int dotIndex)
         {
             var terms = rule.RightHandSide.Select(x => x.ToString()).ToList();
             terms.Insert(dotIndex, "$");
             return string.Format("{0} -> {1}", rule.LeftHandSide, string.Join(" ", terms));
         }
-
-        public bool IsCompleted => DotIndex >= Rule.RightHandSide.Length;
-
-        public DerivedCategory NextTerm => IsCompleted? null : Rule.RightHandSide[DotIndex];
 
         public override string ToString()
         {

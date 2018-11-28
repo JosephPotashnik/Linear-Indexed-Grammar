@@ -6,13 +6,14 @@ namespace LinearIndexedGrammarLearner
 {
     public class SimulatedAnnealing<T> where T : IComparable
     {
+        private readonly double _coolingFactor;
+        private readonly double _initialTemp;
         private readonly Learner _learner;
         private readonly int _numberOfIterations;
-        private readonly double _initialTemp;
-        private readonly double _coolingFactor;
         private readonly IObjectiveFunction<T> _objectiveFunction;
 
-        public SimulatedAnnealing(Learner l, int numberOfIterations, double coolingFactor, double initialTemp , IObjectiveFunction<T> objectiveFunction)
+        public SimulatedAnnealing(Learner l, int numberOfIterations, double coolingFactor, double initialTemp,
+            IObjectiveFunction<T> objectiveFunction)
         {
             _learner = l;
             _numberOfIterations = numberOfIterations;
@@ -21,15 +22,15 @@ namespace LinearIndexedGrammarLearner
             _objectiveFunction = objectiveFunction;
         }
 
-        private (ContextSensitiveGrammar bestGrammar, T bestValue) RunSingleIteration(ContextSensitiveGrammar initialGrammar, T initialValue)
+        private (ContextSensitiveGrammar bestGrammar, T bestValue) RunSingleIteration(
+            ContextSensitiveGrammar initialGrammar, T initialValue)
         {
             var currentTemp = _initialTemp;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
 
             while (currentTemp > 2.0)
-            {
-              try
+                try
                 {
                     var mutatedGrammar = _learner.GetNeighbor(currentGrammar);
                     currentTemp *= _coolingFactor;
@@ -38,7 +39,7 @@ namespace LinearIndexedGrammarLearner
                     //var newValue = _objectiveFunction.Compute(mutatedGrammar, (currentTemp < 100));
                     var newValue = _objectiveFunction.Compute(mutatedGrammar, false);
 
-                    bool accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
+                    var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
                     if (accept)
                     {
                         currentValue = newValue;
@@ -52,7 +53,6 @@ namespace LinearIndexedGrammarLearner
                 {
                     LogManager.GetCurrentClassLogger().Warn(e.ToString());
                 }
-            }
 
             var ruleDistribution = _learner.CollectUsages(currentGrammar);
             currentGrammar.PruneUnusedRules(ruleDistribution);
@@ -71,10 +71,10 @@ namespace LinearIndexedGrammarLearner
                     LogManager.GetCurrentClassLogger().Info($"generation {currentIteration}");
 
                 (currentGrammar, currentValue) = RunSingleIteration(currentGrammar, currentValue);
-                    if (_objectiveFunction.IsMaximalValue(currentValue)) break;
-
+                if (_objectiveFunction.IsMaximalValue(currentValue)) break;
             }
+
             return (currentGrammar, currentValue);
-        } 
+        }
     }
 }

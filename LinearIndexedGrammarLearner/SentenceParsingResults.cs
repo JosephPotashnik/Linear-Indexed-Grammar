@@ -1,5 +1,5 @@
-﻿using LinearIndexedGrammarParser;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using LinearIndexedGrammarParser;
 
 namespace LinearIndexedGrammarLearner
 {
@@ -13,6 +13,5 @@ namespace LinearIndexedGrammarLearner
 
         //the number of times the sentence was encountered in the corpus.
         public int Count { get; set; }
-
     }
 }

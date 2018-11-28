@@ -113,11 +113,12 @@ namespace LinearIndexedGrammar
             var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
             IObjectiveFunction<double> objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
 
-            ContextSensitiveGrammar targetGrammar = new ContextSensitiveGrammar(grammarRules);
+            var targetGrammar = new ContextSensitiveGrammar(grammarRules);
 
             var targetProb = objectiveFunction.Compute(targetGrammar, false);
 
-            s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
+            s =
+                $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
             LogManager.GetCurrentClassLogger().Info(s);
             if (targetProb < 1)
             {
@@ -128,12 +129,13 @@ namespace LinearIndexedGrammar
             var probs = new List<double>();
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
-                LogManager.GetCurrentClassLogger().Info($"Run {i+1}:");
+                LogManager.GetCurrentClassLogger().Info($"Run {i + 1}:");
 
                 //var algorithm = new GeneticAlgorithm<double>(learner, programParams.PopulationSize, programParams.NumberOfGenerations, objectiveFunction);
-                var algorithm = new SimulatedAnnealing<double>(learner, programParams.NumberOfGenerations, 0.99, 2000, objectiveFunction);
+                var algorithm = new SimulatedAnnealing<double>(learner, programParams.NumberOfGenerations, 0.99, 2000,
+                    objectiveFunction);
 
-                (var bestHypothesis, var bestValue) = algorithm.Run();
+                var (bestHypothesis, bestValue) = algorithm.Run();
                 probs.Add(bestValue);
 
                 s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";

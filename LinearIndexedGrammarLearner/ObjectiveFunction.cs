@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using LinearIndexedGrammarParser;
+using NLog;
 
 namespace LinearIndexedGrammarLearner
 {
@@ -11,16 +12,27 @@ namespace LinearIndexedGrammarLearner
         bool IsMaximalValue(T val);
         bool AllowInfeasibleSolutions(T newVal);
         bool ConsiderValue(T newVal);
-
     }
 
     public class GrammarFitnessObjectiveFunction : IObjectiveFunction<double>
     {
         public const double Tolerance = 0.000001;
         private readonly Learner _learner;
-        public GrammarFitnessObjectiveFunction(Learner l) => _learner = l;
-        public bool AllowInfeasibleSolutions(double value) => (value < 100);
-        public bool ConsiderValue(double newval) => (newval > 0); //used by genetic algorithm implementation.
+
+        public GrammarFitnessObjectiveFunction(Learner l)
+        {
+            _learner = l;
+        }
+
+        public bool AllowInfeasibleSolutions(double value)
+        {
+            return value < 100;
+        }
+
+        public bool ConsiderValue(double newval)
+        {
+            return newval > 0;
+        }
 
         public bool AcceptNewValue(double newValue, double oldValue, double temperature)
         {
@@ -37,15 +49,18 @@ namespace LinearIndexedGrammarLearner
             //degration - accept with a probability proportional to the delta and the iteration
             //bigger delta (bigger degradation) => lower probability.
             //bigger temperature => higher probability
-            double delta = (newValue - oldValue) * 1000 * 10;
-            double exponent = delta / temperature;
-            double prob = Math.Exp(exponent);
+            var delta = (newValue - oldValue) * 1000 * 10;
+            var exponent = delta / temperature;
+            var prob = Math.Exp(exponent);
             var rand = ThreadSafeRandom.ThisThreadsRandom;
             var randomThrow = rand.NextDouble();
-            return (randomThrow < prob);
+            return randomThrow < prob;
         }
 
-        public bool IsMaximalValue(double val) => (Math.Abs(val - 1) < Tolerance);
+        public bool IsMaximalValue(double val)
+        {
+            return Math.Abs(val - 1) < Tolerance;
+        }
 
         public double Compute(ContextSensitiveGrammar currentHypothesis, bool considerPartialParsing)
         {
@@ -64,9 +79,10 @@ namespace LinearIndexedGrammarLearner
             catch (AggregateException e) when (e.InnerExceptions.OfType<InfiniteParseException>().Any())
             {
                 var s = e.ToString();
-                NLog.LogManager.GetCurrentClassLogger().Warn(s);
+                LogManager.GetCurrentClassLogger().Warn(s);
                 return 0;
             }
+
             if (allParses != null)
             {
                 var totalTreesCountofData = allParses.Select(x => x.Trees.Count).Sum();
@@ -74,8 +90,7 @@ namespace LinearIndexedGrammarLearner
                 if (totalTreesCountofData != 0)
                 {
                     var totalTreesCountofGrammar = _learner.GetNumberOfParseTrees(currentCFHypothesis);
-                    prob = (totalTreesCountofData) / (double)(totalTreesCountofGrammar);
-
+                    prob = totalTreesCountofData / (double) totalTreesCountofGrammar;
                     if (prob > 1)
                     {
                         return 0;
@@ -91,18 +106,17 @@ namespace LinearIndexedGrammarLearner
                         //throw new Exception("probability is wrong!");
                     }
 
-                    int numberOfSentenceParsed = allParses.Count(x => x.Trees.Count > 0);
-                    double unexplainedSentencePercentage = (1.0 - (numberOfSentenceParsed / (double)allParses.Length));
+                    var numberOfSentenceParsed = allParses.Count(x => x.Trees.Count > 0);
+                    var unexplainedSentencePercentage = 1.0 - numberOfSentenceParsed / (double) allParses.Length;
 
                     if (!considerPartialParsing && unexplainedSentencePercentage > 0) return 0;
-                    
+
                     prob -= unexplainedSentencePercentage;
                     if (prob < 0) prob = 0;
-
                 }
             }
+
             return prob;
         }
     }
-    
 }

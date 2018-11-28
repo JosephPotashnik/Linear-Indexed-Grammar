@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -11,7 +10,7 @@ namespace LinearIndexedGrammarParser
         public int TreesCount { get; set; }
     }
 
-    public class ContextFreeGrammar 
+    public class ContextFreeGrammar
     {
         public const string GammaRule = "Gamma";
         public const string StartRule = "START";
@@ -38,6 +37,7 @@ namespace LinearIndexedGrammarParser
             GenerateAllStaticRulesFromDynamicRules(rulesDic);
             ComputeTransitiveClosureOfNullableCategories();
         }
+
         public ContextFreeGrammar(ContextSensitiveGrammar cs)
         {
             var xy = cs.StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]);

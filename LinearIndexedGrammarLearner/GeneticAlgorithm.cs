@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
 using NLog;
@@ -18,7 +17,6 @@ namespace LinearIndexedGrammarLearner
     }
 
 
-
     public class GeneticAlgorithm<T> where T : IComparable
     {
         public const double Tolerance = 0.0001;
@@ -31,7 +29,8 @@ namespace LinearIndexedGrammarLearner
         private readonly PriorityQueue<T, ContextSensitiveGrammar> _population =
             new PriorityQueue<T, ContextSensitiveGrammar>();
 
-        public GeneticAlgorithm(Learner l, int populationSize, int numberOfGenerations, IObjectiveFunction<T> objectiveFunction)
+        public GeneticAlgorithm(Learner l, int populationSize, int numberOfGenerations,
+            IObjectiveFunction<T> objectiveFunction)
         {
             _numberOfGenerations = numberOfGenerations;
             _learner = l;
@@ -79,7 +78,8 @@ namespace LinearIndexedGrammarLearner
                         var mutatedGrammar = _learner.GetNeighbor(originalGrammar);
 
                         if (mutatedGrammar == null) continue;
-                        objectiveFunctionValue = EvaluateObjectiveFunction(mutatedGrammar, originalGrammar, originalGrammarValue);
+                        objectiveFunctionValue =
+                            EvaluateObjectiveFunction(mutatedGrammar, originalGrammar, originalGrammarValue);
 
                         if (_objectiveFunction.ConsiderValue(objectiveFunctionValue))
                             descendants.Enqueue(
@@ -103,11 +103,11 @@ namespace LinearIndexedGrammarLearner
             return (bestGrammars.First(), value);
         }
 
-        private T EvaluateObjectiveFunction(ContextSensitiveGrammar mutatedGrammar, ContextSensitiveGrammar originalGrammar,
+        private T EvaluateObjectiveFunction(ContextSensitiveGrammar mutatedGrammar,
+            ContextSensitiveGrammar originalGrammar,
             T originalGrammarValue)
         {
-
-            T objectiveFunctionValue = _objectiveFunction.Compute(mutatedGrammar, false);
+            var objectiveFunctionValue = _objectiveFunction.Compute(mutatedGrammar, false);
             return objectiveFunctionValue;
         }
 
@@ -126,7 +126,6 @@ namespace LinearIndexedGrammarLearner
 
         private (T value, IEnumerable<ContextSensitiveGrammar> bestGrammars) ChooseBestHypotheses()
         {
-
             var bestGrammars = _population.Last().Value.Select(x =>
                 {
                     var ruleDistribution = _learner.CollectUsages(x);
@@ -140,7 +139,8 @@ namespace LinearIndexedGrammarLearner
         }
 
 
-        private void InsertDescendantsIntoPopulation(Queue<KeyValuePair<T, ContextSensitiveGrammar>> descendants, int iteration)
+        private void InsertDescendantsIntoPopulation(Queue<KeyValuePair<T, ContextSensitiveGrammar>> descendants,
+            int iteration)
         {
             while (descendants.Any())
             {
@@ -151,20 +151,7 @@ namespace LinearIndexedGrammarLearner
                         var old = _population.Dequeue();
                         _population.Enqueue(descendant.Key, descendant.Value);
                     }
-                    else
-                    {
-                        //var newval = descendant.Key;
-                        //var oldval = _population.PeekFirstKey();
-                        //bool accept = _objectiveFunction.AcceptNewValue(newval, oldval, iteration);
-                        //if (accept)
-                        //{
-                        //    var old = _population.Dequeue();
-                        //    _population.Enqueue(descendant.Key, descendant.Value);
-                        //}
-                    }
             }
         }
-
-
     }
 }
