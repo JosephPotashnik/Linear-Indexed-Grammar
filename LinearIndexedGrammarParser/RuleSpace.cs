@@ -75,11 +75,11 @@ namespace LinearIndexedGrammarParser
                     var rhs1cat = new DerivedCategory(rhs1, ContextFreeGrammar.StarSymbol);
                     _ruleSpace[0][i - length + 1] = new Rule(currentCategory, new[] {rhs1cat, rhs2cat});
 
-                    //Assumption: we allow only different RHS sides.
+                    //Assumption: we allow only different RHS sides for non-terminals.
                     //to be relaxed later.
                     //note: in future, make sure not to relax it include the form Xi -> Xi Xi
                     //(perhaps allow Xj -> Xi Xi)
-                    if (rhs1 != rhs2)
+                    if (rhs1 != rhs2 || _partsOfSpeechCategories.Contains(rhs1))
                         _allowedRHSIndices.Add(i - length + 1);
                 }
             }
