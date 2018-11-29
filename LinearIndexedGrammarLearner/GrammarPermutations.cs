@@ -67,8 +67,9 @@ namespace LinearIndexedGrammarLearner
         {
             var rc = new RuleCoordinates
             {
+                RuleType = RuleType.CFGRules,
                 LHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex(),
-                RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex()
+                RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex(RuleType.CFGRules)
             };
             if (grammar.ContainsRuleWithSameRHS(rc)) return null;
             grammar.AddStackConstantRule(rc);
@@ -97,7 +98,7 @@ namespace LinearIndexedGrammarLearner
             var changedRc = new RuleCoordinates
             {
                 LHSIndex = rc.LHSIndex,
-                RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex()
+                RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex(RuleType.CFGRules)
             };
             if (grammar.ContainsRuleWithSameRHS(changedRc)) return null;
 

@@ -14,19 +14,34 @@ namespace LinearIndexedGrammarParser
                                                                            Thread.CurrentThread.ManagedThreadId)));
     }
 
+    public class RuleType
+    {
+        public static int CFGRules = 0;
+        public static int PushRules = 1;
+        public static int PopRules = 2;
+        public static int RuleTypeCount = 3;
+    }
+
     public class RuleSpace
     {
         private readonly Dictionary<string, int> _nonTerminalLHS = new Dictionary<string, int>();
         private readonly Dictionary<string, int> _nonTerminalsRHS = new Dictionary<string, int>();
-        private readonly List<int> _allowedRHSIndices;
+        private readonly List<int>[] _allowedRHSIndices;
 
         public RuleSpace(string[] partsOfSpeechCategories, int maxNonTerminals)
         {
-            _allowedRHSIndices = new List<int>();
             var rhsStore = new List<string>();
             var nonTerminals = new List<string>();
             var partsOfSpeechCategories1 = new HashSet<string>(partsOfSpeechCategories);
-            _ruleSpace = new Rule[maxNonTerminals][];
+            _ruleSpace = new Rule[RuleType.RuleTypeCount][][];
+            _allowedRHSIndices = new List<int>[RuleType.RuleTypeCount];
+
+            for (int i = 0; i < RuleType.RuleTypeCount; i++)
+            {
+                _ruleSpace[i] = new Rule[maxNonTerminals][];
+                _allowedRHSIndices[i] = new List<int>();
+            }
+
             for (var i = 1; i <= maxNonTerminals; i++)
             {
                 nonTerminals.Add($"X{i}");
@@ -46,75 +61,127 @@ namespace LinearIndexedGrammarParser
             var length = rhsStore.Count;
             var numberOfPossibleRHS = length * length;
 
-            _ruleSpace[0] = new Rule[numberOfPossibleRHS - length + 1];
-            _ruleSpace[0][0] = new Rule(startCategory, new[] {currentCategory});
-            _allowedRHSIndices.Add(0);
+            //allocating the first column of CFG, push and pop rule tables.
+            _ruleSpace[RuleType.CFGRules][0] = new Rule[numberOfPossibleRHS - length + 1];
+            _ruleSpace[RuleType.PushRules][0] = new Rule[numberOfPossibleRHS - length + 1];
+            _ruleSpace[RuleType.PopRules][0] = new Rule[1];
+
+            //START -> Xi rule in CFG Rule table.
+            _ruleSpace[RuleType.CFGRules][0][0] = new Rule(startCategory, new[] {currentCategory});
+            _allowedRHSIndices[RuleType.CFGRules].Add(0);
+            
+            //START -> Xi rule in Push Rule table. (unused).
+            _ruleSpace[RuleType.PushRules][0][0] = new Rule(startCategory, new[] { currentCategory });
+
+            //Xi[Xi] -> epsilon Pop in Pop Rule table. 
+            var epsilonCat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol);
+            var currentCatWithCurrenCatStack = new DerivedCategory("X1", "X1");
+            _ruleSpace[RuleType.PopRules][0][0] = new Rule(currentCatWithCurrenCatStack, new[] { epsilonCat });
 
             for (var i = length; i < numberOfPossibleRHS; i++)
             {
+                int currentIndex = i - length + 1;
                 var rhs1 = rhsStore[i / length];
                 if (i % length == 0)
                 {
-                    var rhs1Cat = new DerivedCategory(rhs1);
-                    _ruleSpace[0][i - length + 1] = new Rule(currentCategory, new[] {rhs1Cat});
+                    //Xi -> RHS in CFG Rules
+                    var rhs1Cat = new DerivedCategory(rhs1, ContextFreeGrammar.StarSymbol);
+                    _ruleSpace[RuleType.CFGRules][0][currentIndex] = new Rule(currentCategory, new[] {rhs1Cat});
+                    
+                    //Xi -> RHS in Push Rules (unused)
+                    _ruleSpace[RuleType.PushRules][0][currentIndex] = new Rule(currentCategory, new[] { rhs1Cat });
 
-                    //add to excluded rhs indices list: unit production such as x1 -> x2
+                    //unit production rules Xi -> Xj are excluded from CFG Rules
+                    //unit production either Xi -> Xj or Xi -> POS are excluded from Push rules.
                     //note:  S -> Xi is allowed (in index 0).
                     if (rhs1Cat.ToString()[0] != 'X')
-                        _allowedRHSIndices.Add(i - length + 1);
+                        _allowedRHSIndices[RuleType.CFGRules].Add(currentIndex);
                 }
                 else
                 {
                     var rhs2 = rhsStore[i % length];
-                    var rhs2Cat = new DerivedCategory(rhs2);
-                    var rhs1Cat = new DerivedCategory(rhs1, ContextFreeGrammar.StarSymbol);
-                    _ruleSpace[0][i - length + 1] = new Rule(currentCategory, new[] {rhs1Cat, rhs2Cat});
+                    //TODO: assumption spine category is the second rhs. in later stage allow spine to be either rhs.
+                    //Xi -> RHS1 RHS2 in CFG Rules
+                    var rhs1Cat = new DerivedCategory(rhs1);
+                    var rhs2Cat = new DerivedCategory(rhs2, ContextFreeGrammar.StarSymbol);
+                    _ruleSpace[RuleType.CFGRules][0][currentIndex] = new Rule(currentCategory, new[] {rhs1Cat, rhs2Cat});
 
-                    //Assumption: we allow only different RHS sides for non-terminals.
-                    //to be relaxed later.
-                    //note: in future, make sure not to relax it include the form Xi -> Xi Xi
-                    //(perhaps allow Xj -> Xi Xi)
+                    //Xi -> RHS1 RHS2[*RHS1] in Push Rules
+                    var rhs2CatForPushRule = new DerivedCategory(rhs2, ContextFreeGrammar.StarSymbol + rhs1);
+                    _ruleSpace[RuleType.PushRules][0][currentIndex] = new Rule(currentCategory, new[] { rhs1Cat, rhs2CatForPushRule });
+
+
+                    //Xi -> Xj Xj (Xj non-terminal) are excluded from CFG Rules
                     if (rhs1 != rhs2 || partsOfSpeechCategories1.Contains(rhs1))
-                        _allowedRHSIndices.Add(i - length + 1);
+                        _allowedRHSIndices[RuleType.CFGRules].Add(currentIndex);
+
+                    //allow only movement of nonterminals (Consequence: movement cannot be out of terminals)
+                    if (!partsOfSpeechCategories1.Contains(rhs2) && !partsOfSpeechCategories1.Contains(rhs1))
+                        _allowedRHSIndices[RuleType.PushRules].Add(currentIndex);
                 }
             }
+            _allowedRHSIndices[RuleType.PopRules].Add(0);
 
             for (var i = 1; i < maxNonTerminals; i++)
             {
                 var currentLHSNonterminal = $"X{i + 1}";
                 currentCategory = new DerivedCategory(currentLHSNonterminal, ContextFreeGrammar.StarSymbol);
 
-                _ruleSpace[i] = _ruleSpace[0]
+                //copy column 0 to column i in CFG Rules, change the current LHS Nonterminal
+                _ruleSpace[RuleType.CFGRules][i] = _ruleSpace[RuleType.CFGRules][0]
                     .Select(x => new Rule(currentCategory, x.RightHandSide)).ToArray();
-                _ruleSpace[i][0] = new Rule(startCategory, new[] {currentCategory});
+                _ruleSpace[RuleType.CFGRules][i][0] = new Rule(startCategory, new[] {currentCategory});
+
+                //copy column 0 to column i in Push Rules, change the current LHS Nonterminal
+                _ruleSpace[RuleType.PushRules][i] = _ruleSpace[RuleType.PushRules][0]
+                    .Select(x => new Rule(currentCategory, x.RightHandSide)).ToArray();
+                _ruleSpace[RuleType.PushRules][i][0] = new Rule(startCategory, new[] { currentCategory });
+
+                //copy column 0 to column in Pop Rules. change the current nonterminal
+                currentCatWithCurrenCatStack = new DerivedCategory(currentLHSNonterminal, currentLHSNonterminal);
+                _ruleSpace[RuleType.PopRules][i] = new Rule[1];
+                _ruleSpace[RuleType.PopRules][i][0] = new Rule(currentCatWithCurrenCatStack, new[] { epsilonCat });
+
             }
 
-            for (var j = 0; j < _ruleSpace.Length; j++)
+            int counter = 1;
+            for (var k = 0; k < RuleType.RuleTypeCount; k++)
             {
-                for (var i = 0; i < _ruleSpace[j].Length; i++)
-                    _ruleSpace[j][i].Number = j * _ruleSpace[0].Length + i + 1;
+                for (int j = 0; j < _ruleSpace[k].Length; j++)
+                {
+                    for (var i = 0; i < _ruleSpace[k][j].Length; i++)
+                        _ruleSpace[k][j][i].Number = counter++;
+                }
             }
+
+            //for (var j = 0; j < _ruleSpace[0].Length; j++)
+            //{
+            //    for (var i = 0; i < _ruleSpace[0][j].Length; i++)
+            //        _ruleSpace[0][j][i].Number = j * _ruleSpace[0][0].Length + i + 1;
+            //}
         }
 
-        private readonly Rule[][] _ruleSpace;
+        private readonly Rule[][][] _ruleSpace;
 
-        public Rule this[RuleCoordinates rc] => _ruleSpace[rc.LHSIndex][rc.RHSIndex];
+        public Rule this[RuleCoordinates rc] => _ruleSpace[rc.RuleType][rc.LHSIndex][rc.RHSIndex];
 
-        public int GetRandomRHSIndex()
+        public int GetRandomRHSIndex(int ruleType)
         {
             var rand = ThreadSafeRandom.ThisThreadsRandom;
-            return _allowedRHSIndices[rand.Next(_allowedRHSIndices.Count)];
+            return _allowedRHSIndices[ruleType][rand.Next(_allowedRHSIndices[ruleType].Count)];
         }
 
         public int GetRandomLHSIndex()
         {
             var rand = ThreadSafeRandom.ThisThreadsRandom;
-            return rand.Next(_ruleSpace.Length);
+            return rand.Next(_ruleSpace[0].Length);
         }
 
         public RuleCoordinates FindRule(Rule r)
         {
             var rc = new RuleCoordinates();
+            rc.RuleType = RuleType.CFGRules;
+
             var lhs = new SyntacticCategory(r.LeftHandSide);
             if (lhs.ToString() == ContextFreeGrammar.StartRule)
             {
@@ -128,6 +195,7 @@ namespace LinearIndexedGrammarParser
                 rc.RHSIndex = FindRHSIndex(r.RightHandSide.Select(x => new SyntacticCategory(x).ToString()).ToArray());
             }
 
+            //rc.RuleType = ????
             return rc;
         }
 

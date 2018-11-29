@@ -59,7 +59,10 @@ namespace LinearIndexedGrammarParser
         {
             LHSIndex = other.LHSIndex;
             RHSIndex = other.RHSIndex;
+            RuleType = other.RuleType;
         }
+        
+        public int RuleType { get; set; }
 
         //the LHS index in the Rule Space (index 0 = LHS "X1", index 1 = LHS "X2", etc)
         public int LHSIndex { get; set; }
@@ -70,7 +73,7 @@ namespace LinearIndexedGrammarParser
         public override bool Equals(object obj)
         {
             if (obj is RuleCoordinates other)
-                return LHSIndex == other.LHSIndex && RHSIndex == other.RHSIndex;
+                return LHSIndex == other.LHSIndex && RHSIndex == other.RHSIndex && RuleType == other.RuleType;
 
             return false;
         }
@@ -82,6 +85,7 @@ namespace LinearIndexedGrammarParser
                 var hash = 17;
                 hash = hash * 23 + LHSIndex;
                 hash = hash * 23 + RHSIndex;
+                hash = hash * 23 + RuleType;
                 return hash;
             }
         }
@@ -89,7 +93,9 @@ namespace LinearIndexedGrammarParser
 
     public class ContextSensitiveGrammar
     {
-        //Rule space is a 2D array,
+        //Rule space is a 3D array,
+        //zero index is the rule type: 0 = CFG rule, 1 = Push LIG rule, 2 = Pop rule.
+
         //first index is LHS ([0] = "X1", [1] = "X2", [2] = "X3" etc)
         //second index is RHS, such that [0][i] = [1][i] = [2][i] etc. 
         public static RuleSpace RuleSpace;
@@ -177,7 +183,7 @@ namespace LinearIndexedGrammarParser
                 return StackConstantRules.Contains(rc);
 
             foreach (var ruleCoord in StackConstantRules)
-                if (ruleCoord.RHSIndex == rc.RHSIndex)
+                if (ruleCoord.RHSIndex == rc.RHSIndex && ruleCoord.RuleType == rc.RuleType)
                     return true;
 
             return false;
