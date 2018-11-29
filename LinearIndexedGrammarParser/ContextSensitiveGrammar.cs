@@ -4,51 +4,6 @@ using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
-    public enum MoveableOperationsKey
-    {
-        NoOp,
-        Push1,
-        Pop1,
-        Pop2
-    }
-
-    public class MoveableOperations
-    {
-        public readonly Dictionary<MoveableOperationsKey, List<StackChangingRule>> MoveOps =
-            new Dictionary<MoveableOperationsKey, List<StackChangingRule>>();
-
-        public bool AddRule(StackChangingRule r, MoveableOperationsKey k, int ruleCounter, bool forceAdd = false)
-        {
-            if (!MoveOps.ContainsKey(k))
-                MoveOps[k] = new List<StackChangingRule>();
-
-            // ReSharper disable once CoVariantArrayConversion
-            //if (!forceAdd && ContextSensitiveGrammar.ContainsRule(r, MoveOps[k].ToArray())) return false;
-
-            var newRule = new StackChangingRule(r) {Number = ++ruleCounter};
-            MoveOps[k].Add(newRule);
-
-            return true;
-        }
-
-        public void DeleteRule(StackChangingRule oldRule, MoveableOperationsKey k)
-        {
-            var rules = MoveOps[k];
-            rules.Remove(oldRule);
-        }
-
-        public StackChangingRule GetRandomRule(MoveableOperationsKey k)
-        {
-            var rules = MoveOps[k];
-            var rand = new Random();
-            StackChangingRule randomRule = null;
-            if (rules.Count > 0)
-                randomRule = rules[rand.Next(rules.Count)];
-            return randomRule;
-        }
-    }
-
-
     public class RuleCoordinates
     {
         public RuleCoordinates()
@@ -94,16 +49,13 @@ namespace LinearIndexedGrammarParser
     public class ContextSensitiveGrammar
     {
         //Rule space is a 3D array,
-        //zero index is the rule type: 0 = CFG rule, 1 = Push LIG rule, 2 = Pop rule.
-
-        //first index is LHS ([0] = "X1", [1] = "X2", [2] = "X3" etc)
-        //second index is RHS, such that [0][i] = [1][i] = [2][i] etc. 
+        //zero index is the rule type: 0 = CFG rule table, 1 = Push LIG rule table, 2 = Pop rule table.
+        //first index is LHS, the column in the relevant rule table ([0] = "X1", [1] = "X2", [2] = "X3" etc)
+        //second index is RHS, the row in the relevant rule table such that [0][i] = [1][i] = [2][i] etc. 
+        //(note, RHS index 0 is a special case, see RuleSpace class).
         public static RuleSpace RuleSpace;
-
-        public readonly Dictionary<SyntacticCategory, MoveableOperations> StackChangingRules =
-            new Dictionary<SyntacticCategory, MoveableOperations>();
-
         public readonly List<RuleCoordinates> StackConstantRules = new List<RuleCoordinates>();
+        public readonly List<RuleCoordinates> StackChangingRules = new List<RuleCoordinates>();
 
         public ContextSensitiveGrammar()
         {
@@ -112,49 +64,25 @@ namespace LinearIndexedGrammarParser
         public ContextSensitiveGrammar(Rule[] grammarRules)
         {
             foreach (var rule in grammarRules)
-                if (rule is StackChangingRule r)
-                {
-                }
-                else
-                {
-                    var rc = RuleSpace.FindRule(rule);
-                    StackConstantRules.Add(rc);
-                }
+            {
+                var rc = RuleSpace.FindRule(rule);
+                StackConstantRules.Add(rc);
+            }
         }
 
         public ContextSensitiveGrammar(ContextSensitiveGrammar otherGrammar)
         {
             StackConstantRules = otherGrammar.StackConstantRules.Select(x => new RuleCoordinates(x)).ToList();
-
-            foreach (var moveable in otherGrammar.StackChangingRules.Keys)
-            {
-                StackChangingRules[moveable] = new MoveableOperations();
-                foreach (var moveOp in otherGrammar.StackChangingRules[moveable].MoveOps.Keys)
-                {
-                    StackChangingRules[moveable].MoveOps[moveOp] = new List<StackChangingRule>();
-
-                    foreach (var rule in otherGrammar.StackChangingRules[moveable].MoveOps[moveOp])
-                    {
-                        var newRule = new StackChangingRule(rule);
-                        StackChangingRules[moveable].MoveOps[moveOp].Add(newRule);
-                    }
-                }
-            }
+            StackChangingRules = otherGrammar.StackChangingRules.Select(x => new RuleCoordinates(x)).ToList();
         }
-
-        public StackChangingRule[] StackChangingRulesArray
-        {
-            //Note: SelectMany here does not deep-copy, we get the reference to the grammar rules.
-            get { return StackChangingRules.Values.SelectMany(x => x.MoveOps.Values).SelectMany(x => x).ToArray(); }
-        }
-
+        
 
         public override string ToString()
         {
             var s1 = "Stack Constant Rules:\r\n" +
                      string.Join("\r\n", StackConstantRules.Select(x => RuleSpace[x].ToString()));
             var s2 = "Stack Changing Rules:\r\n" +
-                     string.Join("\r\n", StackChangingRulesArray.Select(x => x.ToString()));
+                     string.Join("\r\n", StackChangingRules.Select(x => RuleSpace[x].ToString()));
             return s1 + "\r\n" + s2;
         }
 
@@ -189,35 +117,6 @@ namespace LinearIndexedGrammarParser
             return false;
         }
 
-
-        public bool AddStackChangingRule(SyntacticCategory moveable, StackChangingRule r, MoveableOperationsKey key,
-            bool forceAdd = false)
-        {
-            if (!StackChangingRules.ContainsKey(moveable))
-                StackChangingRules[moveable] = new MoveableOperations();
-
-            var isAdded = StackChangingRules[moveable].AddRule(r, key, 0, forceAdd);
-            //if (isAdded) _ruleCounter++;
-            return isAdded;
-        }
-
-        public void DeleteStackChangingRule(SyntacticCategory moveable, StackChangingRule oldRule,
-            MoveableOperationsKey key)
-        {
-            StackChangingRules[moveable].DeleteRule(oldRule, key);
-        }
-
-        public void DeleteStackChangingRule(StackChangingRule oldRule)
-        {
-            foreach (var moveable in StackChangingRules.Keys)
-            {
-                var moveops = StackChangingRules[moveable];
-                foreach (var opKey in moveops.MoveOps.Keys)
-                    DeleteStackChangingRule(moveable, oldRule, opKey);
-            }
-        }
-
-
         public void PruneUnusedRules(Dictionary<int, int> usagesDic)
         {
             var unusedConstantRules =
@@ -226,10 +125,12 @@ namespace LinearIndexedGrammarParser
             foreach (var unusedRule in unusedConstantRules.ToList())
                 StackConstantRules.Remove(unusedRule);
 
-            var unusedStackRules = StackChangingRulesArray.Where(x => !usagesDic.ContainsKey(x.Number)).ToArray();
+            var unusedChangingRules =
+                StackChangingRules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].Number)).ToArray();
 
-            foreach (var rule in unusedStackRules)
-                DeleteStackChangingRule(rule);
+            foreach (var unusedRule in unusedChangingRules.ToList())
+                StackChangingRules.Remove(unusedRule);
+
         }
     }
 }

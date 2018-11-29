@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
-using static LinearIndexedGrammarParser.MoveableOperationsKey;
 
 namespace LinearIndexedGrammarLearner
 {
@@ -142,116 +141,23 @@ namespace LinearIndexedGrammarLearner
 
         public ContextSensitiveGrammar DeleteMovement(ContextSensitiveGrammar grammar)
         {
-            var rand = ThreadSafeRandom.ThisThreadsRandom;
-            var keys = grammar.StackChangingRules.Keys.ToArray();
-            if (keys.Length == 0) return null;
-            var moveable = keys[rand.Next(keys.Length)];
-
-            if (grammar.StackChangingRules[moveable].MoveOps.ContainsKey(Push1))
-            {
-                //if there is more than one push1 rule, delete only push1 rule, 
-                //do not delete the pop1 rule.
-                var oldRule = grammar.StackChangingRules[moveable].GetRandomRule(Push1);
-                grammar.StackChangingRules[moveable].DeleteRule(oldRule, Push1);
-
-                if (grammar.StackChangingRules[moveable].MoveOps[Push1].Count > 0) return grammar;
-
-                //only one push1 rule, delete both push1 and pop1 rules.
-                oldRule = grammar.StackChangingRules[moveable].GetRandomRule(Pop1);
-                grammar.StackChangingRules[moveable].DeleteRule(oldRule, Pop1);
-            }
-
             return null;
         }
 
         public ContextSensitiveGrammar InsertMovement(ContextSensitiveGrammar grammar)
         {
-            //var rand = ThreadSafeRandom.ThisThreadsRandom;
-            //var lhsCategories = grammar.LHSCategories;
-            //var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
-            //string moveable = ContextFreeGrammar.StartRule;
-
-            ////Don't allow the moveable category to be START Category (for now)
-            //while (moveable == ContextFreeGrammar.StartRule)
-            //     moveable = categoriesPool[rand.Next(categoriesPool.Length)].ToString();
-
-            //if (InsertPush1Rule(grammar, moveable))
-            //{
-            //    //if Inserting pop1 does not succeed (i.e, of the form NP[NP] -> epsilon)
-            //    //it means the pop1 rule already exists, so it is still OK.
-            //    InsertPop1Rule(grammar, moveable);
-            //    return grammar;
-            //}
             return null;
         }
 
         private bool InsertPop1Rule(ContextSensitiveGrammar grammar, string moveable = null)
         {
-            //    var rand = ThreadSafeRandom.ThisThreadsRandom;
+            
+               return false;
+        }
 
-            //    if (moveable == null)
-            //    {
-            //        var lhsCategories = grammar.LHSCategories;
-            //        var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
-            //        moveable = categoriesPool[rand.Next(categoriesPool.Length)].ToString();
-            //    }
-
-            //    for (var k = 0; k < NumberOfRetries; k++)
-            //    {
-            //        var moveableCategory = new DerivedCategory(moveable);
-            //        var lhs = new DerivedCategory(moveable, moveable);
-            //        var epsilonCat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol) {StackSymbolsCount = -1};
-            //        var r = new Rule(lhs, new[] { epsilonCat });
-            //        var newRule = new StackChangingRule(r, Pop1, moveableCategory);
-            //        if (!newRule.AddRuleToGrammar(grammar)) continue;
-            //        return true;
-            //    }
-
-            //    return false;
-            //}
-
-            //private bool InsertPush1Rule(ContextSensitiveGrammar grammar, string moveable = null)
-            //{
-            //    var rand = ThreadSafeRandom.ThisThreadsRandom;
-            //    var lhsCategories = grammar.LHSCategories;
-            //    var categoriesPool = lhsCategories.Concat(PartsOfSpeechCategories).ToArray();
-
-            //    if (moveable == null)
-            //      moveable = categoriesPool[rand.Next(categoriesPool.Length)].ToString();
-
-            //    if (DoesNumberOfLHSCategoriesExceedMax(lhsCategories)) return false;
-
-            //    for (var k = 0; k < NumberOfRetries; k++)
-            //    {
-            //        //create a new non terminal
-            //        string baseNonTerminal = null;
-            //        baseNonTerminal = $"X{newNonTerminalCounter++}";
-
-            //        var newCategory = new DerivedCategory(baseNonTerminal, ContextFreeGrammar.StarSymbol);
-
-            //        int len = 2;
-            //        int spinePositionInRHS = rand.Next(len);
-            //        spinePositionInRHS = 1; //initially, constrain moveables to be the first position, spine to the right (=movement to left only)
-            //        var moveableCategory = new DerivedCategory(moveable);
-            //        var spineCategory = new DerivedCategory(lhsCategories[rand.Next(lhsCategories.Length)].ToString(),
-            //            ContextFreeGrammar.StarSymbol + moveable) {StackSymbolsCount = 1};
-
-            //        //if the form is Y[*] -> X1 X1[*X1], it's also like Y -> X1 X1[X1], 
-            //        //since there's a pop rule for the moveable X1: X1[X1] -> epsilon,
-            //        //overall it's like inserting Y -> X1 rule in an overcomplicated way.
-            //        if (spineCategory.BaseEquals(moveableCategory)) continue;
-
-            //        var rightHandSide = new DerivedCategory[len];
-            //        for (var i = 0; i < len; i++)
-            //            rightHandSide[i] = (spinePositionInRHS == i) ? spineCategory : moveableCategory;
-
-            //        var r = new Rule(newCategory, rightHandSide);
-            //        var newRule = new StackChangingRule(r, Push1, moveableCategory);
-            //        if (grammar.OnlyStartSymbolsRHS(newRule)) continue;
-            //        if (!newRule.AddRuleToGrammar(grammar)) continue;
-
-            //        return true;
-            //    }
+        private bool InsertPush1Rule(ContextSensitiveGrammar grammar, string moveable = null)
+        {
+            
             return false;
         }
 

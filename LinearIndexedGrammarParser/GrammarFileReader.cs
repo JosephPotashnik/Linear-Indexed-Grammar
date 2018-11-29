@@ -126,14 +126,14 @@ namespace LinearIndexedGrammarParser
             var pushRule = false;
             Rule baseRule;
             SyntacticCategory moveable = null;
-            var key = MoveableOperationsKey.NoOp;
+            //var key = MoveableOperationsKey.NoOp;
 
             if (leftHandCat.Stack.Contains(ContextFreeGrammar.StarSymbol))
                 if (leftHandCat.Stack.Length > 1)
                 {
                     popRule = true;
                     //TODO: in future, implement pop2 stack changing operation.
-                    key = MoveableOperationsKey.Pop2;
+                    //key = MoveableOperationsKey.Pop2;
                     moveable = new SyntacticCategory(leftHandCat.Stack.Substring(1));
                 }
 
@@ -142,8 +142,8 @@ namespace LinearIndexedGrammarParser
                 var epsilonCat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol) {StackSymbolsCount = -1};
                 baseRule = new Rule(leftHandCat, new[] {epsilonCat});
                 moveable = new SyntacticCategory(leftHandCat);
-                key = MoveableOperationsKey.Pop1;
-                return new StackChangingRule(baseRule, key, moveable);
+                //key = MoveableOperationsKey.Pop1;
+                //return new StackChangingRule(baseRule, key, moveable);
             }
 
             var rightHandCategories = new DerivedCategory[nonTerminals.Length - 1];
@@ -157,7 +157,7 @@ namespace LinearIndexedGrammarParser
                         pushRule = true;
                         //push rule.
                         moveable = new SyntacticCategory(rightHandCategories[i - 1].Stack.Substring(1));
-                        key = MoveableOperationsKey.Push1;
+                        //key = MoveableOperationsKey.Push1;
                         rightHandCategories[i - 1].StackSymbolsCount = 1;
                         if (popRule)
                             throw new Exception("illegal LIG format: can't push and pop within the same rule");
@@ -176,7 +176,8 @@ namespace LinearIndexedGrammarParser
             }
 
             baseRule = new Rule(leftHandCat, rightHandCategories);
-            return new StackChangingRule(baseRule, key, moveable);
+            //return new StackChangingRule(baseRule, key, moveable);
+            return null;
         }
     }
 }

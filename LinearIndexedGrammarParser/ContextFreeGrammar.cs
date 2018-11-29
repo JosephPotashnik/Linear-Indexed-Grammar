@@ -40,15 +40,16 @@ namespace LinearIndexedGrammarParser
 
         public ContextFreeGrammar(ContextSensitiveGrammar cs)
         {
-            var xy = cs.StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]);
-            var rulesArr = xy.Concat(cs.StackChangingRulesArray).ToArray();
+            var xy1 = cs.StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]);
+            var xy2 = cs.StackChangingRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]);
+            var rulesArr = xy1.Concat(xy2);
 
             var rulesDic = CreateRulesDictionary(rulesArr);
             GenerateAllStaticRulesFromDynamicRules(rulesDic);
             ComputeTransitiveClosureOfNullableCategories();
         }
 
-        private static Dictionary<SyntacticCategory, List<Rule>> CreateRulesDictionary(Rule[] xy)
+        private static Dictionary<SyntacticCategory, List<Rule>> CreateRulesDictionary(IEnumerable<Rule> xy)
         {
             var rulesDic = new Dictionary<SyntacticCategory, List<Rule>>();
 
