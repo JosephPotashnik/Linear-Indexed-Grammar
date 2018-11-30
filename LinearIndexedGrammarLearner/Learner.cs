@@ -36,7 +36,7 @@ namespace LinearIndexedGrammarLearner
                 rules.Add(new Rule("X1", new[] {pos}));
             }
 
-            rules.Add(new Rule(ContextFreeGrammar.StartRule, new[] {"X1"}));
+            rules.Add(new Rule(ContextFreeGrammar.StartSymbol, new[] {"X1"}));
 
             var originalGrammar = new ContextSensitiveGrammar(rules.ToArray());
 

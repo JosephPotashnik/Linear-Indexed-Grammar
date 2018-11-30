@@ -1,14 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace LinearIndexedGrammarParser
 {
-    public class SyntacticCategory
+    public class SyntacticCategory : IEquatable<SyntacticCategory>
     {
         protected string Symbol;
-
-        public SyntacticCategory()
-        {
-        }
 
         public SyntacticCategory(string symbol)
         {
@@ -20,17 +17,8 @@ namespace LinearIndexedGrammarParser
             Symbol = otherCategory.Symbol;
         }
 
-        public override bool Equals(object obj)
-        {
-            if (!(obj is SyntacticCategory p))
-                return false;
-
-            return Symbol == p.Symbol;
-        }
-
         public override int GetHashCode()
         {
-            // ReSharper disable once NonReadonlyMemberInGetHashCode
             return Symbol.GetHashCode();
         }
 
@@ -43,9 +31,14 @@ namespace LinearIndexedGrammarParser
         {
             return Symbol == ContextFreeGrammar.EpsilonSymbol;
         }
+
+        public bool Equals(SyntacticCategory other)
+        {
+            return string.Equals(Symbol, other.Symbol);
+        }
     }
 
-    public class DerivedCategory : SyntacticCategory
+    public class DerivedCategory : SyntacticCategory, IEquatable<DerivedCategory>
     {
         public DerivedCategory(string baseCategorySymbol, string stack = "") : base(baseCategorySymbol)
         {
@@ -64,13 +57,6 @@ namespace LinearIndexedGrammarParser
 
         private string Contents => Symbol + Stack;
 
-        public override bool Equals(object obj)
-        {
-            if (!(obj is DerivedCategory p))
-                return false;
-
-            return base.Equals(p) && Stack.Equals(p.Stack);
-        }
 
         public override int GetHashCode()
         {
@@ -109,6 +95,11 @@ namespace LinearIndexedGrammarParser
             if (moveable != null)
                 if (replaceDic.ContainsKey(moveable))
                     Stack = Stack.Replace(moveable, replaceDic[moveable]);
+        }
+
+        public bool Equals(DerivedCategory other)
+        {
+            return string.Equals(Stack, other.Stack) && base.Equals(other);
         }
     }
 }

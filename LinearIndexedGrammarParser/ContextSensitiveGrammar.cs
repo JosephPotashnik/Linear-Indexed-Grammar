@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
-    public class RuleCoordinates
+    public class RuleCoordinates : IEquatable<RuleCoordinates>
     {
         public RuleCoordinates()
         {
@@ -25,24 +25,20 @@ namespace LinearIndexedGrammarParser
         //the RHS index in the Rule Space ( same RHS index for different LHS indices means they share the same RHS)
         public int RHSIndex { get; set; }
 
-        public override bool Equals(object obj)
-        {
-            if (obj is RuleCoordinates other)
-                return LHSIndex == other.LHSIndex && RHSIndex == other.RHSIndex && RuleType == other.RuleType;
-
-            return false;
-        }
-
         public override int GetHashCode()
         {
             unchecked
             {
-                var hash = 17;
-                hash = hash * 23 + LHSIndex;
-                hash = hash * 23 + RHSIndex;
-                hash = hash * 23 + RuleType;
-                return hash;
+                var hashCode = RuleType;
+                hashCode = (hashCode * 397) ^ LHSIndex;
+                hashCode = (hashCode * 397) ^ RHSIndex;
+                return hashCode;
             }
+        }
+
+        public bool Equals(RuleCoordinates other)
+        {
+            return RuleType == other.RuleType && LHSIndex == other.LHSIndex && RHSIndex == other.RHSIndex;
         }
     }
 
@@ -76,7 +72,6 @@ namespace LinearIndexedGrammarParser
             StackChangingRules = otherGrammar.StackChangingRules.Select(x => new RuleCoordinates(x)).ToList();
         }
         
-
         public override string ToString()
         {
             var s1 = "Stack Constant Rules:\r\n" +
@@ -86,31 +81,24 @@ namespace LinearIndexedGrammarParser
             return s1 + "\r\n" + s2;
         }
 
-        public void AddStackConstantRule(RuleCoordinates rc)
-        {
-            StackConstantRules.Add(rc);
-        }
 
-        public void DeleteStackConstantRule(RuleCoordinates rc)
-        {
-            StackConstantRules.Remove(rc);
-        }
-
-        public RuleCoordinates GetRandomStackConstantRule()
+        public RuleCoordinates GetRandomRule(List<RuleCoordinates> rules)
         {
             var rand = ThreadSafeRandom.ThisThreadsRandom;
-            return StackConstantRules[rand.Next(StackConstantRules.Count)];
+            return rules[rand.Next(rules.Count)];
         }
 
         //if there is a rule that has the same RHS side, i.e. the same RHS index
-        public bool ContainsRuleWithSameRHS(RuleCoordinates rc)
+        public bool ContainsRuleWithSameRHS(RuleCoordinates rc, List<RuleCoordinates> rules)
         {
             //RHSIndex 0 is a special index, reserved for rules of the type
-            //S -> X1, S -> X2, S -> X3. so if RHSIndex = 0 we check that exactly the same rule (same LHS) is in the grammar)
+            //S -> X1, S -> X2, S -> X3 (CFG table) or X1[X1] -> epsilon, X2[X2]->epsilon (Pop table)
+            //so if RHSIndex = 0 we check that exactly the same rule (same LHS) is in the grammar)
             if (rc.RHSIndex == 0)
-                return StackConstantRules.Contains(rc);
+                return rules.Contains(rc);
 
-            foreach (var ruleCoord in StackConstantRules)
+            //else we just need to check that the same RHS index appears in some other rule.
+            foreach (var ruleCoord in rules)
                 if (ruleCoord.RHSIndex == rc.RHSIndex && ruleCoord.RuleType == rc.RuleType)
                     return true;
 

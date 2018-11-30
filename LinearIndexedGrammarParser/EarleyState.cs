@@ -1,8 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
-    public class EarleyState
+    public class EarleyState : IEquatable<EarleyState>
     {
         public EarleyState(Rule r, int dotIndex, EarleyColumn c, EarleyNode n)
         {
@@ -39,18 +40,6 @@ namespace LinearIndexedGrammarParser
                 StartColumn.Index, endColumnIndex);
         }
 
-        public override bool Equals(object obj)
-        {
-            if (!(obj is EarleyState s))
-                return false;
-
-            var val = Rule.Equals(s.Rule) && DotIndex == s.DotIndex && StartColumn.Index == s.StartColumn.Index;
-
-            if (Node == null || s.Node == null)
-                return val;
-            return val && Node.Equals(s.Node);
-        }
-
         public override int GetHashCode()
         {
             unchecked
@@ -62,6 +51,7 @@ namespace LinearIndexedGrammarParser
                 return hash;
             }
         }
+
 
         public static EarleyNode MakeNode(EarleyState predecessorState, int endIndex, EarleyNode reductor)
         {
@@ -83,6 +73,14 @@ namespace LinearIndexedGrammarParser
             }
 
             return y;
+        }
+
+        public bool Equals(EarleyState other)
+        {
+            var val = Rule.Equals(other.Rule) && DotIndex == other.DotIndex && StartColumn.Index == other.StartColumn.Index;
+            if (Node == null || other.Node == null)
+                return val;
+            return val && Node.Equals(other.Node);
         }
     }
 }

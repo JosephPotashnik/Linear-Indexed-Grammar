@@ -57,7 +57,7 @@ namespace LinearIndexedGrammarParser
 
 
             var currentCategory = new DerivedCategory("X1", ContextFreeGrammar.StarSymbol);
-            var startCategory = new DerivedCategory(ContextFreeGrammar.StartRule, ContextFreeGrammar.StarSymbol);
+            var startCategory = new DerivedCategory(ContextFreeGrammar.StartSymbol, ContextFreeGrammar.StarSymbol);
             var length = rhsStore.Count;
             var numberOfPossibleRHS = length * length;
 
@@ -174,7 +174,7 @@ namespace LinearIndexedGrammarParser
         public int GetRandomLHSIndex()
         {
             var rand = ThreadSafeRandom.ThisThreadsRandom;
-            return rand.Next(_ruleSpace[0].Length);
+            return rand.Next(_ruleSpace[0].Length); //same LHS indices for all rule type tables.
         }
 
         public RuleCoordinates FindRule(Rule r)
@@ -183,7 +183,7 @@ namespace LinearIndexedGrammarParser
             rc.RuleType = RuleType.CFGRules;
 
             var lhs = new SyntacticCategory(r.LeftHandSide);
-            if (lhs.ToString() == ContextFreeGrammar.StartRule)
+            if (lhs.ToString() == ContextFreeGrammar.StartSymbol)
             {
                 //each start rule is of the form S -> Xi and is the first element of the xi column
                 rc.LHSIndex = FindLHSIndex(new SyntacticCategory(r.RightHandSide[0]).ToString());

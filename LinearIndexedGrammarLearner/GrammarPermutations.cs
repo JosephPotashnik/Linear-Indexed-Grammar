@@ -64,26 +64,32 @@ namespace LinearIndexedGrammarLearner
 
         public ContextSensitiveGrammar InsertStackConstantRule(ContextSensitiveGrammar grammar)
         {
-            var rc = new RuleCoordinates
-            {
-                RuleType = RuleType.CFGRules,
-                LHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex(),
-                RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex(RuleType.CFGRules)
-            };
-            if (grammar.ContainsRuleWithSameRHS(rc)) return null;
-            grammar.AddStackConstantRule(rc);
+            var rc = CreateRandomRule(RuleType.CFGRules);
+            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackConstantRules)) return null;
+            grammar.StackConstantRules.Add(rc);
             return grammar;
+        }
+
+        private RuleCoordinates CreateRandomRule(int ruleType)
+        {
+            return new RuleCoordinates
+            {
+                RuleType = ruleType,
+                LHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex(),
+                RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex(ruleType)
+            };
         }
 
         public ContextSensitiveGrammar DeleteStackConstantRule(ContextSensitiveGrammar grammar)
         {
-            grammar.DeleteStackConstantRule(grammar.GetRandomStackConstantRule());
+            var rc = grammar.GetRandomRule(grammar.StackConstantRules);
+            grammar.StackConstantRules.Remove(rc);
             return grammar;
         }
 
         public ContextSensitiveGrammar ChangeLHS(ContextSensitiveGrammar grammar)
         {
-            var rc = grammar.GetRandomStackConstantRule();
+            var rc = grammar.GetRandomRule(grammar.StackConstantRules);
             var newLHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex();
             if (rc.LHSIndex == newLHSIndex) return null;
 
@@ -93,13 +99,13 @@ namespace LinearIndexedGrammarLearner
 
         public ContextSensitiveGrammar ChangeRHS(ContextSensitiveGrammar grammar)
         {
-            var rc = grammar.GetRandomStackConstantRule();
+            var rc = grammar.GetRandomRule(grammar.StackConstantRules);
             var changedRc = new RuleCoordinates
             {
                 LHSIndex = rc.LHSIndex,
                 RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex(RuleType.CFGRules)
             };
-            if (grammar.ContainsRuleWithSameRHS(changedRc)) return null;
+            if (grammar.ContainsRuleWithSameRHS(changedRc, grammar.StackConstantRules)) return null;
 
             rc.RHSIndex = changedRc.RHSIndex;
             return grammar;
@@ -107,11 +113,11 @@ namespace LinearIndexedGrammarLearner
 
         public ContextSensitiveGrammar SwapTwoRulesLHS(ContextSensitiveGrammar grammar)
         {
-            var rc1 = grammar.GetRandomStackConstantRule();
-            var rc2 = grammar.GetRandomStackConstantRule();
+            var rc1 = grammar.GetRandomRule(grammar.StackConstantRules);
+            var rc2 = grammar.GetRandomRule(grammar.StackConstantRules);
 
             while (rc2.Equals(rc1))
-                rc2 = grammar.GetRandomStackConstantRule();
+                rc2 = grammar.GetRandomRule(grammar.StackConstantRules);
 
             if (rc1.LHSIndex == rc2.LHSIndex) return null;
 
@@ -119,6 +125,29 @@ namespace LinearIndexedGrammarLearner
             rc1.LHSIndex = rc2.LHSIndex;
             rc2.LHSIndex = temp.LHSIndex;
             return grammar;
+        }
+
+        private bool InsertPop1Rule(ContextSensitiveGrammar grammar, string moveable = null)
+        {
+
+            return false;
+        }
+
+        private ContextSensitiveGrammar InsertPush1Rule(ContextSensitiveGrammar grammar)
+        {
+            var rc = CreateRandomRule(RuleType.PushRules);
+            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackChangingRules)) return null;
+            grammar.StackChangingRules.Add(rc);
+            return grammar;
+        }
+        public ContextSensitiveGrammar DeleteMovement(ContextSensitiveGrammar grammar)
+        {
+            return null;
+        }
+
+        public ContextSensitiveGrammar InsertMovement(ContextSensitiveGrammar grammar)
+        {
+            return null;
         }
 
         private bool DoesNumberOfLHSCategoriesExceedMax(SyntacticCategory[] lhsCategories)
@@ -139,27 +168,6 @@ namespace LinearIndexedGrammarLearner
             return lhsCategories.Length - 1 >= upperBoundNonTerminals;
         }
 
-        public ContextSensitiveGrammar DeleteMovement(ContextSensitiveGrammar grammar)
-        {
-            return null;
-        }
-
-        public ContextSensitiveGrammar InsertMovement(ContextSensitiveGrammar grammar)
-        {
-            return null;
-        }
-
-        private bool InsertPop1Rule(ContextSensitiveGrammar grammar, string moveable = null)
-        {
-            
-               return false;
-        }
-
-        private bool InsertPush1Rule(ContextSensitiveGrammar grammar, string moveable = null)
-        {
-            
-            return false;
-        }
 
         [JsonObject(MemberSerialization.OptIn)]
         public class GrammarMutationData

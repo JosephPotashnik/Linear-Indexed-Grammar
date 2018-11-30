@@ -1,10 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public class Rule
+    public class Rule : IEquatable<Rule>
     {
         public Rule()
         {
@@ -45,23 +46,19 @@ namespace LinearIndexedGrammarParser
             return $"{Number}. {LeftHandSide} -> {string.Join(" ", p)}";
         }
 
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Rule p))
-                return false;
-
-            return Number == p.Number;
-        }
-
         public override int GetHashCode()
         {
-            // ReSharper disable once NonReadonlyMemberInGetHashCode
             return Number;
         }
 
         public bool IsEpsilonRule()
         {
             return RightHandSide[0].IsEpsilon();
+        }
+
+        public bool Equals(Rule other)
+        {
+            return Number == other.Number;
         }
     }
 }
