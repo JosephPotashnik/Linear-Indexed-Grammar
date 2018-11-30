@@ -123,9 +123,8 @@ namespace LinearIndexedGrammarParser
 
             var leftHandCat = CreateDerivedCategory(nonTerminals[0]);
             var popRule = false;
-            var pushRule = false;
-            Rule baseRule;
-            SyntacticCategory moveable = null;
+            //var pushRule = false;
+            //SyntacticCategory moveable = null;
             //var key = MoveableOperationsKey.NoOp;
 
             if (leftHandCat.Stack.Contains(ContextFreeGrammar.StarSymbol))
@@ -134,14 +133,15 @@ namespace LinearIndexedGrammarParser
                     popRule = true;
                     //TODO: in future, implement pop2 stack changing operation.
                     //key = MoveableOperationsKey.Pop2;
-                    moveable = new SyntacticCategory(leftHandCat.Stack.Substring(1));
+                    //moveable = new SyntacticCategory(leftHandCat.Stack.Substring(1));
                 }
 
             if (nonTerminals.Length == 1)
             {
                 var epsilonCat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol) {StackSymbolsCount = -1};
-                baseRule = new Rule(leftHandCat, new[] {epsilonCat});
-                moveable = new SyntacticCategory(leftHandCat);
+                //moveable = new SyntacticCategory(leftHandCat);
+                return new Rule(leftHandCat, new[] { epsilonCat });
+
                 //key = MoveableOperationsKey.Pop1;
                 //return new StackChangingRule(baseRule, key, moveable);
             }
@@ -154,9 +154,9 @@ namespace LinearIndexedGrammarParser
                 {
                     if (rightHandCategories[i - 1].Stack.Length > 1)
                     {
-                        pushRule = true;
+                        //pushRule = true;
                         //push rule.
-                        moveable = new SyntacticCategory(rightHandCategories[i - 1].Stack.Substring(1));
+                        //moveable = new SyntacticCategory(rightHandCategories[i - 1].Stack.Substring(1));
                         //key = MoveableOperationsKey.Push1;
                         rightHandCategories[i - 1].StackSymbolsCount = 1;
                         if (popRule)
@@ -170,14 +170,7 @@ namespace LinearIndexedGrammarParser
                 }
             }
 
-            if (!pushRule && !popRule)
-            {
-                return new Rule(leftHandCat, rightHandCategories);
-            }
-
-            baseRule = new Rule(leftHandCat, rightHandCategories);
-            //return new StackChangingRule(baseRule, key, moveable);
-            return null;
+            return new Rule(leftHandCat, rightHandCategories);
         }
     }
 }

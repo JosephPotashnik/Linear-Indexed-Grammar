@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -34,11 +35,32 @@ namespace LinearIndexedGrammarParser
 
         public ContextFreeGrammar(ContextSensitiveGrammar cs)
         {
-            var xy1 = cs.StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]);
-            var xy2 = cs.StackChangingRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]);
-            var rulesArr = xy1.Concat(xy2);
+            IEnumerable<Rule> rules;
+            var stackConstantRules = cs.StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]);
+            if (cs.StackPush1Rules.Count > 0)
+            {
+                var stackChangingRules = cs.StackPush1Rules.Select(x => ContextSensitiveGrammar.RuleSpace[x]).ToList();
+                foreach (var moveableKvp in cs.MoveableReferences)
+                {
+                    if (moveableKvp.Value > 0) //if number of references to this moveable is positive
+                    {
+                        var rc = new RuleCoordinates() //find moveable in pop rules table.
+                        {
+                            LHSIndex = moveableKvp.Key,
+                            RHSIndex = 0,
+                            RuleType = RuleType.PopRules
+                        };
 
-            var rulesDic = CreateRulesDictionary(rulesArr);
+                        stackChangingRules.Add(ContextSensitiveGrammar.RuleSpace[rc]);
+                    }
+                }
+
+                rules = stackConstantRules.Concat(stackChangingRules);
+            }
+            else
+                rules = stackConstantRules;
+
+            var rulesDic = CreateRulesDictionary(rules);
             GenerateAllStaticRulesFromDynamicRules(rulesDic);
             ComputeTransitiveClosureOfNullableCategories();
         }

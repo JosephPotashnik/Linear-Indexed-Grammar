@@ -12,6 +12,7 @@ namespace LinearIndexedGrammarLearner
         bool IsMaximalValue(T val);
         bool AllowInfeasibleSolutions(T newVal);
         bool ConsiderValue(T newVal);
+        T GetMinimalValue();
     }
 
     public class GrammarFitnessObjectiveFunction : IObjectiveFunction<double>
@@ -32,6 +33,11 @@ namespace LinearIndexedGrammarLearner
         public bool ConsiderValue(double newval)
         {
             return newval > 0;
+        }
+
+        public double GetMinimalValue()
+        {
+            return 0;
         }
 
         public bool AcceptNewValue(double newValue, double oldValue, double temperature)

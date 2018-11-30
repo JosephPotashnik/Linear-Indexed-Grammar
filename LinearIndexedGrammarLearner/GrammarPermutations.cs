@@ -127,28 +127,26 @@ namespace LinearIndexedGrammarLearner
             return grammar;
         }
 
-        private bool InsertPop1Rule(ContextSensitiveGrammar grammar, string moveable = null)
-        {
-
-            return false;
-        }
-
-        private ContextSensitiveGrammar InsertPush1Rule(ContextSensitiveGrammar grammar)
-        {
-            var rc = CreateRandomRule(RuleType.PushRules);
-            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackChangingRules)) return null;
-            grammar.StackChangingRules.Add(rc);
-            return grammar;
-        }
         public ContextSensitiveGrammar DeleteMovement(ContextSensitiveGrammar grammar)
         {
-            return null;
+            if (grammar.StackPush1Rules.Count == 0) return null;
+
+            var rc = grammar.GetRandomRule(grammar.StackPush1Rules);
+            grammar.DeleteCorrespondingPopRule(rc);
+            grammar.StackPush1Rules.Remove(rc);
+            return grammar;
         }
 
         public ContextSensitiveGrammar InsertMovement(ContextSensitiveGrammar grammar)
         {
-            return null;
+            var rc = CreateRandomRule(RuleType.Push1Rules);
+            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackPush1Rules)) return null;
+            grammar.StackPush1Rules.Add(rc);
+            grammar.AddCorrespondingPopRule(rc);
+            return grammar;
         }
+
+        
 
         private bool DoesNumberOfLHSCategoriesExceedMax(SyntacticCategory[] lhsCategories)
         {

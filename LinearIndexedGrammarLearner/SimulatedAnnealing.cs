@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using LinearIndexedGrammarParser;
 using NLog;
 
@@ -36,8 +38,17 @@ namespace LinearIndexedGrammarLearner
                     currentTemp *= _coolingFactor;
                     if (mutatedGrammar == null) continue;
 
-                    //var newValue = _objectiveFunction.Compute(mutatedGrammar, (currentTemp < 100));
-                    var newValue = _objectiveFunction.Compute(mutatedGrammar, false);
+
+                    //var t = Task.Run(() => _objectiveFunction.Compute(mutatedGrammar, false));
+                    //if (!t.Wait(1500))
+                    //{
+                    //    string s = "computing all parse trees took too long (0.5 seconds), for the grammar:\r\n" + mutatedGrammar.ToString();
+                    //    NLog.LogManager.GetCurrentClassLogger().Info(s);
+                    //    //throw new Exception();
+                    //}
+
+                    //var newValue = t.Result;
+                    var newValue =  _objectiveFunction.Compute(mutatedGrammar, false);
 
                     var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
                     if (accept)
@@ -67,7 +78,7 @@ namespace LinearIndexedGrammarLearner
 
             while (currentIteration++ < _numberOfIterations)
             {
-                if (currentIteration % 10 == 0)
+                if (currentIteration % 100 == 0)
                     LogManager.GetCurrentClassLogger().Info($"generation {currentIteration}");
 
                 (currentGrammar, currentValue) = RunSingleIteration(currentGrammar, currentValue);

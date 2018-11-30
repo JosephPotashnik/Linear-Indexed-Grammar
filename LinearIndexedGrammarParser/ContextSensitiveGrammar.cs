@@ -51,8 +51,8 @@ namespace LinearIndexedGrammarParser
         //(note, RHS index 0 is a special case, see RuleSpace class).
         public static RuleSpace RuleSpace;
         public readonly List<RuleCoordinates> StackConstantRules = new List<RuleCoordinates>();
-        public readonly List<RuleCoordinates> StackChangingRules = new List<RuleCoordinates>();
-
+        public readonly List<RuleCoordinates> StackPush1Rules = new List<RuleCoordinates>();
+        public readonly Dictionary<int, int> MoveableReferences = new Dictionary<int, int>();
         public ContextSensitiveGrammar()
         {
         }
@@ -62,22 +62,29 @@ namespace LinearIndexedGrammarParser
             foreach (var rule in grammarRules)
             {
                 var rc = RuleSpace.FindRule(rule);
-                StackConstantRules.Add(rc);
+                if (rc.RuleType == RuleType.CFGRules)
+                    StackConstantRules.Add(rc);
+                else if (rc.RuleType == RuleType.Push1Rules)
+                {
+                    StackPush1Rules.Add(rc);
+                    AddCorrespondingPopRule(rc);
+                }
             }
         }
 
         public ContextSensitiveGrammar(ContextSensitiveGrammar otherGrammar)
         {
             StackConstantRules = otherGrammar.StackConstantRules.Select(x => new RuleCoordinates(x)).ToList();
-            StackChangingRules = otherGrammar.StackChangingRules.Select(x => new RuleCoordinates(x)).ToList();
+            StackPush1Rules = otherGrammar.StackPush1Rules.Select(x => new RuleCoordinates(x)).ToList();
+            MoveableReferences = otherGrammar.MoveableReferences.ToDictionary(x => x.Key, x => x.Value);
         }
         
         public override string ToString()
         {
             var s1 = "Stack Constant Rules:\r\n" +
-                     string.Join("\r\n", StackConstantRules.Select(x => RuleSpace[x].ToString()));
+                     String.Join("\r\n", StackConstantRules.Select(x => RuleSpace[x].ToString()));
             var s2 = "Stack Changing Rules:\r\n" +
-                     string.Join("\r\n", StackChangingRules.Select(x => RuleSpace[x].ToString()));
+                     String.Join("\r\n", StackPush1Rules.Select(x => RuleSpace[x].ToString()));
             return s1 + "\r\n" + s2;
         }
 
@@ -114,11 +121,39 @@ namespace LinearIndexedGrammarParser
                 StackConstantRules.Remove(unusedRule);
 
             var unusedChangingRules =
-                StackChangingRules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].Number)).ToArray();
+                StackPush1Rules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].Number)).ToArray();
 
             foreach (var unusedRule in unusedChangingRules.ToList())
-                StackChangingRules.Remove(unusedRule);
+                StackPush1Rules.Remove(unusedRule);
 
+        }
+
+        public void AddCorrespondingPopRule(RuleCoordinates rc)
+        {
+            var pushRule = RuleSpace[rc];
+
+            //assumption: moveable is first RHS, to be relaxed.
+            string moveable = pushRule.RightHandSide[0].ToString();
+            int LHSIndex = RuleSpace.FindLHSIndex(moveable);
+            if (!MoveableReferences.ContainsKey(LHSIndex))
+                MoveableReferences[LHSIndex] = 0;
+
+            MoveableReferences[LHSIndex]++;
+        }
+
+
+        public void DeleteCorrespondingPopRule(RuleCoordinates rc)
+        {
+            var pushRule = ContextSensitiveGrammar.RuleSpace[rc];
+            //assumption: moveable is first RHS, to be relaxed.
+            string moveable = pushRule.RightHandSide[0].ToString();
+            int LHSIndex = ContextSensitiveGrammar.RuleSpace.FindLHSIndex(moveable);
+            if (!MoveableReferences.ContainsKey(LHSIndex))
+                throw new Exception("missing key");
+
+            MoveableReferences[LHSIndex]--;
+            if (MoveableReferences[LHSIndex] < 0)
+                throw new Exception("wrong value of moveable references");
         }
     }
 }
