@@ -113,12 +113,13 @@ namespace LinearIndexedGrammar
             var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
             IObjectiveFunction<double> objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
 
-            var targetGrammar = new ContextSensitiveGrammar(grammarRules);
+            var grammarRuleList = grammarRules.ToList();
+            ContextSensitiveGrammar.RenameVariables(grammarRuleList, posInText);
+            var targetGrammar = new ContextSensitiveGrammar(grammarRuleList);
 
             var targetProb = objectiveFunction.Compute(targetGrammar, false);
 
-            s =
-                $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
+            s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
             LogManager.GetCurrentClassLogger().Info(s);
             if (targetProb < 1)
             {

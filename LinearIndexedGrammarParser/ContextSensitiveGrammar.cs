@@ -57,7 +57,7 @@ namespace LinearIndexedGrammarParser
         {
         }
 
-        public ContextSensitiveGrammar(Rule[] grammarRules)
+        public ContextSensitiveGrammar(List<Rule> grammarRules)
         {
             foreach (var rule in grammarRules)
             {
@@ -154,6 +154,71 @@ namespace LinearIndexedGrammarParser
             MoveableReferences[LHSIndex]--;
             if (MoveableReferences[LHSIndex] < 0)
                 throw new Exception("wrong value of moveable references");
+        }
+
+        public static void RenameVariables(List<Rule> rules, string[] posInText)
+        {
+            var pos = posInText.ToHashSet();
+            var originalVariables = rules.Select(x => new SyntacticCategory(x.LeftHandSide).ToString()).ToList();
+            originalVariables = originalVariables.Distinct().ToList();
+
+            var replaceVariables = new List<string>();
+            for (var i = 0; i < originalVariables.Count; i++)
+                replaceVariables.Add($"X{i + 1}");
+
+            foreach (var originalVariable in originalVariables)
+            {
+                if (replaceVariables.Contains(originalVariable))
+                    throw new Exception("renaming variables failed. Please do not use X1,X2,X3 nonterminals");
+            }
+            var replaceDic = originalVariables.Zip(replaceVariables, (x, y) => new { key = x, value = y })
+                .ToDictionary(x => x.key, x => x.value);
+
+            var startRenamedVariable = replaceDic[ContextFreeGrammar.StartSymbol];
+            replaceDic.Remove(ContextFreeGrammar.StartSymbol);
+            ReplaceVariables(replaceDic, rules);
+
+            DerivedCategory startCategory = new DerivedCategory(ContextFreeGrammar.StartSymbol);
+            List<Rule> startRulesToReplace = new List<Rule>();
+            foreach (var rule in rules)
+            {
+                if (rule.RightHandSide.Length == 2)
+                {
+                    if (rule.LeftHandSide.BaseEquals(startCategory) ||
+                        rule.RightHandSide[0].BaseEquals(startCategory) ||
+                        rule.RightHandSide[1].BaseEquals(startCategory))
+                        startRulesToReplace.Add(rule);
+                }
+
+                if (rule.RightHandSide.Length == 1)
+                {
+                    var baseCat = new SyntacticCategory(rule.RightHandSide[0]);
+                    if (pos.Contains(baseCat.ToString()))
+                        startRulesToReplace.Add(rule);
+
+                }
+            }
+            
+            if (startRulesToReplace.Count > 0)
+            {
+                replaceDic[ContextFreeGrammar.StartSymbol] = startRenamedVariable;
+                ReplaceVariables(replaceDic, startRulesToReplace);
+                var newStartRule = new Rule(ContextFreeGrammar.StartSymbol, new [] { startRenamedVariable });
+                rules.Add(newStartRule);
+            }
+
+        }
+
+
+        private static void ReplaceVariables(Dictionary<string, string> replaceDic, IEnumerable<Rule> rules)
+        {
+            foreach (var rule in rules)
+            {
+                rule.LeftHandSide.Replace(replaceDic);
+
+                for (var i = 0; i < rule.RightHandSide.Length; i++)
+                    rule.RightHandSide[i].Replace(replaceDic);
+            }
         }
     }
 }

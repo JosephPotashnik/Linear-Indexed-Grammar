@@ -85,8 +85,14 @@ namespace LinearIndexedGrammarParser
                 var rhs1 = rhsStore[i / length];
                 if (i % length == 0)
                 {
+                    DerivedCategory rhs1Cat;
                     //Xi -> RHS in CFG Rules
-                    var rhs1Cat = new DerivedCategory(rhs1, ContextFreeGrammar.StarSymbol);
+
+                    if (partsOfSpeechCategories1.Contains(rhs1))
+                         rhs1Cat = new DerivedCategory(rhs1);
+                    else
+                        rhs1Cat = new DerivedCategory(rhs1, ContextFreeGrammar.StarSymbol);
+
                     _ruleSpace[RuleType.CFGRules][0][currentIndex] = new Rule(currentCategory, new[] {rhs1Cat});
 
                     //Xi -> RHS in Push Rules (unused)
@@ -105,7 +111,13 @@ namespace LinearIndexedGrammarParser
                     //TODO: assumption spine category is the second rhs. in later stage allow spine to be either rhs.
                     //Xi -> RHS1 RHS2 in CFG Rules
                     var rhs1Cat = new DerivedCategory(rhs1);
-                    var rhs2Cat = new DerivedCategory(rhs2, ContextFreeGrammar.StarSymbol);
+                    DerivedCategory rhs2Cat;
+
+                    if (partsOfSpeechCategories1.Contains(rhs2))
+                        rhs2Cat = new DerivedCategory(rhs2);
+                    else
+                        rhs2Cat = new DerivedCategory(rhs2, ContextFreeGrammar.StarSymbol);
+
                     _ruleSpace[RuleType.CFGRules][0][currentIndex] = new Rule(currentCategory, new[] {rhs1Cat, rhs2Cat});
 
                     //Xi -> RHS1 RHS2[*RHS1] in Push Rules

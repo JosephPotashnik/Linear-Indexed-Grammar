@@ -4,7 +4,7 @@
       "PopulationSize": 300,
       "NumberOfGenerations": 500,
       "NumberOfRuns": 10,
-      "GrammarFileName": "LIGMovementFromDirectObject.txt"
+      "GrammarFileName": "PalindromeCFGNoTD.txt"
     }
   ]
 }
