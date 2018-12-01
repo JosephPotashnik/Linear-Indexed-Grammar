@@ -1,34 +1,30 @@
 ﻿[
   {
-    "Mutation": "InsertBinaryRule",
-    "MutationWeight": 15
-  },
-  {
-    "Mutation": "InsertUnaryRule",
-    "MutationWeight": 5
-  },
-  {
-    "Mutation": "DeleteRule",
+    "Mutation": "InsertStackConstantRule",
     "MutationWeight": 20
   },
   {
-    "Mutation": "SpreadRuleLHSToRHS",
-    "MutationWeight": 10
+    "Mutation": "DeleteStackConstantRule",
+    "MutationWeight": 20
   },
   {
-    "Mutation": "SpreadRuleLHSToLHS",
-    "MutationWeight": 15
+    "Mutation": "ChangeLHS",
+    "MutationWeight": 20
   },
   {
-    "Mutation": "SpreadPOSToRHS",
-    "MutationWeight": 5
+    "Mutation": "ChangeRHS",
+    "MutationWeight": 20
+  },
+  {
+    "Mutation": "SwapTwoRulesLHS",
+    "MutationWeight": 0
   },
   {
     "Mutation": "InsertMovement",
-    "MutationWeight": 20
+    "MutationWeight": 0
   },
   {
     "Mutation": "DeleteMovement",
-    "MutationWeight": 20
+    "MutationWeight": 0
   }
 ]

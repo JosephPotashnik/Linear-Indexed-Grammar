@@ -1,10 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
     [JsonObject(MemberSerialization.OptIn)]
-    public class Rule
+    public class Rule : IEquatable<Rule>
     {
         public Rule()
         {
@@ -32,10 +33,6 @@ namespace LinearIndexedGrammarParser
             NumberOfGeneratingRule = otherRule.NumberOfGeneratingRule;
         }
 
-        public virtual Rule Clone()
-        {
-            return new Rule(this);
-        }
         [JsonProperty] public DerivedCategory LeftHandSide { get; set; }
 
         [JsonProperty] public DerivedCategory[] RightHandSide { get; set; }
@@ -49,30 +46,19 @@ namespace LinearIndexedGrammarParser
             return $"{Number}. {LeftHandSide} -> {string.Join(" ", p)}";
         }
 
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Rule p))
-                return false;
-
-            return Number == p.Number;
-        }
-
         public override int GetHashCode()
         {
-            // ReSharper disable once NonReadonlyMemberInGetHashCode
             return Number;
         }
 
-        public bool IsEpsilonRule() => RightHandSide[0].IsEpsilon();
-
-        public virtual bool AddRuleToGrammar(ContextSensitiveGrammar grammar, bool forceAdd = false)
+        public bool IsEpsilonRule()
         {
-            return grammar.AddStackConstantRule(this, forceAdd);
+            return RightHandSide[0].IsEpsilon();
         }
 
-        public virtual void DeleteRuleFromGrammar(ContextSensitiveGrammar grammar)
+        public bool Equals(Rule other)
         {
-            grammar.DeleteStackConstantRule(this);
+            return Number == other.Number;
         }
     }
 }

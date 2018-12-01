@@ -18,7 +18,7 @@ namespace LinearIndexedGrammarParser
 
         public SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(int treeDepth)
         {
-            return NumberOfParseTreesPerWords(new DerivedCategory(ContextFreeGrammar.StartRule), treeDepth);
+            return NumberOfParseTreesPerWords(new DerivedCategory(ContextFreeGrammar.StartSymbol), treeDepth);
         }
 
         private SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(DerivedCategory[] rhs, int treeDepth)

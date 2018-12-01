@@ -71,7 +71,7 @@ namespace LinearIndexedGrammar
         private static void Learn(int maxWordsInSentence = 6)
         {
             var fileName = @"ProgramsToRun.json";
-            //fileName = @"NightRunFull.json";
+            fileName = @"NightRunFull.json";
 
             var programParamsList = ReadProgramParamsFromFile(fileName);
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
@@ -83,7 +83,7 @@ namespace LinearIndexedGrammar
         private static void RunProgram(ProgramParams programParams, int maxWordsInSentence,
             Vocabulary universalVocabulary)
         {
-            var (nodeList, targetGrammar) =
+            var (nodeList, grammarRules) =
                 GrammarFileReader.GenerateSentenceAccordingToGrammar(programParams.GrammarFileName, maxWordsInSentence);
             var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
 
@@ -94,13 +94,32 @@ namespace LinearIndexedGrammar
             LogManager.GetCurrentClassLogger().Info(s);
             var stopWatch = StartWatch();
 
+            var posInText = dataVocabulary.POSWithPossibleWords.Keys.ToArray();
+            ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, 5);
+
+            //TODO: add new unit tests for rule space generation.
+            //int ans = ruleSpace.FindRHSIndex(new[] { "D", "N" });
+            //ans = ruleSpace.FindRHSIndex(new[] { "D", "X2" });
+            //var ans2 = ruleSpace.FindRHSIndex(new[] { "X3", "P" });
+            //ans = ruleSpace.FindRHSIndex(new[] { "X3" });
+            //ans = ruleSpace.FindRHSIndex(new[] { "D" });
+            //ans = ruleSpace.FindLHSIndex("X1");
+            //ans = ruleSpace.FindLHSIndex("X3");
+
+            //var r = new Rule("X2", new[] { "V", "X3" });
+            //var rc = ruleSpace.FindRule(r);
+            //var res = ruleSpace[rc];
+
             var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
             IObjectiveFunction<double> objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
 
-            var targetProb = objectiveFunction.Compute(targetGrammar);
+            var grammarRuleList = grammarRules.ToList();
+            ContextSensitiveGrammar.RenameVariables(grammarRuleList, posInText);
+            var targetGrammar = new ContextSensitiveGrammar(grammarRuleList);
 
-            s =
-                $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
+            var targetProb = objectiveFunction.Compute(targetGrammar, false);
+
+            s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
             LogManager.GetCurrentClassLogger().Info(s);
             if (targetProb < 1)
             {
@@ -111,13 +130,16 @@ namespace LinearIndexedGrammar
             var probs = new List<double>();
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
-                LogManager.GetCurrentClassLogger().Info($"Run {i+1}:");
-                var ga = new GeneticAlgorithm<double>(learner, programParams.PopulationSize, programParams.NumberOfGenerations, objectiveFunction);
-                (var bestHypothesis, var bestValue) = ga.Run();
+                LogManager.GetCurrentClassLogger().Info($"Run {i + 1}:");
+
+                //var algorithm = new GeneticAlgorithm<double>(learner, programParams.PopulationSize, programParams.NumberOfGenerations, objectiveFunction);
+                var algorithm = new SimulatedAnnealing<double>(learner, programParams.NumberOfGenerations, 0.99, 2000,
+                    objectiveFunction);
+
+                var (bestHypothesis, bestValue) = algorithm.Run();
                 probs.Add(bestValue);
 
-                s =
-                    $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";
+                s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";
                 LogManager.GetCurrentClassLogger().Info(s);
 
                 //the following line should be uncommented for sanity checks (i.e, it suffices to see that

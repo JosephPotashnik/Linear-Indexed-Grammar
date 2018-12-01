@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
-    public class EarleyNode
+    public class EarleyNode : IEquatable<EarleyNode>
     {
         private const int ScanRuleNumber = 0;
 
@@ -30,22 +30,14 @@ namespace LinearIndexedGrammarParser
 
         [JsonIgnore] public int RuleNumber { get; set; }
 
-        public override bool Equals(object obj)
-        {
-            if (!(obj is EarleyNode n))
-                return false;
-
-            return Name == n.Name && StartIndex == n.StartIndex && EndIndex == n.EndIndex;
-        }
-
         public override int GetHashCode()
         {
             unchecked
             {
                 var hash = 17;
-                hash = hash * 23 + Name.GetHashCode();
-                hash = hash * 23 + StartIndex;
-                hash = hash * 23 + EndIndex;
+                hash = (hash * 23) ^ Name.GetHashCode();
+                hash = (hash * 23) ^ StartIndex;
+                hash = (hash * 23) ^ EndIndex;
                 return hash;
             }
         }
@@ -111,6 +103,11 @@ namespace LinearIndexedGrammarParser
                 foreach (var child in Children)
                     child.GetNonTerminalStringUnderNode(leavesList);
             }
+        }
+
+        public bool Equals(EarleyNode other)
+        {
+            return Name == other.Name && StartIndex == other.StartIndex && EndIndex == other.EndIndex;
         }
     }
 }

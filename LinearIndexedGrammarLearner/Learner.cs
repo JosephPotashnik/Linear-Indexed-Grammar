@@ -1,19 +1,19 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using LinearIndexedGrammarParser;
 using System.Threading;
+using System.Threading.Tasks;
+using LinearIndexedGrammarParser;
 
 namespace LinearIndexedGrammarLearner
 {
     public class Learner
     {
-        private readonly Dictionary<string, int> _sentencesWithCounts;
-        private GrammarPermutations _gp;
-        private readonly Vocabulary _voc;
-        private readonly HashSet<string> _posInText;
         private readonly int _maxWordsInSentence;
+        private readonly HashSet<string> _posInText;
+        private readonly Dictionary<string, int> _sentencesWithCounts;
+        private readonly Vocabulary _voc;
+        private GrammarPermutations _gp;
 
         public Learner(string[] sentences, int maxWordsInSentence, Vocabulary voc)
         {
@@ -26,38 +26,43 @@ namespace LinearIndexedGrammarLearner
         ////We create the "promiscuous grammar" as initial grammar.
         public ContextSensitiveGrammar CreateInitialGrammars()
         {
-            var originalGrammar = new ContextSensitiveGrammar();
             _gp = new GrammarPermutations(_posInText.ToArray());
             _gp.ReadPermutationWeightsFromFile();
 
+            var rules = new List<Rule>();
             foreach (var pos in _posInText)
             {
-                originalGrammar.AddStackConstantRule(new Rule(ContextFreeGrammar.StartRule, new[] { pos, ContextFreeGrammar.StartRule }));
-                originalGrammar.AddStackConstantRule(new Rule(ContextFreeGrammar.StartRule, new[] { pos }));
+                rules.Add(new Rule("X1", new[] {pos, "X1"}));
+                rules.Add(new Rule("X1", new[] {pos}));
             }
+
+            rules.Add(new Rule(ContextFreeGrammar.StartSymbol, new[] {"X1"}));
+
+            var originalGrammar = new ContextSensitiveGrammar(rules);
 
             return originalGrammar;
         }
 
         public SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis)
         {
-            SentenceParsingResults[] allParses = new SentenceParsingResults[_sentencesWithCounts.Count];
+            var allParses = new SentenceParsingResults[_sentencesWithCounts.Count];
 
             try
             {
                 var timeout = 500; // 0.5 seconds
                 var cts = new CancellationTokenSource(timeout);
-                Parallel.ForEach(_sentencesWithCounts, new ParallelOptions { CancellationToken = cts.Token}, (sentenceItem, loopState, i) =>
-                {
-                    var parser = new EarleyParser(currentHypothesis, _voc);
-                    var n = parser.ParseSentence(sentenceItem.Key);
-                    allParses[i] = new SentenceParsingResults()
+                Parallel.ForEach(_sentencesWithCounts, new ParallelOptions {CancellationToken = cts.Token},
+                    (sentenceItem, loopState, i) =>
                     {
-                        Sentence = sentenceItem.Key,
-                        Trees = n,
-                        Count = sentenceItem.Value
-                    };
-                });
+                        var parser = new EarleyParser(currentHypothesis, _voc);
+                        var n = parser.ParseSentence(sentenceItem.Key);
+                        allParses[i] = new SentenceParsingResults
+                        {
+                            Sentence = sentenceItem.Key,
+                            Trees = n,
+                            Count = sentenceItem.Value
+                        };
+                    });
                 return allParses;
             }
             catch (OperationCanceledException)
@@ -69,16 +74,10 @@ namespace LinearIndexedGrammarLearner
                 //string s = "parsing took too long (0.5 second), for the grammar:\r\n" + currentHypothesis.ToString();
                 //NLog.LogManager.GetCurrentClassLogger().Info(s);
                 return null; //parsing failed.
-
             }
-            catch (AggregateException e) when(e.InnerExceptions.OfType<InfiniteParseException>().Any())
+            catch (AggregateException e) when (e.InnerExceptions.OfType<InfiniteParseException>().Any())
             {
                 throw;
-            }
-
-            catch (Exception)
-            {
-                return null; //parsing failed.
             }
         }
 
@@ -96,10 +95,10 @@ namespace LinearIndexedGrammarLearner
             var treeDepth = _maxWordsInSentence + 3;
             //TODO: find a safe upper bound to tree depth, which will be a function of
             //max words in sentence, possibly also a function of the number of different POS.
-            Task<SubtreeCountsWithNumberOfWords> t = Task.Run(() =>
+            var t = Task.Run(() =>
             {
-                SubTreeCountsCache cache = new SubTreeCountsCache(hypothesis, treeDepth);
-                GrammarTreeCountsCalculator treeCalculator = new GrammarTreeCountsCalculator(hypothesis, _posInText, cache);
+                var cache = new SubTreeCountsCache(hypothesis, treeDepth);
+                var treeCalculator = new GrammarTreeCountsCalculator(hypothesis, _posInText, cache);
                 return treeCalculator.NumberOfParseTreesPerWords(treeDepth);
             });
 
@@ -109,13 +108,15 @@ namespace LinearIndexedGrammarLearner
                 //NLog.LogManager.GetCurrentClassLogger().Info(s);
                 //throw new Exception();
             }
+
             var parseTreesCountPerWords = t.Result;
-            var numberOfParseTreesBelowMaxWords = parseTreesCountPerWords.WordsTreesDic.Values.Where(x => x.WordsCount <= _maxWordsInSentence).Select(x => x.TreesCount).Sum();
+            var numberOfParseTreesBelowMaxWords = parseTreesCountPerWords.WordsTreesDic.Values
+                .Where(x => x.WordsCount <= _maxWordsInSentence).Select(x => x.TreesCount).Sum();
 
             return numberOfParseTreesBelowMaxWords;
         }
 
-            
+
         public Dictionary<int, int> CollectUsages(ContextSensitiveGrammar currentHypothesis)
         {
             var cfGrammar = new ContextFreeGrammar(currentHypothesis);
@@ -130,6 +131,7 @@ namespace LinearIndexedGrammarLearner
                     foreach (var tree in sentenceParsingResult.Trees)
                         CollectRuleUsages(tree, usagesDic, sentenceParsingResult.Count);
                 }
+
                 return usagesDic;
             }
 
@@ -156,13 +158,11 @@ namespace LinearIndexedGrammarLearner
         {
             //choose mutation function in random (weighted according to weights file)
             var m = GrammarPermutations.GetWeightedRandomMutation();
-
             var newGrammar = new ContextSensitiveGrammar(currentHypothesis);
 
             //mutate the grammar.
-            var g =  m(newGrammar);
+            var g = m(newGrammar);
             return g;
-
         }
     }
 }

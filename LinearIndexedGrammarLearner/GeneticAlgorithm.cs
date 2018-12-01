@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
 using NLog;
@@ -17,14 +16,6 @@ namespace LinearIndexedGrammarLearner
         [JsonProperty] public float PopulationSize { get; set; }
     }
 
-    public static class ThreadSafeRandom
-    {
-        [ThreadStatic] private static Random _local;
-
-        public static Random ThisThreadsRandom => _local ?? (_local =
-                                                      new Random(unchecked(Environment.TickCount * 31 +
-                                                                           Thread.CurrentThread.ManagedThreadId)));
-    }
 
     public class GeneticAlgorithm<T> where T : IComparable
     {
@@ -33,21 +24,22 @@ namespace LinearIndexedGrammarLearner
         private const int NumberOfSufficientSolutions = 10;
         private readonly Learner _learner;
         private readonly int _numberOfGenerations;
-        private IObjectiveFunction<T> _objectiveFunction;
+        private readonly IObjectiveFunction<T> _objectiveFunction;
 
         private readonly PriorityQueue<T, ContextSensitiveGrammar> _population =
             new PriorityQueue<T, ContextSensitiveGrammar>();
 
-        public GeneticAlgorithm(Learner l, int populationSize, int numberOfGenerations, IObjectiveFunction<T> objectiveFunction)
+        public GeneticAlgorithm(Learner l, int populationSize, int numberOfGenerations,
+            IObjectiveFunction<T> objectiveFunction)
         {
             _numberOfGenerations = numberOfGenerations;
             _learner = l;
             _objectiveFunction = objectiveFunction;
             var initialGrammar = _learner.CreateInitialGrammars();
-            var obectiveFunctionValue = _objectiveFunction.Compute(initialGrammar);
+            var objectiveFunctionValue = _objectiveFunction.Compute(initialGrammar, false);
 
             for (var i = 0; i < populationSize; i++)
-                _population.Enqueue(obectiveFunctionValue,
+                _population.Enqueue(objectiveFunctionValue,
                     new ContextSensitiveGrammar(initialGrammar));
         }
 
@@ -86,7 +78,8 @@ namespace LinearIndexedGrammarLearner
                         var mutatedGrammar = _learner.GetNeighbor(originalGrammar);
 
                         if (mutatedGrammar == null) continue;
-                        objectiveFunctionValue = EvaluateObjectiveFunction(mutatedGrammar, originalGrammar, originalGrammarValue);
+                        objectiveFunctionValue =
+                            EvaluateObjectiveFunction(mutatedGrammar, originalGrammar, originalGrammarValue);
 
                         if (_objectiveFunction.ConsiderValue(objectiveFunctionValue))
                             descendants.Enqueue(
@@ -94,7 +87,7 @@ namespace LinearIndexedGrammarLearner
                                     mutatedGrammar));
                     }
 
-                    InsertDescendantsIntoPopulation(descendants);
+                    InsertDescendantsIntoPopulation(descendants, currentGeneration);
                     var enoughSolutions = CheckForSufficientSolutions();
                     if (enoughSolutions) break;
                 }
@@ -110,25 +103,11 @@ namespace LinearIndexedGrammarLearner
             return (bestGrammars.First(), value);
         }
 
-        private T EvaluateObjectiveFunction(ContextSensitiveGrammar mutatedGrammar, ContextSensitiveGrammar originalGrammar,
+        private T EvaluateObjectiveFunction(ContextSensitiveGrammar mutatedGrammar,
+            ContextSensitiveGrammar originalGrammar,
             T originalGrammarValue)
         {
-
-            T objectiveFunctionValue;
-            //if (mutatedGrammar.StackConstantRulesArray.Length >
-            //    originalGrammar.StackConstantRulesArray.Length
-            //    ||
-            //    mutatedGrammar.StackChangingRulesArray.Length >
-            //    originalGrammar.StackChangingRulesArray.Length)
-
-            //{
-            //    objectiveFunctionValue = originalGrammarValue;
-            //}
-            //else
-            //{
-                objectiveFunctionValue = _objectiveFunction.Compute(mutatedGrammar);
-            //}
-
+            var objectiveFunctionValue = _objectiveFunction.Compute(mutatedGrammar, false);
             return objectiveFunctionValue;
         }
 
@@ -147,24 +126,21 @@ namespace LinearIndexedGrammarLearner
 
         private (T value, IEnumerable<ContextSensitiveGrammar> bestGrammars) ChooseBestHypotheses()
         {
-
             var bestGrammars = _population.Last().Value.Select(x =>
                 {
                     var ruleDistribution = _learner.CollectUsages(x);
                     x.PruneUnusedRules(ruleDistribution);
-                    //rename variables names from serial generated names such as X271618 to X1, X2 etc.
-                    x.RenameVariables();
-
                     return x;
                 }
             );
 
-            var y = bestGrammars.OrderBy(x => x.StackConstantRulesArray.Count());
+            var y = bestGrammars.OrderBy(x => x.StackConstantRules.Count());
             return (_population.Last().Key, y);
         }
 
 
-        private void InsertDescendantsIntoPopulation(Queue<KeyValuePair<T, ContextSensitiveGrammar>> descendants)
+        private void InsertDescendantsIntoPopulation(Queue<KeyValuePair<T, ContextSensitiveGrammar>> descendants,
+            int iteration)
         {
             while (descendants.Any())
             {
@@ -177,7 +153,5 @@ namespace LinearIndexedGrammarLearner
                     }
             }
         }
-
-
     }
 }
