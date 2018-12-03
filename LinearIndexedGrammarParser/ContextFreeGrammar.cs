@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -13,6 +14,7 @@ namespace LinearIndexedGrammarParser
 
     public class ContextFreeGrammar
     {
+        public static HashSet<SyntacticCategory> PartsOfSpeech;
         public const string GammaRule = "Gamma";
         public const string StartSymbol = "START";
         public const string EpsilonSymbol = "Epsilon";
@@ -20,17 +22,21 @@ namespace LinearIndexedGrammarParser
         public const int MaxStackDepth = 3;
         public readonly HashSet<DerivedCategory> ObligatoryNullableCategories = new HashSet<DerivedCategory>();
         public readonly HashSet<DerivedCategory> PossibleNullableCategories = new HashSet<DerivedCategory>();
-
+        private int ruleNumbering = 1;
         public readonly Dictionary<DerivedCategory, List<Rule>> StaticRules =
             new Dictionary<DerivedCategory, List<Rule>>();
 
         public readonly HashSet<DerivedCategory> StaticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
 
-        public ContextFreeGrammar(Rule[] ruleList)
+        private void ConstructCFG(IEnumerable<Rule> ruleList)
         {
             var rulesDic = CreateRulesDictionary(ruleList);
             GenerateAllStaticRulesFromDynamicRules(rulesDic);
             ComputeTransitiveClosureOfNullableCategories();
+        }
+        public ContextFreeGrammar(Rule[] ruleList)
+        {
+            ConstructCFG(ruleList);
         }
 
         public ContextFreeGrammar(ContextSensitiveGrammar cs)
@@ -60,9 +66,7 @@ namespace LinearIndexedGrammarParser
             else
                 rules = stackConstantRules;
 
-            var rulesDic = CreateRulesDictionary(rules);
-            GenerateAllStaticRulesFromDynamicRules(rulesDic);
-            ComputeTransitiveClosureOfNullableCategories();
+            ConstructCFG(rules);
         }
 
         private static Dictionary<SyntacticCategory, List<Rule>> CreateRulesDictionary(IEnumerable<Rule> xy)
@@ -92,7 +96,10 @@ namespace LinearIndexedGrammarParser
         {
             if (r == null) return;
 
-            var newRule = new Rule(r);
+            var newRule = new Rule(r)
+            {
+                Number = ruleNumbering++
+            };
 
             if (!StaticRules.ContainsKey(newRule.LeftHandSide))
                 StaticRules[newRule.LeftHandSide] = new List<Rule>();
@@ -211,7 +218,10 @@ namespace LinearIndexedGrammarParser
         public Rule GenerateStaticRuleFromDyamicRule(Rule dynamicGrammarRule, DerivedCategory leftHandSide)
         {
             var patternStringLeftHandSide = dynamicGrammarRule.LeftHandSide.Stack;
-            var newRule = new Rule(dynamicGrammarRule) {NumberOfGeneratingRule = dynamicGrammarRule.Number};
+            var newRule = new Rule(dynamicGrammarRule)
+            {
+                NumberOfGeneratingRule = dynamicGrammarRule.Number,
+            };
 
             if (!patternStringLeftHandSide.Contains(StarSymbol))
                 return dynamicGrammarRule.LeftHandSide.Equals(leftHandSide) ? newRule : null;
@@ -229,21 +239,35 @@ namespace LinearIndexedGrammarParser
 
             var stackContents = match.Groups[1].Value;
             newRule.LeftHandSide = leftHandSide;
+            int posInRhsCount = 0;
 
             //3. replace the contents of the stack * in the right hand side productions.
             for (var i = 0; i < newRule.RightHandSide.Length; i++)
             {
+                if (PartsOfSpeech.Contains(newRule.RightHandSide[i]))
+                    posInRhsCount++;
+
                 var patternRightHandSide = newRule.RightHandSide[i].Stack;
                 if (patternRightHandSide != string.Empty)
                 {
+
                     var res = patternRightHandSide.Replace(StarSymbol, stackContents);
                     newRule.RightHandSide[i].Stack = res;
                     newRule.RightHandSide[i].StackSymbolsCount += newRule.LeftHandSide.StackSymbolsCount;
 
                     if (newRule.RightHandSide[i].StackSymbolsCount > MaxStackDepth)
                         return null;
+
+                    if (newRule.RightHandSide[i].StackSymbolsCount > 0 
+                        && PartsOfSpeech.Contains(newRule.RightHandSide[i]))
+                        return null;
+
+
                 }
             }
+
+            if (stackContents != string.Empty && posInRhsCount == newRule.RightHandSide.Length)
+                return null;
 
             return newRule;
         }
@@ -295,5 +319,100 @@ namespace LinearIndexedGrammarParser
                 }
             }
         }
+
+
+        public static void RenameVariables(List<Rule> rules, string[] posInText)
+        {
+            var pos = posInText.ToHashSet();
+            var originalVariables = rules.Select(x => new SyntacticCategory(x.LeftHandSide).ToString()).ToList();
+            originalVariables = originalVariables.Distinct().ToList();
+
+            var replaceVariables = new List<string>();
+            for (var i = 0; i < originalVariables.Count; i++)
+                replaceVariables.Add($"X{i + 1}");
+
+            foreach (var originalVariable in originalVariables)
+            {
+                if (replaceVariables.Contains(originalVariable))
+                    throw new Exception("renaming variables failed. Please do not use X1,X2,X3 nonterminals");
+            }
+            var replaceDic = originalVariables.Zip(replaceVariables, (x, y) => new { key = x, value = y })
+                .ToDictionary(x => x.key, x => x.value);
+
+            var startRenamedVariable = replaceDic[StartSymbol];
+            replaceDic.Remove(StartSymbol);
+            ReplaceVariables(replaceDic, rules);
+
+            DerivedCategory startCategory = new DerivedCategory(StartSymbol);
+            List<Rule> startRulesToReplace = new List<Rule>();
+            foreach (var rule in rules)
+            {
+                if (rule.RightHandSide.Length == 2)
+                {
+                    if (rule.LeftHandSide.BaseEquals(startCategory) ||
+                        rule.RightHandSide[0].BaseEquals(startCategory) ||
+                        rule.RightHandSide[1].BaseEquals(startCategory))
+                        startRulesToReplace.Add(rule);
+                }
+
+                if (rule.RightHandSide.Length == 1)
+                {
+                    var baseCat = new SyntacticCategory(rule.RightHandSide[0]);
+                    if (pos.Contains(baseCat.ToString()))
+                        startRulesToReplace.Add(rule);
+
+                }
+            }
+
+            if (startRulesToReplace.Count > 0)
+            {
+                replaceDic[StartSymbol] = startRenamedVariable;
+                ReplaceVariables(replaceDic, startRulesToReplace);
+                var newStartRule = new Rule(StartSymbol, new[] { startRenamedVariable });
+                rules.Add(newStartRule);
+            }
+
+        }
+
+
+        private static void ReplaceVariables(Dictionary<string, string> replaceDic, IEnumerable<Rule> rules)
+        {
+            foreach (var rule in rules)
+            {
+                rule.LeftHandSide.Replace(replaceDic);
+
+                for (var i = 0; i < rule.RightHandSide.Length; i++)
+                    rule.RightHandSide[i].Replace(replaceDic);
+            }
+        }
+
+        public static HashSet<(string rhs1, string rhs2)> GetBigramsOfData(string[] data, Vocabulary textVocabulary)
+        {
+            var bigrams = new HashSet<(string rhs1, string rhs2)>();
+
+            foreach (var sentence in data)
+            {
+                var words = sentence.Split();
+                for (int i = 0; i < words.Length-1; i++)
+                {
+                    var rhs1 = words[i];
+                    var rhs2 = words[i + 1];
+
+                    var possiblePOSforrhs1 = textVocabulary.WordWithPossiblePOS[rhs1].ToArray();
+                    var possiblePOSforrhs2 = textVocabulary.WordWithPossiblePOS[rhs2].ToArray();
+
+                    foreach (var pos1 in possiblePOSforrhs1)
+                    {
+                        foreach (var pos2 in possiblePOSforrhs2)
+                        {
+                            bigrams.Add((pos1, pos2));
+                        }
+                    }
+                }
+            }
+
+            return bigrams;
+        }
+
     }
 }

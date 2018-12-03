@@ -10,9 +10,7 @@ namespace LinearIndexedGrammarLearner
         T Compute(ContextSensitiveGrammar currentHypothesis, bool considerPartialParsing);
         bool AcceptNewValue(T newValue, T oldValue, double temperature);
         bool IsMaximalValue(T val);
-        bool AllowInfeasibleSolutions(T newVal);
         bool ConsiderValue(T newVal);
-        T GetMinimalValue();
     }
 
     public class GrammarFitnessObjectiveFunction : IObjectiveFunction<double>
@@ -25,20 +23,11 @@ namespace LinearIndexedGrammarLearner
             _learner = l;
         }
 
-        public bool AllowInfeasibleSolutions(double value)
-        {
-            return value < 100;
-        }
-
         public bool ConsiderValue(double newval)
         {
             return newval > 0;
         }
 
-        public double GetMinimalValue()
-        {
-            return 0;
-        }
 
         public bool AcceptNewValue(double newValue, double oldValue, double temperature)
         {

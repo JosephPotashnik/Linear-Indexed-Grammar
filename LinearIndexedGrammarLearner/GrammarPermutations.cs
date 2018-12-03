@@ -97,6 +97,18 @@ namespace LinearIndexedGrammarLearner
             return grammar;
         }
 
+        public ContextSensitiveGrammar ChangeLHSPush(ContextSensitiveGrammar grammar)
+        {
+            if (grammar.StackPush1Rules.Count == 0) return null;
+
+            var rc = grammar.GetRandomRule(grammar.StackPush1Rules);
+            var newLHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex();
+            if (rc.LHSIndex == newLHSIndex) return null;
+
+            rc.LHSIndex = newLHSIndex;
+            return grammar;
+        }
+
         public ContextSensitiveGrammar ChangeRHS(ContextSensitiveGrammar grammar)
         {
             var rc = grammar.GetRandomRule(grammar.StackConstantRules);
@@ -111,6 +123,24 @@ namespace LinearIndexedGrammarLearner
             return grammar;
         }
 
+        public ContextSensitiveGrammar ChangeRHSPush(ContextSensitiveGrammar grammar)
+        {
+            if (grammar.StackPush1Rules.Count == 0) return null;
+
+            var rc = grammar.GetRandomRule(grammar.StackPush1Rules);
+            var changedRc = new RuleCoordinates
+            {
+                LHSIndex = rc.LHSIndex,
+                RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex(RuleType.Push1Rules)
+            };
+            if (grammar.ContainsRuleWithSameRHS(changedRc, grammar.StackPush1Rules)) return null;
+
+            grammar.DeleteCorrespondingPopRule(rc);
+            rc.RHSIndex = changedRc.RHSIndex;
+            grammar.AddCorrespondingPopRule(rc);
+
+            return grammar;
+        }
         public ContextSensitiveGrammar SwapTwoRulesLHS(ContextSensitiveGrammar grammar)
         {
             var rc1 = grammar.GetRandomRule(grammar.StackConstantRules);
