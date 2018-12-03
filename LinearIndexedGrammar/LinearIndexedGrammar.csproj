@@ -19,6 +19,9 @@
     <None Update="EvenNCFG.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="MoveNP.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="MutationWeights.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

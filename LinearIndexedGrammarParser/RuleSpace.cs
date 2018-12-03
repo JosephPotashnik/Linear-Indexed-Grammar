@@ -32,7 +32,8 @@ namespace LinearIndexedGrammarParser
         {
             var rhsStore = new List<string>();
             var nonTerminals = new List<string>();
-            var partsOfSpeechCategories1 = new HashSet<string>(partsOfSpeechCategories);
+            var posHashSet = new HashSet<string>(partsOfSpeechCategories);
+
             _ruleSpace = new Rule[RuleType.RuleTypeCount][][];
             _allowedRHSIndices = new List<int>[RuleType.RuleTypeCount];
 
@@ -88,8 +89,8 @@ namespace LinearIndexedGrammarParser
                     DerivedCategory rhs1Cat;
                     //Xi -> RHS in CFG Rules
 
-                    if (partsOfSpeechCategories1.Contains(rhs1))
-                         rhs1Cat = new DerivedCategory(rhs1);
+                    if (posHashSet.Contains(rhs1))
+                        rhs1Cat = new DerivedCategory(rhs1);
                     else
                         rhs1Cat = new DerivedCategory(rhs1, ContextFreeGrammar.StarSymbol);
 
@@ -113,7 +114,7 @@ namespace LinearIndexedGrammarParser
                     var rhs1Cat = new DerivedCategory(rhs1);
                     DerivedCategory rhs2Cat;
 
-                    if (partsOfSpeechCategories1.Contains(rhs2))
+                    if (posHashSet.Contains(rhs2))
                         rhs2Cat = new DerivedCategory(rhs2);
                     else
                         rhs2Cat = new DerivedCategory(rhs2, ContextFreeGrammar.StarSymbol);
@@ -127,12 +128,12 @@ namespace LinearIndexedGrammarParser
 
 
                     //Xi -> Xj Xj (Xj non-terminal) are excluded from CFG Rules
-                    if (rhs1 != rhs2 || partsOfSpeechCategories1.Contains(rhs1))
+                    if (rhs1 != rhs2 || posHashSet.Contains(rhs1))
                         _allowedRHSIndices[RuleType.CFGRules].Add(currentIndex);
 
                     //allow only movement of nonterminals (Consequence: movement cannot be out of terminals)
                     //also disallow rules such as Xi -> Xj Xj[*Xj] (this is equal to unit production Xi -> Xj)
-                    if (rhs1 != rhs2 && !partsOfSpeechCategories1.Contains(rhs2) && !partsOfSpeechCategories1.Contains(rhs1))
+                    if (rhs1 != rhs2 && !posHashSet.Contains(rhs2) && !posHashSet.Contains(rhs1))
                         _allowedRHSIndices[RuleType.Push1Rules].Add(currentIndex);
                 }
             }

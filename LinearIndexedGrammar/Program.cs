@@ -83,6 +83,7 @@ namespace LinearIndexedGrammar
         private static void RunProgram(ProgramParams programParams, int maxWordsInSentence,
             Vocabulary universalVocabulary)
         {
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
             var (nodeList, grammarRules) =
                 GrammarFileReader.GenerateSentenceAccordingToGrammar(programParams.GrammarFileName, maxWordsInSentence);
             var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
@@ -114,7 +115,7 @@ namespace LinearIndexedGrammar
             IObjectiveFunction<double> objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
 
             var grammarRuleList = grammarRules.ToList();
-            ContextSensitiveGrammar.RenameVariables(grammarRuleList, posInText);
+            ContextFreeGrammar.RenameVariables(grammarRuleList, posInText);
             var targetGrammar = new ContextSensitiveGrammar(grammarRuleList);
 
             var targetProb = objectiveFunction.Compute(targetGrammar, false);
