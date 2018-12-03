@@ -385,5 +385,34 @@ namespace LinearIndexedGrammarParser
                     rule.RightHandSide[i].Replace(replaceDic);
             }
         }
+
+        public static HashSet<(string rhs1, string rhs2)> GetBigramsOfData(string[] data, Vocabulary textVocabulary)
+        {
+            var bigrams = new HashSet<(string rhs1, string rhs2)>();
+
+            foreach (var sentence in data)
+            {
+                var words = sentence.Split();
+                for (int i = 0; i < words.Length-1; i++)
+                {
+                    var rhs1 = words[i];
+                    var rhs2 = words[i + 1];
+
+                    var possiblePOSforrhs1 = textVocabulary.WordWithPossiblePOS[rhs1].ToArray();
+                    var possiblePOSforrhs2 = textVocabulary.WordWithPossiblePOS[rhs2].ToArray();
+
+                    foreach (var pos1 in possiblePOSforrhs1)
+                    {
+                        foreach (var pos2 in possiblePOSforrhs2)
+                        {
+                            bigrams.Add((pos1, pos2));
+                        }
+                    }
+                }
+            }
+
+            return bigrams;
+        }
+
     }
 }

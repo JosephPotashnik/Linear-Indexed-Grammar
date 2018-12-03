@@ -12,6 +12,7 @@ START[*] -> NP VP[*]
 VP[*] -> V0
 VP[*] -> V1 NP[*]
 VP[*] -> V2 PP[*]
+VP[*] -> V3 START[*]
 PP[*] -> P NP[*]
 NP[*] -> D N
 NP[*] -> PN

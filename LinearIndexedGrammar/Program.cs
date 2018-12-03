@@ -71,7 +71,7 @@ namespace LinearIndexedGrammar
         private static void Learn(int maxWordsInSentence = 6)
         {
             var fileName = @"ProgramsToRun.json";
-            fileName = @"NightRunFull.json";
+            //fileName = @"NightRunFull.json";
 
             var programParamsList = ReadProgramParamsFromFile(fileName);
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
@@ -96,7 +96,10 @@ namespace LinearIndexedGrammar
             var stopWatch = StartWatch();
 
             var posInText = dataVocabulary.POSWithPossibleWords.Keys.ToArray();
-            ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, 5);
+            var bigrams = ContextFreeGrammar.GetBigramsOfData(data, dataVocabulary);
+            ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, bigrams, 5);
+
+            
 
             //TODO: add new unit tests for rule space generation.
             //int ans = ruleSpace.FindRHSIndex(new[] { "D", "N" });
@@ -145,7 +148,7 @@ namespace LinearIndexedGrammar
 
                 //the following line should be uncommented for sanity checks (i.e, it suffices to see that
                 //we arrived at a possible solution), for night run / unit tests, etc.
-                if (objectiveFunction.IsMaximalValue(bestValue)) break;
+                //if (objectiveFunction.IsMaximalValue(bestValue)) break;
             }
 
             var numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < GeneticAlgorithm<double>.Tolerance);

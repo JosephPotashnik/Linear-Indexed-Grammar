@@ -28,7 +28,7 @@ namespace LinearIndexedGrammarParser
         private readonly Dictionary<string, int> _nonTerminalsRHS = new Dictionary<string, int>();
         private readonly List<int>[] _allowedRHSIndices;
 
-        public RuleSpace(string[] partsOfSpeechCategories, int maxNonTerminals)
+        public RuleSpace(string[] partsOfSpeechCategories, HashSet<(string rhs1, string rhs2)> bigrams, int maxNonTerminals)
         {
             var rhsStore = new List<string>();
             var nonTerminals = new List<string>();
@@ -127,9 +127,17 @@ namespace LinearIndexedGrammarParser
                     _ruleSpace[RuleType.Push1Rules][0][currentIndex] = new Rule(currentCategory, new[] { rhs1Cat, rhs2CatForPushRule });
 
 
-                    //Xi -> Xj Xj (Xj non-terminal) are excluded from CFG Rules
-                    if (rhs1 != rhs2 || posHashSet.Contains(rhs1))
-                        _allowedRHSIndices[RuleType.CFGRules].Add(currentIndex);
+                    if (posHashSet.Contains(rhs1) && posHashSet.Contains(rhs2))
+                    {
+                        if (bigrams.Contains((rhs1, rhs2)))
+                            _allowedRHSIndices[RuleType.CFGRules].Add(currentIndex);
+                    }
+                    else
+                    {
+                        //Xi -> Xj Xj (Xj non-terminal) are excluded from CFG Rules
+                        if (rhs1 != rhs2)
+                            _allowedRHSIndices[RuleType.CFGRules].Add(currentIndex);
+                    }
 
                     //allow only movement of nonterminals (Consequence: movement cannot be out of terminals)
                     //also disallow rules such as Xi -> Xj Xj[*Xj] (this is equal to unit production Xi -> Xj)
