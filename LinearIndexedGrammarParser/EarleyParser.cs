@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using NLog;
 
 namespace LinearIndexedGrammarParser
@@ -76,12 +77,12 @@ namespace LinearIndexedGrammarParser
         //at the moment, the promiscuous grammar could generate +100,000 earley states
         //so a very large amount of earley states is not necessarily a a bug.
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-        private static void TestForTooManyStatesInColumn(int count)
-        {
-            if (count > 100000) throw new InfiniteParseException("Grammar with infinite parse. abort this grammar..");
-        }
+        //private static void TestForTooManyStatesInColumn(int count)
+        //{
+        //    if (count > 100000) throw new InfiniteParseException("Grammar with infinite parse. abort this grammar..");
+        //}
 
-        public List<EarleyNode> ParseSentence(string text, int maxWords = 0)
+        public List<EarleyNode> ParseSentence(string text, CancellationTokenSource cts, int maxWords = 0)
         {
             var (table, finalColumns) = PrepareEarleyTable(text, maxWords);
             var nodes = new List<EarleyNode>();
@@ -125,6 +126,8 @@ namespace LinearIndexedGrammarParser
                 var s = e.ToString();
                 LogManager.GetCurrentClassLogger().Warn(s);
             }
+
+            if (nodes.Count == 0) cts.Cancel();
 
             return nodes;
         }
@@ -176,8 +179,8 @@ namespace LinearIndexedGrammarParser
 
                 if (col.ActionableCompleteStates.Any()) col.ActionableCompleteStates.Clear();
 
-                count++;
-                TestForTooManyStatesInColumn(count);
+                //count++;
+                //TestForTooManyStatesInColumn(count);
 
                 if (!_grammar.StaticRules.ContainsKey(nextTerm)) continue;
 
@@ -192,8 +195,8 @@ namespace LinearIndexedGrammarParser
         {
             while (col.ActionableCompleteStates.Any())
             {
-                count++;
-                TestForTooManyStatesInColumn(count);
+                //count++;
+                //TestForTooManyStatesInColumn(count);
 
                 var completedStatesQueueKey = col.ActionableCompleteStates.First().Key;
                 var completedStatesQueue = col.ActionableCompleteStates.First().Value;

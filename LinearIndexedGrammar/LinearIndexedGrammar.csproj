@@ -52,6 +52,9 @@
     <None Update="NoNPWithV3.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="VocabularyAmbiguousWords1.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="YesNPNoV3WithADJ.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

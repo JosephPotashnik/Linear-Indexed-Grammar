@@ -41,12 +41,12 @@
       "NumberOfGenerations": 1000,
       "NumberOfRuns": 5,
       "GrammarFileName": "PalindromeCFGNoTD.txt"
-    },
-    {
-      "PopulationSize": 500,
-      "NumberOfGenerations": 1000,
-      "NumberOfRuns": 5,
-      "GrammarFileName": "PalindromeCFGWithTD.txt"
     }
+    //{ With 6 nonterminals it does not converge.
+    //  "PopulationSize": 500,
+    //  "NumberOfGenerations": 1000,
+    //  "NumberOfRuns": 5,
+    //  "GrammarFileName": "PalindromeCFGWithTD.txt"
+    //}
   ]
 }

@@ -51,17 +51,19 @@ namespace LinearIndexedGrammarLearner
             {
                 var timeout = 500; // 0.5 seconds
                 var cts = new CancellationTokenSource(timeout);
-                Parallel.ForEach(_sentencesWithCounts, new ParallelOptions {CancellationToken = cts.Token},
+                var po = new ParallelOptions {CancellationToken = cts.Token};
+                Parallel.ForEach(_sentencesWithCounts, po,
                     (sentenceItem, loopState, i) =>
                     {
                         var parser = new EarleyParser(currentHypothesis, _voc);
-                        var n = parser.ParseSentence(sentenceItem.Key);
+                        var n = parser.ParseSentence(sentenceItem.Key, cts);
                         allParses[i] = new SentenceParsingResults
                         {
                             Sentence = sentenceItem.Key,
                             Trees = n,
                             Count = sentenceItem.Value
                         };
+                        po.CancellationToken.ThrowIfCancellationRequested();
                     });
                 return allParses;
             }
@@ -70,6 +72,9 @@ namespace LinearIndexedGrammarLearner
                 //parse tree too long to parse
                 //the grammar is too recursive,
                 //decision - discard it and continue.
+
+                //OR -
+                //parser failed
 
                 //string s = "parsing took too long (0.5 second), for the grammar:\r\n" + currentHypothesis.ToString();
                 //NLog.LogManager.GetCurrentClassLogger().Info(s);

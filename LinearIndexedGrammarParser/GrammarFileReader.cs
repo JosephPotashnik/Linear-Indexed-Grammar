@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace LinearIndexedGrammarParser
 {
@@ -19,45 +20,52 @@ namespace LinearIndexedGrammarParser
             var textVocabulary = new Vocabulary();
             var nonTerminalSentences = GetSentencesNonTerminals(n);
             var sentences = new List<string>();
+            var rand = new Random();
+            var posCategories = new HashSet<string>();
 
             foreach (var item in nonTerminalSentences)
             {
                 var arr = item.Split();
-                var sentence = new string[arr.Length];
 
-                var posCategories = new HashSet<string>();
-                for (var i = 0; i < arr.Length; i++)
+                for (int k = 0; k < 3; k++)
                 {
-                    var posCat = arr[i];
+                    var sentence = new string[arr.Length];
 
-                    sentence[i] = universalVocabulary.POSWithPossibleWords[posCat].First();
-                    if (!posCategories.Contains(posCat))
+                    for (var i = 0; i < sentence.Length; i++)
+                    {
+                        var posCat = arr[i];
+
+                        var possibleWords = universalVocabulary.POSWithPossibleWords[posCat].ToArray();
+                        var randomWord = possibleWords[rand.Next(possibleWords.Length)];
+                        sentence[i] = randomWord;
                         posCategories.Add(posCat);
+                    }
+
+                    var s = string.Join(" ", sentence);
+                    sentences.Add(s);
                 }
-
-                foreach (var category in posCategories)
-                    textVocabulary.AddWordsToPOSCategory(category,
-                        universalVocabulary.POSWithPossibleWords[category].ToArray());
-
-                var s = string.Join(" ", sentence);
-                sentences.Add(s);
+                
             }
+            foreach (var category in posCategories)
+                textVocabulary.AddWordsToPOSCategory(category,
+                    universalVocabulary.POSWithPossibleWords[category].ToArray());
 
             return (sentences.ToArray(), textVocabulary);
         }
 
-        public static (List<EarleyNode> nodeList, Rule[] grammarRules) GenerateSentenceAccordingToGrammar(
+        public static (List<EarleyNode> nodeList, List<Rule> grammarRules) GenerateSentenceAccordingToGrammar(
             string filename, int maxWords)
         {
             //var cSgrammar = CreateGrammarFromFile(filename);
             //var cfGrammar = new ContextFreeGrammar(cSgrammar);
 
-            var grammarRules = ReadRulesFromFile(filename).ToArray();
+            var grammarRules = ReadRulesFromFile(filename);
             var cfGrammar = new ContextFreeGrammar(grammarRules);
 
             var generator = new EarleyGenerator(cfGrammar);
 
-            var nodeList = generator.ParseSentence("", maxWords);
+            var cts = new CancellationTokenSource();
+            var nodeList = generator.ParseSentence("", cts, maxWords);
             //return (nodeList, cSgrammar);
             return (nodeList, grammarRules);
         }
@@ -69,7 +77,7 @@ namespace LinearIndexedGrammarParser
 
             var parser = new EarleyParser(cFgrammar);
 
-            var n = parser.ParseSentence(sentence);
+            var n = parser.ParseSentence(sentence, new CancellationTokenSource());
             return n;
         }
 
@@ -91,7 +99,7 @@ namespace LinearIndexedGrammarParser
             return new DerivedCategory(match.Groups["BaseCategory"].Value, match.Groups["Stack"].Value);
         }
 
-        private static List<Rule> ReadRulesFromFile(string filename)
+        public static List<Rule> ReadRulesFromFile(string filename)
         {
             string line;
             var comment = '#';
