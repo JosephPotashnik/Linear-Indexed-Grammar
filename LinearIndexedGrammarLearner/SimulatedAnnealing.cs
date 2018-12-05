@@ -78,7 +78,7 @@ namespace LinearIndexedGrammarLearner
 
             while (currentIteration++ < _numberOfIterations)
             {
-                //if (currentIteration % 1 == 0)
+                //if (currentIteration % 100 == 0)
                     LogManager.GetCurrentClassLogger().Info($"generation {currentIteration}");
 
                 (currentGrammar, currentValue) = RunSingleIteration(currentGrammar, currentValue);

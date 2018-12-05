@@ -97,7 +97,7 @@ namespace LinearIndexedGrammar
 
             var posInText = dataVocabulary.POSWithPossibleWords.Keys.ToArray();
             var bigrams = ContextFreeGrammar.GetBigramsOfData(data, dataVocabulary);
-            ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, bigrams, 5);
+            ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, bigrams, 6);
 
             
 
