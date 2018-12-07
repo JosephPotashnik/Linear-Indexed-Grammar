@@ -114,6 +114,44 @@ namespace LinearIndexedGrammarParser
 
         public void PruneUnusedRules(Dictionary<int, int> usagesDic)
         {
+            try
+            {
+                foreach (var rule in StackConstantRules)
+                {
+                    if (RuleSpace[rule] == null)
+                    {
+                        Console.WriteLine($"Rule lhs {rule.LHSIndex}, rule rhs {rule.RHSIndex}, rule space type: {rule.RuleType} ");
+                        throw new Exception();
+
+                    }
+                }
+
+                if (StackConstantRules == null)
+                {
+                    Console.WriteLine($"Stack Constant Rules is null");
+                    throw new Exception();
+                }
+
+                if (usagesDic == null)
+                {
+                    Console.WriteLine($"usages dic is null");
+                    throw new Exception();
+                }
+
+                if (RuleSpace == null)
+                {
+                    Console.WriteLine($"rule space is null");
+                    throw new Exception();
+                }
+                    
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+
             var unusedConstantRules =
                 StackConstantRules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].Number)).ToArray();
 

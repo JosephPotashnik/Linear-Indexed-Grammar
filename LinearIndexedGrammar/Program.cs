@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using LinearIndexedGrammarLearner;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
@@ -18,6 +19,21 @@ namespace LinearIndexedGrammar
         [JsonProperty] public ProgramParams[] ProgramsToRun { get; set; }
     }
 
+    //TODO: add new unit tests for rule space generation.
+    //int ans = ruleSpace.FindRHSIndex(new[] { "D", "N" });
+    //ans = ruleSpace.FindRHSIndex(new[] { "D", "X2" });
+    //var ans2 = ruleSpace.FindRHSIndex(new[] { "X3", "P" });
+    //ans = ruleSpace.FindRHSIndex(new[] { "X3" });
+    //ans = ruleSpace.FindRHSIndex(new[] { "D" });
+    //ans = ruleSpace.FindLHSIndex("X1");
+    //ans = ruleSpace.FindLHSIndex("X3");
+
+    //var r = new Rule("X2", new[] { "V", "X3" });
+    //var rc = ruleSpace.FindRule(r);
+    //var res = ruleSpace[rc];
+
+
+
     [JsonObject(MemberSerialization.OptIn)]
     public class ProgramParams
     {
@@ -32,6 +48,16 @@ namespace LinearIndexedGrammar
 
     internal class Program
     {
+        private static void Learn()
+        {
+            var fileName = @"ProgramsToRun.json";
+            fileName = @"NightRunFull.json";
+
+            var programParamsList = ReadProgramParamsFromFile(fileName);
+            foreach (var programParams in programParamsList.ProgramsToRun)
+                RunProgram(programParams);
+        }
+
         private static void Main()
         {
             ConfigureLogger();
@@ -68,25 +94,58 @@ namespace LinearIndexedGrammar
         }
 
 
-        private static void Learn(int maxWordsInSentence = 6)
+        
+
+        private static (string[] data, Vocabulary dataVocabulary) PrepareDataFromTargetGrammar(List<Rule> grammarRules, Vocabulary universalVocabulary, int maxWords = 6)
         {
-            var fileName = @"ProgramsToRun.json";
-            //fileName = @"NightRunFull.json";
-
-            var programParamsList = ReadProgramParamsFromFile(fileName);
-            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
-
-            foreach (var programParams in programParamsList.ProgramsToRun)
-                RunProgram(programParams, maxWordsInSentence, universalVocabulary);
+            var cfGrammar = new ContextFreeGrammar(grammarRules);
+            var generator = new EarleyGenerator(cfGrammar);
+            var nodeList = generator.ParseSentence("", new CancellationTokenSource(), maxWords);
+            return GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
         }
 
-        private static void RunProgram(ProgramParams programParams, int maxWordsInSentence,
-            Vocabulary universalVocabulary)
+        private static void PrepareRuleSpace(Vocabulary dataVocabulary, string[] data, int numberOfAllowedNonTerminals)
         {
+            var posInText = dataVocabulary.POSWithPossibleWords.Keys.ToArray();
+            var bigrams = ContextFreeGrammar.GetBigramsOfData(data, dataVocabulary);
+            ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, bigrams, numberOfAllowedNonTerminals);
+        }
+        private static bool ValidateTargetGrammar(List<Rule> grammarRules, string[] data, Vocabulary dataVocabulary)
+        {
+            var sentences = data.Select(x => x.Split()).ToArray();
+            int maxWordsInSentence = sentences.Max(x => x.Length);
+
+            var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
+            IObjectiveFunction<double> objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
+            var posInText = dataVocabulary.POSWithPossibleWords.Keys.ToHashSet();
+            ContextFreeGrammar.RenameVariables(grammarRules, posInText);
+            var targetGrammar = new ContextSensitiveGrammar(grammarRules);
+
+            var targetProb = objectiveFunction.Compute(targetGrammar, false);
+
+            string s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
+            LogManager.GetCurrentClassLogger().Info(s);
+            if (targetProb < 1)
+            {
+                LogManager.GetCurrentClassLogger().Fatal("probablity incorrect. exit!");
+                return false;
+            }
+
+            return true;
+        }
+
+        private static void RunProgram(ProgramParams programParams)
+        {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(ContextFreeGrammar.VocabularyFile);
+
             ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
-            var (nodeList, grammarRules) =
-                GrammarFileReader.GenerateSentenceAccordingToGrammar(programParams.GrammarFileName, maxWordsInSentence);
-            var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
+            var grammarRules = GrammarFileReader.ReadRulesFromFile(programParams.GrammarFileName);
+            var (data, dataVocabulary) = PrepareDataFromTargetGrammar(grammarRules, universalVocabulary);
+            int numberOfAllowedNonTerminals = 6;
+            PrepareRuleSpace(dataVocabulary, data, numberOfAllowedNonTerminals);
+
+            if (!ValidateTargetGrammar(grammarRules, data, dataVocabulary))
+                return;
 
             var s = "-------------------\r\n" +
                     $"Session {DateTime.Now:MM/dd/yyyy h:mm tt}\r\n" +
@@ -95,52 +154,13 @@ namespace LinearIndexedGrammar
             LogManager.GetCurrentClassLogger().Info(s);
             var stopWatch = StartWatch();
 
-            var posInText = dataVocabulary.POSWithPossibleWords.Keys.ToArray();
-            var bigrams = ContextFreeGrammar.GetBigramsOfData(data, dataVocabulary);
-            ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, bigrams, 6);
-
-            
-
-            //TODO: add new unit tests for rule space generation.
-            //int ans = ruleSpace.FindRHSIndex(new[] { "D", "N" });
-            //ans = ruleSpace.FindRHSIndex(new[] { "D", "X2" });
-            //var ans2 = ruleSpace.FindRHSIndex(new[] { "X3", "P" });
-            //ans = ruleSpace.FindRHSIndex(new[] { "X3" });
-            //ans = ruleSpace.FindRHSIndex(new[] { "D" });
-            //ans = ruleSpace.FindLHSIndex("X1");
-            //ans = ruleSpace.FindLHSIndex("X3");
-
-            //var r = new Rule("X2", new[] { "V", "X3" });
-            //var rc = ruleSpace.FindRule(r);
-            //var res = ruleSpace[rc];
-
-            var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
-            IObjectiveFunction<double> objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
-
-            var grammarRuleList = grammarRules.ToList();
-            ContextFreeGrammar.RenameVariables(grammarRuleList, posInText);
-            var targetGrammar = new ContextSensitiveGrammar(grammarRuleList);
-
-            var targetProb = objectiveFunction.Compute(targetGrammar, false);
-
-            s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
-            LogManager.GetCurrentClassLogger().Info(s);
-            if (targetProb < 1)
-            {
-                LogManager.GetCurrentClassLogger().Fatal("probablity incorrect. exit!");
-                return;
-            }
-
             var probs = new List<double>();
+            programParams.NumberOfRuns = 1;
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
                 LogManager.GetCurrentClassLogger().Info($"Run {i + 1}:");
 
-                //var algorithm = new GeneticAlgorithm<double>(learner, programParams.PopulationSize, programParams.NumberOfGenerations, objectiveFunction);
-                var algorithm = new SimulatedAnnealing<double>(learner, programParams.NumberOfGenerations, 0.99, 2000,
-                    objectiveFunction);
-
-                var (bestHypothesis, bestValue) = algorithm.Run();
+                var (bestHypothesis, bestValue) = LearnGrammarFromData(data, dataVocabulary);
                 probs.Add(bestValue);
 
                 s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";
@@ -159,6 +179,24 @@ namespace LinearIndexedGrammar
             StopWatch(stopWatch);
         }
 
+        public static (ContextSensitiveGrammar bestGrammar, double bestValue) LearnGrammarFromData(string[] data, Vocabulary dataVocabulary)
+        {
+            int numberOfAllowedNonTerminals = 6;
+            PrepareRuleSpace(dataVocabulary, data, numberOfAllowedNonTerminals);
+
+            var sentences = data.Select(x => x.Split()).ToArray();
+            int maxWordsInSentence = sentences.Max(x => x.Length);
+
+            var learner = new Learner(data, maxWordsInSentence, dataVocabulary);
+            IObjectiveFunction<double> objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
+            var numberOfIterations = 1000;
+            var coolingFactor = 0.99;
+            var initialTemperature = 2000;
+
+            var algorithm = new SimulatedAnnealing<double>(learner, numberOfIterations, coolingFactor, initialTemperature,objectiveFunction);
+            var (bestHypothesis, bestValue) = algorithm.Run();
+            return (bestHypothesis, bestValue);
+        }
 
         private static ProgramParamsList ReadProgramParamsFromFile(string fileName)
         {

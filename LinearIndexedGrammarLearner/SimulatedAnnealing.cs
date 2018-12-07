@@ -38,7 +38,6 @@ namespace LinearIndexedGrammarLearner
                     currentTemp *= _coolingFactor;
                     if (mutatedGrammar == null) continue;
 
-
                     //var t = Task.Run(() => _objectiveFunction.Compute(mutatedGrammar, false));
                     //if (!t.Wait(1500))
                     //{

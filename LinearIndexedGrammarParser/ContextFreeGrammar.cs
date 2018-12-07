@@ -14,6 +14,7 @@ namespace LinearIndexedGrammarParser
 
     public class ContextFreeGrammar
     {
+        public const string VocabularyFile = "VocabularyAmbiguousWords3.Json";
         public static HashSet<SyntacticCategory> PartsOfSpeech;
         public const string GammaRule = "Gamma";
         public const string StartSymbol = "START";
@@ -34,7 +35,7 @@ namespace LinearIndexedGrammarParser
             GenerateAllStaticRulesFromDynamicRules(rulesDic);
             ComputeTransitiveClosureOfNullableCategories();
         }
-        public ContextFreeGrammar(Rule[] ruleList)
+        public ContextFreeGrammar(List<Rule> ruleList)
         {
             ConstructCFG(ruleList);
         }
@@ -321,9 +322,8 @@ namespace LinearIndexedGrammarParser
         }
 
 
-        public static void RenameVariables(List<Rule> rules, string[] posInText)
+        public static void RenameVariables(List<Rule> rules, HashSet<string> partOfSpeechCategories)
         {
-            var pos = posInText.ToHashSet();
             var originalVariables = rules.Select(x => new SyntacticCategory(x.LeftHandSide).ToString()).ToList();
             originalVariables = originalVariables.Distinct().ToList();
 
@@ -358,7 +358,7 @@ namespace LinearIndexedGrammarParser
                 if (rule.RightHandSide.Length == 1)
                 {
                     var baseCat = new SyntacticCategory(rule.RightHandSide[0]);
-                    if (pos.Contains(baseCat.ToString()))
+                    if (partOfSpeechCategories.Contains(baseCat.ToString()))
                         startRulesToReplace.Add(rule);
 
                 }
