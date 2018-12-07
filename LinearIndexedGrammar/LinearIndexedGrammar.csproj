@@ -19,6 +19,9 @@
     <None Update="EvenNCFG.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="MoveNPPP.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="MoveNPWithADJ.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -50,6 +53,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="NoNPWithV3.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="VocabularyAmbiguousWords3.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="VocabularyAmbiguousWords2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="VocabularyAmbiguousWords1.json">

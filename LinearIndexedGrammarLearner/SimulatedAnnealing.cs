@@ -38,7 +38,6 @@ namespace LinearIndexedGrammarLearner
                     currentTemp *= _coolingFactor;
                     if (mutatedGrammar == null) continue;
 
-
                     //var t = Task.Run(() => _objectiveFunction.Compute(mutatedGrammar, false));
                     //if (!t.Wait(1500))
                     //{
@@ -78,7 +77,7 @@ namespace LinearIndexedGrammarLearner
 
             while (currentIteration++ < _numberOfIterations)
             {
-                if (currentIteration % 100 == 0)
+                //if (currentIteration % 100 == 0)
                     LogManager.GetCurrentClassLogger().Info($"generation {currentIteration}");
 
                 (currentGrammar, currentValue) = RunSingleIteration(currentGrammar, currentValue);

@@ -20,7 +20,7 @@ namespace LinearIndexedGrammarParser
 
         public EarleyParser(ContextFreeGrammar g, Vocabulary v = null)
         {
-            Voc = v ?? Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
+            Voc = v ?? Vocabulary.ReadVocabularyFromFile(ContextFreeGrammar.VocabularyFile);
 
             _grammar = g;
         }

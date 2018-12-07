@@ -139,7 +139,7 @@ namespace LinearIndexedGrammarLearner
 
                 return usagesDic;
             }
-
+            Console.WriteLine("returning usages dic null. meaning that all parses are zero.");
             return null;
         }
 

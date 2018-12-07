@@ -4,7 +4,7 @@
       "PopulationSize": 300,
       "NumberOfGenerations": 500,
       "NumberOfRuns": 10,
-      "GrammarFileName": "YesNPNoV3WithADJ.txt"
+      "GrammarFileName": "MoveNPPP.txt"
     }
   ]
 }

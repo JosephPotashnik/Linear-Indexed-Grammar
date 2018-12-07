@@ -77,12 +77,18 @@ namespace LinearIndexedGrammarLearner
                 LogManager.GetCurrentClassLogger().Warn(s);
                 return 0;
             }
+            //catch (Exception e)
+            //{
+            //    var s = e.ToString();
+            //    LogManager.GetCurrentClassLogger().Error(s);
+            //    throw;
+            //}
 
             if (allParses != null)
             {
-                //var totalTreesCountofData = allParses.Select(x => x.Trees.Count).Sum();
+
                 var trees = allParses.SelectMany(x => x.Trees);
-                var representations = trees.Select(x => x.GetBracketedRepresentation()).Distinct().ToArray();
+                var representations = trees.Select(x => x.GetBracketedRepresentation()).Distinct(StringComparer.Ordinal).ToArray();
                 var totalTreesCountofData = representations.Length;
                 if (totalTreesCountofData != 0)
                 {

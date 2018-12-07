@@ -14,6 +14,7 @@ namespace LinearIndexedGrammarParser
 
     public class ContextFreeGrammar
     {
+        public const string VocabularyFile = "VocabularyAmbiguousWords3.Json";
         public static HashSet<SyntacticCategory> PartsOfSpeech;
         public const string GammaRule = "Gamma";
         public const string StartSymbol = "START";

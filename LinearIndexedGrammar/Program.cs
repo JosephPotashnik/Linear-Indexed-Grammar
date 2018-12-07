@@ -48,6 +48,16 @@ namespace LinearIndexedGrammar
 
     internal class Program
     {
+        private static void Learn()
+        {
+            var fileName = @"ProgramsToRun.json";
+            fileName = @"NightRunFull.json";
+
+            var programParamsList = ReadProgramParamsFromFile(fileName);
+            foreach (var programParams in programParamsList.ProgramsToRun)
+                RunProgram(programParams);
+        }
+
         private static void Main()
         {
             ConfigureLogger();
@@ -84,17 +94,7 @@ namespace LinearIndexedGrammar
         }
 
 
-        private static void Learn(int maxWordsInSentence = 6)
-        {
-            var fileName = @"ProgramsToRun.json";
-            fileName = @"NightRunFull.json";
-
-            var programParamsList = ReadProgramParamsFromFile(fileName);
-            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
-
-            foreach (var programParams in programParamsList.ProgramsToRun)
-                RunProgram(programParams, maxWordsInSentence, universalVocabulary);
-        }
+        
 
         private static (string[] data, Vocabulary dataVocabulary) PrepareDataFromTargetGrammar(List<Rule> grammarRules, Vocabulary universalVocabulary, int maxWords = 6)
         {
@@ -134,13 +134,15 @@ namespace LinearIndexedGrammar
             return true;
         }
 
-        private static void RunProgram(ProgramParams programParams, int maxWordsInSentence,
-            Vocabulary universalVocabulary)
+        private static void RunProgram(ProgramParams programParams)
         {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(ContextFreeGrammar.VocabularyFile);
+
             ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
             var grammarRules = GrammarFileReader.ReadRulesFromFile(programParams.GrammarFileName);
-            var (data, dataVocabulary) = PrepareDataFromTargetGrammar(grammarRules, universalVocabulary, maxWordsInSentence);
-            PrepareRuleSpace(dataVocabulary, data, 6);
+            var (data, dataVocabulary) = PrepareDataFromTargetGrammar(grammarRules, universalVocabulary);
+            int numberOfAllowedNonTerminals = 6;
+            PrepareRuleSpace(dataVocabulary, data, numberOfAllowedNonTerminals);
 
             if (!ValidateTargetGrammar(grammarRules, data, dataVocabulary))
                 return;

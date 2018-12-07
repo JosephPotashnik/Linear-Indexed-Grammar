@@ -23,11 +23,12 @@ namespace LinearIndexedGrammarParser
             var rand = new Random();
             var posCategories = new HashSet<string>();
 
+            int numberOfSentencesPerEachTree = 10;
             foreach (var item in nonTerminalSentences)
             {
                 var arr = item.Split();
 
-                for (int k = 0; k < 3; k++)
+                for (int k = 0; k < numberOfSentencesPerEachTree; k++)
                 {
                     var sentence = new string[arr.Length];
 
