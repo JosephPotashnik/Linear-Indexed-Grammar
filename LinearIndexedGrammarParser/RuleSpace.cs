@@ -28,11 +28,10 @@ namespace LinearIndexedGrammarParser
         private readonly Dictionary<string, int> _nonTerminalsRHS = new Dictionary<string, int>();
         private readonly List<int>[] _allowedRHSIndices;
 
-        public RuleSpace(string[] partsOfSpeechCategories, HashSet<(string rhs1, string rhs2)> bigrams, int maxNonTerminals)
+        public RuleSpace(HashSet<string> partsOfSpeechCategories, HashSet<(string rhs1, string rhs2)> bigrams, int maxNonTerminals)
         {
             var rhsStore = new List<string>();
             var nonTerminals = new List<string>();
-            var posHashSet = new HashSet<string>(partsOfSpeechCategories);
 
             _ruleSpace = new Rule[RuleType.RuleTypeCount][][];
             _allowedRHSIndices = new List<int>[RuleType.RuleTypeCount];
@@ -89,7 +88,7 @@ namespace LinearIndexedGrammarParser
                     DerivedCategory rhs1Cat;
                     //Xi -> RHS in CFG Rules
 
-                    if (posHashSet.Contains(rhs1))
+                    if (partsOfSpeechCategories.Contains(rhs1))
                         rhs1Cat = new DerivedCategory(rhs1);
                     else
                         rhs1Cat = new DerivedCategory(rhs1, ContextFreeGrammar.StarSymbol);
@@ -114,7 +113,7 @@ namespace LinearIndexedGrammarParser
                     var rhs1Cat = new DerivedCategory(rhs1);
                     DerivedCategory rhs2Cat;
 
-                    if (posHashSet.Contains(rhs2))
+                    if (partsOfSpeechCategories.Contains(rhs2))
                         rhs2Cat = new DerivedCategory(rhs2);
                     else
                         rhs2Cat = new DerivedCategory(rhs2, ContextFreeGrammar.StarSymbol);
@@ -127,7 +126,7 @@ namespace LinearIndexedGrammarParser
                     _ruleSpace[RuleType.Push1Rules][0][currentIndex] = new Rule(currentCategory, new[] { rhs1Cat, rhs2CatForPushRule });
 
 
-                    if (posHashSet.Contains(rhs1) && posHashSet.Contains(rhs2))
+                    if (partsOfSpeechCategories.Contains(rhs1) && partsOfSpeechCategories.Contains(rhs2))
                     {
                         if (bigrams.Contains((rhs1, rhs2)))
                             _allowedRHSIndices[RuleType.CFGRules].Add(currentIndex);
@@ -141,7 +140,7 @@ namespace LinearIndexedGrammarParser
 
                     //allow only movement of nonterminals (Consequence: movement cannot be out of terminals)
                     //also disallow rules such as Xi -> Xj Xj[*Xj] (this is equal to unit production Xi -> Xj)
-                    if (rhs1 != rhs2 && !posHashSet.Contains(rhs2) && !posHashSet.Contains(rhs1))
+                    if (rhs1 != rhs2 && !partsOfSpeechCategories.Contains(rhs2) && !partsOfSpeechCategories.Contains(rhs1))
                         _allowedRHSIndices[RuleType.Push1Rules].Add(currentIndex);
                 }
             }

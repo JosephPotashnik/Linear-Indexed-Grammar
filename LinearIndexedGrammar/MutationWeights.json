@@ -21,18 +21,18 @@
   },
   {
     "Mutation": "InsertMovement",
-    "MutationWeight": 0
+    "MutationWeight": 5
   },
   {
     "Mutation": "DeleteMovement",
-    "MutationWeight": 0
+    "MutationWeight": 5
   },
   {
     "Mutation": "ChangeLHSPush",
-    "MutationWeight": 0
+    "MutationWeight": 5
   },
   {
     "Mutation": "ChangeRHSPush",
-    "MutationWeight": 0
+    "MutationWeight": 5
   }
 ]

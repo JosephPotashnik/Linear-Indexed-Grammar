@@ -14,13 +14,15 @@ namespace LinearIndexedGrammarParser
 
     public class ContextFreeGrammar
     {
-        public const string VocabularyFile = "VocabularyAmbiguousWords3.Json";
+        public const string VocabularyFile = "Vocabulary.Json";
         public static HashSet<SyntacticCategory> PartsOfSpeech;
         public const string GammaRule = "Gamma";
         public const string StartSymbol = "START";
         public const string EpsilonSymbol = "Epsilon";
         public const string StarSymbol = "*";
         public const int MaxStackDepth = 3;
+        public const int MaxSentenceLength = 15;
+
         public readonly HashSet<DerivedCategory> ObligatoryNullableCategories = new HashSet<DerivedCategory>();
         public readonly HashSet<DerivedCategory> PossibleNullableCategories = new HashSet<DerivedCategory>();
         private int ruleNumbering = 1;
@@ -41,6 +43,12 @@ namespace LinearIndexedGrammarParser
         }
 
         public ContextFreeGrammar(ContextSensitiveGrammar cs)
+        {
+            var rules = ExtractRules(cs);
+            ConstructCFG(rules);
+        }
+
+        public static IEnumerable<Rule> ExtractRules(ContextSensitiveGrammar cs)
         {
             IEnumerable<Rule> rules;
             var stackConstantRules = cs.StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]);
@@ -67,7 +75,7 @@ namespace LinearIndexedGrammarParser
             else
                 rules = stackConstantRules;
 
-            ConstructCFG(rules);
+            return rules;
         }
 
         private static Dictionary<SyntacticCategory, List<Rule>> CreateRulesDictionary(IEnumerable<Rule> xy)
@@ -386,7 +394,7 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        public static HashSet<(string rhs1, string rhs2)> GetBigramsOfData(string[] data, Vocabulary textVocabulary)
+        public static HashSet<(string rhs1, string rhs2)> GetBigramsOfData(string[] data, Vocabulary universalVocabulary)
         {
             var bigrams = new HashSet<(string rhs1, string rhs2)>();
 
@@ -398,8 +406,8 @@ namespace LinearIndexedGrammarParser
                     var rhs1 = words[i];
                     var rhs2 = words[i + 1];
 
-                    var possiblePOSforrhs1 = textVocabulary.WordWithPossiblePOS[rhs1].ToArray();
-                    var possiblePOSforrhs2 = textVocabulary.WordWithPossiblePOS[rhs2].ToArray();
+                    var possiblePOSforrhs1 = universalVocabulary.WordWithPossiblePOS[rhs1].ToArray();
+                    var possiblePOSforrhs2 = universalVocabulary.WordWithPossiblePOS[rhs2].ToArray();
 
                     foreach (var pos1 in possiblePOSforrhs1)
                     {

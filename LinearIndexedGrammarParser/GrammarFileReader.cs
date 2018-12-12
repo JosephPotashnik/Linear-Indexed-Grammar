@@ -14,6 +14,30 @@ namespace LinearIndexedGrammarParser
             return n.Select(x => x.GetNonTerminalStringUnderNode()).ToList();
         }
 
+        public static (string[] sentences, HashSet<string> POSCategoriesInData)  GetDataAndVocabularyForSentencesUpToLengthN(string[] allData, Vocabulary universalVocabulary, int n)
+        {
+            var sentences = new List<string>();
+            var posCategories = new HashSet<string>();
+
+            foreach (var item in allData)
+            {
+                var arr = item.Split();
+                if (arr.Length > n) continue;
+
+                var sentence = new string[arr.Length];
+                for (var i = 0; i < sentence.Length; i++)
+                {
+                    var possiblePOS = universalVocabulary.WordWithPossiblePOS[arr[i]];
+                    foreach (var pos in possiblePOS)
+                        posCategories.Add(pos);
+                }
+
+                sentences.Add(item);
+            }
+
+            return (sentences.ToArray(), posCategories);
+        }
+
         public static (string[] sentences, Vocabulary textVocabulary) GetSentencesOfGenerator(List<EarleyNode> n,
             Vocabulary universalVocabulary)
         {
