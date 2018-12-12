@@ -4,7 +4,7 @@
       "PopulationSize": 300,
       "NumberOfGenerations": 500,
       "NumberOfRuns": 10,
-      "GrammarFileName": "MoveNPPP.txt"
+      "GrammarFileName": "NoNPWithV3.txt"
     }
   ]
 }

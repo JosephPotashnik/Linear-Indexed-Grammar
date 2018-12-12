@@ -14,7 +14,7 @@ namespace LinearIndexedGrammarLearner
         private readonly Dictionary<string, int> _sentencesWithCounts;
         private readonly Vocabulary _voc;
         private GrammarPermutations _gp;
-        public const int ParsingTimeOut = 20000; //in milliseconds
+        public const int ParsingTimeOut = 2000; //in milliseconds
         public const int GrammarTreeCountCalculationTimeOut = 500; //in milliseconds
 
         public Learner(string[] sentences, int maxWordsInSentence, HashSet<string> posInText, Vocabulary universalVocabulary)

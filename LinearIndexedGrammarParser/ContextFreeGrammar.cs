@@ -21,7 +21,6 @@ namespace LinearIndexedGrammarParser
         public const string EpsilonSymbol = "Epsilon";
         public const string StarSymbol = "*";
         public const int MaxStackDepth = 3;
-        public const int MaxSentenceLength = 15;
 
         public readonly HashSet<DerivedCategory> ObligatoryNullableCategories = new HashSet<DerivedCategory>();
         public readonly HashSet<DerivedCategory> PossibleNullableCategories = new HashSet<DerivedCategory>();

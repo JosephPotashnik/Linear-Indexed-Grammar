@@ -52,7 +52,7 @@ namespace LinearIndexedGrammar
         private static void Learn()
         {
             var fileName = @"ProgramsToRun.json";
-            //fileName = @"NightRunFull.json";
+            fileName = @"NightRunFull.json";
 
             var programParamsList = ReadProgramParamsFromFile(fileName);
             foreach (var programParams in programParamsList.ProgramsToRun)
@@ -132,7 +132,8 @@ namespace LinearIndexedGrammar
             ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
             var grammarRules = GrammarFileReader.ReadRulesFromFile(programParams.GrammarFileName);
 
-            var (data, dataVocabulary) = PrepareDataFromTargetGrammar(grammarRules, universalVocabulary, ContextFreeGrammar.MaxSentenceLength);
+            int maxSentenceLength = 12;
+            var (data, dataVocabulary) = PrepareDataFromTargetGrammar(grammarRules, universalVocabulary, maxSentenceLength);
 
             if (!ValidateTargetGrammar(grammarRules, data, dataVocabulary))
                 return;
@@ -224,13 +225,16 @@ namespace LinearIndexedGrammar
         {
             var initialWordLength = 6;
             var currentWordLength = initialWordLength;
-            ContextSensitiveGrammar[] initialGrammars = new ContextSensitiveGrammar[ContextFreeGrammar.MaxSentenceLength];
+            int MaxSentenceLength = data.Max(x => x.Split().Length);
+
+            ContextSensitiveGrammar[] initialGrammars = new ContextSensitiveGrammar[MaxSentenceLength+1];
+
 
             ContextSensitiveGrammar currentGrammar = null;
             Queue<ContextSensitiveGrammar> successfulGrammars = new Queue<ContextSensitiveGrammar>();
                 
             double currentValue = 0;
-            while (currentWordLength < ContextFreeGrammar.MaxSentenceLength)
+            while (currentWordLength <= MaxSentenceLength)
             {
                 LogManager.GetCurrentClassLogger().Info($"learning word length  {currentWordLength}");
 
@@ -272,7 +276,7 @@ namespace LinearIndexedGrammar
                 }
                 
                 currentWordLength++;
-                if (currentWordLength < ContextFreeGrammar.MaxSentenceLength)
+                if (currentWordLength <= MaxSentenceLength)
                     initialGrammars[currentWordLength] = currentGrammar;
             }
 
