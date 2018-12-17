@@ -113,7 +113,7 @@ namespace LinearIndexedGrammar
             ContextFreeGrammar.RenameVariables(grammarRules, partOfSpeechCategories);
             var targetGrammar = new ContextSensitiveGrammar(grammarRules);
 
-            var targetProb = objectiveFunction.Compute(targetGrammar, false);
+            var targetProb = objectiveFunction.Compute(targetGrammar, true);
 
             string s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
             LogManager.GetCurrentClassLogger().Info(s);
@@ -162,7 +162,7 @@ namespace LinearIndexedGrammar
                 //if (objectiveFunction.IsMaximalValue(bestValue)) break;
             }
 
-            var numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < GeneticAlgorithm<double>.Tolerance);
+            var numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < 0.00001);
             var averageProb = probs.Average();
             s = $"Average probability is: {averageProb}\r\n" +
                 $"Achieved Probability=1 in {numTimesAchieveProb1} times out of {programParams.NumberOfRuns} runs";
@@ -186,18 +186,18 @@ namespace LinearIndexedGrammar
             if (initialGrammar != null)
                 initialGrammar = new ContextSensitiveGrammar(rules.ToList());
 
-            var numberOfIterations = 1000;
-            var coolingFactor = 0.99;
-            var initialTemperature = 2000;
+            var numberOfIterations = 2000;
+            var coolingFactor = 0.999;
+            var initialTemperature = 10;
 
             //run
-            var algorithm = new SimulatedAnnealing<double>(learner, numberOfIterations, coolingFactor, initialTemperature, objectiveFunction);
+            var algorithm = new SimulatedAnnealing(learner, numberOfIterations, coolingFactor, initialTemperature, objectiveFunction);
             var (bestHypothesis, bestValue) = algorithm.Run(initialGrammar);
             return (bestHypothesis, bestValue);
         }
 
         private static Learner PrepareLearningUpToSentenceLengthN(string[] data, Vocabulary universalVocabulary, int n,
-            out IObjectiveFunction<double> objectiveFunction)
+            out IObjectiveFunction objectiveFunction)
         {
             //1. get sentences up to length n and the relevant POS categories in them.
             (var sentences, var posInText) =

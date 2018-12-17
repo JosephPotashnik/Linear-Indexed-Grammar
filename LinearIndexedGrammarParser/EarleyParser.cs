@@ -134,8 +134,8 @@ namespace LinearIndexedGrammarParser
                 LogManager.GetCurrentClassLogger().Warn(s);
             }
 
-            if (nodes.Count == 0)
-                cts.Cancel();
+            //if (nodes.Count == 0)
+            //    cts.Cancel();
 
             return nodes;
         }

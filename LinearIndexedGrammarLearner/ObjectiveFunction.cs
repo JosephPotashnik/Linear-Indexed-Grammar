@@ -5,15 +5,14 @@ using NLog;
 
 namespace LinearIndexedGrammarLearner
 {
-    public interface IObjectiveFunction<T> where T : IComparable
+    public interface IObjectiveFunction
     {
-        T Compute(ContextSensitiveGrammar currentHypothesis, bool considerPartialParsing);
-        bool AcceptNewValue(T newValue, T oldValue, double temperature);
-        bool IsMaximalValue(T val);
-        bool ConsiderValue(T newVal);
+        double Compute(ContextSensitiveGrammar currentHypothesis, bool considerPartialParsing);
+        bool AcceptNewValue(double newValue, double oldValue, double temperature);
+        bool IsMaximalValue(double val);
     }
 
-    public class GrammarFitnessObjectiveFunction : IObjectiveFunction<double>
+    public class GrammarFitnessObjectiveFunction : IObjectiveFunction
     {
         public const double Tolerance = 0.000001;
         private readonly Learner _learner;
@@ -32,20 +31,19 @@ namespace LinearIndexedGrammarLearner
         public bool AcceptNewValue(double newValue, double oldValue, double temperature)
         {
             if (newValue > oldValue) return true; //any positive improvement - accept.
-            if (newValue < Tolerance) return false; //if newValue = 0, reject.
+            //if (newValue < Tolerance) return false; //if newValue = 0, reject.
 
             //if the change is too small or 0, reject.
             //many times the new grammar does not change the value,
             //experimentally, I found out we don't want to accept that move. 
             //or maybe accept the move with some probability? definitely not 100%!
-            if (oldValue - newValue < Tolerance) return false;
+            //if (oldValue - newValue < Tolerance) return false;
 
             //neval =< oldValue (our objective function is to maximize value)
             //degration - accept with a probability proportional to the delta and the iteration
             //bigger delta (bigger degradation) => lower probability.
             //bigger temperature => higher probability
-            var delta = (newValue - oldValue) * 1000 * 10;
-            var exponent = delta / temperature;
+            var exponent = 100* (Math.Log(newValue) - Math.Log(oldValue)) / temperature;
             var prob = Math.Exp(exponent);
             var rand = ThreadSafeRandom.ThisThreadsRandom;
             var randomThrow = rand.NextDouble();
@@ -110,11 +108,11 @@ namespace LinearIndexedGrammarLearner
                     }
 
                     var numberOfSentenceParsed = allParses.Count(x => x.Trees.Count > 0);
-                    var unexplainedSentencePercentage = 1.0 - numberOfSentenceParsed / (double) allParses.Length;
-
-                    if (!considerPartialParsing && unexplainedSentencePercentage > 0) return 0;
-
-                    prob -= unexplainedSentencePercentage;
+                    //var unexplainedSentencePercentage = 1.0 - numberOfSentenceParsed / (double) allParses.Length;
+                    var explainedSentences = (numberOfSentenceParsed / (double)allParses.Length);
+                    //if (!considerPartialParsing && unexplainedSentencePercentage > 0) return 0;
+                    prob *= explainedSentences;
+                    //prob -= unexplainedSentencePercentage;
                     if (prob < 0) prob = 0;
                 }
             }
