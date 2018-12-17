@@ -13,6 +13,13 @@ namespace LinearIndexedGrammarParser
         }
     }
 
+    public class GrammarOverlyRecursiveException : Exception
+    {
+        public GrammarOverlyRecursiveException(string str) : base(str)
+        {
+        }
+    }
+
     public class EarleyParser
     {
         private readonly ContextFreeGrammar _grammar;
@@ -127,7 +134,8 @@ namespace LinearIndexedGrammarParser
                 LogManager.GetCurrentClassLogger().Warn(s);
             }
 
-            if (nodes.Count == 0) cts.Cancel();
+            //if (nodes.Count == 0)
+            //    cts.Cancel();
 
             return nodes;
         }

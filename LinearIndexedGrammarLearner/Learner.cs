@@ -14,11 +14,13 @@ namespace LinearIndexedGrammarLearner
         private readonly Dictionary<string, int> _sentencesWithCounts;
         private readonly Vocabulary _voc;
         private GrammarPermutations _gp;
+        public const int ParsingTimeOut = 5000; //in milliseconds
+        public const int GrammarTreeCountCalculationTimeOut = 500; //in milliseconds
 
-        public Learner(string[] sentences, int maxWordsInSentence, Vocabulary voc)
+        public Learner(string[] sentences, int maxWordsInSentence, HashSet<string> posInText, Vocabulary universalVocabulary)
         {
-            _voc = voc;
-            _posInText = _voc.POSWithPossibleWords.Keys.ToHashSet();
+            _voc = universalVocabulary;
+            _posInText = posInText;
             _maxWordsInSentence = maxWordsInSentence;
             _sentencesWithCounts = sentences.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
         }
@@ -49,8 +51,7 @@ namespace LinearIndexedGrammarLearner
 
             try
             {
-                var timeout = 500; // 0.5 seconds
-                var cts = new CancellationTokenSource(timeout);
+                var cts = new CancellationTokenSource(ParsingTimeOut);
                 var po = new ParallelOptions {CancellationToken = cts.Token};
                 Parallel.ForEach(_sentencesWithCounts, po,
                     (sentenceItem, loopState, i) =>
@@ -107,11 +108,11 @@ namespace LinearIndexedGrammarLearner
                 return treeCalculator.NumberOfParseTreesPerWords(treeDepth);
             });
 
-            if (!t.Wait(500))
+            if (!t.Wait(GrammarTreeCountCalculationTimeOut))
             {
-                //string s = "computing all parse trees took too long (0.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
+                //string s = "computing all parse trees took too long (1.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
                 //NLog.LogManager.GetCurrentClassLogger().Info(s);
-                //throw new Exception();
+                //throw new GrammarOverlyRecursiveException(s);
             }
 
             var parseTreesCountPerWords = t.Result;
