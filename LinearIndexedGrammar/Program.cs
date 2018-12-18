@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -38,21 +37,18 @@ namespace LinearIndexedGrammar
     [JsonObject(MemberSerialization.OptIn)]
     public class ProgramParams
     {
-        [JsonProperty] public int PopulationSize { get; set; }
-
-        [JsonProperty] public int NumberOfGenerations { get; set; }
-
         [JsonProperty] public int NumberOfRuns { get; set; }
-
         [JsonProperty] public string GrammarFileName { get; set; }
+        [JsonProperty] public string VocabularyFileName { get; set; }
+        [JsonProperty] public bool IsCFG { get; set; }
     }
 
     internal class Program
     {
-        private static void Learn()
+
+        private static void Learn(bool nightRun = true)
         {
-            var fileName = @"ProgramsToRun.json";
-            fileName = @"NightRunFull.json";
+            var fileName = nightRun ? @"NightRunFull.json" : @"ProgramsToRun.json";
 
             var programParamsList = ReadProgramParamsFromFile(fileName);
             foreach (var programParams in programParamsList.ProgramsToRun)
@@ -97,7 +93,7 @@ namespace LinearIndexedGrammar
         private static (string[] data, Vocabulary dataVocabulary) PrepareDataFromTargetGrammar(List<Rule> grammarRules, Vocabulary universalVocabulary, int maxWords)
         {
             var cfGrammar = new ContextFreeGrammar(grammarRules);
-            var generator = new EarleyGenerator(cfGrammar);
+            var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
             var nodeList = generator.ParseSentence("", new CancellationTokenSource(), maxWords);
             return GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
         }
@@ -108,12 +104,12 @@ namespace LinearIndexedGrammar
             var sentences = data.Select(x => x.Split()).ToArray();
             int maxWordsInSentence = sentences.Max(x => x.Length);
 
-            var learner = PrepareLearningUpToSentenceLengthN(data, universalVocabulary, maxWordsInSentence, out var objectiveFunction);
+            PrepareLearningUpToSentenceLengthN(data, universalVocabulary, maxWordsInSentence, out var objectiveFunction);
             var partOfSpeechCategories = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
             ContextFreeGrammar.RenameVariables(grammarRules, partOfSpeechCategories);
             var targetGrammar = new ContextSensitiveGrammar(grammarRules);
 
-            var targetProb = objectiveFunction.Compute(targetGrammar, true);
+            var targetProb = objectiveFunction.Compute(targetGrammar);
 
             string s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
             LogManager.GetCurrentClassLogger().Info(s);
@@ -128,7 +124,7 @@ namespace LinearIndexedGrammar
 
         private static void RunProgram(ProgramParams programParams)
         {
-            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(ContextFreeGrammar.VocabularyFile);
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(programParams.VocabularyFileName);
             ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
             var grammarRules = GrammarFileReader.ReadRulesFromFile(programParams.GrammarFileName);
 
@@ -138,28 +134,23 @@ namespace LinearIndexedGrammar
             if (!ValidateTargetGrammar(grammarRules, data, dataVocabulary))
                 return;
 
-            var s = "-------------------\r\n" +
+            var s = "------------------------------------------------------------\r\n" +
                     $"Session {DateTime.Now:MM/dd/yyyy h:mm tt}\r\n" +
-                    $"runs: {programParams.NumberOfRuns}, population size: {programParams.PopulationSize}, number of generations: {programParams.NumberOfGenerations}\r\n";
+                    $"runs: {programParams.NumberOfRuns}, grammar file name: {programParams.GrammarFileName}, vocabulary file name: {programParams.VocabularyFileName}\r\n";
 
             LogManager.GetCurrentClassLogger().Info(s);
             var stopWatch = StartWatch();
 
             var probs = new List<double>();
-            programParams.NumberOfRuns = 1;
             for (var i = 0; i < programParams.NumberOfRuns; i++)
             {
                 LogManager.GetCurrentClassLogger().Info($"Run {i + 1}:");
 
-                var (bestHypothesis, bestValue) = LearnGrammarFromData(data, dataVocabulary);
+                var (bestHypothesis, bestValue) = LearnGrammarFromData(data, dataVocabulary, programParams.IsCFG);
                 probs.Add(bestValue);
 
                 s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";
                 LogManager.GetCurrentClassLogger().Info(s);
-
-                //the following line should be uncommented for sanity checks (i.e, it suffices to see that
-                //we arrived at a possible solution), for night run / unit tests, etc.
-                //if (objectiveFunction.IsMaximalValue(bestValue)) break;
             }
 
             var numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < 0.00001);
@@ -171,7 +162,7 @@ namespace LinearIndexedGrammar
         }
 
         public static (ContextSensitiveGrammar bestGrammar, double bestValue) LearnGrammarFromDataUpToLengthN(
-            string[] data, Vocabulary universalVocabulary, int n, ContextSensitiveGrammar initialGrammar)
+            string[] data, Vocabulary universalVocabulary, int n, bool isCFGGrammar, ContextSensitiveGrammar initialGrammar)
         {
             IEnumerable<Rule> rules = null;
             //1. transform initial grammar to rule list
@@ -186,13 +177,17 @@ namespace LinearIndexedGrammar
             if (initialGrammar != null)
                 initialGrammar = new ContextSensitiveGrammar(rules.ToList());
 
-            var numberOfIterations = 2000;
-            var coolingFactor = 0.999;
-            var initialTemperature = 10;
+
+            SimulatedAnnealingParameters parameters = new SimulatedAnnealingParameters()
+            {
+                CoolingFactor = 0.999,
+                InitialTemperature = 10,
+                NumberOfIterations = 2000
+            };
 
             //run
-            var algorithm = new SimulatedAnnealing(learner, numberOfIterations, coolingFactor, initialTemperature, objectiveFunction);
-            var (bestHypothesis, bestValue) = algorithm.Run(initialGrammar);
+            var algorithm = new SimulatedAnnealing(learner, parameters, objectiveFunction);
+            var (bestHypothesis, bestValue) = algorithm.Run(isCFGGrammar, initialGrammar);
             return (bestHypothesis, bestValue);
         }
 
@@ -221,14 +216,13 @@ namespace LinearIndexedGrammar
             ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, bigrams, numberOfAllowedNonTerminals);
         }
 
-        public static (ContextSensitiveGrammar bestGrammar, double bestValue) LearnGrammarFromData(string[] data, Vocabulary universalVocabulary)
+        public static (ContextSensitiveGrammar bestGrammar, double bestValue) LearnGrammarFromData(string[] data, Vocabulary universalVocabulary, bool isCFGGrammar)
         {
             var initialWordLength = 6;
             var currentWordLength = initialWordLength;
             int MaxSentenceLength = data.Max(x => x.Split().Length);
 
             ContextSensitiveGrammar[] initialGrammars = new ContextSensitiveGrammar[MaxSentenceLength+1];
-
 
             ContextSensitiveGrammar currentGrammar = null;
             Queue<ContextSensitiveGrammar> successfulGrammars = new Queue<ContextSensitiveGrammar>();
@@ -237,19 +231,8 @@ namespace LinearIndexedGrammar
             while (currentWordLength <= MaxSentenceLength)
             {
                 LogManager.GetCurrentClassLogger().Info($"learning word length  {currentWordLength}");
+                (currentGrammar, currentValue) = LearnGrammarFromDataUpToLengthN(data, universalVocabulary, currentWordLength, isCFGGrammar, initialGrammars[currentWordLength]);
 
-                //try
-                {
-                    (currentGrammar, currentValue) =
-                        LearnGrammarFromDataUpToLengthN(data, universalVocabulary, currentWordLength, initialGrammars[currentWordLength]);
-
-                }
-                //catch (Exception)
-                //{
-                //    currentValue = 0;
-                //    currentGrammar = null;
-                //}
-             
                 //what if you did not converge on a grammar that generates the data precisely?
                 if (currentValue < 1)
                 {
@@ -266,14 +249,10 @@ namespace LinearIndexedGrammar
                     {
                         LogManager.GetCurrentClassLogger().Info("retrying from scratch");
                         currentWordLength = initialWordLength - 1;
-
                     }
-
                 }
                 else
-                {
                     successfulGrammars.Enqueue(currentGrammar);
-                }
                 
                 currentWordLength++;
                 if (currentWordLength <= MaxSentenceLength)
@@ -281,7 +260,6 @@ namespace LinearIndexedGrammar
             }
 
             return (currentGrammar, currentValue);
-
         }
 
         private static ProgramParamsList ReadProgramParamsFromFile(string fileName)

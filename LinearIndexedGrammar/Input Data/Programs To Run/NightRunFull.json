@@ -1,0 +1,70 @@
+﻿{
+  "ProgramsToRun": [
+    {
+      "IsCFG": true,
+      "VocabularyFileName": "Vocabulary.json",
+      "NumberOfRuns": 1,
+      "GrammarFileName": "NoNPNoV3.txt"
+    },
+    {
+      "IsCFG": true,
+      "VocabularyFileName": "Vocabulary.json",
+      "NumberOfRuns": 1,
+      "GrammarFileName": "NoNPWithV3.txt"
+    },
+    {
+      "IsCFG": true,
+      "VocabularyFileName": "Vocabulary.json",
+      "NumberOfRuns": 1,
+      "GrammarFileName": "YesNPNoV3.txt"
+    },
+    {
+      "IsCFG": true,
+      "VocabularyFileName": "Vocabulary.json",
+      "NumberOfRuns": 1,
+      "GrammarFileName": "YesNPNoV3WithADJ.txt"
+    },
+    {
+      "IsCFG": true,
+      "VocabularyFileName": "Vocabulary.json",
+      "NumberOfRuns": 1,
+      "GrammarFileName": "YesNPYesV3.txt"
+    },
+    {
+      "IsCFG": true,
+      "VocabularyFileName": "Vocabulary.json",
+      "NumberOfRuns": 1,
+      "GrammarFileName": "YesNPYesV3WithADJ.txt"
+    },
+    {
+      "IsCFG": true,
+      "VocabularyFileName": "Vocabulary.json",
+      "NumberOfRuns": 1,
+      "GrammarFileName": "PalindromeCFGNoTD.txt"
+    },
+    {
+      "IsCFG": true,
+      "VocabularyFileName": "Vocabulary.json",
+      "NumberOfRuns": 1,
+      "GrammarFileName": "PalindromeCFGWithTD.txt"
+    },
+    {
+      "IsCFG": false,
+      "VocabularyFileName": "Vocabulary.json",
+      "NumberOfRuns": 1,
+      "GrammarFileName": "MoveNP.txt"
+    },
+    {
+      "IsCFG": false,
+      "VocabularyFileName": "Vocabulary.json",
+      "NumberOfRuns": 1,
+      "GrammarFileName": "MoveNPWithADJ.txt"
+    },
+    {
+      "IsCFG": false,
+      "VocabularyFileName": "Vocabulary.json",
+      "NumberOfRuns": 1,
+      "GrammarFileName": "MoveNPPP.txt"
+    }
+  ]
+}

@@ -13,6 +13,7 @@ namespace LinearIndexedGrammarLearner
         private readonly HashSet<string> _posInText;
         private readonly Dictionary<string, int> _sentencesWithCounts;
         private readonly Vocabulary _voc;
+        // ReSharper disable once NotAccessedField.Local
         private GrammarPermutations _gp;
         public const int ParsingTimeOut = 5000; //in milliseconds
         public const int GrammarTreeCountCalculationTimeOut = 500; //in milliseconds
@@ -26,10 +27,9 @@ namespace LinearIndexedGrammarLearner
         }
 
         ////We create the "promiscuous grammar" as initial grammar.
-        public ContextSensitiveGrammar CreateInitialGrammars()
+        public ContextSensitiveGrammar CreateInitialGrammar(bool isCFGGrammar)
         {
-            _gp = new GrammarPermutations(_posInText.ToArray());
-            _gp.ReadPermutationWeightsFromFile();
+            _gp = new GrammarPermutations(isCFGGrammar);
 
             var rules = new List<Rule>();
             foreach (var pos in _posInText)
@@ -73,10 +73,6 @@ namespace LinearIndexedGrammarLearner
                 //parse tree too long to parse
                 //the grammar is too recursive,
                 //decision - discard it and continue.
-
-                //OR -
-                //parser failed
-
                 //string s = "parsing took too long (0.5 second), for the grammar:\r\n" + currentHypothesis.ToString();
                 //NLog.LogManager.GetCurrentClassLogger().Info(s);
                 return null; //parsing failed.
@@ -90,13 +86,6 @@ namespace LinearIndexedGrammarLearner
 
         public int GetNumberOfParseTrees(ContextFreeGrammar hypothesis)
         {
-            //best case: tree depth = log (maxWordsInSentence) for a fully balanced tree
-            //if the tree is totally binary but extremely non-balanced (fully right or left branching), tree depth = words(leaves) -1.
-
-            //what happens when there are abstract non-terminals that do not correspond to input nodes?
-            //i.e, say, category I (auxiliary syntactic poition, not always phonteically overt)
-            //or category C (complementizer syntactic position ,not always phonetically overt)
-
             //working assumption:
             var treeDepth = _maxWordsInSentence + 3;
             //TODO: find a safe upper bound to tree depth, which will be a function of

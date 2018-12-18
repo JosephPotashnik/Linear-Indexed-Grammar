@@ -87,7 +87,8 @@ namespace LinearIndexedGrammarParser
             var grammarRules = ReadRulesFromFile(filename);
             var cfGrammar = new ContextFreeGrammar(grammarRules);
 
-            var generator = new EarleyGenerator(cfGrammar);
+            //not working!
+            var generator = new EarleyGenerator(cfGrammar, null);
 
             var cts = new CancellationTokenSource();
             var nodeList = generator.ParseSentence("", cts, maxWords);
@@ -100,7 +101,8 @@ namespace LinearIndexedGrammarParser
             var cSgrammar = CreateGrammarFromFile(filename);
             var cFgrammar = new ContextFreeGrammar(cSgrammar);
 
-            var parser = new EarleyParser(cFgrammar);
+            //function not working.
+            var parser = new EarleyParser(cFgrammar, null);
 
             var n = parser.ParseSentence(sentence, new CancellationTokenSource());
             return n;
@@ -109,11 +111,8 @@ namespace LinearIndexedGrammarParser
 
         public static ContextSensitiveGrammar CreateGrammarFromFile(string filename)
         {
-            var rules = ReadRulesFromFile(filename);
+            ReadRulesFromFile(filename);
             var grammar = new ContextSensitiveGrammar();
-            //foreach (var item in rules)
-            //    item.AddRuleToGrammar(grammar, true);
-
             return grammar;
         }
 
