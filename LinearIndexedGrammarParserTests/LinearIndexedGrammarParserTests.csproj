@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
@@ -21,129 +21,118 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="CFG.json">
+
+    <ContentWithTargetPath Include="Vocabularies\Vocabulary.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedCFGLeftRecursion.json">
+      <TargetPath>Vocabulary.json</TargetPath>
+    </ContentWithTargetPath>
+
+    <ContentWithTargetPath Include="ExpectedResults\ExpectedCFG.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\CFG.json">
+      <TargetPath>ExpectedCFG.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\ExpectedCFGLeftRecursion.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\ExpectedCFGLeftRecursion.json">
+      <TargetPath>ExpectedCFGLeftRecursion.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\GenerateCFGGrammarSentences.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\GeneratCFGGrammarSentences.json">
+      <TargetPath>GenerateCFGGrammarSentences.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\GenerateLIGMovementFromSubjectOrNoMovementAmbiguitySentences.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\GeneratLIGMovementFromSubjectOrNoMovementAmbiguitySentences.json">
+      <TargetPath>GenerateLIGMovementFromSubjectOrNoMovementAmbiguitySentences.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\GenerateLIGMovementPPSentences.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\GeneratLIGMovementPPSentences.json">
+      <TargetPath>GenerateLIGMovementPPSentences.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\GenerateNullableCategoriesSentences.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\GeneratNullableCategoriesSentences.json">
+      <TargetPath>GenerateNullableCategoriesSentences.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\GenerateNullableCategoriesSentences2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\GeneratNullableCategoriesSentences2.json">
+      <TargetPath>GenerateNullableCategoriesSentences2.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\LIG.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\LIG.json">
+      <TargetPath>LIG.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\LIGMovementFromDirectObject.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\LIGMovementFromDirectObject.json">
+      <TargetPath>LIGMovementFromDirectObject.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\LIGMovementFromSubject.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\LIGMovementFromSubject.json">
+      <TargetPath>LIGMovementFromSubject.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\LIGMovementFromSubjectOrNoMovementAmbiguity.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\LIGMovementFromSubjectOrNoMovementAmbiguity.json">
+      <TargetPath>LIGMovementFromSubjectOrNoMovementAmbiguity.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\LIGMovementPP.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\LIGMovementPP.json">
+      <TargetPath>LIGMovementPP.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\LIGMovementPPStranding.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\LIGMovementPPStranding.json">
+      <TargetPath>LIGMovementPPStranding.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\NullableTransitiveClosureMovement.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\NullableTransitiveClosureMovement.json">
+      <TargetPath>NullableTransitiveClosureMovement.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\NullableTransitiveClosureMovement2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ExpectedResults\NullableTransitiveClosureMovement2.json">
+      <TargetPath>NullableTransitiveClosureMovement2.json</TargetPath>
+    </ContentWithTargetPath>
+
+
+    <ContentWithTargetPath Include="TestGrammars\CFG.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="GeneratCFGGrammarSentences.json">
+      <TargetPath>CFG.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\CFGLeftRecursion.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="GeneratLIGMovementFromSubjectOrNoMovementAmbiguitySentences.json">
+      <TargetPath>CFGLeftRecursion.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\LIG.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="GeneratLIGMovementPPSentences.json">
+      <TargetPath>LIG.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\LIGMovementFromDirectObject.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="GeneratNullableCategoriesSentences.json">
+      <TargetPath>LIGMovementFromDirectObject.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\LIGMovementFromSubject.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="GeneratNullableCategoriesSentences2.json">
+      <TargetPath>LIGMovementFromSubject.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\LIGMovementFromSubjectOrNoMovementAmbiguity.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="LIG.json">
+      <TargetPath>LIGMovementFromSubjectOrNoMovementAmbiguity.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\LIGMovementPP.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="LIGMovementFromDirectObject.json">
+      <TargetPath>LIGMovementPP.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\NullableTransitiveClosureMovement.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="LIGMovementFromSubject.json">
+      <TargetPath>NullableTransitiveClosureMovement.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\NullableTransitiveClosureMovement2.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="LIGMovementFromSubjectOrNoMovementAmbiguity.json">
+      <TargetPath>NullableTransitiveClosureMovement2.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\NullableTransitiveClosureMovement3.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="LIGMovementPP.json">
+      <TargetPath>NullableTransitiveClosureMovement3.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\SimpleCFG.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="LIGMovementPPStranding.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="NullableTransitiveClosureMovement.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="NullableTransitiveClosureMovement2.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestGrammars\CFG.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestGrammars\CFGLeftRecursion.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestGrammars\LIG.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestGrammars\LIGMovementFromDirectObject.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestGrammars\LIGMovementFromSubject.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestGrammars\LIGMovementFromSubjectOrNoMovementAmbiguity.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestGrammars\LIGMovementPP.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestGrammars\NullableTransitiveClosureMovement.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestGrammars\NullableTransitiveClosureMovement2.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestGrammars\NullableTransitiveClosureMovement3.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestGrammars\SimpleCFG.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+      <TargetPath>SimpleCFG.txt</TargetPath>
+    </ContentWithTargetPath>
   </ItemGroup>
 
 </Project>

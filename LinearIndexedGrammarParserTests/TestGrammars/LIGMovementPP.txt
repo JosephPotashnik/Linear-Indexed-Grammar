@@ -18,3 +18,4 @@ VP[*] -> V1 NP[*]
 VP[*] -> V2 PP[*]
 NP -> D N
 PP[*] -> P NP[*]
+NP -> PN

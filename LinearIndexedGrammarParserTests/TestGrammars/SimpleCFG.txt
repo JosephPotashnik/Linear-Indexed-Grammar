@@ -13,10 +13,4 @@ VP -> V2 PP
 VP -> V3 START
 NP -> D N
 PP -> P NP
-#START -> X1 VP
-#VP -> V0
-#VP -> V1 X1
-#VP -> V2 PP
-#VP -> V3 START
-#X1 -> D N
-#PP -> P X1
+NP -> PN

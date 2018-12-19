@@ -12,6 +12,7 @@ VP -> V1 NP
 VP -> V2 PP
 VP -> V3 START
 NP -> D N
+NP -> PN
 PP -> P NP
 NP -> NP ADJP
 VP -> VP ADJP

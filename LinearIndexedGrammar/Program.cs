@@ -92,10 +92,11 @@ namespace LinearIndexedGrammar
 
         private static (string[] data, Vocabulary dataVocabulary) PrepareDataFromTargetGrammar(List<Rule> grammarRules, Vocabulary universalVocabulary, int maxWords)
         {
+            int numberOfSentencesPerTree = 10;
             var cfGrammar = new ContextFreeGrammar(grammarRules);
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
             var nodeList = generator.ParseSentence("", new CancellationTokenSource(), maxWords);
-            return GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary);
+            return GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary, numberOfSentencesPerTree);
         }
 
        
@@ -173,7 +174,7 @@ namespace LinearIndexedGrammar
             var learner = PrepareLearningUpToSentenceLengthN(data, universalVocabulary, n, out var objectiveFunction);
 
             //3. re-place rule list inside new rule space (the coordinates of the old rules need not be the same
-            //coordinates in the new rule space).
+            //coordinates in the new rule space, for example in the case when the number of nonterminals have changed).
             if (initialGrammar != null)
                 initialGrammar = new ContextSensitiveGrammar(rules.ToList());
 
@@ -220,15 +221,15 @@ namespace LinearIndexedGrammar
         {
             var initialWordLength = 6;
             var currentWordLength = initialWordLength;
-            int MaxSentenceLength = data.Max(x => x.Split().Length);
+            int maxSentenceLength = data.Max(x => x.Split().Length);
 
-            ContextSensitiveGrammar[] initialGrammars = new ContextSensitiveGrammar[MaxSentenceLength+1];
+            ContextSensitiveGrammar[] initialGrammars = new ContextSensitiveGrammar[maxSentenceLength+1];
 
             ContextSensitiveGrammar currentGrammar = null;
             Queue<ContextSensitiveGrammar> successfulGrammars = new Queue<ContextSensitiveGrammar>();
                 
             double currentValue = 0;
-            while (currentWordLength <= MaxSentenceLength)
+            while (currentWordLength <= maxSentenceLength)
             {
                 LogManager.GetCurrentClassLogger().Info($"learning word length  {currentWordLength}");
                 (currentGrammar, currentValue) = LearnGrammarFromDataUpToLengthN(data, universalVocabulary, currentWordLength, isCFGGrammar, initialGrammars[currentWordLength]);
@@ -255,7 +256,7 @@ namespace LinearIndexedGrammar
                     successfulGrammars.Enqueue(currentGrammar);
                 
                 currentWordLength++;
-                if (currentWordLength <= MaxSentenceLength)
+                if (currentWordLength <= maxSentenceLength)
                     initialGrammars[currentWordLength] = currentGrammar;
             }
 

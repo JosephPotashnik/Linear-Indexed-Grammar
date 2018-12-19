@@ -9,6 +9,7 @@
 START -> NP VP
 VP -> V0
 NP -> D N
+NP -> PN
 NP -> NP D
 PP -> P NP
 NP -> NP ADJP
