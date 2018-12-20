@@ -7,7 +7,7 @@ namespace LinearIndexedGrammarLearner
 {
     public interface IObjectiveFunction
     {
-        double Compute(ContextSensitiveGrammar currentHypothesis, bool considerPartialParsing);
+        double Compute(ContextSensitiveGrammar currentHypothesis);
         bool AcceptNewValue(double newValue, double oldValue, double temperature);
         bool IsMaximalValue(double val);
     }
@@ -31,16 +31,9 @@ namespace LinearIndexedGrammarLearner
         public bool AcceptNewValue(double newValue, double oldValue, double temperature)
         {
             if (newValue > oldValue) return true; //any positive improvement - accept.
-            //if (newValue < Tolerance) return false; //if newValue = 0, reject.
-
-            //if the change is too small or 0, reject.
-            //many times the new grammar does not change the value,
-            //experimentally, I found out we don't want to accept that move. 
-            //or maybe accept the move with some probability? definitely not 100%!
-            //if (oldValue - newValue < Tolerance) return false;
 
             //neval =< oldValue (our objective function is to maximize value)
-            //degration - accept with a probability proportional to the delta and the iteration
+            //degradation - accept with a probability proportional to the delta and the iteration
             //bigger delta (bigger degradation) => lower probability.
             //bigger temperature => higher probability
             var exponent = 100* (Math.Log(newValue) - Math.Log(oldValue)) / temperature;
@@ -55,7 +48,7 @@ namespace LinearIndexedGrammarLearner
             return Math.Abs(val - 1) < Tolerance;
         }
 
-        public double Compute(ContextSensitiveGrammar currentHypothesis, bool considerPartialParsing)
+        public double Compute(ContextSensitiveGrammar currentHypothesis)
         {
             if (currentHypothesis == null) return 0;
 
@@ -75,12 +68,6 @@ namespace LinearIndexedGrammarLearner
                 LogManager.GetCurrentClassLogger().Warn(s);
                 return 0;
             }
-            //catch (Exception e)
-            //{
-            //    var s = e.ToString();
-            //    LogManager.GetCurrentClassLogger().Error(s);
-            //    throw;
-            //}
 
             if (allParses != null)
             {
@@ -108,9 +95,7 @@ namespace LinearIndexedGrammarLearner
                     }
 
                     var numberOfSentenceParsed = allParses.Count(x => x.Trees.Count > 0);
-                    //var unexplainedSentencePercentage = 1.0 - numberOfSentenceParsed / (double) allParses.Length;
                     var explainedSentences = (numberOfSentenceParsed / (double)allParses.Length);
-                    //if (!considerPartialParsing && unexplainedSentencePercentage > 0) return 0;
                     prob *= explainedSentences;
                     //prob -= unexplainedSentencePercentage;
                     if (prob < 0) prob = 0;

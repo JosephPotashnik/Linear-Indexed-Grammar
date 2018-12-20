@@ -6,10 +6,12 @@
 # comment lines begin with "#"
 # the start symbol is "START"
 #
-START[*] -> NP VP[*]
-VP[*] -> V0
-VP[*] -> V1 NP[*]
-VP[*] -> V2 PP[*]
-VP[*] -> V3 START[*]
-PP[*] -> P NP[*]
-NP[*] -> D N[*]
+START -> NP VP
+VP -> V0
+NP -> D N
+NP -> PN
+NP -> NP D
+PP -> P NP
+NP -> NP ADJP
+VP -> VP ADJP
+ADJP -> NP

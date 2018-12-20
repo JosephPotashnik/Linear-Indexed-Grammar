@@ -5,10 +5,17 @@
     "EndIndex": 9,
     "Children": [
       {
-        "Name": "NP",
+        "Name": "NP -> PN $",
         "StartIndex": 0,
         "EndIndex": 1,
-        "AssociatedTerminal": "David"
+        "Children": [
+          {
+            "Name": "PN",
+            "StartIndex": 0,
+            "EndIndex": 1,
+            "AssociatedTerminal": "David"
+          }
+        ]
       },
       {
         "Name": "VP -> VP ADJP $",
@@ -122,10 +129,17 @@
     "EndIndex": 9,
     "Children": [
       {
-        "Name": "NP",
+        "Name": "NP -> PN $",
         "StartIndex": 0,
         "EndIndex": 1,
-        "AssociatedTerminal": "David"
+        "Children": [
+          {
+            "Name": "PN",
+            "StartIndex": 0,
+            "EndIndex": 1,
+            "AssociatedTerminal": "David"
+          }
+        ]
       },
       {
         "Name": "VP -> V3 START $",
@@ -239,10 +253,17 @@
     "EndIndex": 9,
     "Children": [
       {
-        "Name": "NP",
+        "Name": "NP -> PN $",
         "StartIndex": 0,
         "EndIndex": 1,
-        "AssociatedTerminal": "David"
+        "Children": [
+          {
+            "Name": "PN",
+            "StartIndex": 0,
+            "EndIndex": 1,
+            "AssociatedTerminal": "David"
+          }
+        ]
       },
       {
         "Name": "VP -> V3 START $",

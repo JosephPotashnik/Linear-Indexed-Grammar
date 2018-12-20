@@ -39,7 +39,7 @@ namespace LinearIndexedGrammarParser
         }
 
         public static (string[] sentences, Vocabulary textVocabulary) GetSentencesOfGenerator(List<EarleyNode> n,
-            Vocabulary universalVocabulary)
+            Vocabulary universalVocabulary, int numberOfSentencesPerTree, bool isRandom = true)
         {
             var textVocabulary = new Vocabulary();
             var nonTerminalSentences = GetSentencesNonTerminals(n);
@@ -47,12 +47,11 @@ namespace LinearIndexedGrammarParser
             var rand = new Random();
             var posCategories = new HashSet<string>();
 
-            int numberOfSentencesPerEachTree = 10;
             foreach (var item in nonTerminalSentences)
             {
                 var arr = item.Split();
 
-                for (int k = 0; k < numberOfSentencesPerEachTree; k++)
+                for (int k = 0; k < numberOfSentencesPerTree; k++)
                 {
                     var sentence = new string[arr.Length];
 
@@ -61,7 +60,12 @@ namespace LinearIndexedGrammarParser
                         var posCat = arr[i];
 
                         var possibleWords = universalVocabulary.POSWithPossibleWords[posCat].ToArray();
-                        var randomWord = possibleWords[rand.Next(possibleWords.Length)];
+                        string randomWord;
+                        if (isRandom)
+                            randomWord = possibleWords[rand.Next(possibleWords.Length)];
+                        else
+                            randomWord = possibleWords[0];
+
                         sentence[i] = randomWord;
                         posCategories.Add(posCat);
                     }
@@ -79,43 +83,35 @@ namespace LinearIndexedGrammarParser
         }
 
         public static (List<EarleyNode> nodeList, List<Rule> grammarRules) GenerateSentenceAccordingToGrammar(
-            string filename, int maxWords)
+            string filename, string vocabularyFilename, int maxWords)
         {
-            //var cSgrammar = CreateGrammarFromFile(filename);
-            //var cfGrammar = new ContextFreeGrammar(cSgrammar);
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(vocabularyFilename);
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
 
-            var grammarRules = ReadRulesFromFile(filename);
-            var cfGrammar = new ContextFreeGrammar(grammarRules);
+            var rules = ReadRulesFromFile(filename);
+            var cfGrammar = new ContextFreeGrammar(rules);
 
-            var generator = new EarleyGenerator(cfGrammar);
+            var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
 
             var cts = new CancellationTokenSource();
             var nodeList = generator.ParseSentence("", cts, maxWords);
-            //return (nodeList, cSgrammar);
-            return (nodeList, grammarRules);
+            return (nodeList, rules);
         }
 
-        public static List<EarleyNode> ParseSentenceAccordingToGrammar(string filename, string sentence)
+        public static List<EarleyNode> ParseSentenceAccordingToGrammar(string filename, string vocabularyFilename, string sentence)
         {
-            var cSgrammar = CreateGrammarFromFile(filename);
-            var cFgrammar = new ContextFreeGrammar(cSgrammar);
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(vocabularyFilename);
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
 
-            var parser = new EarleyParser(cFgrammar);
+            var rules = ReadRulesFromFile(filename);
+            var cfGrammar = new ContextFreeGrammar(rules);
+
+            var parser = new EarleyParser(cfGrammar, universalVocabulary);
 
             var n = parser.ParseSentence(sentence, new CancellationTokenSource());
             return n;
         }
 
-
-        public static ContextSensitiveGrammar CreateGrammarFromFile(string filename)
-        {
-            var rules = ReadRulesFromFile(filename);
-            var grammar = new ContextSensitiveGrammar();
-            //foreach (var item in rules)
-            //    item.AddRuleToGrammar(grammar, true);
-
-            return grammar;
-        }
 
         private static DerivedCategory CreateDerivedCategory(string s)
         {

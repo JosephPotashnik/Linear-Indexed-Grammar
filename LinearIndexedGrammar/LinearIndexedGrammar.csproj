@@ -1,10 +1,96 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
+
+
+  <ItemGroup>
+
+    <ContentWithTargetPath  Include="Input Data\Programs To Run\NightRunFull.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>NightRunFull.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Programs To Run\NightRunonly CFG.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>NightRunonly CFG.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Programs To Run\ProgramsToRun.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>ProgramsToRun.json</TargetPath>
+    </ContentWithTargetPath>
+
+
+    <ContentWithTargetPath  Include="Input Data\Context Free Grammars\NoNPNoV3.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>NoNPNoV3.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Context Free Grammars\NoNPWithV3.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>NoNPWithV3.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Context Free Grammars\PalindromeCFGNoTD.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>PalindromeCFGNoTD.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Context Free Grammars\PalindromeCFGWithTD.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>PalindromeCFGWithTD.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Context Free Grammars\YesNPNoV3.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>YesNPNoV3.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Context Free Grammars\YesNPNoV3WithADJ.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>YesNPNoV3WithADJ.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Context Free Grammars\YesNPYesV3.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>YesNPYesV3.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Context Free Grammars\YesNPYesV3WithADJ.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>YesNPYesV3WithADJ.txt</TargetPath>
+    </ContentWithTargetPath>
+
+
+    <ContentWithTargetPath  Include="Input Data\Context Sensitive Grammars\MoveNP.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>MoveNP.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Context Sensitive Grammars\MoveNPPP.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>MoveNPPP.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Context Sensitive Grammars\MoveNPWithADJ.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>MoveNPWithADJ.txt</TargetPath>
+    </ContentWithTargetPath>
+
+    <ContentWithTargetPath  Include="Input Data\Vocabularies\Vocabulary.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>Vocabulary.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Vocabularies\VocabularyAmbiguousWords1.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>VocabularyAmbiguousWords1.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Vocabularies\VocabularyAmbiguousWords2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>VocabularyAmbiguousWords2.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Vocabularies\VocabularyAmbiguousWords3.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>VocabularyAmbiguousWords3.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath  Include="Input Data\Vocabularies\VocabularyVConsolidated.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>VocabularyVConsolidated.json</TargetPath>
+    </ContentWithTargetPath>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.5.8" />
@@ -15,76 +101,5 @@
     <ProjectReference Include="..\LinearIndexedGrammarParser\LinearIndexedGrammarParser.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="EvenNCFG.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="MoveNPPP.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="MoveNPWithADJ.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="MoveNP.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="MutationWeights.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="NightRunFull.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="TestTooLong.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="PalindromeCFGNoTD.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="PalindromeCFGWithTD.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="NightRun.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="ProgramsToRun.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="NoNPNoV3.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="NoNPWithV3.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="VocabularyAmbiguousWords3.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="VocabularyAmbiguousWords2.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="VocabularyAmbiguousWords1.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="YesNPNoV3WithADJ.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="YesNPNoV3.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="YesNPYesV3WithADJ.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="YesNPYesV3.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="SimpleCFGLIGNotation.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="SimpleCFG.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Vocabulary.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 
 </Project>

@@ -1,53 +1,47 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using LinearIndexedGrammarParser;
+using Newtonsoft.Json;
 using NLog;
 
 namespace LinearIndexedGrammarLearner
 {
+    [JsonObject(MemberSerialization.OptIn)]
+    public class SimulatedAnnealingParameters
+    {
+        [JsonProperty] public int NumberOfIterations { get; set; }
+        [JsonProperty] public double InitialTemperature { get; set; }
+        [JsonProperty] public double CoolingFactor { get; set; }
+    }
+
     public class SimulatedAnnealing
     {
-        private readonly double _coolingFactor;
-        private readonly double _initialTemp;
         private readonly Learner _learner;
-        private readonly int _numberOfIterations;
         private readonly IObjectiveFunction _objectiveFunction;
+        private SimulatedAnnealingParameters _params;
 
-        public SimulatedAnnealing(Learner l, int numberOfIterations, double coolingFactor, double initialTemp,
+        public SimulatedAnnealing(Learner l, SimulatedAnnealingParameters parameters,
             IObjectiveFunction objectiveFunction)
         {
             _learner = l;
-            _numberOfIterations = numberOfIterations;
-            _initialTemp = initialTemp;
-            _coolingFactor = coolingFactor;
+            _params = parameters;
             _objectiveFunction = objectiveFunction;
         }
 
         private (ContextSensitiveGrammar bestGrammar, double bestValue) RunSingleIteration(
             ContextSensitiveGrammar initialGrammar, double initialValue)
         {
-            var currentTemp = _initialTemp;
+            var currentTemp = _params.InitialTemperature;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
 
             while (currentTemp > 0.3)
             { 
                 var mutatedGrammar = _learner.GetNeighbor(currentGrammar);
-                currentTemp *= _coolingFactor;
+                currentTemp *= _params.CoolingFactor;
                 if (mutatedGrammar == null) continue;
 
-                //var t = Task.Run(() => _objectiveFunction.Compute(mutatedGrammar, false));
-                //if (!t.Wait(1500))
-                //{
-                //    string s = "computing all parse trees took too long (1.5 seconds), for the grammar:\r\n" + mutatedGrammar.ToString();
-                //    NLog.LogManager.GetCurrentClassLogger().Info(s);
-                //    //throw new Exception();
-                //}
-
-                //var newValue = t.Result;
-                var newValue =  _objectiveFunction.Compute(mutatedGrammar, true);
+                var newValue =  _objectiveFunction.Compute(mutatedGrammar);
 
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
                 if (accept)
@@ -59,18 +53,16 @@ namespace LinearIndexedGrammarLearner
                 if (_objectiveFunction.IsMaximalValue(currentValue)) break;
             }
 
-
-
             var ruleDistribution = _learner.CollectUsages(currentGrammar);
             currentGrammar.PruneUnusedRules(ruleDistribution);
             return (currentGrammar, currentValue);
         }
 
-        public (ContextSensitiveGrammar bestGrammar, double bestValue) Run(ContextSensitiveGrammar initiaGrammar = null)
+        public (ContextSensitiveGrammar bestGrammar, double bestValue) Run(bool isCFGGrammar, ContextSensitiveGrammar initiaGrammar = null)
         {
             var currentIteration = 0;
-            var currentGrammar = initiaGrammar ?? _learner.CreateInitialGrammars();
-            var currentValue = _objectiveFunction.Compute(currentGrammar, false);
+            var currentGrammar = initiaGrammar ?? _learner.CreateInitialGrammar(isCFGGrammar);
+            var currentValue = _objectiveFunction.Compute(currentGrammar);
 
             if (_objectiveFunction.IsMaximalValue(currentValue))
                 return (currentGrammar, currentValue);
@@ -84,11 +76,9 @@ namespace LinearIndexedGrammarLearner
             int noImprovemetCounter = 0;
             //if current grammar is already optimal on data, no need to learn anything,
             //return immediately.
-            while (currentIteration++ < _numberOfIterations)
+            while (currentIteration++ < _params.NumberOfIterations)
             {
-                //if (currentIteration % 100 == 0)
-                    LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, probability {currentValue}");
-
+                LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, probability {currentValue}");
 
                 (currentGrammar, currentValue) = RunSingleIteration(currentGrammar, currentValue);
                 if (_objectiveFunction.IsMaximalValue(currentValue)) break;

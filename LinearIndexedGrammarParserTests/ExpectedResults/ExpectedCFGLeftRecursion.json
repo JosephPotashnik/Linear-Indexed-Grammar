@@ -35,10 +35,17 @@
                             "EndIndex": 2,
                             "Children": [
                               {
-                                "Name": "NP",
+                                "Name": "NP -> PN $",
                                 "StartIndex": 0,
                                 "EndIndex": 1,
-                                "AssociatedTerminal": "John"
+                                "Children": [
+                                  {
+                                    "Name": "PN",
+                                    "StartIndex": 0,
+                                    "EndIndex": 1,
+                                    "AssociatedTerminal": "John"
+                                  }
+                                ]
                               },
                               {
                                 "Name": "D",

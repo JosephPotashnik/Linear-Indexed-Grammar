@@ -182,10 +182,10 @@ namespace LinearIndexedGrammarParser
 
         public void DeleteCorrespondingPopRule(RuleCoordinates rc)
         {
-            var pushRule = ContextSensitiveGrammar.RuleSpace[rc];
+            var pushRule = RuleSpace[rc];
             //assumption: moveable is first RHS, to be relaxed.
             string moveable = pushRule.RightHandSide[0].ToString();
-            int LHSIndex = ContextSensitiveGrammar.RuleSpace.FindLHSIndex(moveable);
+            int LHSIndex = RuleSpace.FindLHSIndex(moveable);
             if (!MoveableReferences.ContainsKey(LHSIndex))
                 throw new Exception("missing key");
 

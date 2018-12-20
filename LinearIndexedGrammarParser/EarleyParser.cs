@@ -25,10 +25,9 @@ namespace LinearIndexedGrammarParser
         private readonly ContextFreeGrammar _grammar;
         protected Vocabulary Voc;
 
-        public EarleyParser(ContextFreeGrammar g, Vocabulary v = null)
+        public EarleyParser(ContextFreeGrammar g, Vocabulary v)
         {
-            Voc = v ?? Vocabulary.ReadVocabularyFromFile(ContextFreeGrammar.VocabularyFile);
-
+            Voc = v;
             _grammar = g;
         }
 
