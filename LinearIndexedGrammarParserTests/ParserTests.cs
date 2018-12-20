@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
 using Xunit;
@@ -254,6 +256,70 @@ namespace LinearIndexedGrammarParserTests
             var actual = JsonConvert.SerializeObject(data, settings);
             var expected = File.ReadAllText(@"GenerateNullableCategoriesSentences2.json");
             Assert.Equal(expected, actual);
+        }
+
+        private static HashSet<string> PrepareRuleSpace(out HashSet<(string rhs1, string rhs2)> bigrams)
+        {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
+            var posInText = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
+            bigrams = new HashSet<(string rhs1, string rhs2)>();
+            foreach (var pos1 in posInText)
+            foreach (var pos2 in posInText)
+                bigrams.Add((pos1, pos2));
+            return posInText;
+        }
+
+
+        [Fact]
+        public void FindRHSIndexText1()
+        {
+            var posInText = PrepareRuleSpace(out var bigrams);
+
+            ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, bigrams, 5);
+            int actual = ContextSensitiveGrammar.RuleSpace.FindRHSIndex(new[] { "X2", "X4" });
+            int expected = 191;
+            Assert.Equal(expected, actual);
+        }
+
+  
+        [Fact]
+        public void FindRHSIndexText2()
+        {
+            var posInText = PrepareRuleSpace(out var bigrams);
+
+            ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, bigrams, 5);
+            int actual = ContextSensitiveGrammar.RuleSpace.FindRHSIndex(new[] { "D", "N" });
+            int expected = 3;
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void FindLHSIndexText()
+        {
+            var posInText = PrepareRuleSpace(out var bigrams);
+
+            ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, bigrams, 5);
+            int actual = ContextSensitiveGrammar.RuleSpace.FindLHSIndex("X3");
+            int expected = 2;
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void FindCFGRuleTest()
+        {
+            var posInText = PrepareRuleSpace(out var bigrams);
+            ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, bigrams, 5);
+
+            var r = new Rule("X2", new[] { "V2", "X3" });
+            var actual = ContextSensitiveGrammar.RuleSpace.FindRule(r);
+            var expected = new RuleCoordinates()
+            {
+                LHSIndex = 1,
+                RHSIndex = 94,
+                RuleType = 0
+            };
+
+            Assert.Equal(actual, expected);
         }
 
     }

@@ -19,21 +19,6 @@ namespace LinearIndexedGrammar
         [JsonProperty] public ProgramParams[] ProgramsToRun { get; set; }
     }
 
-    //TODO: add new unit tests for rule space generation.
-    //int ans = ruleSpace.FindRHSIndex(new[] { "D", "N" });
-    //ans = ruleSpace.FindRHSIndex(new[] { "D", "X2" });
-    //var ans2 = ruleSpace.FindRHSIndex(new[] { "X3", "P" });
-    //ans = ruleSpace.FindRHSIndex(new[] { "X3" });
-    //ans = ruleSpace.FindRHSIndex(new[] { "D" });
-    //ans = ruleSpace.FindLHSIndex("X1");
-    //ans = ruleSpace.FindLHSIndex("X3");
-
-    //var r = new Rule("X2", new[] { "V", "X3" });
-    //var rc = ruleSpace.FindRule(r);
-    //var res = ruleSpace[rc];
-
-
-
     [JsonObject(MemberSerialization.OptIn)]
     public class ProgramParams
     {
