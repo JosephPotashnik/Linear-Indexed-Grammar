@@ -14,7 +14,7 @@ namespace LinearIndexedGrammarParser
             return n.Select(x => x.GetNonTerminalStringUnderNode()).ToList();
         }
 
-        public static (string[] sentences, HashSet<string> POSCategoriesInData)  GetDataAndVocabularyForSentencesUpToLengthN(string[] allData, Vocabulary universalVocabulary, int n)
+        public static (string[] sentences, HashSet<string> POSCategoriesInData)  GetDataAndVocabularyForSentencesUpToLengthN(string[] allData, Vocabulary universalVocabulary, int minWords, int maxWords)
         {
             var sentences = new List<string>();
             var posCategories = new HashSet<string>();
@@ -22,7 +22,7 @@ namespace LinearIndexedGrammarParser
             foreach (var item in allData)
             {
                 var arr = item.Split();
-                if (arr.Length > n) continue;
+                if (arr.Length > maxWords || arr.Length < minWords) continue;
 
                 var sentence = new string[arr.Length];
                 for (var i = 0; i < sentence.Length; i++)

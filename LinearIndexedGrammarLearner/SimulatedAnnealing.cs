@@ -42,6 +42,7 @@ namespace LinearIndexedGrammarLearner
                 if (mutatedGrammar == null) continue;
 
                 var newValue =  _objectiveFunction.Compute(mutatedGrammar);
+                //LogManager.GetCurrentClassLogger().Info($"currentTemp {currentTemp}, probability {newValue}");
 
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
                 if (accept)
@@ -64,6 +65,8 @@ namespace LinearIndexedGrammarLearner
             var currentGrammar = initiaGrammar ?? _learner.CreateInitialGrammar(isCFGGrammar);
             var currentValue = _objectiveFunction.Compute(currentGrammar);
 
+            //if current grammar is already optimal on data, no need to learn anything,
+            //return immediately.
             if (_objectiveFunction.IsMaximalValue(currentValue))
                 return (currentGrammar, currentValue);
 
@@ -74,14 +77,17 @@ namespace LinearIndexedGrammarLearner
 
             double smallestBestValue = bestGrammars.PeekFirstKey();
             int noImprovemetCounter = 0;
-            //if current grammar is already optimal on data, no need to learn anything,
-            //return immediately.
+
             while (currentIteration++ < _params.NumberOfIterations)
             {
                 LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, probability {currentValue}");
 
                 (currentGrammar, currentValue) = RunSingleIteration(currentGrammar, currentValue);
-                if (_objectiveFunction.IsMaximalValue(currentValue)) break;
+                if (_objectiveFunction.IsMaximalValue(currentValue))
+                {
+                    bestGrammars.Enqueue(currentValue, currentGrammar);
+                    break;
+                }
 
                 if (smallestBestValue < currentValue)
                 {
@@ -109,6 +115,8 @@ namespace LinearIndexedGrammarLearner
                 }
             }
 
+            currentValue = bestGrammars.Last().Key;
+            currentGrammar = bestGrammars.Last().Value.First();
             return (currentGrammar, currentValue);
         }
     }

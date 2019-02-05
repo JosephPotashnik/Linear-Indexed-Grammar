@@ -53,6 +53,7 @@ namespace LinearIndexedGrammarLearner
             if (currentHypothesis == null) return 0;
 
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
+
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
                 return 0;
 
@@ -71,9 +72,21 @@ namespace LinearIndexedGrammarLearner
 
             if (allParses != null)
             {
+                //var pairs = allParses.SelectMany(x => x.Trees.Select(y => (x.Sentence, y.GetNonTerminalStringUnderNode()))).ToArray();
+                //using (System.IO.StreamWriter file =
+                //    new System.IO.StreamWriter(@"PossibleTrees.txt"))
+                //{
+                //    for (int i = 0; i < pairs.Length; i++)
+                //    {
+                //        file.WriteLine($"{pairs[i].Sentence} , {pairs[i].Item2}");
+                //    }
+                //}
 
                 var trees = allParses.SelectMany(x => x.Trees);
                 var representations = trees.Select(x => x.GetBracketedRepresentation()).Distinct(StringComparer.Ordinal).ToArray();
+                //var representations = allParses.Where(x => x.Trees.Count == 1)
+                //    .Select(x => x.Trees.First().GetBracketedRepresentation()).ToArray();
+
                 var totalTreesCountofData = representations.Length;
                 if (totalTreesCountofData != 0)
                 {
@@ -97,7 +110,7 @@ namespace LinearIndexedGrammarLearner
                     var numberOfSentenceParsed = allParses.Count(x => x.Trees.Count > 0);
                     var explainedSentences = (numberOfSentenceParsed / (double)allParses.Length);
                     prob *= explainedSentences;
-                    //prob -= unexplainedSentencePercentage;
+                
                     if (prob < 0) prob = 0;
                 }
             }

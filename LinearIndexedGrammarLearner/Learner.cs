@@ -10,6 +10,8 @@ namespace LinearIndexedGrammarLearner
     public class Learner
     {
         private readonly int _maxWordsInSentence;
+        private readonly int _minWordsInSentence;
+
         private readonly HashSet<string> _posInText;
         private readonly Dictionary<string, int> _sentencesWithCounts;
         private readonly Vocabulary _voc;
@@ -18,11 +20,12 @@ namespace LinearIndexedGrammarLearner
         public const int ParsingTimeOut = 5000; //in milliseconds
         public const int GrammarTreeCountCalculationTimeOut = 500; //in milliseconds
 
-        public Learner(string[] sentences, int maxWordsInSentence, HashSet<string> posInText, Vocabulary universalVocabulary)
+        public Learner(string[] sentences,  int minWordsInSentence, int maxWordsInSentence, HashSet<string> posInText, Vocabulary universalVocabulary)
         {
             _voc = universalVocabulary;
             _posInText = posInText;
             _maxWordsInSentence = maxWordsInSentence;
+            _minWordsInSentence = minWordsInSentence;
             _sentencesWithCounts = sentences.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
         }
 
@@ -106,7 +109,7 @@ namespace LinearIndexedGrammarLearner
 
             var parseTreesCountPerWords = t.Result;
             var numberOfParseTreesBelowMaxWords = parseTreesCountPerWords.WordsTreesDic.Values
-                .Where(x => x.WordsCount <= _maxWordsInSentence).Select(x => x.TreesCount).Sum();
+                .Where(x => x.WordsCount <= _maxWordsInSentence && x.WordsCount >= _minWordsInSentence).Select(x => x.TreesCount).Sum();
 
             return numberOfParseTreesBelowMaxWords;
         }
