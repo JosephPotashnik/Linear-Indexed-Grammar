@@ -1,10 +1,11 @@
 ﻿{
   "ProgramsToRun": [
     {
-      "PopulationSize": 300,
-      "NumberOfGenerations": 500,
-      "NumberOfRuns": 10,
-      "GrammarFileName": "MoveNPPP.txt"
+      "IsCFG": true,
+      "VocabularyFileName": "UniversalVocabulary.json",
+      "NumberOfRuns": 1,
+      "GrammarFileName": "CorwinIdealGrammar.txt",
+      "DataFileName": "CorwinBooks.txt"
     }
   ]
 }

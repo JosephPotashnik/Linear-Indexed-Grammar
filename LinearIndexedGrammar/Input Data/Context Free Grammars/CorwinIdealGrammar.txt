@@ -7,9 +7,6 @@
 # the start symbol is "START"
 #
 START[*] -> IP[*]
-START[*] -> VP[*]
-START[*] -> NP[*]
-START[*] -> PP[*]
 IP[*] -> NP VP[*]
 IP[*] -> NP IBAR[*]
 IBAR[*] -> V VP[*]

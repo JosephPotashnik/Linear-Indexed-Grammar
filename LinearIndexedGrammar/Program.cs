@@ -25,6 +25,7 @@ namespace LinearIndexedGrammar
         [JsonProperty] public int NumberOfRuns { get; set; }
         [JsonProperty] public string GrammarFileName { get; set; }
         [JsonProperty] public string VocabularyFileName { get; set; }
+        [JsonProperty] public string DataFileName { get; set; }
         [JsonProperty] public bool IsCFG { get; set; }
     }
 
@@ -44,7 +45,6 @@ namespace LinearIndexedGrammar
         {
             ConfigureLogger();
             Learn();
-            //LearnGrammarFromFile("CorwinBooks.txt", true);
         }
 
         private static void ConfigureLogger()
@@ -98,11 +98,8 @@ namespace LinearIndexedGrammar
             sentences = sentences.Select(sentence => sentence.Replace('\n', ' '));
             return sentences;
         }
-        private static (IEnumerable<string> data, Vocabulary vocabulary) FilterDataAccordingToTargetGrammar(string grammarFileName, string dataFileName,  int minWords, int maxWords, string universalVocabularyFileName = @"UniversalVocabulary.json")
+        private static IEnumerable<string> FilterDataAccordingToTargetGrammar(List<Rule> grammarRules, string dataFileName,  int minWords, int maxWords, Vocabulary universalVocabulary)
         {
-            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(universalVocabularyFileName);
-            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
-            var grammarRules = GrammarFileReader.ReadRulesFromFile(grammarFileName);
             var cfGrammar = new ContextFreeGrammar(grammarRules);
 
             //1. get sentences from file
@@ -113,7 +110,7 @@ namespace LinearIndexedGrammar
 
             //3. leave only sentences in word length range from minWords to maxWords in a sentence.
             (var sentences, var posInText) =
-                GrammarFileReader.GetDataAndVocabularyForSentencesUpToLengthN(sentencesInVocabulary, universalVocabulary, minWords, maxWords);
+                GrammarFileReader.GetSentencesInWordLengthRange(sentencesInVocabulary, universalVocabulary, minWords, maxWords);
 
             var learner = new Learner(sentences, maxWords, minWords, posInText, universalVocabulary);
 
@@ -121,26 +118,16 @@ namespace LinearIndexedGrammar
             //if no oracle is supplied, try to learn the entire input. 
             List<string> filteredSen = new List<string>();
 
-            if (grammarFileName != null)
-            {
-                SentenceParsingResults[] allParses = learner.ParseAllSentences(cfGrammar);
-                var parsableData = allParses.Where(x => x.Trees.Count > 0);
+            SentenceParsingResults[] allParses = learner.ParseAllSentences(cfGrammar);
+            var parsableData = allParses.Where(x => x.Trees.Count > 0);
 
-                foreach (var sen in parsableData)
-                {
-                    for (int i = 0; i < sen.Count; i++)
-                        filteredSen.Add(sen.Sentence);
-                }
-            }
-            else
+            foreach (var sen in parsableData)
             {
-                filteredSen = sentences.ToList();
+                for (int i = 0; i < sen.Count; i++)
+                    filteredSen.Add(sen.Sentence);
             }
 
-            if (!ValidateTargetGrammar(grammarRules, filteredSen.ToArray(), universalVocabulary))
-                throw new Exception();
-
-            return (filteredSen,universalVocabulary);
+            return filteredSen;
 
         }
 
@@ -174,8 +161,23 @@ namespace LinearIndexedGrammar
             ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
             var grammarRules = GrammarFileReader.ReadRulesFromFile(programParams.GrammarFileName);
 
-            int maxSentenceLength = 12;
-            var (data, dataVocabulary) = PrepareDataFromTargetGrammar(grammarRules, universalVocabulary, maxSentenceLength);
+            string[] data;
+            Vocabulary dataVocabulary;
+
+            if (programParams.DataFileName == null)
+            {
+                int maxWordsInSentence = 12;
+                (data, dataVocabulary) =
+                    PrepareDataFromTargetGrammar(grammarRules, universalVocabulary, maxWordsInSentence);
+            }
+            else
+            {
+                //leave only sentences in range [minWordsInSentence,maxWordsInSentence]
+                int minWordsInSentence = 1;
+                int maxWordsInSentence = 4;
+                var sentences = FilterDataAccordingToTargetGrammar(grammarRules, programParams.DataFileName, minWordsInSentence, maxWordsInSentence, universalVocabulary);
+                (data, dataVocabulary) = (sentences.ToArray(), universalVocabulary);
+            }
 
             if (!ValidateTargetGrammar(grammarRules, data, dataVocabulary))
                 return;
@@ -228,7 +230,7 @@ namespace LinearIndexedGrammar
             {
                 CoolingFactor = 0.999,
                 InitialTemperature = 10,
-                NumberOfIterations = 2000
+                NumberOfIterations = 1000
             };
 
             //run
@@ -242,7 +244,7 @@ namespace LinearIndexedGrammar
         {
             //1. get sentences up to length n and the relevant POS categories in them.
             (var sentences, var posInText) =
-                GrammarFileReader.GetDataAndVocabularyForSentencesUpToLengthN(data, universalVocabulary, minWords, maxWords);
+                GrammarFileReader.GetSentencesInWordLengthRange(data, universalVocabulary, minWords, maxWords);
 
             //2. prepare the rule space
             PrepareRuleSpace(universalVocabulary, posInText, sentences);
@@ -262,17 +264,13 @@ namespace LinearIndexedGrammar
             ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, bigrams, numberOfAllowedNonTerminals);
         }
 
-        public static void LearnGrammarFromFile(string fileName, bool isCFG)
-        {
-            int minWordsInSentence = 4;
-            int maxWordsInSentence = 4;
-            (var sentences, var voc) = FilterDataAccordingToTargetGrammar("CorwinIdealGrammar.txt", "CorwinBooks.txt", minWordsInSentence, maxWordsInSentence);
-            (ContextSensitiveGrammar bestGrammar, double bestValue) = LearnGrammarFromData(sentences.ToArray(), voc, isCFG);
-            var s = $"Best Hypothesis:\r\n{bestGrammar} \r\n with probability {bestValue}";
-            LogManager.GetCurrentClassLogger().Info(s);
-        }
+
         public static (ContextSensitiveGrammar bestGrammar, double bestValue) LearnGrammarFromData(string[] data, Vocabulary universalVocabulary, bool isCFGGrammar)
         {
+            // initialWordLength is the sentence length from which you would like to start learning
+            //it does not have to be the length of the shortest sentences
+            //for instance, you have sentences in range [1,12] words, and you start learning from initial word length 6,
+            //i.e, all sentences [1,6], then [1,7],... up to [1,12].
             var initialWordLength = 6;
             var currentWordLength = initialWordLength;
             int maxSentenceLength = data.Max(x => x.Split().Length);
