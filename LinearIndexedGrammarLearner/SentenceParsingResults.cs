@@ -12,6 +12,9 @@ namespace LinearIndexedGrammarLearner
         public List<EarleyNode> Trees { get; set; }
 
         //the number of times the sentence was encountered in the corpus.
-        public int Count { get; set; }
+        public int Count  { get; set; }
+
+        //the length of the sentence (number of words)
+        public int Length { get; set; }
     }
 }

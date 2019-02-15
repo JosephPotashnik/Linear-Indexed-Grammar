@@ -49,9 +49,9 @@ namespace LinearIndexedGrammarLearner
                 {
                     currentValue = newValue;
                     currentGrammar = mutatedGrammar;
-                }
+                    if (_objectiveFunction.IsMaximalValue(currentValue)) break;
 
-                if (_objectiveFunction.IsMaximalValue(currentValue)) break;
+                }
             }
 
             var ruleDistribution = _learner.CollectUsages(currentGrammar);
@@ -80,9 +80,10 @@ namespace LinearIndexedGrammarLearner
 
             while (currentIteration++ < _params.NumberOfIterations)
             {
-                LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, probability {currentValue}");
 
+                LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, probability {currentValue}");
                 (currentGrammar, currentValue) = RunSingleIteration(currentGrammar, currentValue);
+
                 if (_objectiveFunction.IsMaximalValue(currentValue))
                 {
                     bestGrammars.Enqueue(currentValue, currentGrammar);

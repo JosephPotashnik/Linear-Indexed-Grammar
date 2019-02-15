@@ -31,7 +31,7 @@ namespace LinearIndexedGrammar
 
     public class Program
     {
-
+        
         private static void Learn(bool nightRun = true)
         {
             var fileName = nightRun ? @"NightRunFull.json" : @"ProgramsToRun.json";
@@ -142,11 +142,24 @@ namespace LinearIndexedGrammar
             ContextFreeGrammar.RenameVariables(grammarRules, partOfSpeechCategories);
             var targetGrammar = new ContextSensitiveGrammar(grammarRules);
 
-            var targetProb = objectiveFunction.Compute(targetGrammar);
+            Learner.SetParsingTimeOut(int.MaxValue); 
 
-            string s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar (should be 1): {targetProb}\r\n";
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            var targetProb = objectiveFunction.Compute(targetGrammar);
+            stopWatch.Stop();
+            var ts = stopWatch.Elapsed;
+            int parsingTimeout = Math.Max((ts.Seconds * 1000 + ts.Milliseconds) * 3, Learner.InitialTimeOut);
+            Learner.SetParsingTimeOut(parsingTimeout);
+            
+            //trying to learn data from incomplete source leads to p < 1
+            //so set the maximum value to the target probability, which is the maximal support
+            //given to the grammar from the data..
+            objectiveFunction.SetMaximalValue(targetProb);
+
+            string s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar given the data: {targetProb} \r\n parsing timeout is {parsingTimeout}: \r\n";
             LogManager.GetCurrentClassLogger().Info(s);
-            if (targetProb < 1)
+            if (!objectiveFunction.IsMaximalValue(targetProb))
             {
                 LogManager.GetCurrentClassLogger().Fatal("probablity incorrect. exit!");
                 return false;
@@ -174,7 +187,7 @@ namespace LinearIndexedGrammar
             {
                 //leave only sentences in range [minWordsInSentence,maxWordsInSentence]
                 int minWordsInSentence = 1;
-                int maxWordsInSentence = 4;
+                int maxWordsInSentence = 8;
                 var sentences = FilterDataAccordingToTargetGrammar(grammarRules, programParams.DataFileName, minWordsInSentence, maxWordsInSentence, universalVocabulary);
                 (data, dataVocabulary) = (sentences.ToArray(), universalVocabulary);
             }

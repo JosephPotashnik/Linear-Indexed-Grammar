@@ -87,23 +87,7 @@ namespace LinearIndexedGrammarParser
             GetNonTerminalStringUnderNode(leaves);
             return string.Join(" ", leaves);
         }
-
-        public string GetBracketedRepresentation()
-        {
-            string rep = "(" + Name;
-            if (Children != null)
-            {
-                foreach (var child in Children)
-                {
-                    string childRep = child.GetBracketedRepresentation();
-                    rep = rep + childRep;
-                }
-            }
-
-            rep = rep + ")";
-            return rep;
-        }
-
+        
         private void GetNonTerminalStringUnderNode(List<string> leavesList)
         {
             if (Children == null)

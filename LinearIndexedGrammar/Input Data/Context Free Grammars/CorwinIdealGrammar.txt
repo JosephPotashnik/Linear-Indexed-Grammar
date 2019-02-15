@@ -8,16 +8,13 @@
 #
 START[*] -> IP[*]
 IP[*] -> NP VP[*]
-IP[*] -> NP IBAR[*]
-IBAR[*] -> V VP[*]
 NP[*] -> PRON
 NP[*] -> NBAR[*]
 NP[*] -> D NBAR[*]
 NBAR[*] -> N
 NBAR[*] -> ADJ NBAR[*]
-NBAR[*] -> N NBAR[*]
-NBAR[*] -> NBAR PP[*]
 VP[*] -> V PP[*]
 VP[*] -> V NP[*]
+VP[*] -> V IP[*]
 VP[*] -> V
 PP[*] -> P NP[*]

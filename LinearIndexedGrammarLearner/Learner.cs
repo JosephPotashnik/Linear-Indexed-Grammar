@@ -13,11 +13,12 @@ namespace LinearIndexedGrammarLearner
         private readonly int _minWordsInSentence;
 
         private readonly HashSet<string> _posInText;
-        private readonly Dictionary<string, int> _sentencesWithCounts;
+        private readonly SentenceParsingResults[] _sentencesWithCounts;
         private readonly Vocabulary _voc;
         // ReSharper disable once NotAccessedField.Local
         private GrammarPermutations _gp;
-        public const int ParsingTimeOut = 5000; //in milliseconds
+        public const int InitialTimeOut = 1500;
+        private static int parsingTimeOut = InitialTimeOut; //in milliseconds
         public const int GrammarTreeCountCalculationTimeOut = 500; //in milliseconds
 
         public Learner(string[] sentences,  int minWordsInSentence, int maxWordsInSentence, HashSet<string> posInText, Vocabulary universalVocabulary)
@@ -26,8 +27,25 @@ namespace LinearIndexedGrammarLearner
             _posInText = posInText;
             _maxWordsInSentence = maxWordsInSentence;
             _minWordsInSentence = minWordsInSentence;
-            _sentencesWithCounts = sentences.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
+            var dict = sentences.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
+            _sentencesWithCounts = new SentenceParsingResults[dict.Count];
+            var arrayOfDesiredVals = dict.Select(x => (x.Key, x.Value, x.Key.Split().Length)).ToArray();
+
+            for (int i = 0; i < _sentencesWithCounts.Length; i++)
+            {
+                _sentencesWithCounts[i] = new SentenceParsingResults();
+                _sentencesWithCounts[i].Sentence = arrayOfDesiredVals[i].Key;
+                _sentencesWithCounts[i].Count = arrayOfDesiredVals[i].Value;
+                _sentencesWithCounts[i].Length = arrayOfDesiredVals[i].Length;
+
+            }
         }
+
+        public static void SetParsingTimeOut(int pto) //in milliseconds
+        {
+            parsingTimeOut = pto;
+        }
+
 
         ////We create the "promiscuous grammar" as initial grammar.
         public ContextSensitiveGrammar CreateInitialGrammar(bool isCFGGrammar)
@@ -50,26 +68,20 @@ namespace LinearIndexedGrammarLearner
 
         public SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis)
         {
-            var allParses = new SentenceParsingResults[_sentencesWithCounts.Count];
-
             try
             {
-                var cts = new CancellationTokenSource(ParsingTimeOut);
+                var cts = new CancellationTokenSource(parsingTimeOut);
                 var po = new ParallelOptions {CancellationToken = cts.Token};
                 Parallel.ForEach(_sentencesWithCounts, po,
                     (sentenceItem, loopState, i) =>
                     {
                         var parser = new EarleyParser(currentHypothesis, _voc);
-                        var n = parser.ParseSentence(sentenceItem.Key, cts);
-                        allParses[i] = new SentenceParsingResults
-                        {
-                            Sentence = sentenceItem.Key,
-                            Trees = n,
-                            Count = sentenceItem.Value
-                        };
+                        var n = parser.ParseSentence(sentenceItem.Sentence, cts);
+                        _sentencesWithCounts[i].Trees = n;
                         po.CancellationToken.ThrowIfCancellationRequested();
                     });
-                return allParses;
+
+                return _sentencesWithCounts;
             }
             catch (OperationCanceledException)
             {
@@ -84,10 +96,11 @@ namespace LinearIndexedGrammarLearner
             {
                 throw;
             }
+
         }
 
 
-        public int GetNumberOfParseTrees(ContextFreeGrammar hypothesis)
+        public Dictionary<int,int> GetGrammarTrees(ContextFreeGrammar hypothesis)
         {
             //working assumption:
             var treeDepth = _maxWordsInSentence + 3;
@@ -107,19 +120,22 @@ namespace LinearIndexedGrammarLearner
                 //throw new GrammarOverlyRecursiveException(s);
             }
 
-            var parseTreesCountPerWords = t.Result;
-            var numberOfParseTreesBelowMaxWords = parseTreesCountPerWords.WordsTreesDic.Values
-                .Where(x => x.WordsCount <= _maxWordsInSentence && x.WordsCount >= _minWordsInSentence).Select(x => x.TreesCount).Sum();
-
-            return numberOfParseTreesBelowMaxWords;
+            var grammarTreesPerLength = t.Result.WordsTreesDic.Values
+                .Where(x => x.WordsCount <= _maxWordsInSentence && x.WordsCount >= _minWordsInSentence)
+                .ToDictionary(x => x.WordsCount, x => x.TreesCount);
+                
+                
+            return grammarTreesPerLength;
+;
         }
 
 
         public Dictionary<int, int> CollectUsages(ContextSensitiveGrammar currentHypothesis)
         {
-            var cfGrammar = new ContextFreeGrammar(currentHypothesis);
 
+            var cfGrammar = new ContextFreeGrammar(currentHypothesis);
             var allParses = ParseAllSentences(cfGrammar);
+
             var usagesDic = new Dictionary<int, int>();
 
             if (allParses != null)
