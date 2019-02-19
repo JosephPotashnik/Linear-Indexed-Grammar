@@ -18,7 +18,7 @@ namespace LinearIndexedGrammarLearner
         // ReSharper disable once NotAccessedField.Local
         private GrammarPermutations _gp;
         public const int InitialTimeOut = 1500;
-        private static int parsingTimeOut = InitialTimeOut; //in milliseconds
+        public static int ParsingTimeOut = InitialTimeOut; //in milliseconds
         public const int GrammarTreeCountCalculationTimeOut = 500; //in milliseconds
 
         public Learner(string[] sentences,  int minWordsInSentence, int maxWordsInSentence, HashSet<string> posInText, Vocabulary universalVocabulary)
@@ -40,12 +40,6 @@ namespace LinearIndexedGrammarLearner
 
             }
         }
-
-        public static void SetParsingTimeOut(int pto) //in milliseconds
-        {
-            parsingTimeOut = pto;
-        }
-
 
         ////We create the "promiscuous grammar" as initial grammar.
         public ContextSensitiveGrammar CreateInitialGrammar(bool isCFGGrammar)
@@ -70,7 +64,7 @@ namespace LinearIndexedGrammarLearner
         {
             try
             {
-                var cts = new CancellationTokenSource(parsingTimeOut);
+                var cts = new CancellationTokenSource(ParsingTimeOut);
                 var po = new ParallelOptions {CancellationToken = cts.Token};
                 Parallel.ForEach(_sentencesWithCounts, po,
                     (sentenceItem, loopState, i) =>
@@ -88,7 +82,7 @@ namespace LinearIndexedGrammarLearner
                 //parse tree too long to parse
                 //the grammar is too recursive,
                 //decision - discard it and continue.
-                //string s = "parsing took too long (0.5 second), for the grammar:\r\n" + currentHypothesis.ToString();
+                //string s = "parsing took too long, for the grammar:\r\n" + currentHypothesis.ToString();
                 //NLog.LogManager.GetCurrentClassLogger().Info(s);
                 return null; //parsing failed.
             }
@@ -132,9 +126,17 @@ namespace LinearIndexedGrammarLearner
 
         public Dictionary<int, int> CollectUsages(ContextSensitiveGrammar currentHypothesis)
         {
-
             var cfGrammar = new ContextFreeGrammar(currentHypothesis);
+
+            //store original parsing timeout aside, allow this parse to take as long as
+            //required (because the optimal parse might surpass the parsing time out due to
+            // accidental localized cpu unavailability.
+            //and we don't want the accepted grammar to fail here -- the accepted grammar
+            //already survived the same timeout previously. 
+            int parsingTimeout = ParsingTimeOut;
+            ParsingTimeOut = int.MaxValue;
             var allParses = ParseAllSentences(cfGrammar);
+            ParsingTimeOut = parsingTimeout;
 
             var usagesDic = new Dictionary<int, int>();
 

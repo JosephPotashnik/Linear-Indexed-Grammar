@@ -34,7 +34,7 @@ namespace LinearIndexedGrammarLearner
             var currentTemp = _params.InitialTemperature;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
-
+            //int counter = 0;
             while (currentTemp > 0.3)
             { 
                 var mutatedGrammar = _learner.GetNeighbor(currentGrammar);
@@ -42,7 +42,8 @@ namespace LinearIndexedGrammarLearner
                 if (mutatedGrammar == null) continue;
 
                 var newValue =  _objectiveFunction.Compute(mutatedGrammar);
-                //LogManager.GetCurrentClassLogger().Info($"currentTemp {currentTemp}, probability {newValue}");
+                //if (counter++ % 100 == 0)
+                //    LogManager.GetCurrentClassLogger().Info($"currentTemp {currentTemp}, probability {newValue}");
 
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
                 if (accept)

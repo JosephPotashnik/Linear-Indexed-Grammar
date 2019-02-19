@@ -142,7 +142,7 @@ namespace LinearIndexedGrammar
             ContextFreeGrammar.RenameVariables(grammarRules, partOfSpeechCategories);
             var targetGrammar = new ContextSensitiveGrammar(grammarRules);
 
-            Learner.SetParsingTimeOut(int.MaxValue); 
+            Learner.ParsingTimeOut = int.MaxValue;
 
             var stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -150,8 +150,8 @@ namespace LinearIndexedGrammar
             stopWatch.Stop();
             var ts = stopWatch.Elapsed;
             int parsingTimeout = Math.Max((ts.Seconds * 1000 + ts.Milliseconds) * 3, Learner.InitialTimeOut);
-            Learner.SetParsingTimeOut(parsingTimeout);
-            
+            Learner.ParsingTimeOut = parsingTimeout;
+
             //trying to learn data from incomplete source leads to p < 1
             //so set the maximum value to the target probability, which is the maximal support
             //given to the grammar from the data..
