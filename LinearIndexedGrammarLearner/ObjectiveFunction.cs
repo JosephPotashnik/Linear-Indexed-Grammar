@@ -148,9 +148,14 @@ namespace LinearIndexedGrammarLearner
                 //    }
                 //}
 
-     
-                var trees = allParses.SelectMany(x => x.Trees.Select(y => (x.Length, y)));
-                var dataTreesPerLength = trees.Distinct(new LengthAndEarleyNodeComparer()).GroupBy(x => x.Item1).ToDictionary(g => g.Key, g => g.Count());
+                var trees = new HashSet<(int, EarleyNode)>(new LengthAndEarleyNodeComparer());
+                for (int i = 0; i < allParses.Length; i++)
+                {
+                    for (int j = 0; j < allParses[i].Trees.Count; j++)
+                        trees.Add((allParses[i].Length, allParses[i].Trees[j]));
+                }
+
+                var dataTreesPerLength = trees.GroupBy(x => x.Item1).ToDictionary(g => g.Key, g => g.Count());
 
                 if (trees.Any())
                 {
