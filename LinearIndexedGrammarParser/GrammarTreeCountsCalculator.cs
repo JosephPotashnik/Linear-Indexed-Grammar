@@ -5,69 +5,82 @@ namespace LinearIndexedGrammarParser
 {
     public class GrammarTreeCountsCalculator
     {
-        private readonly SubTreeCountsCache _cache;
-        private readonly ContextFreeGrammar _g;
+        private SubTreeCountsCache _cache;
+        public ContextFreeGrammar _g;
         private readonly HashSet<string> _pos;
 
-        public GrammarTreeCountsCalculator(ContextFreeGrammar g, HashSet<string> pos, SubTreeCountsCache cache)
+        //private ContextFreeGrammar _originalG;
+        private readonly int _maxWordsInSentence;
+        private readonly int _minWordsInSentence;
+        private int _treeDepth;
+
+        public GrammarTreeCountsCalculator(HashSet<string> pos, int min, int max)
         {
-            _g = g;
             _pos = pos;
-            _cache = cache;
+            _minWordsInSentence = min;
+            _maxWordsInSentence = max;
+            _treeDepth = max + 3;
         }
 
-        public SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(int treeDepth)
+        public int[] NumberOfParseTreesPerWords()
         {
-            return NumberOfParseTreesPerWords(new DerivedCategory(ContextFreeGrammar.StartSymbol), treeDepth);
+            return NumberOfParseTreesPerWords(new DerivedCategory(ContextFreeGrammar.StartSymbol), _treeDepth-1);
         }
 
-        private SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(DerivedCategory[] rhs, int treeDepth)
+        //in a given depth treedepth, we have array of arr[wc] = tc;
+        private int[] NumberOfParseTreesPerWords(Rule r, int treeDepth)
         {
-            var res = new SubtreeCountsWithNumberOfWords();
+            var res = _cache.RuleCache[r][treeDepth];
+            var rhs = r.RightHandSide;
 
             if (rhs.Length == 2)
             {
                 var catCounts1 = NumberOfParseTreesPerWords(rhs[0], treeDepth);
                 var catCounts2 = NumberOfParseTreesPerWords(rhs[1], treeDepth);
 
-                var kvpFromCat1 = catCounts1.WordsTreesDic.Values.ToList();
-                var kvpFromCat2 = catCounts2.WordsTreesDic.Values.ToList();
-
-                UpdateCounts(res, kvpFromCat1, kvpFromCat2);
+                UpdateCounts(res, catCounts1, catCounts2);
             }
             else
             {
                 var catCounts1 = NumberOfParseTreesPerWords(rhs[0], treeDepth);
-                var kvpFromCat1 = catCounts1.WordsTreesDic.Values.ToList();
-                UpdateCounts(res, kvpFromCat1);
+                UpdateCounts(res, catCounts1);
             }
 
             return res;
         }
 
-        private static void UpdateCounts(SubtreeCountsWithNumberOfWords res, List<WordsTreesCounts> kvpFromCat1,
-            List<WordsTreesCounts> kvpFromCat2)
+        private static void UpdateCounts(int[] res, int[] fromCat1, int[] fromCat2)
         {
-            foreach (var wordsTreesDepth1 in kvpFromCat1)
-            foreach (var wordsTreesDepth2 in kvpFromCat2)
+            for (int i = 0; i < fromCat1.Length; i++)
             {
-                var dic = res.WordsTreesDic;
+                for (int j = 0; j < fromCat2.Length; j++)
+                {
+                    if (fromCat1[i] > 0 && fromCat2[j] > 0)
+                    {
+                        var wc = i + j;
+                        var tc = fromCat1[i] * fromCat2[j];
 
-                var wc = wordsTreesDepth1.WordsCount + wordsTreesDepth2.WordsCount;
-                var tc = wordsTreesDepth1.TreesCount * wordsTreesDepth2.TreesCount;
+                        if (wc < res.Length)
+                            res[wc] += tc;
+                    }
+                }
 
-                if (!dic.ContainsKey(wc))
-                    dic[wc] = new WordsTreesCounts();
-
-                dic[wc].WordsCount = wc;
-                dic[wc].TreesCount += tc;
             }
+
         }
 
-
-        private SubtreeCountsWithNumberOfWords NumberOfParseTreesPerWords(DerivedCategory cat, int treeDepth)
+        private static bool IsEmpty(int[] wordLengthAndTrees)
         {
-            var res = new SubtreeCountsWithNumberOfWords {WordsTreesDic = new Dictionary<int, WordsTreesCounts>()};
+            for (int i = 0; i < wordLengthAndTrees.Length; i++)
+                if (wordLengthAndTrees[i] != 0)
+                    return false;
+
+            return true;
+        }
+
+        private int[] NumberOfParseTreesPerWords(DerivedCategory cat, int treeDepth)
+        {
+            var res = _cache.CategoriesCache[cat][treeDepth];
 
             if (_g.StaticRules.ContainsKey(cat))
             {
@@ -82,10 +95,11 @@ namespace LinearIndexedGrammarParser
                     var storedCountsOfCat = _cache.CategoriesCache[cat];
                     var indexInCatCacheArr = treeDepth - 1;
                     var cachedCatCounts = storedCountsOfCat[indexInCatCacheArr];
-                    while (cachedCatCounts == null && ++indexInCatCacheArr < storedCountsOfCat.Length)
+
+                    while (IsEmpty(cachedCatCounts) && ++indexInCatCacheArr < storedCountsOfCat.Length)
                         cachedCatCounts = storedCountsOfCat[indexInCatCacheArr];
 
-                    if (cachedCatCounts != null)
+                    if (!IsEmpty(cachedCatCounts))
                         return cachedCatCounts;
 
                     var ruleList = _g.StaticRules[cat];
@@ -95,18 +109,17 @@ namespace LinearIndexedGrammarParser
                         var storedCountsOfRules = _cache.RuleCache[rule];
                         var indexInRuleCacheArr = treeDepth - 1;
                         var cachedRuleCounts = storedCountsOfRules[indexInRuleCacheArr];
-                        while (cachedRuleCounts == null && ++indexInRuleCacheArr < storedCountsOfRules.Length)
+                        while (IsEmpty(cachedRuleCounts) && ++indexInRuleCacheArr < storedCountsOfRules.Length)
                             cachedRuleCounts = storedCountsOfRules[indexInRuleCacheArr];
 
-                        SubtreeCountsWithNumberOfWords fromRHS;
+                        int[] fromRHS;
                         //use previously computed results if applicable.
-                        if (cachedRuleCounts != null)
+                        if (!IsEmpty(cachedRuleCounts))
                             fromRHS = cachedRuleCounts;
                         else
-                            fromRHS = NumberOfParseTreesPerWords(rule.RightHandSide, treeDepth - 1);
+                            fromRHS = NumberOfParseTreesPerWords(rule, treeDepth - 1);
 
-                        var kvpFromCat1 = fromRHS.WordsTreesDic.Values.ToList();
-                        UpdateCounts(res, kvpFromCat1);
+                        UpdateCounts(res, fromRHS);
 
                         //store in rules cache.
                         storedCountsOfRules[treeDepth - 1] = fromRHS;
@@ -128,33 +141,44 @@ namespace LinearIndexedGrammarParser
             return res;
         }
 
-        private static void CountTerminal(SubtreeCountsWithNumberOfWords res)
+        private static void CountTerminal(int[] res)
         {
-            var c = new WordsTreesCounts {TreesCount = 1, WordsCount = 1};
-            res.WordsTreesDic[c.WordsCount] = c;
+            res[1] = 1;
         }
 
-        private static void CountEpsilon(SubtreeCountsWithNumberOfWords res)
+        private static void CountEpsilon(int[] res)
         {
-            var c = new WordsTreesCounts {TreesCount = 1, WordsCount = 0};
-            res.WordsTreesDic[c.WordsCount] = c;
+            res[0] = 1;
         }
 
-        private static void UpdateCounts(SubtreeCountsWithNumberOfWords res, List<WordsTreesCounts> kvpFromCat1)
+        private static void UpdateCounts(int[] res, int[] fromRHS)
         {
-            foreach (var wordsTreesDepth1 in kvpFromCat1)
+            for (int i = 0; i < fromRHS.Length; i++)
+                res[i] += fromRHS[i];
+        }
+
+        public Dictionary<int, int> Recalculate(ContextFreeGrammar grammar)
+        {
+            //if (_cache == null)
+                _cache = new SubTreeCountsCache(grammar, _treeDepth);
+            //else
+             //   _cache.Reset(grammar, _treeDepth);
+
+            _g = grammar;
+
+            var t = NumberOfParseTreesPerWords();
+            var grammarTreesPerLength = new Dictionary<int, int>();
+            for (int i = 0; i < t.Length; i++)
             {
-                var dic = res.WordsTreesDic;
-
-                var wc = wordsTreesDepth1.WordsCount;
-                var tc = wordsTreesDepth1.TreesCount;
-
-                if (!dic.ContainsKey(wc))
-                    dic[wc] = new WordsTreesCounts();
-
-                dic[wc].WordsCount = wc;
-                dic[wc].TreesCount += tc;
+                if (i <= _maxWordsInSentence && i >= _minWordsInSentence && t[i] > 0)
+                    grammarTreesPerLength[i] = t[i];
             }
+
+            return grammarTreesPerLength;
+
         }
     }
+
+
+
 }

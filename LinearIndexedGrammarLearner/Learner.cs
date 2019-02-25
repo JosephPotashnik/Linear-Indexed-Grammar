@@ -20,6 +20,7 @@ namespace LinearIndexedGrammarLearner
         public const int InitialTimeOut = 1500;
         public static int ParsingTimeOut = InitialTimeOut; //in milliseconds
         public const int GrammarTreeCountCalculationTimeOut = 500; //in milliseconds
+        public GrammarTreeCountsCalculator _grammarTreesCalculator;
 
         public Learner(string[] sentences,  int minWordsInSentence, int maxWordsInSentence, HashSet<string> posInText, Vocabulary universalVocabulary)
         {
@@ -30,6 +31,7 @@ namespace LinearIndexedGrammarLearner
             var dict = sentences.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
             _sentencesWithCounts = new SentenceParsingResults[dict.Count];
             var arrayOfDesiredVals = dict.Select(x => (x.Key, x.Value, x.Key.Split().Length)).ToArray();
+            _grammarTreesCalculator = new GrammarTreeCountsCalculator(_posInText, _minWordsInSentence, _maxWordsInSentence);
 
             for (int i = 0; i < _sentencesWithCounts.Length; i++)
             {
@@ -96,31 +98,7 @@ namespace LinearIndexedGrammarLearner
 
         public Dictionary<int,int> GetGrammarTrees(ContextFreeGrammar hypothesis)
         {
-            //working assumption:
-            var treeDepth = _maxWordsInSentence + 3;
-            //TODO: find a safe upper bound to tree depth, which will be a function of
-            //max words in sentence, possibly also a function of the number of different POS.
-            var t = Task.Run(() =>
-            {
-                var cache = new SubTreeCountsCache(hypothesis, treeDepth);
-                var treeCalculator = new GrammarTreeCountsCalculator(hypothesis, _posInText, cache);
-                return treeCalculator.NumberOfParseTreesPerWords(treeDepth);
-            });
-
-            if (!t.Wait(GrammarTreeCountCalculationTimeOut))
-            {
-                //string s = "computing all parse trees took too long (1.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
-                //NLog.LogManager.GetCurrentClassLogger().Info(s);
-                //throw new GrammarOverlyRecursiveException(s);
-            }
-
-            var grammarTreesPerLength = t.Result.WordsTreesDic.Values
-                .Where(x => x.WordsCount <= _maxWordsInSentence && x.WordsCount >= _minWordsInSentence)
-                .ToDictionary(x => x.WordsCount, x => x.TreesCount);
-                
-                
-            return grammarTreesPerLength;
-;
+            return _grammarTreesCalculator.Recalculate(hypothesis);
         }
 
 
