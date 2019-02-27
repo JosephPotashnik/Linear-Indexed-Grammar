@@ -26,9 +26,23 @@ namespace LinearIndexedGrammarParser
 
         private static string RuleWithDotNotation(Rule rule, int dotIndex)
         {
-            var terms = rule.RightHandSide.Select(x => x.ToString()).ToList();
-            terms.Insert(dotIndex, "$");
-            return string.Format("{0} -> {1}", rule.LeftHandSide, string.Join(" ", terms));
+            //this function is called very heavily, so the following code
+            //is optimized to return exactly the possible 5 cases.
+            if (rule.RightHandSide.Length == 1)
+            {
+                if (dotIndex == 0)
+                    return $"{rule.LeftHandSide} -> $ {rule.RightHandSide[0]}";
+
+                return $"{rule.LeftHandSide} -> {rule.RightHandSide[0]} $";
+
+            }
+            //length  = 2
+            if (dotIndex == 0)
+                return $"{rule.LeftHandSide} -> $ {rule.RightHandSide[0]} {rule.RightHandSide[1]}";
+            if (dotIndex == 1)
+                return $"{rule.LeftHandSide} -> {rule.RightHandSide[0]} $ {rule.RightHandSide[1]}";
+
+            return $"{rule.LeftHandSide} -> {rule.RightHandSide[0]} {rule.RightHandSide[1]} $";  
         }
 
         public override string ToString()

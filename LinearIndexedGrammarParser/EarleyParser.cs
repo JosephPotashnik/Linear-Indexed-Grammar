@@ -199,9 +199,9 @@ namespace LinearIndexedGrammarParser
             {
                 //count++;
                 //TestForTooManyStatesInColumn(count);
-
-                var completedStatesQueueKey = col.ActionableCompleteStates.First().Key;
-                var completedStatesQueue = col.ActionableCompleteStates.First().Value;
+                var kvp = col.ActionableCompleteStates.First();
+                var completedStatesQueueKey = kvp.Key;
+                var completedStatesQueue = kvp.Value;
 
                 var state = completedStatesQueue.Dequeue();
 
