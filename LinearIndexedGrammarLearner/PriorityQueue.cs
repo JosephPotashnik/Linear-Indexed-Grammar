@@ -9,8 +9,6 @@ namespace LinearIndexedGrammarLearner
     {
         private readonly SortedDictionary<P, Queue<V>> list = new SortedDictionary<P, Queue<V>>();
 
-        public bool IsEmpty => !list.Any();
-
         public IEnumerable<(P, V)> KeyValuePairs
         {
             get

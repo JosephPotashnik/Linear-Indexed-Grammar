@@ -180,11 +180,11 @@ namespace LinearIndexedGrammarParser
 
         private int TraversePredictableStates(EarleyColumn col, int count)
         {
-            while (col.CategoriesToPredict.Any())
+            while (col.CategoriesToPredict.Count > 0)
             {
                 var nextTerm = col.CategoriesToPredict.Dequeue();
 
-                if (col.ActionableCompleteStates.Any()) col.ActionableCompleteStates.Clear();
+                if (col.ActionableCompleteStates.Count > 0) col.ActionableCompleteStates.Clear();
 
                 //count++;
                 //TestForTooManyStatesInColumn(count);
@@ -200,7 +200,7 @@ namespace LinearIndexedGrammarParser
 
         private int TraverseCompletedStates(EarleyColumn col, int count)
         {
-            while (col.ActionableCompleteStates.Any())
+            while (col.ActionableCompleteStates.Count > 0)
             {
                 //count++;
                 //TestForTooManyStatesInColumn(count);
@@ -210,7 +210,7 @@ namespace LinearIndexedGrammarParser
 
                 var state = completedStatesQueue.Dequeue();
 
-                if (!completedStatesQueue.Any())
+                if (completedStatesQueue.Count == 0)
                     col.ActionableCompleteStates.Remove(completedStatesQueueKey);
 
                 Complete(col, state);

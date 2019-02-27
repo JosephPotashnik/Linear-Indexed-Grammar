@@ -291,7 +291,7 @@ namespace LinearIndexedGrammarParser
             toVisit.Enqueue(startCat);
             visited.Add(startCat);
 
-            while (toVisit.Any())
+            while (toVisit.Count > 0)
             {
                 var nextTerm = toVisit.Dequeue();
 

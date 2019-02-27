@@ -177,7 +177,7 @@ namespace LinearIndexedGrammarLearner
 
                 var dataTreesPerLength = trees.GroupBy(x => x.Item1).ToDictionary(g => g.Key, g => g.Count());
 
-                if (trees.Any())
+                if (trees.Count > 0)
                 {
                     prob = 1;
                     var grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis);
