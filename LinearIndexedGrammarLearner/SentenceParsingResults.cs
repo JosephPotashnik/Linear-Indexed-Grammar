@@ -6,7 +6,7 @@ namespace LinearIndexedGrammarLearner
     public class SentenceParsingResults
     {
         //the sentence being parsed
-        public string Sentence { get; set; }
+        public string[] Sentence { get; set; }
 
         //the set of trees corresponding to the sentence, given a grammar.
         public List<EarleyNode> Trees { get; set; }

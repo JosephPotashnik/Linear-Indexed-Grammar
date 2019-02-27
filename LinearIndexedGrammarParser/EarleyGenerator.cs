@@ -9,7 +9,7 @@ namespace LinearIndexedGrammarParser
         {
         }
 
-        protected override (EarleyColumn[], int[]) PrepareEarleyTable(string text, int maxWords)
+        protected override (EarleyColumn[], int[]) PrepareEarleyTable(string[] text, int maxWords)
         {
             var table = new EarleyColumn[maxWords + 1];
 

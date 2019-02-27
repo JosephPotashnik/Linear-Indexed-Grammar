@@ -19,26 +19,28 @@ namespace LinearIndexedGrammarLearner
         private GrammarPermutations _gp;
         public const int InitialTimeOut = 1500;
         public static int ParsingTimeOut = InitialTimeOut; //in milliseconds
-        public const int GrammarTreeCountCalculationTimeOut = 500; //in milliseconds
         public GrammarTreeCountsCalculator _grammarTreesCalculator;
 
-        public Learner(string[] sentences,  int minWordsInSentence, int maxWordsInSentence, HashSet<string> posInText, Vocabulary universalVocabulary)
+        public Learner(string[][] sentences,  int minWordsInSentence, int maxWordsInSentence, HashSet<string> posInText, Vocabulary universalVocabulary)
         {
             _voc = universalVocabulary;
             _posInText = posInText;
             _maxWordsInSentence = maxWordsInSentence;
             _minWordsInSentence = minWordsInSentence;
-            var dict = sentences.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
+
+            var dict = sentences.GroupBy(x => string.Join(" ", x)).ToDictionary(g => g.Key, g => g.Count());
+
             _sentencesWithCounts = new SentenceParsingResults[dict.Count];
-            var arrayOfDesiredVals = dict.Select(x => (x.Key, x.Value, x.Key.Split().Length)).ToArray();
+            var arrayOfDesiredVals = dict.Select(x => (x.Key, x.Value)).ToArray();
+
             _grammarTreesCalculator = new GrammarTreeCountsCalculator(_posInText, _minWordsInSentence, _maxWordsInSentence);
 
             for (int i = 0; i < _sentencesWithCounts.Length; i++)
             {
                 _sentencesWithCounts[i] = new SentenceParsingResults();
-                _sentencesWithCounts[i].Sentence = arrayOfDesiredVals[i].Key;
+                _sentencesWithCounts[i].Sentence = arrayOfDesiredVals[i].Key.Split();
                 _sentencesWithCounts[i].Count = arrayOfDesiredVals[i].Value;
-                _sentencesWithCounts[i].Length = arrayOfDesiredVals[i].Length;
+                _sentencesWithCounts[i].Length = _sentencesWithCounts[i].Sentence.Length;
 
             }
         }

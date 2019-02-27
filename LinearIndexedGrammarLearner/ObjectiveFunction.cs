@@ -57,7 +57,7 @@ namespace LinearIndexedGrammarLearner
 
     public class GrammarFitnessObjectiveFunction : IObjectiveFunction
     {
-        private static double[] powersOfMinus2 =
+        private static readonly double[] powersOfMinus2 =
         {
             Math.Pow(2, 0),
             Math.Pow(2, -1),

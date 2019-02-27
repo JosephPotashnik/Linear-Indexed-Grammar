@@ -5,15 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace LinearIndexedGrammarParser
 {
-    public class WordsTreesCounts
-    {
-        public int WordsCount { get; set; }
-        public int TreesCount { get; set; }
-    }
 
     public class ContextFreeGrammar
     {
-        public const string VocabularyFile = "Vocabulary.Json";
         public static HashSet<SyntacticCategory> PartsOfSpeech;
         public const string GammaRule = "Gamma";
         public const string StartSymbol = "START";
@@ -392,13 +386,12 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        public static HashSet<(string rhs1, string rhs2)> GetBigramsOfData(string[] data, Vocabulary universalVocabulary)
+        public static HashSet<(string rhs1, string rhs2)> GetBigramsOfData(string[][] data, Vocabulary universalVocabulary)
         {
             var bigrams = new HashSet<(string rhs1, string rhs2)>();
 
-            foreach (var sentence in data)
+            foreach (var words in data)
             {
-                var words = sentence.Split();
                 for (int i = 0; i < words.Length-1; i++)
                 {
                     var rhs1 = words[i];

@@ -14,14 +14,13 @@ namespace LinearIndexedGrammarParser
             return n.Select(x => x.GetNonTerminalStringUnderNode()).ToList();
         }
 
-        public static (string[] sentences, HashSet<string> POSCategoriesInData)  GetSentencesInWordLengthRange(string[] allData, Vocabulary universalVocabulary, int minWords, int maxWords)
+        public static (string[][] sentences, HashSet<string> POSCategoriesInData)  GetSentencesInWordLengthRange(string[][] allData, Vocabulary universalVocabulary, int minWords, int maxWords)
         {
-            var sentences = new List<string>();
+            var sentences = new List<string[]>();
             var posCategories = new HashSet<string>();
 
-            foreach (var item in allData)
+            foreach (var arr in allData)
             {
-                var arr = item.Split();
                 if (arr.Length > maxWords || arr.Length < minWords) continue;
 
                 var sentence = new string[arr.Length];
@@ -32,18 +31,18 @@ namespace LinearIndexedGrammarParser
                         posCategories.Add(pos);
                 }
 
-                sentences.Add(item);
+                sentences.Add(arr);
             }
 
             return (sentences.ToArray(), posCategories);
         }
 
-        public static (string[] sentences, Vocabulary textVocabulary) GetSentencesOfGenerator(List<EarleyNode> n,
+        public static (string[][] sentences, Vocabulary textVocabulary) GetSentencesOfGenerator(List<EarleyNode> n,
             Vocabulary universalVocabulary, int numberOfSentencesPerTree, bool isRandom = true)
         {
             var textVocabulary = new Vocabulary();
             var nonTerminalSentences = GetSentencesNonTerminals(n);
-            var sentences = new List<string>();
+            var sentences = new List<string[]>();
             var rand = new Random();
             var posCategories = new HashSet<string>();
 
@@ -70,8 +69,7 @@ namespace LinearIndexedGrammarParser
                         posCategories.Add(posCat);
                     }
 
-                    var s = string.Join(" ", sentence);
-                    sentences.Add(s);
+                    sentences.Add(sentence);
                 }
                 
             }
@@ -94,7 +92,7 @@ namespace LinearIndexedGrammarParser
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
 
             var cts = new CancellationTokenSource();
-            var nodeList = generator.ParseSentence("", cts, maxWords);
+            var nodeList = generator.ParseSentence(null, cts, maxWords);
             return (nodeList, rules);
         }
 
@@ -108,7 +106,7 @@ namespace LinearIndexedGrammarParser
 
             var parser = new EarleyParser(cfGrammar, universalVocabulary);
 
-            var n = parser.ParseSentence(sentence, new CancellationTokenSource());
+            var n = parser.ParseSentence(sentence.Split(), new CancellationTokenSource());
             return n;
         }
 

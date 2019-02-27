@@ -199,9 +199,10 @@ namespace LinearIndexedGrammarParserTests
             //Assert.Equal(expected, actual);
 
 
-            JsonSerializer serializer = new JsonSerializer();
-            serializer.NullValueHandling = NullValueHandling.Ignore;
-            serializer.Formatting = Formatting.Indented;
+            JsonSerializer serializer = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented
+            };
 
             using (StreamWriter sw = new StreamWriter(@"GenerateCFGGrammarSentences.json"))
             using (JsonWriter writer = new JsonTextWriter(sw))
@@ -210,7 +211,7 @@ namespace LinearIndexedGrammarParserTests
             }
             foreach (var item in data)
             {
-                output.WriteLine(item);
+                output.WriteLine(string.Join(" ", item));
             }
         }
 

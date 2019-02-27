@@ -203,8 +203,7 @@ namespace LinearIndexedGrammarParser
 
         public RuleCoordinates FindRule(Rule r)
         {
-            var rc = new RuleCoordinates();
-            rc.RuleType = RuleType.CFGRules;
+            var rc = new RuleCoordinates {RuleType = RuleType.CFGRules};
 
             var lhs = new SyntacticCategory(r.LeftHandSide);
 

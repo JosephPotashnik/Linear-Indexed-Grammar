@@ -10,7 +10,7 @@ namespace LinearIndexedGrammarParser
         public ContextFreeGrammar _g;
         private readonly HashSet<string> _pos;
 
-        private int _treeDepth;
+        private readonly int _treeDepth;
 
         public GrammarTreeCountsCalculator(HashSet<string> pos, int min, int max)
         {

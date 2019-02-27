@@ -88,7 +88,7 @@ namespace LinearIndexedGrammarParser
         //    if (count > 100000) throw new InfiniteParseException("Grammar with infinite parse. abort this grammar..");
         //}
 
-        public List<EarleyNode> ParseSentence(string text, CancellationTokenSource cts, int maxWords = 0)
+        public List<EarleyNode> ParseSentence(string[] text, CancellationTokenSource cts, int maxWords = 0)
         {
             var (table, finalColumns) = PrepareEarleyTable(text, maxWords);
             var nodes = new List<EarleyNode>();
@@ -139,17 +139,12 @@ namespace LinearIndexedGrammarParser
             return nodes;
         }
 
-        protected virtual (EarleyColumn[], int[]) PrepareEarleyTable(string text, int maxWord)
+        protected virtual (EarleyColumn[], int[]) PrepareEarleyTable(string[] text, int maxWord)
         {
-            var arr = text.Split();
-            //check below that the text appears in the vocabulary
-            if (arr.Any(str => !Voc.ContainsWord(str)))
-                throw new Exception("word in text does not appear in the vocabulary.");
-
-            var table = new EarleyColumn[arr.Length + 1];
+            var table = new EarleyColumn[text.Length + 1];
 
             for (var i = 1; i < table.Length; i++)
-                table[i] = new EarleyColumn(i, arr[i - 1]);
+                table[i] = new EarleyColumn(i, text[i - 1]);
 
             table[0] = new EarleyColumn(0, "");
             return (table, new[] {table.Length - 1});

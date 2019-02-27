@@ -85,7 +85,7 @@ namespace LinearIndexedGrammarParser
         //filter sentences with words that are not recognized by vocabulary
         //note: this function also adds inflected nouns and conjugated verbs in text to
         //the vocabulary they are not present (i.e. remembered (-> remember), gates -> gate)
-        public IEnumerable<string> LeaveOnlySentencesWithWordsInVocabulary(IEnumerable<string> sentences)
+        public string[][] LeaveOnlySentencesWithWordsInVocabulary(IEnumerable<string> sentences)
         {
             List<string[]> sentencesToLearn = new List<string[]>();
             HashSet<string> wordsNotInVocabulary = new HashSet<string>();
@@ -99,12 +99,14 @@ namespace LinearIndexedGrammarParser
 
                 //split to words
                 var sentenceWords = sentence.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                Dictionary<string, List<string>> newWords = new Dictionary<string, List<string>>();
+                Dictionary<string, List<string>> newWords = new Dictionary<string, List<string>>
+                {
+                    ["N"] = new List<string>(),
+                    ["V"] = new List<string>(),
+                    ["ADJ"] = new List<string>(),
+                    ["ADV"] = new List<string>()
+                };
 
-                newWords["N"] = new List<string>();
-                newWords["V"] = new List<string>();
-                newWords["ADJ"] = new List<string>();
-                newWords["ADV"] = new List<string>();
 
                 //second stage of preprocessing
                 //go over each word in the sentence
@@ -253,7 +255,7 @@ namespace LinearIndexedGrammarParser
 
             }
 
-            return sentencesToLearn.Select(x => string.Join(" ", x));
+            return sentencesToLearn.ToArray();
         }
 
         //first step = outrule WH questions, see if you succeed in learning CFG grammar.
