@@ -5,7 +5,7 @@ using System.Text;
 
 namespace LinearIndexedGrammarParser
 {
-    public class GeneratingRuleComparer : IEqualityComparer<Rule>
+    /*public class GeneratingRuleComparer : IEqualityComparer<Rule>
     {
         public bool Equals(Rule x, Rule y)
         {
@@ -17,39 +17,13 @@ namespace LinearIndexedGrammarParser
             return obj.NumberOfGeneratingRule;
         }
     }
+    */
     public class SubTreeCountsCache
     {
         public Dictionary<DerivedCategory, int[][]> CategoriesCache;
         public Dictionary<Rule, int[][]> RuleCache;
 
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            if (CategoriesCache != null)
-            {
-                foreach (var cat in CategoriesCache.Keys)
-                {
-                    sb.AppendLine($"Category {cat}:");
-                    for (int i = 0; i < CategoriesCache[cat].Length; i++)
-                    {
-                        if (CategoriesCache[cat][i] != null)
-                        {
-                            sb.AppendLine($"Depth {i}:");
-                            for (int j = 0; j < CategoriesCache[cat][i].Length; j++)
-                            {
-                                sb.Append(CategoriesCache[cat][i][j]);
-
-                            }
-                        }
-
-                    }
-
-                }
-            }
-
-            return sb.ToString();
-        }
-
+        /*
         public void Reset(ContextFreeGrammar g, int depth)
         {
             foreach (var cat in CategoriesCache.Keys)
@@ -87,6 +61,7 @@ namespace LinearIndexedGrammarParser
                 }
             }
         }
+        */
         public SubTreeCountsCache(ContextFreeGrammar g, int depth)
         {
             CategoriesCache = new Dictionary<DerivedCategory, int[][]>();
@@ -95,18 +70,21 @@ namespace LinearIndexedGrammarParser
                 CategoriesCache[lhs] = new int[depth][];
 
                 for (int i = 0; i < depth; i++)
-                    CategoriesCache[lhs][i] = new int[depth];
+                    CategoriesCache[lhs][i] = new int[depth+1];
+                //the last location is a flag that signifies that the cache cell is used.
 
             }
 
-            RuleCache = new Dictionary<Rule, int[][]>(new GeneratingRuleComparer());
+            //RuleCache = new Dictionary<Rule, int[][]>(new GeneratingRuleComparer());
+            RuleCache = new Dictionary<Rule, int[][]>();
+
             var staticRules = g.StaticRules.Values.SelectMany(x => x);
             foreach (var rule in staticRules)
             {
                 RuleCache[rule] = new int[depth][];
                 for (int i = 0; i < depth; i++)
-                    RuleCache[rule][i] = new int[depth];
-
+                    RuleCache[rule][i] = new int[depth+1];
+                //the last location is a flag that signifies that the cache cell is used.
             }
         }
     }

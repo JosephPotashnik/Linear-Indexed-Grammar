@@ -98,7 +98,25 @@ namespace LinearIndexedGrammarLearner
 
         public Dictionary<int,int> GetGrammarTrees(ContextFreeGrammar hypothesis)
         {
-            return _grammarTreesCalculator.Recalculate(hypothesis);
+            //var t = Task.Run(() => _grammarTreesCalculator.Recalculate(hypothesis));
+
+            //if (!t.Wait(GrammarTreeCountCalculationTimeOut))
+            //{
+            //    //string s = "computing all parse trees took too long (1.5 seconds), for the grammar:\r\n" + hypothesis.ToString();
+            //    //NLog.LogManager.GetCurrentClassLogger().Info(s);
+            //    //throw new GrammarOverlyRecursiveException(s);
+            //}
+            //var res = t.Result;
+
+            var res = _grammarTreesCalculator.Recalculate(hypothesis);
+            var grammarTreesPerLength = new Dictionary<int, int>();
+            for (int i = 0; i < res.Length; i++)
+            {
+                if (i <= _maxWordsInSentence && i >= _minWordsInSentence && res[i] > 0)
+                    grammarTreesPerLength[i] = res[i];
+            }
+
+            return grammarTreesPerLength;
         }
 
 

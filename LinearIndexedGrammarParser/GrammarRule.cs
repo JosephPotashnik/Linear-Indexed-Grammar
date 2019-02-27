@@ -40,7 +40,13 @@ namespace LinearIndexedGrammarParser
         public int Number { get; set; }
         public int NumberOfGeneratingRule { get; set; }
 
-        public override string ToString()
+        public string ToStringWithoutNumber()
+        {
+            var p = RightHandSide.Select(x => x.ToString()).ToArray();
+            return $"{LeftHandSide} -> {string.Join(" ", p)}";
+        }
+
+        public  string ToString() 
         {
             var p = RightHandSide.Select(x => x.ToString()).ToArray();
             return $"{Number}. {LeftHandSide} -> {string.Join(" ", p)}";

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LinearIndexedGrammarParser
@@ -9,173 +10,152 @@ namespace LinearIndexedGrammarParser
         public ContextFreeGrammar _g;
         private readonly HashSet<string> _pos;
 
-        //private ContextFreeGrammar _originalG;
-        private readonly int _maxWordsInSentence;
-        private readonly int _minWordsInSentence;
         private int _treeDepth;
 
         public GrammarTreeCountsCalculator(HashSet<string> pos, int min, int max)
         {
             _pos = pos;
-            _minWordsInSentence = min;
-            _maxWordsInSentence = max;
             _treeDepth = max + 3;
         }
 
         public int[] NumberOfParseTreesPerWords()
         {
-            return NumberOfParseTreesPerWords(new DerivedCategory(ContextFreeGrammar.StartSymbol), _treeDepth-1);
+            return ParseTreesForCategoryInDepth(new DerivedCategory(ContextFreeGrammar.StartSymbol), _treeDepth-1);
         }
 
         //in a given depth treedepth, we have array of arr[wc] = tc;
-        private int[] NumberOfParseTreesPerWords(Rule r, int treeDepth)
+        private int[] ParseTreesForRuleInDepth(Rule r, int treeDepth)
         {
-            var res = _cache.RuleCache[r][treeDepth];
+            var ruleCounts = _cache.RuleCache[r][treeDepth];
+
+            //check if in rules cache.
+            var storedCountsOfRules = _cache.RuleCache[r];
+            var indexInRuleCacheArr = treeDepth;
+            var cachedRuleCounts = storedCountsOfRules[indexInRuleCacheArr];
+
+            while (IsEmpty(cachedRuleCounts) && ++indexInRuleCacheArr < _treeDepth)
+                cachedRuleCounts = storedCountsOfRules[indexInRuleCacheArr];
+
+            if (!IsEmpty(cachedRuleCounts))
+            {
+                //if (cachedRuleCounts != ruleCounts)
+                //   UpdateCounts(ruleCounts, cachedRuleCounts);
+                return cachedRuleCounts;
+            }
+
+            //from now on, not found cached rule information
             var rhs = r.RightHandSide;
 
-            if (rhs.Length == 2)
+            if (treeDepth > 0)
             {
-                var catCounts1 = NumberOfParseTreesPerWords(rhs[0], treeDepth);
-                var catCounts2 = NumberOfParseTreesPerWords(rhs[1], treeDepth);
+                if (rhs.Length == 2)
+                {
+                    var catCounts1 = ParseTreesForCategoryInDepth(rhs[0], treeDepth - 1);
+                    var catCounts2 = ParseTreesForCategoryInDepth(rhs[1], treeDepth - 1);
 
-                UpdateCounts(res, catCounts1, catCounts2);
-            }
-            else
-            {
-                var catCounts1 = NumberOfParseTreesPerWords(rhs[0], treeDepth);
-                UpdateCounts(res, catCounts1);
+                    UpdateCounts(ruleCounts, catCounts1, catCounts2);
+                }
+                else
+                {
+                    var catCounts1 = ParseTreesForCategoryInDepth(rhs[0], treeDepth - 1);
+                    UpdateCounts(ruleCounts, catCounts1);
+                }
             }
 
-            return res;
+            ruleCounts[_treeDepth] = 1;
+            return ruleCounts;
         }
 
-        private static void UpdateCounts(int[] res, int[] fromCat1, int[] fromCat2)
+        private void UpdateCounts(int[] res, int[] fromCat1, int[] fromCat2)
         {
-            for (int i = 0; i < fromCat1.Length; i++)
+            for (int i = 0; i < _treeDepth; i++)
             {
-                for (int j = 0; j < fromCat2.Length; j++)
+                if (fromCat1[i] <= 0) continue;
+                for (int j = 0; j < _treeDepth; j++)
                 {
-                    if (fromCat1[i] > 0 && fromCat2[j] > 0)
-                    {
-                        var wc = i + j;
-                        var tc = fromCat1[i] * fromCat2[j];
+                    if (fromCat2[j] <= 0) continue;
 
-                        if (wc < res.Length)
-                            res[wc] += tc;
-                    }
+                    var wc = i + j;
+                    var tc = fromCat1[i] * fromCat2[j];
+
+                    if (wc < _treeDepth)
+                        res[wc] += tc;
+
                 }
 
             }
 
         }
 
-        private static bool IsEmpty(int[] wordLengthAndTrees)
+        private bool IsEmpty(int[] res)
         {
-            for (int i = 0; i < wordLengthAndTrees.Length; i++)
-                if (wordLengthAndTrees[i] != 0)
-                    return false;
-
-            return true;
+            return (res[_treeDepth] == 0);
         }
 
-        private int[] NumberOfParseTreesPerWords(DerivedCategory cat, int treeDepth)
+        private int[] ParseTreesForCategoryInDepth(DerivedCategory cat, int treeDepth)
         {
-            var res = _cache.CategoriesCache[cat][treeDepth];
+            var categoryCounts = _cache.CategoriesCache[cat][treeDepth];
 
-            if (_g.StaticRules.ContainsKey(cat))
+            //check if in categories cache.
+            var storedCountsOfCat = _cache.CategoriesCache[cat];
+            var indexInCatCacheArr = treeDepth;
+            var cachedCategoryCounts = storedCountsOfCat[indexInCatCacheArr];
+
+            while (IsEmpty(cachedCategoryCounts) && ++indexInCatCacheArr < _treeDepth)
+                cachedCategoryCounts = storedCountsOfCat[indexInCatCacheArr];
+
+            if (!IsEmpty(cachedCategoryCounts))
             {
-                //if not in cache, compute counts of subtrees
-                //POS can sometimes be a left-side nonterminal, for instance NP -> D N
-                if (_pos.Contains(cat.ToString()))
-                    CountTerminal(res);
+                //if (cachedCategoryCounts != categoryCounts)
+                //    UpdateCounts(categoryCounts, cachedCategoryCounts);
+                return cachedCategoryCounts;
+            }
 
-                if (treeDepth > 0)
+            //from now on, not found cached category information.
+            if (_g.StaticRules.ContainsKey(cat))
+            {                
+                var ruleList = _g.StaticRules[cat];
+                foreach (var rule in ruleList)
                 {
-                    //check if in categories cache.
-                    var storedCountsOfCat = _cache.CategoriesCache[cat];
-                    var indexInCatCacheArr = treeDepth - 1;
-                    var cachedCatCounts = storedCountsOfCat[indexInCatCacheArr];
-
-                    while (IsEmpty(cachedCatCounts) && ++indexInCatCacheArr < storedCountsOfCat.Length)
-                        cachedCatCounts = storedCountsOfCat[indexInCatCacheArr];
-
-                    if (!IsEmpty(cachedCatCounts))
-                        return cachedCatCounts;
-
-                    var ruleList = _g.StaticRules[cat];
-                    foreach (var rule in ruleList)
-                    {
-                        //check if in rules cache.
-                        var storedCountsOfRules = _cache.RuleCache[rule];
-                        var indexInRuleCacheArr = treeDepth - 1;
-                        var cachedRuleCounts = storedCountsOfRules[indexInRuleCacheArr];
-                        while (IsEmpty(cachedRuleCounts) && ++indexInRuleCacheArr < storedCountsOfRules.Length)
-                            cachedRuleCounts = storedCountsOfRules[indexInRuleCacheArr];
-
-                        int[] fromRHS;
-                        //use previously computed results if applicable.
-                        if (!IsEmpty(cachedRuleCounts))
-                            fromRHS = cachedRuleCounts;
-                        else
-                            fromRHS = NumberOfParseTreesPerWords(rule, treeDepth - 1);
-
-                        UpdateCounts(res, fromRHS);
-
-                        //store in rules cache.
-                        storedCountsOfRules[treeDepth - 1] = fromRHS;
-                    }
-
-                    //store in categories cache.
-                    storedCountsOfCat[treeDepth - 1] = res;
+                    var ruleCounts = ParseTreesForRuleInDepth(rule, treeDepth);
+                    UpdateCounts(categoryCounts, ruleCounts);
                 }
             }
             else if (_pos.Contains(cat.ToString()))
             {
-                CountTerminal(res);
+                CountTerminal(categoryCounts);
             }
             else if (cat.ToString() == ContextFreeGrammar.EpsilonSymbol)
             {
-                CountEpsilon(res);
+                CountEpsilon(categoryCounts);
             }
 
-            return res;
+            categoryCounts[_treeDepth] = 1;
+            return categoryCounts;
         }
 
         private static void CountTerminal(int[] res)
         {
-            res[1] = 1;
+            res[1] += 1;
         }
 
         private static void CountEpsilon(int[] res)
         {
-            res[0] = 1;
+            res[0] += 1;
         }
 
-        private static void UpdateCounts(int[] res, int[] fromRHS)
+        private void UpdateCounts(int[] res, int[] fromRHS)
         {
-            for (int i = 0; i < fromRHS.Length; i++)
+            for (int i = 0; i < _treeDepth; i++)
                 res[i] += fromRHS[i];
         }
 
-        public Dictionary<int, int> Recalculate(ContextFreeGrammar grammar)
+        public int[] Recalculate(ContextFreeGrammar grammar)
         {
-            //if (_cache == null)
-                _cache = new SubTreeCountsCache(grammar, _treeDepth);
-            //else
-             //   _cache.Reset(grammar, _treeDepth);
-
+            _cache = new SubTreeCountsCache(grammar, _treeDepth);
             _g = grammar;
 
-            var t = NumberOfParseTreesPerWords();
-            var grammarTreesPerLength = new Dictionary<int, int>();
-            for (int i = 0; i < t.Length; i++)
-            {
-                if (i <= _maxWordsInSentence && i >= _minWordsInSentence && t[i] > 0)
-                    grammarTreesPerLength[i] = t[i];
-            }
-
-            return grammarTreesPerLength;
-
+            return NumberOfParseTreesPerWords();
         }
     }
 

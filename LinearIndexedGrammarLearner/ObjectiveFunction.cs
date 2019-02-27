@@ -77,6 +77,26 @@ namespace LinearIndexedGrammarLearner
             Math.Pow(2, -15),
         };
 
+        //private static double[] powersOfMinus2 =
+        //{
+        //    1,
+        //   1,
+        //    1,
+        //    1,
+        //   1,
+        //    1,
+        //    1,
+        //    1,
+        //    1,
+        //    1,
+        //    1,
+        //   1,
+        //    1,
+        //    1,
+        //    1,
+        //    1,
+        //};
+
         public const double Tolerance = 0.000001;
         private readonly Learner _learner;
         static double maxVal;
@@ -161,6 +181,7 @@ namespace LinearIndexedGrammarLearner
                 {
                     prob = 1;
                     var grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis);
+
                     double totalProbabilityOfGrammarTrees = 0;
                     foreach (var length in grammarTreesPerLength.Keys)
                         totalProbabilityOfGrammarTrees += powersOfMinus2[length];
