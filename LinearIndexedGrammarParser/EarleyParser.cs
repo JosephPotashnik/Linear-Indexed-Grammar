@@ -160,16 +160,19 @@ namespace LinearIndexedGrammarParser
         {
             if (col.Index + 1 >= table.Length) return;
 
-            var nextScannableTerm = table[col.Index + 1].Token;
-            var possibleSyntacticCategories = GetPossibleSyntacticCategoriesForToken(nextScannableTerm);
-
-            foreach (var item in possibleSyntacticCategories)
+            while (col.ActionableNonCompleteStates.Count > 0)
             {
-                var currentCategory = new DerivedCategory(item);
+                var stateToScan = col.ActionableNonCompleteStates.Dequeue();
 
-                if (col.StatesWithNextSyntacticCategory.ContainsKey(currentCategory))
-                    foreach (var state in col.StatesWithNextSyntacticCategory[currentCategory])
-                        Scan(table[col.Index + 1], state, currentCategory, nextScannableTerm);
+                var nextScannableTerm = table[col.Index + 1].Token;
+                var possibleSyntacticCategories = GetPossibleSyntacticCategoriesForToken(nextScannableTerm);
+
+                foreach (var item in possibleSyntacticCategories)
+                {
+                    var currentCategory = new DerivedCategory(item);
+                    if (stateToScan.NextTerm.Equals(currentCategory))
+                            Scan(table[col.Index + 1], stateToScan, currentCategory, nextScannableTerm);
+                }
             }
         }
 
@@ -184,7 +187,10 @@ namespace LinearIndexedGrammarParser
                 //count++;
                 //TestForTooManyStatesInColumn(count);
 
-                if (!_grammar.StaticRules.ContainsKey(nextTerm)) continue;
+                if (!_grammar.StaticRules.ContainsKey(nextTerm))
+                {
+                    throw new Exception("should not encounter here, you modified CategoriesToPredict to not add POS");
+                }
 
                 var ruleList = _grammar.StaticRules[nextTerm];
                 Predict(col, ruleList, nextTerm);

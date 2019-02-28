@@ -27,12 +27,15 @@ namespace LinearIndexedGrammarParser
             //completed agenda is ordered in decreasing order of start indices (see Stolcke 1995 about completion priority queue).
             ActionableCompleteStates =
                 new SortedDictionary<EarleyState, Queue<EarleyState>>(new CompletedStateComparer());
+            ActionableNonCompleteStates = new Queue<EarleyState>();
             StatesWithNextSyntacticCategory = new Dictionary<DerivedCategory, List<EarleyState>>();
             GammaStates = new List<EarleyState>();
             CategoriesToPredict = new Queue<DerivedCategory>();
         }
 
         internal SortedDictionary<EarleyState, Queue<EarleyState>> ActionableCompleteStates { get; set; }
+        internal Queue<EarleyState> ActionableNonCompleteStates { get; set; }
+
         public List<EarleyState> GammaStates { get; set; }
         public int Index { get; }
         public string Token { get; set; }
@@ -55,16 +58,22 @@ namespace LinearIndexedGrammarParser
             if (!newState.IsCompleted)
             {
                 var term = newState.NextTerm;
-
+                bool isPOS = !grammar.StaticRules.ContainsKey(term);
                 if (!StatesWithNextSyntacticCategory.ContainsKey(term))
                 {
                     StatesWithNextSyntacticCategory[term] = new List<EarleyState>();
 
                     if (!grammar.ObligatoryNullableCategories.Contains(term))
-                        CategoriesToPredict.Enqueue(term);
+                    {
+                        if (!isPOS)
+                            CategoriesToPredict.Enqueue(term);
+                    }
                 }
 
                 StatesWithNextSyntacticCategory[term].Add(newState);
+
+                if (isPOS)
+                    ActionableNonCompleteStates.Enqueue(newState);
 
                 //check if the next nonterminal leads to an expansion of null production, if yes,
                 //then perform a spontaneous dot shift.

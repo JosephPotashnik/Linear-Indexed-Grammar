@@ -164,9 +164,10 @@ namespace LinearIndexedGrammarParserTests
                     6);
             var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary, 1, false);
 
+            var sentences = data.Select(x => string.Join(" ", x));
             var settings = new JsonSerializerSettings
             { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
-            var actual = JsonConvert.SerializeObject(data, settings);
+            var actual = JsonConvert.SerializeObject(sentences, settings);
             var expected = File.ReadAllText(@"GenerateLIGMovementFromSubjectOrNoMovementAmbiguitySentences.json");
             Assert.Equal(expected, actual);
 
@@ -191,10 +192,11 @@ namespace LinearIndexedGrammarParserTests
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
             var (nodeList, grammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("SimpleCFG.txt", "Vocabulary.json",10);
             var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary, 1, false);
+            var sentences = data.Select(x => string.Join(" ", x));
 
             var settings = new JsonSerializerSettings
                 { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
-            var actual = JsonConvert.SerializeObject(data, settings);
+            var actual = JsonConvert.SerializeObject(sentences, settings);
             //var expected = File.ReadAllText(@"GenerateCFGGrammarSentences.json");
             //Assert.Equal(expected, actual);
 
@@ -222,9 +224,11 @@ namespace LinearIndexedGrammarParserTests
             var (nodeList, grammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("LIGMovementPP.txt", "Vocabulary.json", 10);
             var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary, 1, false);
 
+            var sentences = data.Select(x => string.Join(" ", x));
+
             var settings = new JsonSerializerSettings
             { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
-            var actual = JsonConvert.SerializeObject(data, settings);
+            var actual = JsonConvert.SerializeObject(sentences, settings);
             var expected = File.ReadAllText(@"GenerateLIGMovementPPSentences.json");
             Assert.Equal(expected, actual);
         }
@@ -236,10 +240,11 @@ namespace LinearIndexedGrammarParserTests
             var (nodeList, grammar) =
                 GrammarFileReader.GenerateSentenceAccordingToGrammar("NullableTransitiveClosureMovement2.txt", "Vocabulary.json",10);
             var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary, 1, false);
+            var sentences = data.Select(x => string.Join(" ", x));
 
             var settings = new JsonSerializerSettings
             { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
-            var actual = JsonConvert.SerializeObject(data, settings);
+            var actual = JsonConvert.SerializeObject(sentences, settings);
             var expected = File.ReadAllText(@"GenerateNullableCategoriesSentences.json");
             Assert.Equal(expected, actual);
         }
@@ -251,10 +256,11 @@ namespace LinearIndexedGrammarParserTests
             var (nodeList, grammar) =
                 GrammarFileReader.GenerateSentenceAccordingToGrammar("NullableTransitiveClosureMovement3.txt", "Vocabulary.json",10);
             var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary, 1, false);
+            var sentences = data.Select(x => string.Join(" ", x));
 
             var settings = new JsonSerializerSettings
             { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
-            var actual = JsonConvert.SerializeObject(data, settings);
+            var actual = JsonConvert.SerializeObject(sentences, settings);
             var expected = File.ReadAllText(@"GenerateNullableCategoriesSentences2.json");
             Assert.Equal(expected, actual);
         }
