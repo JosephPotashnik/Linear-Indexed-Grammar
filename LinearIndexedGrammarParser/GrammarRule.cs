@@ -14,21 +14,40 @@ namespace LinearIndexedGrammarParser
         public Rule(DerivedCategory leftHandSide, DerivedCategory[] rightHandSide, int num = -1)
         {
             LeftHandSide = new DerivedCategory(leftHandSide);
-            RightHandSide = rightHandSide?.Select(cat => new DerivedCategory(cat)).ToArray();
+            if (rightHandSide != null)
+            {
+                int length = rightHandSide.Length;
+                RightHandSide = new DerivedCategory[length];
+                for (int i = 0; i < length; i++)
+                    RightHandSide[i] = new DerivedCategory(rightHandSide[i]);
+            }
+
             Number = num;
         }
 
         public Rule(string leftHandSide, string[] rightHandSide, int num = -1)
         {
             LeftHandSide = new DerivedCategory(leftHandSide);
-            RightHandSide = rightHandSide?.Select(cat => new DerivedCategory(cat)).ToArray();
+            if (rightHandSide != null)
+            {
+                int length = rightHandSide.Length;
+                RightHandSide = new DerivedCategory[length];
+                for (int i = 0; i < length; i++)
+                    RightHandSide[i] = new DerivedCategory(rightHandSide[i]);
+            }
             Number = num;
         }
 
         public Rule(Rule otherRule)
         {
             LeftHandSide = new DerivedCategory(otherRule.LeftHandSide);
-            RightHandSide = otherRule.RightHandSide.Select(cat => new DerivedCategory(cat)).ToArray();
+            if (otherRule.RightHandSide != null)
+            {
+                int length = otherRule.RightHandSide.Length;
+                RightHandSide = new DerivedCategory[length];
+                for (int i = 0; i < length; i++)
+                    RightHandSide[i] = new DerivedCategory(otherRule.RightHandSide[i]);
+            }
             Number = otherRule.Number;
             NumberOfGeneratingRule = otherRule.NumberOfGeneratingRule;
         }
