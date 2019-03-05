@@ -63,7 +63,7 @@
                     "EndIndex": 5,
                     "Children": [
                       {
-                        "Name": "trace",
+                        "Name": "NPNP -> Epsilon $",
                         "StartIndex": 4,
                         "EndIndex": 4
                       },
@@ -79,7 +79,7 @@
                             "AssociatedTerminal": "kissed"
                           },
                           {
-                            "Name": "trace",
+                            "Name": "NPNP -> Epsilon $",
                             "StartIndex": 5,
                             "EndIndex": 5
                           }
@@ -165,7 +165,7 @@
                         "AssociatedTerminal": "kissed"
                       },
                       {
-                        "Name": "trace",
+                        "Name": "NPNP -> Epsilon $",
                         "StartIndex": 5,
                         "EndIndex": 5
                       }

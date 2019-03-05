@@ -15,19 +15,15 @@ namespace LinearIndexedGrammarParser
         public const string StarSymbol = "*";
         public const int MaxStackDepth = 3;
 
-        public readonly HashSet<DerivedCategory> ObligatoryNullableCategories = new HashSet<DerivedCategory>();
-        public readonly HashSet<DerivedCategory> PossibleNullableCategories = new HashSet<DerivedCategory>();
         private int ruleNumbering = 1;
         public readonly Dictionary<DerivedCategory, List<Rule>> StaticRules =
             new Dictionary<DerivedCategory, List<Rule>>();
-
         public readonly HashSet<DerivedCategory> StaticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
 
         private void ConstructCFG(IEnumerable<Rule> ruleList)
         {
             var rulesDic = CreateRulesDictionary(ruleList);
             GenerateAllStaticRulesFromDynamicRules(rulesDic);
-            ComputeTransitiveClosureOfNullableCategories();
         }
         public ContextFreeGrammar(List<Rule> ruleList)
         {
@@ -107,115 +103,8 @@ namespace LinearIndexedGrammarParser
 
             StaticRules[newRule.LeftHandSide].Add(newRule);
         }
-
-        private bool ContainsCycle(DerivedCategory root, HashSet<DerivedCategory> visited,
-            Dictionary<DerivedCategory, List<DerivedCategory>> dic)
-        {
-            if (visited.Contains(root)) return true;
-            visited.Add(root);
-
-            if (dic.ContainsKey(root))
-            {
-                var neighbors = dic[root];
-                foreach (var neighbor in neighbors)
-                {
-                    var containsCycle = ContainsCycle(neighbor, visited, dic);
-                    if (containsCycle) return true;
-                }
-            }
-
-            return false;
-        }
-
-        public bool ContainsCyclicUnitProduction()
-        {
-            var allRules = StaticRules.Values.SelectMany(x => x);
-            var unitProductions = new Dictionary<DerivedCategory, List<DerivedCategory>>();
-
-            foreach (var r in allRules)
-            {
-                if (!unitProductions.ContainsKey(r.LeftHandSide))
-                    unitProductions[r.LeftHandSide] = new List<DerivedCategory>();
-
-                if (r.RightHandSide.Length == 1)
-                    unitProductions[r.LeftHandSide].Add(r.RightHandSide[0]);
-                else if (PossibleNullableCategories.Contains(r.RightHandSide[0]))
-                    unitProductions[r.LeftHandSide].Add(r.RightHandSide[1]);
-                else if (PossibleNullableCategories.Contains(r.RightHandSide[1]))
-                    unitProductions[r.LeftHandSide].Add(r.RightHandSide[0]);
-            }
-
-            foreach (var root in unitProductions.Keys)
-            {
-                var visited = new HashSet<DerivedCategory>();
-                if (ContainsCycle(root, visited, unitProductions))
-                    return true;
-            }
-
-            return false;
-        }
-
-        private void ComputeTransitiveClosureOfNullableCategories()
-        {
-            var allRules = StaticRules.Values.SelectMany(x => x).ToArray();
-            var epsilonCat = new DerivedCategory(EpsilonSymbol);
-            PossibleNullableCategories.Add(epsilonCat);
-            var added = true;
-
-            while (added)
-            {
-                added = false;
-                var toAddToPossibleNullableCategories = new List<DerivedCategory>();
-
-                foreach (var r in allRules)
-                    if (!PossibleNullableCategories.Contains(r.LeftHandSide))
-                        if (r.RightHandSide.All(x => PossibleNullableCategories.Contains(x)))
-                        {
-                            added = true;
-                            toAddToPossibleNullableCategories.Add(new DerivedCategory(r.LeftHandSide));
-                        }
-
-                foreach (var cat in toAddToPossibleNullableCategories)
-                    PossibleNullableCategories.Add(cat);
-            }
-
-            //the nullable categories here are for left hand side symbols checks,
-            //(i.e, left-hand side nullable categories).
-            //epsilon symbol appears only right hand; remove it. Epsilon was used internally above 
-            //for the transitive closure only.
-            PossibleNullableCategories.Remove(epsilonCat);
-
-            ObligatoryNullableCategories.Add(epsilonCat);
-            added = true;
-
-            while (added)
-            {
-                added = false;
-                var toAddToObligatoryNullableCategories = new List<DerivedCategory>();
-
-                foreach (var cat in StaticRules.Keys)
-                    if (!ObligatoryNullableCategories.Contains(cat))
-                        if (IsObligatoryNullableCategory(cat))
-                        {
-                            added = true;
-                            toAddToObligatoryNullableCategories.Add(cat);
-                        }
-
-                foreach (var cat in toAddToObligatoryNullableCategories)
-                    ObligatoryNullableCategories.Add(cat);
-            }
-        }
-
-        private bool IsObligatoryNullableCategory(DerivedCategory cat)
-        {
-            return StaticRules[cat].All(r => IsObligatoryNullableRule(r));
-        }
-
-        public bool IsObligatoryNullableRule(Rule r)
-        {
-            return r.RightHandSide.All(x => ObligatoryNullableCategories.Contains(x));
-        }
-
+        
+        
         public Rule GenerateStaticRuleFromDyamicRule(Rule dynamicGrammarRule, DerivedCategory leftHandSide)
         {
             var patternStringLeftHandSide = dynamicGrammarRule.LeftHandSide.Stack;
@@ -411,6 +300,89 @@ namespace LinearIndexedGrammarParser
             }
 
             return bigrams;
+        }
+
+
+        private bool ContainsCycle(DerivedCategory root, HashSet<DerivedCategory> visited,
+            Dictionary<DerivedCategory, List<DerivedCategory>> dic)
+        {
+            if (visited.Contains(root)) return true;
+            visited.Add(root);
+
+            if (dic.ContainsKey(root))
+            {
+                var neighbors = dic[root];
+                foreach (var neighbor in neighbors)
+                {
+                    var containsCycle = ContainsCycle(neighbor, visited, dic);
+                    if (containsCycle) return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool ContainsCyclicUnitProduction()
+        {
+            var possibleNullableCategories = ComputeTransitiveClosureOfNullableCategories();
+            var allRules = StaticRules.Values.SelectMany(x => x);
+            var unitProductions = new Dictionary<DerivedCategory, List<DerivedCategory>>();
+
+            foreach (var r in allRules)
+            {
+                if (!unitProductions.ContainsKey(r.LeftHandSide))
+                    unitProductions[r.LeftHandSide] = new List<DerivedCategory>();
+
+                if (r.RightHandSide.Length == 1)
+                    unitProductions[r.LeftHandSide].Add(r.RightHandSide[0]);
+                else if (possibleNullableCategories.Contains(r.RightHandSide[0]))
+                    unitProductions[r.LeftHandSide].Add(r.RightHandSide[1]);
+                else if (possibleNullableCategories.Contains(r.RightHandSide[1]))
+                    unitProductions[r.LeftHandSide].Add(r.RightHandSide[0]);
+            }
+
+            foreach (var root in unitProductions.Keys)
+            {
+                var visited = new HashSet<DerivedCategory>();
+                if (ContainsCycle(root, visited, unitProductions))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private HashSet<DerivedCategory> ComputeTransitiveClosureOfNullableCategories()
+        {
+            var allRules = StaticRules.Values.SelectMany(x => x).ToArray();
+            var epsilonCat = new DerivedCategory(EpsilonSymbol);
+            HashSet<DerivedCategory> possibleNullableCategories = new HashSet<DerivedCategory>();
+            possibleNullableCategories.Add(epsilonCat);
+            var added = true;
+
+            while (added)
+            {
+                added = false;
+                var toAddToPossibleNullableCategories = new List<DerivedCategory>();
+
+                foreach (var r in allRules)
+                    if (!possibleNullableCategories.Contains(r.LeftHandSide))
+                        if (r.RightHandSide.All(x => possibleNullableCategories.Contains(x)))
+                        {
+                            added = true;
+                            toAddToPossibleNullableCategories.Add(new DerivedCategory(r.LeftHandSide));
+                        }
+
+                foreach (var cat in toAddToPossibleNullableCategories)
+                    possibleNullableCategories.Add(cat);
+            }
+
+            //the nullable categories here are for left hand side symbols checks,
+            //(i.e, left-hand side nullable categories).
+            //epsilon symbol appears only right hand; remove it. Epsilon was used internally above 
+            //for the transitive closure only.
+            possibleNullableCategories.Remove(epsilonCat);
+
+            return possibleNullableCategories;
         }
 
     }

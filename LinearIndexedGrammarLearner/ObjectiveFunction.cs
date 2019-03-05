@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using LinearIndexedGrammarParser;
-using NLog;
 
 namespace LinearIndexedGrammarLearner
 {
@@ -129,7 +128,7 @@ namespace LinearIndexedGrammarLearner
 
         public bool IsMaximalValue(double val)
         {
-            if (val - maxVal > 0.01) return true;
+            if (val - maxVal > 0.001) return true;
             return Math.Abs(val - maxVal) < Tolerance;
         }
 
@@ -144,17 +143,8 @@ namespace LinearIndexedGrammarLearner
 
             SentenceParsingResults[] allParses;
             double prob = 0;
-            try
-            {
-                allParses = _learner.ParseAllSentences(currentCFHypothesis);
-            }
-            catch (AggregateException e) when (e.InnerExceptions.OfType<InfiniteParseException>().Any())
-            {
-                var s = e.ToString();
-                LogManager.GetCurrentClassLogger().Warn(s);
-                return 0;
-            }
 
+            allParses = _learner.ParseAllSentences(currentCFHypothesis);
 
             if (allParses != null)
             {
@@ -208,9 +198,7 @@ namespace LinearIndexedGrammarLearner
 
                         //assumption: we will reject grammars with data parsed too deep.
                         //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
-                        //right now: it is depth = maxWords+2. change?
-
-                        //throw new Exception("probability is wrong!");
+                        //right now: it is depth = maxWords+3. change?
                     }
 
 

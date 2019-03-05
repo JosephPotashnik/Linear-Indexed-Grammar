@@ -6,137 +6,225 @@ using NLog;
 
 namespace LinearIndexedGrammarParser
 {
-    public class InfiniteParseException : Exception
-    {
-        public InfiniteParseException(string str) : base(str)
-        {
-        }
-    }
-
-    public class GrammarOverlyRecursiveException : Exception
-    {
-        public GrammarOverlyRecursiveException(string str) : base(str)
-        {
-        }
-    }
-
     public class EarleyParser
     {
         private readonly ContextFreeGrammar _grammar;
         protected Vocabulary Voc;
+        private EarleyColumn[] _table;
+        private List<EarleyNode> _nodes;
+        private string[] _text;
+        int[] _finalColumns;
+        private bool _checkForCyclicUnitProductions;
 
-        public EarleyParser(ContextFreeGrammar g, Vocabulary v)
+        public EarleyParser(ContextFreeGrammar g, Vocabulary v, bool checkUnitProductionCycles = true)
         {
             Voc = v;
             _grammar = g;
+            _checkForCyclicUnitProductions = checkUnitProductionCycles;
         }
 
         private void Predict(EarleyColumn col, List<Rule> ruleList, DerivedCategory nextTerm)
         {
-            var isPossibleNullable = _grammar.PossibleNullableCategories.Contains(nextTerm);
-
             foreach (var rule in ruleList)
             {
-                //if the rule obligatorily expands to the nullable production,
-                //do not predict it. you have already performed a spontaneous dot-shift
-                //in EarleyColumn.AddState().
-                if (isPossibleNullable && _grammar.IsObligatoryNullableRule(rule)) continue;
-
                 var newState = new EarleyState(rule, 0, col, null);
                 col.AddState(newState, _grammar);
             }
         }
 
-        protected void Scan(EarleyColumn col, EarleyState state, SyntacticCategory term, string token)
+        protected void Scan(EarleyColumn startColumn, EarleyColumn nextCol, EarleyState state, DerivedCategory term, string token)
         {
-            var v = new EarleyNode(term.ToString(), col.Index - 1, col.Index)
+            if (!startColumn.Reductors.ContainsKey(term))
             {
-                AssociatedTerminal = token
-            };
-            var y = EarleyState.MakeNode(state, col.Index, v);
-            var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn, y);
+                var v = new EarleyNode(term.ToString(), startColumn.Index, nextCol.Index)
+                {
+                    AssociatedTerminal = token
+                };
 
-            col.AddState(newState, _grammar);
+                //prepared a scanned Earley rule (the scanned rule does not appear in this representations,
+                //the terminals are stored separately in a vocabulary under their heading non-terminal, a.k.a their part of speech).
+                var scannedStateRule = new Rule(term.ToString(), new[] {token});
+                var scannedState = new EarleyState(scannedStateRule, 1, startColumn, v);
+                scannedState.EndColumn = nextCol;
+                startColumn.Reductors[term] = new List<EarleyState>() {scannedState};
+            }
+
+            var reductor = startColumn.Reductors[term][0];
+            var y = EarleyState.MakeNode(state, reductor.EndColumn.Index, reductor.Node);
+            var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn, y);
+            state.Parents.Add(newState);
+            nextCol.AddState(newState, _grammar);
         }
 
-        private void Complete(EarleyColumn col, EarleyState state)
+        private void Complete(EarleyColumn col, EarleyState reductorState)
         {
-            if (state.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
+            if (reductorState.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
             {
-                col.GammaStates.Add(state);
+                col.GammaStates.Add(reductorState);
                 return;
             }
 
-            var startColumn = state.StartColumn;
-            var completedSyntacticCategory = state.Rule.LeftHandSide;
-            var predecessorStates = startColumn.StatesWithNextSyntacticCategory[completedSyntacticCategory];
+            var startColumn = reductorState.StartColumn;
+            var completedSyntacticCategory = reductorState.Rule.LeftHandSide;
+            var predecessorStates = startColumn.Predecessors[completedSyntacticCategory];
 
-            foreach (var st in predecessorStates)
+            if (!startColumn.Reductors.ContainsKey(reductorState.Rule.LeftHandSide))
+                startColumn.Reductors[reductorState.Rule.LeftHandSide] = new List<EarleyState>();
+
+            startColumn.Reductors[reductorState.Rule.LeftHandSide].Add(reductorState);
+
+            foreach (var predecessor in predecessorStates)
             {
-                var y = EarleyState.MakeNode(st, state.EndColumn.Index, state.Node);
-                var newState = new EarleyState(st.Rule, st.DotIndex + 1, st.StartColumn, y);
+                var y = EarleyState.MakeNode(predecessor, reductorState.EndColumn.Index, reductorState.Node);
+                var newState = new EarleyState(predecessor.Rule, predecessor.DotIndex + 1, predecessor.StartColumn, y);
+                predecessor.Parents.Add(newState);
+                reductorState.Parents.Add(newState);
+
+
+                if (_checkForCyclicUnitProductions)
+                {
+                    //if the state completes a unit production cycle, do not add it.
+                    if (IsNewStatePartOfUnitProductionCycle(reductorState, newState, startColumn, predecessor))
+                        continue;
+                }
+
                 col.AddState(newState, _grammar);
             }
         }
 
-        //inactive. use for debugging when you suspect program stuck.
-        //at the moment, the promiscuous grammar could generate +100,000 earley states
-        //so a very large amount of earley states is not necessarily a a bug.
-        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-        //private static void TestForTooManyStatesInColumn(int count)
-        //{
-        //    if (count > 100000) throw new InfiniteParseException("Grammar with infinite parse. abort this grammar..");
-        //}
+        private static bool IsNewStatePartOfUnitProductionCycle(EarleyState reductorState, EarleyState newState,
+            EarleyColumn startColumn, EarleyState predecessor)
+        {
+            //check if the new state completed and is a parent of past reductor for its LHS,
+            //if so - you arrived at a unit production cycle.
+            bool foundCycle = false;
 
+            if (newState.IsCompleted)
+            {
+                if (startColumn.Reductors.ContainsKey(newState.Rule.LeftHandSide))
+                {
+                    var reductors = startColumn.Reductors[newState.Rule.LeftHandSide];
+
+                    foreach (var reductor in reductors)
+                    {
+                        if (newState.Rule.Equals(reductor.Rule) && newState.StartColumn == reductor.StartColumn)
+                        {
+                            var parents = reductor.GetTransitiveClosureOfParents();
+                            foreach (var parent in parents)
+                            {
+                                //found a unit production cycle.
+                                if (newState == parent)
+                                    foundCycle = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (foundCycle)
+            {
+                //undo the parent ties,  and do not insert the new state
+                reductorState.Parents.RemoveAt(reductorState.Parents.Count - 1);
+                predecessor.Parents.RemoveAt(predecessor.Parents.Count - 1);
+                return true;
+            }
+
+            return false;
+        }
+
+        public List<EarleyNode> ReParseSentenceWithRuleAddition(Rule r)
+        {
+            _nodes = new List<EarleyNode>();
+            //note - this will work only for CFG for now.
+            //if you want to add stack changing rule, you need 
+            //to generate all static rules from it
+            _grammar.AddStaticRule(r);
+
+            foreach (var col in _table)
+            {
+                //seed the new rule in the column
+                var cat = r.LeftHandSide;
+                if (col.Predecessors.ContainsKey(cat))
+                {
+                    var newState = new EarleyState(r, 0, col, null);
+                    col.AddState(newState, _grammar);
+                }
+
+                //1. complete
+                bool exhaustedCompletion = false;
+                while (!exhaustedCompletion)
+                {
+                    TraverseCompletedStates(col);
+
+                    //2. predict after complete:
+                    TraversePredictableStates(col);
+                    exhaustedCompletion = col.ActionableCompleteStates.Count == 0;
+                }
+
+                //3. scan after predict.
+                TraverseScannableStates(_table, col);
+            }
+
+            foreach (var index in _finalColumns)
+            {
+                var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
+                _nodes.AddRange(n);
+            }
+
+            return _nodes;
+        }
         public List<EarleyNode> ParseSentence(string[] text, CancellationTokenSource cts, int maxWords = 0)
         {
-            var (table, finalColumns) = PrepareEarleyTable(text, maxWords);
-            var nodes = new List<EarleyNode>();
+            _text = text;
+            _nodes = new List<EarleyNode>();
+
+            (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
 
             //assumption: GenerateAllStaticRulesFromDynamicRules has been called before parsing
             //and added the GammaRule
             var startRule = _grammar.StaticRules[new DerivedCategory(ContextFreeGrammar.GammaRule)][0];
 
-            var startState = new EarleyState(startRule, 0, table[0], null);
-            table[0].AddState(startState, _grammar);
+            var startState = new EarleyState(startRule, 0, _table[0], null);
+            _table[0].AddState(startState, _grammar);
             try
             {
-                foreach (var col in table)
+                foreach (var col in _table)
                 {
-                    var count = 0;
+                    bool exhaustedCompletion = false;
+                    var anyCompleted = false;
+                    var anyPredicted = false;
+                    while (!exhaustedCompletion)
+                    {
+                        //1. complete
+                        anyCompleted = TraverseCompletedStates(col);
 
-                    //1. complete
-                    count = TraverseCompletedStates(col, count);
+                        //2. predict after complete:
+                        anyPredicted = TraversePredictableStates(col);
 
-                    //2. predict after complete:
-                    // ReSharper disable once RedundantAssignment
-                    count = TraversePredictableStates(col, count);
+                        //prediction of epsilon transitions can lead to completed states.
+                        //hence we might need to complete those states.
+                        exhaustedCompletion = col.ActionableCompleteStates.Count == 0;
+                    }
 
                     //3. scan after predict.
-                    TraverseScannableStates(table, col);
+                    var anyScanned = TraverseScannableStates(_table, col);
+
+                    if (!anyCompleted && !anyPredicted && !anyScanned) break;
                 }
 
-                foreach (var index in finalColumns)
+                foreach (var index in _finalColumns)
                 {
-                    var n = table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
-                    nodes.AddRange(n);
+                    var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
+                    _nodes.AddRange(n);
                 }
             }
-            catch (InfiniteParseException)
-            {
-                throw;
-            }
-
             catch (Exception e)
             {
                 var s = e.ToString();
                 LogManager.GetCurrentClassLogger().Warn(s);
             }
 
-            //if (nodes.Count == 0)
-            //    cts.Cancel();
-
-            return nodes;
+            return _nodes;
         }
 
         protected virtual (EarleyColumn[], int[]) PrepareEarleyTable(string[] text, int maxWord)
@@ -156,9 +244,10 @@ namespace LinearIndexedGrammarParser
         }
 
 
-        private void TraverseScannableStates(EarleyColumn[] table, EarleyColumn col)
+        private bool TraverseScannableStates(EarleyColumn[] table, EarleyColumn col)
         {
-            if (col.Index + 1 >= table.Length) return;
+            bool anyScanned = col.ActionableNonCompleteStates.Count > 0;
+            if (col.Index + 1 >= table.Length) return false;
 
             while (col.ActionableNonCompleteStates.Count > 0)
             {
@@ -171,40 +260,31 @@ namespace LinearIndexedGrammarParser
                 {
                     var currentCategory = new DerivedCategory(item);
                     if (stateToScan.NextTerm.Equals(currentCategory))
-                            Scan(table[col.Index + 1], stateToScan, currentCategory, nextScannableTerm);
+                            Scan(table[col.Index], table[col.Index+1],stateToScan, currentCategory, nextScannableTerm);
                 }
             }
+
+            return anyScanned;
         }
 
-        private int TraversePredictableStates(EarleyColumn col, int count)
+        private bool TraversePredictableStates(EarleyColumn col)
         {
+            bool anyPredicted = col.CategoriesToPredict.Count > 0;
             while (col.CategoriesToPredict.Count > 0)
             {
                 var nextTerm = col.CategoriesToPredict.Dequeue();
-
-                if (col.ActionableCompleteStates.Count > 0) col.ActionableCompleteStates.Clear();
-
-                //count++;
-                //TestForTooManyStatesInColumn(count);
-
-                if (!_grammar.StaticRules.ContainsKey(nextTerm))
-                {
-                    throw new Exception("should not encounter here, you modified CategoriesToPredict to not add POS");
-                }
-
                 var ruleList = _grammar.StaticRules[nextTerm];
                 Predict(col, ruleList, nextTerm);
             }
 
-            return count;
+            return anyPredicted;
         }
 
-        private int TraverseCompletedStates(EarleyColumn col, int count)
+        private bool TraverseCompletedStates(EarleyColumn col)
         {
+            bool anyCompleted = col.ActionableCompleteStates.Count > 0;
             while (col.ActionableCompleteStates.Count > 0)
             {
-                //count++;
-                //TestForTooManyStatesInColumn(count);
                 var kvp = col.ActionableCompleteStates.First();
                 var completedStatesQueueKey = kvp.Key;
                 var completedStatesQueue = kvp.Value;
@@ -217,7 +297,7 @@ namespace LinearIndexedGrammarParser
                 Complete(col, state);
             }
 
-            return count;
+            return anyCompleted;
         }
     }
 }

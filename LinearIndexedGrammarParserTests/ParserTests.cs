@@ -197,24 +197,24 @@ namespace LinearIndexedGrammarParserTests
             var settings = new JsonSerializerSettings
                 { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
             var actual = JsonConvert.SerializeObject(sentences, settings);
-            //var expected = File.ReadAllText(@"GenerateCFGGrammarSentences.json");
-            //Assert.Equal(expected, actual);
+            var expected = File.ReadAllText(@"GenerateCFGGrammarSentences.json");
+            Assert.Equal(expected, actual);
 
 
-            JsonSerializer serializer = new JsonSerializer
-            {
-                NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented
-            };
+            //JsonSerializer serializer = new JsonSerializer
+            //{
+            //    NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented
+            //};
 
-            using (StreamWriter sw = new StreamWriter(@"GenerateCFGGrammarSentences.json"))
-            using (JsonWriter writer = new JsonTextWriter(sw))
-            {
-                serializer.Serialize(writer, data);
-            }
-            foreach (var item in data)
-            {
-                output.WriteLine(string.Join(" ", item));
-            }
+            //using (StreamWriter sw = new StreamWriter(@"GenerateCFGGrammarSentences.json"))
+            //using (JsonWriter writer = new JsonTextWriter(sw))
+            //{
+            //    serializer.Serialize(writer, data);
+            //}
+            //foreach (var item in data)
+            //{
+            //    output.WriteLine(string.Join(" ", item));
+            //}
         }
 
         [Fact]
@@ -327,6 +327,33 @@ namespace LinearIndexedGrammarParserTests
             };
 
             Assert.Equal(actual, expected);
+        }
+
+        [Fact]
+        public void CyclicUnitProductions()
+        {
+            var n = GrammarFileReader.ParseSentenceAccordingToGrammar("CFGCyclicUnitProductions.txt", "Vocabulary.json",
+                "the man kissed the woman");
+            var settings = new JsonSerializerSettings
+                { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
+            var actual = JsonConvert.SerializeObject(n, settings);
+            var expected = File.ReadAllText(@"ExpectedCyclicUnitProduction.json");
+            Assert.Equal(expected, actual);
+
+
+            //JsonSerializer serializer = new JsonSerializer();
+            //serializer.NullValueHandling = NullValueHandling.Ignore;
+            //serializer.Formatting = Formatting.Indented;
+
+            //using (StreamWriter sw = new StreamWriter(@"ExpectedCyclicUnitProduction.json"))
+            //using (JsonWriter writer = new JsonTextWriter(sw))
+            //{
+            //    serializer.Serialize(writer, n);
+            //}
+            //foreach (var item in n)
+            //{
+            //    output.WriteLine(item.TreeString());
+            //}
         }
 
     }

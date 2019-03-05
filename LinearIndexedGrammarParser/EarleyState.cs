@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LinearIndexedGrammarParser
@@ -19,7 +20,22 @@ namespace LinearIndexedGrammarParser
         public EarleyColumn EndColumn { get; set; }
         public int DotIndex { get; }
         public EarleyNode Node { get; set; }
+        public List<EarleyState> Parents  = new List<EarleyState>();
 
+
+        public List<EarleyState> GetTransitiveClosureOfParents()
+        {
+            List<EarleyState> l = new List<EarleyState>();
+
+            foreach (var parent in Parents)
+            {
+                l.Add(parent);
+                var grandParents = parent.GetTransitiveClosureOfParents();
+                l.AddRange(grandParents);
+            }
+
+            return l;
+        }
         public bool IsCompleted => DotIndex >= Rule.RightHandSide.Length;
 
         public DerivedCategory NextTerm => IsCompleted ? null : Rule.RightHandSide[DotIndex];
@@ -80,7 +96,7 @@ namespace LinearIndexedGrammarParser
             else
             {
                 y = new EarleyNode(nodeName, predecessorState.StartColumn.Index, endIndex);
-                if (!y.HasChildren())
+                if (!y.HasChildren() && reductor != null) //reductor is null in case of epsilon transition.
                     y.AddChildren(reductor, predecessorState.Node);
 
                 y.RuleNumber = predecessorState.Rule.NumberOfGeneratingRule;

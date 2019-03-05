@@ -1,0 +1,9 @@
+﻿START[*] -> NP VP[*]
+VP[*] -> V0
+VP[*] -> V1 NP[*]
+VP[*] -> V2 PP[*]
+PP[*] -> P NP[*]
+NP[*] -> D N[*]
+NP[*] -> PN[*]
+NP[*] -> DP[*]
+DP[*] -> NP[*]

@@ -43,6 +43,25 @@ namespace LinearIndexedGrammar
 
         private static void Main()
         {
+            //1.
+            //var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
+            //ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            //var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingNPRule.txt");
+
+            //var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
+            //ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            //var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingVPRule.txt");
+
+            //var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
+            //ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            //var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGCyclicUnitProduction.txt");
+
+
+            //////1.var rule = new Rule("ZP", new [] { "D", "N"});
+            //var rule = new Rule("YP", new[] { "V1", "NP" });
+
+            //var nodeList1 = parser.ReParseSentenceWithRuleAddition(rule);
+
             ConfigureLogger();
             Learn();
         }
@@ -156,7 +175,7 @@ namespace LinearIndexedGrammar
             //given to the grammar from the data..
             objectiveFunction.SetMaximalValue(targetProb);
 
-            string s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar given the data: {targetProb} \r\n parsing timeout is {parsingTimeout}: \r\n";
+            string s = $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar given the data: {targetProb} \r\n parsing timeout is {Learner.ParsingTimeOut}: \r\n";
             LogManager.GetCurrentClassLogger().Info(s);
             if (!objectiveFunction.IsMaximalValue(targetProb))
             {

@@ -73,7 +73,7 @@ namespace LinearIndexedGrammarLearner
                 Parallel.ForEach(_sentencesWithCounts, po,
                     (sentenceItem, loopState, i) =>
                     {
-                        var parser = new EarleyParser(currentHypothesis, _voc);
+                        var parser = new EarleyParser(currentHypothesis, _voc, false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
                         var n = parser.ParseSentence(sentenceItem.Sentence, cts);
                         _sentencesWithCounts[i].Trees = n;
                         po.CancellationToken.ThrowIfCancellationRequested();
@@ -89,10 +89,6 @@ namespace LinearIndexedGrammarLearner
                 //string s = "parsing took too long, for the grammar:\r\n" + currentHypothesis.ToString();
                 //NLog.LogManager.GetCurrentClassLogger().Info(s);
                 return null; //parsing failed.
-            }
-            catch (AggregateException e) when (e.InnerExceptions.OfType<InfiniteParseException>().Any())
-            {
-                throw;
             }
 
         }
