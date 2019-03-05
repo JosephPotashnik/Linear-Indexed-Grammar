@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
 using Xunit;
@@ -330,22 +331,89 @@ namespace LinearIndexedGrammarParserTests
         }
 
         [Fact]
-        public void CyclicUnitProductions()
+        public void CyclicUnitProductionsTest()
         {
-            var n = GrammarFileReader.ParseSentenceAccordingToGrammar("CFGCyclicUnitProductions.txt", "Vocabulary.json",
+            var n = GrammarFileReader.ParseSentenceAccordingToGrammar("CFGCyclicUnitProduction.txt", "Vocabulary.json",
                 "the man kissed the woman");
             var settings = new JsonSerializerSettings
                 { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
             var actual = JsonConvert.SerializeObject(n, settings);
             var expected = File.ReadAllText(@"ExpectedCyclicUnitProduction.json");
+            Assert.Equal(expected, actual); 
+        }
+
+        [Fact]
+        public void ReparseWithRuleAddition1()
+        {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingNPRule.txt");
+
+            var rule = new Rule("ZP", new[] { "D", "N" });
+
+            var cfGrammar = new ContextFreeGrammar(grammarRules);
+
+            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var sentence = "the man kissed the woman";
+            parser.ParseSentence(sentence.Split(), new CancellationTokenSource());
+            grammarRules.Add(rule);
+            var n = parser.ReParseSentenceWithRuleAddition(grammarRules, rule);
+            var settings = new JsonSerializerSettings
+                { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
+            var actual = JsonConvert.SerializeObject(n, settings);
+            var expected = File.ReadAllText(@"ExpectedReparseWithRuleAddition1.json");
             Assert.Equal(expected, actual);
+        }
 
+        [Fact]
+        public void ReparseWithRuleAddition2()
+        {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingVPRule.txt");
 
+            var rule = new Rule("YP", new[] { "V1", "NP" });
+
+            var cfGrammar = new ContextFreeGrammar(grammarRules);
+
+            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var sentence = "the man kissed the woman";
+            parser.ParseSentence(sentence.Split(), new CancellationTokenSource());
+            grammarRules.Add(rule);
+            var n = parser.ReParseSentenceWithRuleAddition(grammarRules, rule);
+            var settings = new JsonSerializerSettings
+                { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
+            var actual = JsonConvert.SerializeObject(n, settings);
+            var expected = File.ReadAllText(@"ExpectedReparseWithRuleAddition2.json");
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void ReparseWithRuleAddition3()
+        {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingVPRule.txt");
+
+            var rule = new Rule("YP", new[] { "VP", "ADJP" });
+
+            var cfGrammar = new ContextFreeGrammar(grammarRules);
+
+            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var sentence = "the man kissed the woman the woman";
+            parser.ParseSentence(sentence.Split(), new CancellationTokenSource());
+            grammarRules.Add(rule);
+            var n = parser.ReParseSentenceWithRuleAddition(grammarRules, rule);
+            var settings = new JsonSerializerSettings
+                { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
+            var actual = JsonConvert.SerializeObject(n, settings);
+            var expected = File.ReadAllText(@"ExpectedReparseWithRuleAddition3.json");
+            Assert.Equal(expected, actual);
             //JsonSerializer serializer = new JsonSerializer();
             //serializer.NullValueHandling = NullValueHandling.Ignore;
             //serializer.Formatting = Formatting.Indented;
 
-            //using (StreamWriter sw = new StreamWriter(@"ExpectedCyclicUnitProduction.json"))
+            //using (StreamWriter sw = new StreamWriter(@"ExpectedReparseWithRuleAddition3.json"))
             //using (JsonWriter writer = new JsonTextWriter(sw))
             //{
             //    serializer.Serialize(writer, n);

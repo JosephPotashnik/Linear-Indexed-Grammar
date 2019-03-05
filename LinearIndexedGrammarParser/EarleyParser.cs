@@ -8,7 +8,7 @@ namespace LinearIndexedGrammarParser
 {
     public class EarleyParser
     {
-        private readonly ContextFreeGrammar _grammar;
+        private ContextFreeGrammar _grammar;
         protected Vocabulary Voc;
         private EarleyColumn[] _table;
         private List<EarleyNode> _nodes;
@@ -132,18 +132,15 @@ namespace LinearIndexedGrammarParser
             return false;
         }
 
-        public List<EarleyNode> ReParseSentenceWithRuleAddition(Rule r)
+        public List<EarleyNode> ReParseSentenceWithRuleAddition(List<Rule> grammarRules, Rule r)
         {
             _nodes = new List<EarleyNode>();
-            //note - this will work only for CFG for now.
-            //if you want to add stack changing rule, you need 
-            //to generate all static rules from it
-            _grammar.AddStaticRule(r);
+            _grammar = new ContextFreeGrammar(grammarRules);
+            var cat = r.LeftHandSide;
 
             foreach (var col in _table)
             {
                 //seed the new rule in the column
-                var cat = r.LeftHandSide;
                 if (col.Predecessors.ContainsKey(cat))
                 {
                     var newState = new EarleyState(r, 0, col, null);

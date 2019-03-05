@@ -87,8 +87,22 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>NullableTransitiveClosureMovement2.json</TargetPath>
     </ContentWithTargetPath>
-
-
+    <ContentWithTargetPath Include="ExpectedResults\ExpectedReparseWithRuleAddition1.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>ExpectedReparseWithRuleAddition1.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\ExpectedReparseWithRuleAddition2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>ExpectedReparseWithRuleAddition2.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\ExpectedReparseWithRuleAddition3.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>ExpectedReparseWithRuleAddition3.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\ExpectedCyclicUnitProduction.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>ExpectedCyclicUnitProduction.json</TargetPath>
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="TestGrammars\CFG.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>CFG.txt</TargetPath>
@@ -132,6 +146,18 @@
     <ContentWithTargetPath Include="TestGrammars\SimpleCFG.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>SimpleCFG.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\CFGMissingNPRule.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>CFGMissingNPRule.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\CFGMissingVPRule.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>CFGMissingVPRule.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\CFGCyclicUnitProduction.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>CFGCyclicUnitProduction.txt</TargetPath>
     </ContentWithTargetPath>
   </ItemGroup>
 

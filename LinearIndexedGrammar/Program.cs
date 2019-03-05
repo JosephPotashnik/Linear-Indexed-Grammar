@@ -43,25 +43,6 @@ namespace LinearIndexedGrammar
 
         private static void Main()
         {
-            //1.
-            //var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
-            //ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
-            //var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingNPRule.txt");
-
-            //var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
-            //ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
-            //var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingVPRule.txt");
-
-            //var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
-            //ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
-            //var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGCyclicUnitProduction.txt");
-
-
-            //////1.var rule = new Rule("ZP", new [] { "D", "N"});
-            //var rule = new Rule("YP", new[] { "V1", "NP" });
-
-            //var nodeList1 = parser.ReParseSentenceWithRuleAddition(rule);
-
             ConfigureLogger();
             Learn();
         }
