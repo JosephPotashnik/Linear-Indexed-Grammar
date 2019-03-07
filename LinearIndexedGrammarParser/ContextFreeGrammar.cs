@@ -30,6 +30,12 @@ namespace LinearIndexedGrammarParser
             ConstructCFG(ruleList);
         }
 
+        public List<Rule> Rules
+        {
+            get { return StaticRules.Values.SelectMany(x => x).ToList(); }
+        }
+
+
         public ContextFreeGrammar(ContextSensitiveGrammar cs)
         {
             var rules = ExtractRules(cs);
@@ -105,7 +111,7 @@ namespace LinearIndexedGrammarParser
         }
         
         
-        public Rule GenerateStaticRuleFromDyamicRule(Rule dynamicGrammarRule, DerivedCategory leftHandSide)
+        public static Rule GenerateStaticRuleFromDynamicRule(Rule dynamicGrammarRule, DerivedCategory leftHandSide)
         {
             var patternStringLeftHandSide = dynamicGrammarRule.LeftHandSide.Stack;
             var newRule = new Rule(dynamicGrammarRule)
@@ -190,7 +196,7 @@ namespace LinearIndexedGrammarParser
                         var grammarRuleList = dynamicRules[baseSyntacticCategory];
                         foreach (var item in grammarRuleList)
                         {
-                            var derivedRule = GenerateStaticRuleFromDyamicRule(item, nextTerm);
+                            var derivedRule = GenerateStaticRuleFromDynamicRule(item, nextTerm);
                             AddStaticRule(derivedRule);
 
                             if (derivedRule != null)

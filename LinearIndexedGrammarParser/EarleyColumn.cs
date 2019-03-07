@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
@@ -17,6 +19,21 @@ namespace LinearIndexedGrammarParser
     //        return obj.Rule.LeftHandSide.GetHashCode();
     //    }
     //}
+    internal class EarleyStateReferenceComparer : IEqualityComparer<EarleyState>
+    {
+
+        public bool Equals(EarleyState x, EarleyState y)
+        {
+            return (x.StartColumn.Index == y.StartColumn.Index && x.EndColumn.Index == y.EndColumn.Index &&
+                    x.Rule.LeftHandSide.Equals(y.Rule.LeftHandSide));
+        }
+
+        public int GetHashCode(EarleyState obj)
+        {
+            return obj.Rule.LeftHandSide.GetHashCode();
+        }
+    }
+
 
     internal class CompletedStateComparer : IComparer<EarleyState>
     {
@@ -32,9 +49,9 @@ namespace LinearIndexedGrammarParser
 
     public class EarleyColumn
     {
-        internal Queue<DerivedCategory> CategoriesToPredict;
         internal Dictionary<DerivedCategory, List<EarleyState>> Predecessors;
         internal Dictionary<DerivedCategory, List<EarleyState>> Reductors;
+        internal Dictionary<int, List<EarleyState>> Predicted;
 
         public EarleyColumn(int index, string token)
         {
@@ -47,12 +64,14 @@ namespace LinearIndexedGrammarParser
             ActionableNonCompleteStates = new Queue<EarleyState>();
             Predecessors = new Dictionary<DerivedCategory, List<EarleyState>>();
             Reductors = new Dictionary<DerivedCategory, List<EarleyState>>();
+            Predicted = new Dictionary<int, List<EarleyState>>();
             GammaStates = new List<EarleyState>();
-            CategoriesToPredict = new Queue<DerivedCategory>();
+            ActionableNonTerminalsToPredict = new Queue<DerivedCategory>();
         }
 
         internal SortedDictionary<EarleyState, Queue<EarleyState>> ActionableCompleteStates { get; set; }
         internal Queue<EarleyState> ActionableNonCompleteStates { get; set; }
+        internal Queue<DerivedCategory> ActionableNonTerminalsToPredict;
 
         public List<EarleyState> GammaStates { get; set; }
         public int Index { get; }
@@ -63,7 +82,101 @@ namespace LinearIndexedGrammarParser
             var y = EarleyState.MakeNode(state, completedState.EndColumn.Index, completedState.Node);
             var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn, y);
             state.Parents.Add(newState);
+            completedState.Parents.Add(newState);
+
+            //you need to check for cyclic unit production here.
+            //
+            //
+            //
+            //
+
+
             completedState.EndColumn.AddState(newState, grammar);
+        }
+
+        public void DeleteState(EarleyState oldState, ContextFreeGrammar grammar)
+        {
+            if (oldState.Removed) return;
+            oldState.Removed = true;
+
+            if (!oldState.IsCompleted)
+            {
+                var nextTerm = oldState.NextTerm;
+
+                var predecessors = Predecessors[nextTerm];
+                for (int i = 0; i < predecessors.Count; i++)
+                {
+                    if (predecessors[i] == oldState)
+                    {
+                        predecessors.RemoveAt(i);
+                        break;
+                    }
+                }
+
+
+                //if this state is the only source of predictions for the next term,
+                //we need to recursively delete all earley states predicted from next term.
+                if (Predecessors[nextTerm].Count == 0)
+                {
+                     Predecessors.Remove(nextTerm);
+
+                    if (grammar.StaticRules.ContainsKey(nextTerm))
+                    {
+                        //delete all predictions
+                        var ruleList = grammar.StaticRules[nextTerm];
+
+                        foreach (var rule in ruleList)
+                        {
+                            //you need to change it to generating rule number when dealing with CSG
+                            var statesToDelete = Predicted[rule.Number];
+                            foreach (var state in statesToDelete)
+                                DeleteState(state, grammar);
+
+                            Predicted[rule.Number].Clear();
+                            Predicted.Remove(rule.Number); 
+                        }
+                    }
+                }
+
+                foreach (var state in oldState.Parents)
+                    state.EndColumn.DeleteState(state, grammar);
+            }
+            else
+            {
+                if (oldState.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
+                {
+                    var gammaStates = oldState.EndColumn.GammaStates;
+                    for (int i = 0; i < gammaStates.Count; i++)
+                    {
+                        if (gammaStates[i] == oldState)
+                        {
+                            gammaStates.RemoveAt(i);
+                            break;
+                        }
+                    }
+
+                    return;
+                }
+
+                var reductors = oldState.StartColumn.Reductors[oldState.Rule.LeftHandSide];
+                for (int i = 0; i < reductors.Count; i++)
+                {
+                    if (reductors[i] == oldState)
+                    {
+                        reductors.RemoveAt(i);
+                        break;
+                    }
+                }
+
+
+                if (oldState.StartColumn.Reductors[oldState.Rule.LeftHandSide].Count == 0)
+                    oldState.StartColumn.Reductors.Remove(oldState.Rule.LeftHandSide);
+
+                //remove parents of reductor.
+                foreach (var state in oldState.Parents)
+                    state.EndColumn.DeleteState(state, grammar);
+
+            }
         }
 
         //The responsibility not to add a state that already exists in the column
@@ -82,10 +195,18 @@ namespace LinearIndexedGrammarParser
                     Predecessors[term] = new List<EarleyState>();
 
                     if (!isPOS)
-                        CategoriesToPredict.Enqueue(term);
+                        ActionableNonTerminalsToPredict.Enqueue(term);
                 }
 
                 Predecessors[term].Add(newState);
+
+                if (newState.DotIndex == 0)
+                {
+                    //predicted - add to predicted dictionary
+                    if (!Predicted.ContainsKey(newState.Rule.Number))
+                        Predicted[newState.Rule.Number] = new List<EarleyState>();
+                    Predicted[newState.Rule.Number].Add(newState);
+                }
 
                 if (isPOS && !Reductors.ContainsKey(term))
                     ActionableNonCompleteStates.Enqueue(newState);

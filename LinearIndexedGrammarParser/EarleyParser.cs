@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using Newtonsoft.Json;
 using NLog;
 
 namespace LinearIndexedGrammarParser
 {
     public class EarleyParser
     {
-        private ContextFreeGrammar _grammar;
+        public ContextFreeGrammar _grammar;
         protected Vocabulary Voc;
         private EarleyColumn[] _table;
         private List<EarleyNode> _nodes;
         private string[] _text;
         int[] _finalColumns;
-        private bool _checkForCyclicUnitProductions;
+        private readonly bool _checkForCyclicUnitProductions;
 
         public EarleyParser(ContextFreeGrammar g, Vocabulary v, bool checkUnitProductionCycles = true)
         {
@@ -143,8 +145,12 @@ namespace LinearIndexedGrammarParser
                 //seed the new rule in the column
                 if (col.Predecessors.ContainsKey(cat))
                 {
-                    var newState = new EarleyState(r, 0, col, null);
-                    col.AddState(newState, _grammar);
+                    //if not already marked to be predicted, predict.
+                    if (!col.ActionableNonTerminalsToPredict.Contains(cat))
+                    {
+                        var newState = new EarleyState(r, 0, col, null);
+                        col.AddState(newState, _grammar);
+                    }
                 }
 
                 //1. complete
@@ -167,6 +173,35 @@ namespace LinearIndexedGrammarParser
                 var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
                 _nodes.AddRange(n);
             }
+
+            return _nodes;
+        }
+
+        public List<EarleyNode> ReParseSentenceWithRuleDeletion(List<Rule> grammarRules, Rule r)
+        {
+            _nodes = new List<EarleyNode>();
+
+            foreach (var col in _table)
+            {
+                if (col.Predicted.ContainsKey(r.Number))
+                {
+                    //you need to change it to generating rule number when dealing with CSG
+                    var statesToDelete = col.Predicted[r.Number];
+                    foreach (var state in statesToDelete)
+                        col.DeleteState(state, _grammar);
+
+                    col.Predicted[r.Number].Clear();
+                    col.Predicted.Remove(r.Number);
+                }
+            }
+
+            foreach (var index in _finalColumns)
+            {
+                var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
+                _nodes.AddRange(n);
+            }
+
+            _grammar = new ContextFreeGrammar(grammarRules);
 
             return _nodes;
         }
@@ -266,10 +301,10 @@ namespace LinearIndexedGrammarParser
 
         private bool TraversePredictableStates(EarleyColumn col)
         {
-            bool anyPredicted = col.CategoriesToPredict.Count > 0;
-            while (col.CategoriesToPredict.Count > 0)
+            bool anyPredicted = col.ActionableNonTerminalsToPredict.Count > 0;
+            while (col.ActionableNonTerminalsToPredict.Count > 0)
             {
-                var nextTerm = col.CategoriesToPredict.Dequeue();
+                var nextTerm = col.ActionableNonTerminalsToPredict.Dequeue();
                 var ruleList = _grammar.StaticRules[nextTerm];
                 Predict(col, ruleList, nextTerm);
             }
@@ -295,6 +330,43 @@ namespace LinearIndexedGrammarParser
             }
 
             return anyCompleted;
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+         
+            foreach (var col in _table)
+            {
+                sb.AppendLine($"col {col.Index}");
+
+                sb.AppendLine("Predecessors:");
+                foreach (var predecessorKeyAndValue in col.Predecessors)
+                {
+                    var key = predecessorKeyAndValue.Key;
+                    sb.AppendLine($"key {key}");
+                    foreach (var state in predecessorKeyAndValue.Value)
+                        sb.AppendLine(state.ToString());
+                }
+                sb.AppendLine("Predicted:");
+                foreach (var predictedKeyAndValue in col.Predicted)
+                {
+                    var key = predictedKeyAndValue.Key;
+                    sb.AppendLine($"key {key}");
+                    foreach (var state in predictedKeyAndValue.Value)
+                        sb.AppendLine(state.ToString());
+                }
+                sb.AppendLine("Reductors:");
+                foreach (var reductorsKeyAndValue in col.Reductors)
+                {
+                    var key = reductorsKeyAndValue.Key;
+                    sb.AppendLine($"key {key}");
+                    foreach (var state in reductorsKeyAndValue.Value)
+                        sb.AppendLine(state.ToString());
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

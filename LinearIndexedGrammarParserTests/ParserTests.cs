@@ -424,5 +424,201 @@ namespace LinearIndexedGrammarParserTests
             //}
         }
 
+        [Fact]
+        public void ReparseWithRuleDeletion1()
+        {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingNPRule.txt");
+
+            var cfGrammar = new ContextFreeGrammar(grammarRules);
+
+            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var sentence = "the man kissed the woman";
+            parser.ParseSentence(sentence.Split(), new CancellationTokenSource());
+            var grules = cfGrammar.Rules;
+
+
+            var rule = grules[3]; // NP -> D N
+            grules.RemoveAt(3);
+            var lhs = new SyntacticCategory(rule.LeftHandSide);
+            var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rule, new DerivedCategory(lhs.ToString()));
+
+            parser.ReParseSentenceWithRuleDeletion(grules, r);
+            var actual = parser.ToString();
+            //File.WriteAllText(@"ExpectedRuleDeletion1.txt", str);
+            var expected = File.ReadAllText(@"ExpectedRuleDeletion1.txt");
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void ReparseWithRuleDeletion2()
+        {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingVPRule.txt");
+
+            var cfGrammar = new ContextFreeGrammar(grammarRules);
+
+            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var sentence = "the man kissed the woman";
+            parser.ParseSentence(sentence.Split(), new CancellationTokenSource());
+            var grules = cfGrammar.Rules;
+            var rule = grules[5]; //VP -> V1 NP
+            grules.RemoveAt(5);
+            var lhs = new SyntacticCategory(rule.LeftHandSide);
+            var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rule, new DerivedCategory(lhs.ToString()));
+
+            parser.ReParseSentenceWithRuleDeletion(grules, r);
+            var actual = parser.ToString();
+            //File.WriteAllText(@"ExpectedRuleDeletion2.txt", actual);
+            var expected = File.ReadAllText(@"ExpectedRuleDeletion2.txt");
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void ReparseWithRuleDeletion3()
+        {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingVPRule.txt");
+
+            var rule1 = new Rule("YP", new[] { "VP", "ADJP" });
+            rule1.Number = -5;
+            var cfGrammar = new ContextFreeGrammar(grammarRules);
+
+            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var sentence = "the man kissed the woman the woman";
+            parser.ParseSentence(sentence.Split(), new CancellationTokenSource());
+            grammarRules.Add(rule1);
+            var n = parser.ReParseSentenceWithRuleAddition(grammarRules, rule1);
+            var s = parser.ToString();
+            var grules = parser._grammar.Rules;
+            var rule = grules[7]; //YP -> VP ADJP
+            grules.RemoveAt(7);
+            rule.Number = -5;
+
+            var lhs = new SyntacticCategory(rule.LeftHandSide);
+            var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rule, new DerivedCategory(lhs.ToString()));
+
+            var n1 = parser.ReParseSentenceWithRuleDeletion(grules, r);
+            var actual = parser.ToString();
+            //File.WriteAllText(@"ExpectedRuleDeletion3.txt", actual);
+            var expected = File.ReadAllText(@"ExpectedRuleDeletion3.txt");
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void ReparseWithRuleAdditionAndDeletion1()
+        {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingNPRule.txt");
+
+            var rule1 = new Rule("ZP", new[] { "D", "N" });
+            rule1.Number = -5;
+            var cfGrammar = new ContextFreeGrammar(grammarRules);
+
+            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var sentence = "the man kissed the woman";
+            var n1 = parser.ParseSentence(sentence.Split(), new CancellationTokenSource());
+            var settings = new JsonSerializerSettings
+                { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
+            var origTree = JsonConvert.SerializeObject(n1, settings);
+
+            var originalTable = parser.ToString();
+            grammarRules.Add(rule1);
+            var n = parser.ReParseSentenceWithRuleAddition(grammarRules, rule1);
+            var grules = parser._grammar.Rules;
+            var rule = grules[7]; //ZP -> D N
+            grules.RemoveAt(7);
+            rule.Number = -5;
+
+            var lhs = new SyntacticCategory(rule.LeftHandSide);
+            var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rule, new DerivedCategory(lhs.ToString()));
+
+            var n2 = parser.ReParseSentenceWithRuleDeletion(grules, r);
+            var restoredTree = JsonConvert.SerializeObject(n2, settings);
+
+            var tableAfterAdditionAndDeletion = parser.ToString();
+            Assert.Equal(tableAfterAdditionAndDeletion, originalTable);
+            Assert.Equal(restoredTree, origTree);
+
+        }
+
+
+        [Fact]
+        public void ReparseWithRuleAdditionAndDeletion2()
+        {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingVPRule.txt");
+
+            var rule1 = new Rule("YP", new[] { "V1", "NP" });
+            rule1.Number = -5;
+            var cfGrammar = new ContextFreeGrammar(grammarRules);
+
+            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var sentence = "the man kissed the woman";
+            var n1 = parser.ParseSentence(sentence.Split(), new CancellationTokenSource());
+            var settings = new JsonSerializerSettings
+                { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
+            var origTree = JsonConvert.SerializeObject(n1, settings);
+
+            var originalTable = parser.ToString();
+            grammarRules.Add(rule1);
+            var n = parser.ReParseSentenceWithRuleAddition(grammarRules, rule1);
+            var grules = parser._grammar.Rules;
+            var rule = grules[7]; //YP -> V1 NP
+            grules.RemoveAt(7);
+            rule.Number = -5;
+
+            var lhs = new SyntacticCategory(rule.LeftHandSide);
+            var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rule, new DerivedCategory(lhs.ToString()));
+
+            var n2 = parser.ReParseSentenceWithRuleDeletion(grules, r);
+            var restoredTree = JsonConvert.SerializeObject(n2, settings);
+
+            var tableAfterAdditionAndDeletion = parser.ToString();
+            Assert.Equal(tableAfterAdditionAndDeletion, originalTable);
+            Assert.Equal(restoredTree, origTree);
+
+        }
+
+
+        [Fact]
+        public void ReparseWithRuleAdditionAndDeletion3()
+        {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile("Vocabulary.json");
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            var grammarRules = GrammarFileReader.ReadRulesFromFile("CFGMissingVPRule.txt");
+
+            var rule1 = new Rule("YP", new[] { "VP", "ADJP" });
+            rule1.Number = -5;
+            var cfGrammar = new ContextFreeGrammar(grammarRules);
+
+            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var sentence = "the man kissed the woman the woman";
+            var n1 = parser.ParseSentence(sentence.Split(), new CancellationTokenSource());
+            var settings = new JsonSerializerSettings
+                { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
+            var origTree = JsonConvert.SerializeObject(n1, settings);
+
+            grammarRules.Add(rule1);
+            var n = parser.ReParseSentenceWithRuleAddition(grammarRules, rule1);
+            var grules = parser._grammar.Rules;
+            var rule = grules[7]; //YP -> V1 NP
+            grules.RemoveAt(7);
+            rule.Number = -5;
+
+            var lhs = new SyntacticCategory(rule.LeftHandSide);
+            var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rule, new DerivedCategory(lhs.ToString()));
+
+            var n2 = parser.ReParseSentenceWithRuleDeletion(grules, r);
+            var restoredTree = JsonConvert.SerializeObject(n2, settings);
+
+            Assert.Equal(restoredTree, origTree);
+
+        }
     }
 }

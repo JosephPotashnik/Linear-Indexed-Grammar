@@ -70,11 +70,6 @@ namespace LinearIndexedGrammarParser
             return Number;
         }
 
-        public bool IsEpsilonRule()
-        {
-            return RightHandSide[0].IsEpsilon();
-        }
-
         public bool Equals(Rule other)
         {
             return Number == other.Number;

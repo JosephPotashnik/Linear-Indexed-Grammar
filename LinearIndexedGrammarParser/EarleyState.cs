@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
@@ -8,6 +9,7 @@ namespace LinearIndexedGrammarParser
     {
         public EarleyState(Rule r, int dotIndex, EarleyColumn c, EarleyNode n)
         {
+            Removed = false;
             Rule = r;
             DotIndex = dotIndex;
             StartColumn = c;
@@ -15,13 +17,13 @@ namespace LinearIndexedGrammarParser
             Node = n;
         }
 
+        public bool Removed { get; set; }
         public Rule Rule { get; }
         public EarleyColumn StartColumn { get; }
         public EarleyColumn EndColumn { get; set; }
         public int DotIndex { get; }
         public EarleyNode Node { get; set; }
         public List<EarleyState> Parents  = new List<EarleyState>();
-
 
         public List<EarleyState> GetTransitiveClosureOfParents()
         {
