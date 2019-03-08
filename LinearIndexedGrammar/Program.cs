@@ -149,7 +149,7 @@ namespace LinearIndexedGrammar
             stopWatch.Stop();
             var ts = stopWatch.Elapsed;
             int parsingTimeout = Math.Max((ts.Seconds * 1000 + ts.Milliseconds) * 3, Learner.InitialTimeOut);
-            Learner.ParsingTimeOut = parsingTimeout;
+            Learner.ParsingTimeOut = int.MaxValue;
 
             //trying to learn data from incomplete source leads to p < 1
             //so set the maximum value to the target probability, which is the maximal support

@@ -103,6 +103,30 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>ExpectedCyclicUnitProduction.json</TargetPath>
     </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\ExpectedReparseWithRuleAdditionAndDeletion4.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>ExpectedReparseWithRuleAdditionAndDeletion4.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\ExpectedRuleDeletion1.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>ExpectedRuleDeletion1.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\ExpectedRuleDeletion2.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>ExpectedRuleDeletion2.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\ExpectedRuleDeletion3.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>ExpectedRuleDeletion3.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\ExpectedRuleDeletion4.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>ExpectedRuleDeletion4.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="ExpectedResults\ExpectedRuleDeletion5.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>ExpectedRuleDeletion5.txt</TargetPath>
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="TestGrammars\CFG.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>CFG.txt</TargetPath>
@@ -158,6 +182,10 @@
     <ContentWithTargetPath Include="TestGrammars\CFGCyclicUnitProduction.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>CFGCyclicUnitProduction.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="TestGrammars\CFGLeftRecursionMissingNPRule.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>CFGLeftRecursionMissingNPRule.txt</TargetPath>
     </ContentWithTargetPath>
   </ItemGroup>
 
