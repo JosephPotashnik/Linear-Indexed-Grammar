@@ -35,7 +35,6 @@ namespace LinearIndexedGrammarParser
             get { return StaticRules.Values.SelectMany(x => x).ToList(); }
         }
 
-
         public ContextFreeGrammar(ContextSensitiveGrammar cs)
         {
             var rules = ExtractRules(cs);

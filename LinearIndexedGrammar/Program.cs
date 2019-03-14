@@ -82,7 +82,7 @@ namespace LinearIndexedGrammar
             var cfGrammar = new ContextFreeGrammar(grammarRules);
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
             var nodeList = generator.ParseSentence(null, new CancellationTokenSource(), maxWords);
-            return GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary, numberOfSentencesPerTree);
+            return GrammarFileReader.GetSentencesOfGenerator(nodeList.nodes, universalVocabulary, numberOfSentencesPerTree);
         }
 
         private static IEnumerable<string> GetSentenceFromDataFile(string dataFileName)
@@ -119,7 +119,7 @@ namespace LinearIndexedGrammar
             List<string[]> filteredSen = new List<string[]>();
 
             SentenceParsingResults[] allParses = learner.ParseAllSentences(cfGrammar);
-            var parsableData = allParses.Where(x => x.Trees.Count > 0);
+            var parsableData = allParses.Where(x => x.GammaStates.Count > 0);
 
             foreach (var sen in parsableData)
             {
@@ -145,6 +145,8 @@ namespace LinearIndexedGrammar
 
             var stopWatch = new Stopwatch();
             stopWatch.Start();
+            objectiveFunction.GetLearner().ParseAllSentencesFromScratch(targetGrammar);
+
             var targetProb = objectiveFunction.Compute(targetGrammar);
             stopWatch.Stop();
             var ts = stopWatch.Elapsed;

@@ -10,6 +10,7 @@ namespace LinearIndexedGrammarParser
 {
     public class EarleyParser
     {
+        public ContextFreeGrammar _oldGrammar;
         public ContextFreeGrammar _grammar;
         protected Vocabulary Voc;
         private EarleyColumn[] _table;
@@ -55,6 +56,7 @@ namespace LinearIndexedGrammarParser
             var y = EarleyState.MakeNode(state, reductor.EndColumn.Index, reductor.Node);
             var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn, y);
             state.Parents.Add(newState);
+            newState.Predecessor = state;
             nextCol.AddState(newState, _grammar);
         }
 
@@ -81,7 +83,8 @@ namespace LinearIndexedGrammarParser
                 var newState = new EarleyState(predecessor.Rule, predecessor.DotIndex + 1, predecessor.StartColumn, y);
                 predecessor.Parents.Add(newState);
                 reductorState.Parents.Add(newState);
-
+                newState.Predecessor = predecessor;
+                newState.Reductor = reductorState;
 
                 if (_checkForCyclicUnitProductions)
                 {
@@ -126,23 +129,26 @@ namespace LinearIndexedGrammarParser
             if (foundCycle)
             {
                 //undo the parent ties,  and do not insert the new state
-                reductorState.Parents.RemoveAt(reductorState.Parents.Count - 1);
-                predecessor.Parents.RemoveAt(predecessor.Parents.Count - 1);
+                reductorState.Parents.Remove(newState);
+                predecessor.Parents.Remove(newState);
                 return true;
             }
 
             return false;
         }
 
-        public List<EarleyNode> ReParseSentenceWithRuleAddition(List<Rule> grammarRules, Rule r)
+        public (List<EarleyNode> nodes, List<EarleyState> gammaStates) ReParseSentenceWithRuleAddition(ContextFreeGrammar g, Rule r)
         {
             _nodes = new List<EarleyNode>();
-            _grammar = new ContextFreeGrammar(grammarRules);
+            var gammaStates = new List<EarleyState>();
+            _oldGrammar = _grammar;
+            _grammar = g;
             var cat = r.LeftHandSide;
 
             foreach (var col in _table)
             {
                 //seed the new rule in the column
+                //think about categories if this would be context sensitive grammar.
                 if (col.Predecessors.ContainsKey(cat))
                 {
                     //if not already marked to be predicted, predict.
@@ -172,43 +178,58 @@ namespace LinearIndexedGrammarParser
             {
                 var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
                 _nodes.AddRange(n);
+                gammaStates.AddRange(_table[index].GammaStates);
+
             }
 
-            return _nodes;
+            return (_nodes, gammaStates);
         }
 
-        public List<EarleyNode> ReParseSentenceWithRuleDeletion(List<Rule> grammarRules, Rule r)
+        public (List<EarleyNode> nodes, List<EarleyState> gammaStates) ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, Rule r)
         {
             _nodes = new List<EarleyNode>();
+            var gammaStates = new List<EarleyState>();
 
             foreach (var col in _table)
             {
-                if (col.Predicted.ContainsKey(r.Number))
+                if (col.Predicted.ContainsKey(r.NumberOfGeneratingRule))
                 {
-                    //you need to change it to generating rule number when dealing with CSG
-                    var statesToDelete = col.Predicted[r.Number];
+                    var statesToDelete = col.Predicted[r.NumberOfGeneratingRule];
                     foreach (var state in statesToDelete)
-                        col.DeleteState(state, _grammar);
+                    {
+                        if (!col.predictedToDelete.Contains(state))
+                        {
+                            col.predictedToDelete.Add(state);
+                            col.DeleteState(state, _grammar);
+                        }
+                    }
 
-                    col.Predicted[r.Number].Clear();
-                    col.Predicted.Remove(r.Number);
+                    col.Predicted[r.NumberOfGeneratingRule].Clear();
+                    col.Predicted.Remove(r.NumberOfGeneratingRule);
                 }
+
+                col.predictedToDelete.Clear();
             }
 
             foreach (var index in _finalColumns)
             {
                 var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
                 _nodes.AddRange(n);
+                gammaStates.AddRange(_table[index].GammaStates);
+
             }
 
-            _grammar = new ContextFreeGrammar(grammarRules);
+            _oldGrammar = _grammar;
+            _grammar = g;
 
-            return _nodes;
+            return (_nodes, gammaStates);
         }
-        public List<EarleyNode> ParseSentence(string[] text, CancellationTokenSource cts, int maxWords = 0)
+        public (List<EarleyNode> nodes, List<EarleyState> gammaStates) ParseSentence(string[] text, CancellationTokenSource cts, int maxWords = 0)
         {
             _text = text;
             _nodes = new List<EarleyNode>();
+            List<EarleyState> gammaStates = new List<EarleyState>();
+
 
             (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
 
@@ -248,6 +269,7 @@ namespace LinearIndexedGrammarParser
                 {
                     var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
                     _nodes.AddRange(n);
+                    gammaStates.AddRange(_table[index].GammaStates);
                 }
             }
             catch (Exception e)
@@ -256,7 +278,7 @@ namespace LinearIndexedGrammarParser
                 LogManager.GetCurrentClassLogger().Warn(s);
             }
 
-            return _nodes;
+            return (_nodes, gammaStates);
         }
 
         protected virtual (EarleyColumn[], int[]) PrepareEarleyTable(string[] text, int maxWord)
@@ -367,6 +389,24 @@ namespace LinearIndexedGrammarParser
             }
 
             return sb.ToString();
+        }
+
+        public void AcceptChanges()
+        {
+            foreach (var col in _table)
+                col.AcceptChanges();
+
+            _oldGrammar = null;
+
+        }
+
+        public void RejectChanges()
+        {
+            foreach (var col in _table)
+                col.RejectChanges();
+
+            _grammar = _oldGrammar;
+            _oldGrammar = null;
         }
     }
 }

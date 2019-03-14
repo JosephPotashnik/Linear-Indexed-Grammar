@@ -106,7 +106,11 @@ namespace LinearIndexedGrammarParser
 
         public bool Equals(EarleyNode other)
         {
-            return Name == other.Name && StartIndex == other.StartIndex && EndIndex == other.EndIndex;
+            string s =
+                "Node.Equals should not be used, the node comparer is only used FullTreeComparer";
+            Console.WriteLine(s);
+            throw new Exception(s);
+            //return Name == other.Name && StartIndex == other.StartIndex && EndIndex == other.EndIndex;
         }
     }
 }

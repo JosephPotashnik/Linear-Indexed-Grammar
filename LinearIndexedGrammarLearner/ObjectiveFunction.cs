@@ -30,6 +30,33 @@ namespace LinearIndexedGrammarLearner
         }
     }
 
+    class EarleyStateComparer : IEqualityComparer<EarleyState>
+    {
+        public bool Equals(EarleyState x, EarleyState y)
+        {
+            if (x.Rule.Number != y.Rule.Number || x.StartColumn.Index != y.StartColumn.Index || x.EndColumn.Index != y.EndColumn.Index ||
+                x.DotIndex != y.DotIndex) return false;
+
+            bool predSide = x.Predecessor == null && y.Predecessor == null;
+            if (x.Predecessor != null && y.Predecessor != null)
+                predSide = this.Equals(x.Predecessor, y.Predecessor);
+
+            if (!predSide) return false;
+
+            bool reductorSide = x.Reductor == null && y.Reductor == null;
+            if (x.Reductor != null && y.Reductor != null)
+                reductorSide = this.Equals(x.Reductor, y.Reductor);
+            if (!reductorSide) return false;
+
+            return true;
+        }
+
+        public int GetHashCode(EarleyState obj)
+        {
+            return obj.GetHashCode();
+        }
+    }
+
     class LengthAndEarleyNodeComparer : IEqualityComparer<(int length, EarleyNode node)>
     {
         static readonly FullTreeComparer comp = new FullTreeComparer();
@@ -45,12 +72,28 @@ namespace LinearIndexedGrammarLearner
         }
     }
 
+    class LengthAndEarleyStateComparer : IEqualityComparer<(int length, EarleyState state)>
+    {
+        static readonly EarleyStateComparer comp = new EarleyStateComparer();
+
+        public bool Equals((int length, EarleyState state) x, (int length, EarleyState state) y)
+        {
+            return comp.Equals(x.state, y.state);
+        }
+
+        public int GetHashCode((int length, EarleyState state) obj)
+        {
+            return obj.length;
+        }
+    }
+
     public interface IObjectiveFunction
     {
         double Compute(ContextSensitiveGrammar currentHypothesis);
         bool AcceptNewValue(double newValue, double oldValue, double temperature);
         bool IsMaximalValue(double val);
         void SetMaximalValue(double val);
+        Learner GetLearner();
 
     }
 
@@ -100,6 +143,12 @@ namespace LinearIndexedGrammarLearner
         private readonly Learner _learner;
         static double maxVal;
 
+
+        public Learner GetLearner()
+        {
+            return _learner;
+
+        }
         public GrammarFitnessObjectiveFunction(Learner l)
         {
             _learner = l;
@@ -141,12 +190,12 @@ namespace LinearIndexedGrammarLearner
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
                 return 0;
 
-            SentenceParsingResults[] allParses;
             double prob = 0;
 
-            allParses = _learner.ParseAllSentences(currentCFHypothesis);
+            //allParses = _learner.ParseAllSentences(currentCFHypothesis);
+            var allParses = _learner.Parses;
 
-            if (allParses != null)
+            //if (allParses != null)
             {
                 //var pairs = allParses.SelectMany(x => x.Trees.Select(y => (x.Sentence, y.GetNonTerminalStringUnderNode()))).ToArray();
                 //using (System.IO.StreamWriter file =
@@ -158,11 +207,18 @@ namespace LinearIndexedGrammarLearner
                 //    }
                 //}
 
-                var trees = new HashSet<(int, EarleyNode)>(new LengthAndEarleyNodeComparer());
+                //var trees = new HashSet<(int, EarleyNode)>(new LengthAndEarleyNodeComparer());
+                //for (int i = 0; i < allParses.Length; i++)
+                //{
+                //    for (int j = 0; j < allParses[i].Trees.Count; j++)
+                //        trees.Add((allParses[i].Length, allParses[i].Trees[j]));
+                //}
+
+                var trees = new HashSet<(int, EarleyState)>(new LengthAndEarleyStateComparer());
                 for (int i = 0; i < allParses.Length; i++)
                 {
-                    for (int j = 0; j < allParses[i].Trees.Count; j++)
-                        trees.Add((allParses[i].Length, allParses[i].Trees[j]));
+                    for (int j = 0; j < allParses[i].GammaStates.Count; j++)
+                        trees.Add((allParses[i].Length, allParses[i].GammaStates[j]));
                 }
 
                 var dataTreesPerLength = trees.GroupBy(x => x.Item1).ToDictionary(g => g.Key, g => g.Count());
@@ -172,6 +228,10 @@ namespace LinearIndexedGrammarLearner
                     prob = 1;
                     var grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis);
 
+                    if (grammarTreesPerLength.Count == 0)
+                    {
+                        int x = 1; //horribly wrong.
+                    }
                     double totalProbabilityOfGrammarTrees = 0;
                     foreach (var length in grammarTreesPerLength.Keys)
                         totalProbabilityOfGrammarTrees += powersOfMinus2[length];
@@ -202,7 +262,7 @@ namespace LinearIndexedGrammarLearner
                     }
 
 
-                    var numberOfSentenceUnParsed = allParses.Count(x => x.Trees.Count == 0);
+                    var numberOfSentenceUnParsed = allParses.Count(x => x.GammaStates.Count == 0);
                     var unexplainedSentences = (numberOfSentenceUnParsed / (double)allParses.Length);
 
                     prob *= ( 1 - unexplainedSentences);

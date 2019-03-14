@@ -11,6 +11,7 @@ namespace LinearIndexedGrammarParserTests
 {
     public class ParserTests
     {
+       /*
         public ParserTests(ITestOutputHelper output)
         {
             this.output = output;
@@ -774,6 +775,7 @@ namespace LinearIndexedGrammarParserTests
 
             Assert.Equal(restoredTree, origTree);
 
-        }
+        }*/
     }
+
 }

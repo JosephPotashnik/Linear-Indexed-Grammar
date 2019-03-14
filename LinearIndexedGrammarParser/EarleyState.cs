@@ -17,13 +17,16 @@ namespace LinearIndexedGrammarParser
             Node = n;
         }
 
+        public bool Added { get; set; }
         public bool Removed { get; set; }
         public Rule Rule { get; }
         public EarleyColumn StartColumn { get; }
         public EarleyColumn EndColumn { get; set; }
         public int DotIndex { get; }
         public EarleyNode Node { get; set; }
-        public List<EarleyState> Parents  = new List<EarleyState>();
+        public HashSet<EarleyState> Parents  = new HashSet<EarleyState>();
+        public EarleyState Predecessor { get; set; }
+        public EarleyState Reductor { get; set; }
 
         public List<EarleyState> GetTransitiveClosureOfParents()
         {
@@ -100,7 +103,7 @@ namespace LinearIndexedGrammarParser
                 y = new EarleyNode(nodeName, predecessorState.StartColumn.Index, endIndex);
                 if (!y.HasChildren() && reductor != null) //reductor is null in case of epsilon transition.
                     y.AddChildren(reductor, predecessorState.Node);
-
+                
                 y.RuleNumber = predecessorState.Rule.NumberOfGeneratingRule;
             }
 
@@ -109,10 +112,7 @@ namespace LinearIndexedGrammarParser
 
         public bool Equals(EarleyState other)
         {
-            var val = Rule.Equals(other.Rule) && DotIndex == other.DotIndex && StartColumn.Index == other.StartColumn.Index;
-            if (Node == null || other.Node == null)
-                return val;
-            return val && Node.Equals(other.Node);
+            return (this == other);
         }
     }
 }

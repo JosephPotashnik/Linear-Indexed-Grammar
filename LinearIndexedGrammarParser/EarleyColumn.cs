@@ -52,7 +52,7 @@ namespace LinearIndexedGrammarParser
         internal Dictionary<DerivedCategory, List<EarleyState>> Predecessors;
         internal Dictionary<DerivedCategory, List<EarleyState>> Reductors;
         internal Dictionary<int, List<EarleyState>> Predicted;
-
+        internal HashSet<EarleyState> predictedToDelete = new HashSet<EarleyState>();
         public EarleyColumn(int index, string token)
         {
             Index = index;
@@ -72,6 +72,8 @@ namespace LinearIndexedGrammarParser
         internal SortedDictionary<EarleyState, Queue<EarleyState>> ActionableCompleteStates { get; set; }
         internal Queue<EarleyState> ActionableNonCompleteStates { get; set; }
         internal Queue<DerivedCategory> ActionableNonTerminalsToPredict;
+        internal List<EarleyState> statesAddedInLastReparse = new List<EarleyState>();
+        internal List<EarleyState> statesRemovedInLastReparse = new List<EarleyState>();
 
         public List<EarleyState> GammaStates { get; set; }
         public int Index { get; }
@@ -83,7 +85,9 @@ namespace LinearIndexedGrammarParser
             var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn, y);
             state.Parents.Add(newState);
             completedState.Parents.Add(newState);
-
+            newState.Predecessor = state;
+            newState.Reductor = completedState;
+            
             //you need to check for cyclic unit production here.
             //
             //
@@ -98,6 +102,22 @@ namespace LinearIndexedGrammarParser
         {
             if (oldState.Removed) return;
             oldState.Removed = true;
+            statesRemovedInLastReparse.Add(oldState);
+
+            if (oldState.Predecessor != null)
+            {
+                if (oldState.Predecessor.Removed == false)
+                    //need to remove the parent edge between the predecessor to the deleted state
+                    oldState.Predecessor.Parents.Remove(oldState);
+            }
+
+            if (oldState.Reductor != null)
+            {
+                if (oldState.Reductor.Removed == false)          
+                    //need to remove the parent edge between the reductor to the deleted state
+                    oldState.Reductor.Parents.Remove(oldState);        
+            }
+
 
             if (!oldState.IsCompleted)
             {
@@ -118,7 +138,7 @@ namespace LinearIndexedGrammarParser
                 //we need to recursively delete all earley states predicted from next term.
                 if (Predecessors[nextTerm].Count == 0)
                 {
-                     Predecessors.Remove(nextTerm);
+                     //Predecessors.Remove(nextTerm);
 
                     if (grammar.StaticRules.ContainsKey(nextTerm))
                     {
@@ -127,19 +147,23 @@ namespace LinearIndexedGrammarParser
 
                         foreach (var rule in ruleList)
                         {
+                           
                             //you need to change it to generating rule number when dealing with CSG
-                            var statesToDelete = Predicted[rule.Number];
+                            var statesToDelete = Predicted[rule.NumberOfGeneratingRule];
                             foreach (var state in statesToDelete)
-                                DeleteState(state, grammar);
+                            {
+                                if (!predictedToDelete.Contains(state))
+                                {
+                                    predictedToDelete.Add(state);
+                                    DeleteState(state, grammar);
+                                }
+                            }
 
-                            Predicted[rule.Number].Clear();
-                            Predicted.Remove(rule.Number); 
+                            Predicted[rule.NumberOfGeneratingRule].Clear();
+                            Predicted.Remove(rule.NumberOfGeneratingRule); 
                         }
                     }
                 }
-
-                foreach (var state in oldState.Parents)
-                    state.EndColumn.DeleteState(state, grammar);
             }
             else
             {
@@ -169,14 +193,15 @@ namespace LinearIndexedGrammarParser
                 }
 
 
-                if (oldState.StartColumn.Reductors[oldState.Rule.LeftHandSide].Count == 0)
-                    oldState.StartColumn.Reductors.Remove(oldState.Rule.LeftHandSide);
+                //if (oldState.StartColumn.Reductors[oldState.Rule.LeftHandSide].Count == 0)
+                //    oldState.StartColumn.Reductors.Remove(oldState.Rule.LeftHandSide);
 
-                //remove parents of reductor.
-                foreach (var state in oldState.Parents)
-                    state.EndColumn.DeleteState(state, grammar);
+
 
             }
+
+            foreach (var state in oldState.Parents)
+                state.EndColumn.DeleteState(state, grammar);
         }
 
         //The responsibility not to add a state that already exists in the column
@@ -184,7 +209,9 @@ namespace LinearIndexedGrammarParser
         //or epsilon complete.
         public void AddState(EarleyState newState, ContextFreeGrammar grammar)
         {
+            newState.Added = true;
             newState.EndColumn = this;
+            statesAddedInLastReparse.Add(newState);
 
             if (!newState.IsCompleted)
             {
@@ -203,9 +230,9 @@ namespace LinearIndexedGrammarParser
                 if (newState.DotIndex == 0)
                 {
                     //predicted - add to predicted dictionary
-                    if (!Predicted.ContainsKey(newState.Rule.Number))
-                        Predicted[newState.Rule.Number] = new List<EarleyState>();
-                    Predicted[newState.Rule.Number].Add(newState);
+                    if (!Predicted.ContainsKey(newState.Rule.NumberOfGeneratingRule))
+                        Predicted[newState.Rule.NumberOfGeneratingRule] = new List<EarleyState>();
+                    Predicted[newState.Rule.NumberOfGeneratingRule].Add(newState);
                 }
 
                 if (isPOS && !Reductors.ContainsKey(term))
@@ -235,6 +262,140 @@ namespace LinearIndexedGrammarParser
 
                 ActionableCompleteStates[newState].Enqueue(newState);
             }
+        }
+
+        public void AcceptChanges()
+        {
+            if (statesAddedInLastReparse.Count > 0 && statesRemovedInLastReparse.Count > 0)
+                throw new Exception("states should not have been both added and removed");
+
+            foreach (var state in statesAddedInLastReparse)
+                state.Added = false;
+
+            statesAddedInLastReparse.Clear();
+
+            foreach (var state in statesRemovedInLastReparse)
+                state.Removed = false;
+
+            statesRemovedInLastReparse.Clear();
+
+        }
+
+        public void RejectChanges()
+        {
+            if (statesAddedInLastReparse.Count > 0 && statesRemovedInLastReparse.Count > 0)
+                throw new Exception("states should not have been both added and removed");
+
+            foreach (var state in statesAddedInLastReparse)
+            {
+                if (state.IsCompleted)
+                {
+                    if (state.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
+                    {
+                        var gammaStates = state.EndColumn.GammaStates;
+                        for (int i = 0; i < gammaStates.Count; i++)
+                        {
+                            if (gammaStates[i] == state)
+                            {
+                                gammaStates.RemoveAt(i);
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        state.StartColumn.Reductors[state.Rule.LeftHandSide].Remove(state);
+                        //if (state.StartColumn.Reductors[state.Rule.LeftHandSide].Count == 0)
+                        //    state.StartColumn.Reductors.Remove(state.Rule.LeftHandSide);
+
+                    }
+
+
+                }
+                else
+                {
+                    var nextTerm = state.NextTerm;
+                    state.EndColumn.Predecessors[nextTerm].Remove(state);
+                    //if (state.StartColumn.Predecessors[nextTerm].Count == 0)
+                    //    state.StartColumn.Predecessors.Remove(nextTerm);
+
+                    if (state.DotIndex == 0)
+                    {
+                        state.EndColumn.Predicted[state.Rule.NumberOfGeneratingRule].Remove(state);
+                        if (state.EndColumn.Predicted[state.Rule.NumberOfGeneratingRule].Count == 0)
+                            state.EndColumn.Predicted.Remove(state.Rule.NumberOfGeneratingRule);
+                    }
+                }
+
+                if (state.Predecessor != null)
+                {
+                    if (state.Predecessor.Added == false)
+                        //need to remove the parent edge between the predecessor to the deleted state
+                        state.Predecessor.Parents.Remove(state);
+                }
+
+                if (state.Reductor != null)
+                {
+                    if (state.Reductor.Added == false)
+                        //need to remove the parent edge between the reductor to the deleted state
+                        state.Reductor.Parents.Remove(state);
+                }
+
+
+
+            }
+
+            foreach (var state in statesRemovedInLastReparse)
+            {
+                if (state.IsCompleted)
+                {
+                    if (state.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
+                    {
+                        var gammaStates = state.EndColumn.GammaStates;
+                        gammaStates.Add(state);
+                    }
+                    else
+                    {
+                        state.StartColumn.Reductors[state.Rule.LeftHandSide].Add(state);
+                        //if (state.StartColumn.Reductors[state.Rule.LeftHandSide].Count == 0)
+                        //    state.StartColumn.Reductors.Remove(state.Rule.LeftHandSide);
+
+                    }
+                }
+                else
+                {
+                    var nextTerm = state.NextTerm;
+                    state.EndColumn.Predecessors[nextTerm].Add(state);
+                    //if (state.StartColumn.Predecessors[nextTerm].Count == 0)
+                    //    state.StartColumn.Predecessors.Remove(nextTerm);
+
+                    if (state.DotIndex == 0)
+                    {
+                        if (!state.EndColumn.Predicted.ContainsKey(state.Rule.NumberOfGeneratingRule))
+                            state.EndColumn.Predicted[state.Rule.NumberOfGeneratingRule] = new List<EarleyState>();
+
+                        state.EndColumn.Predicted[state.Rule.NumberOfGeneratingRule].Add(state);
+
+                    }
+                }
+
+                if (state.Predecessor != null)
+                {
+                    if (state.Predecessor.Removed == false)
+                        //need to re-add the parent edge between the predecessor to the deleted state
+                        state.Predecessor.Parents.Add(state);
+                }
+
+                if (state.Reductor != null)
+                {
+                    if (state.Reductor.Removed == false)
+                        //need to re-add the parent edge between the reductor to the deleted state
+                        state.Reductor.Parents.Add(state);
+                }
+
+            }
+
+            AcceptChanges();
         }
     }
 }
