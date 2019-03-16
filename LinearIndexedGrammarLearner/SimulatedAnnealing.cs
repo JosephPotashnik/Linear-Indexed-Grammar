@@ -34,7 +34,7 @@ namespace LinearIndexedGrammarLearner
             var currentTemp = _params.InitialTemperature;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
-            //int counter = 0;
+
             while (currentTemp > 0.3)
             { 
                 var mutatedGrammar = _learner.GetNeighbor(currentGrammar);
@@ -44,37 +44,38 @@ namespace LinearIndexedGrammarLearner
                 var addedRule = mutatedGrammar.StackConstantRules.Except(currentGrammar.StackConstantRules);
                 var removedRule = currentGrammar.StackConstantRules.Except(mutatedGrammar.StackConstantRules);
                 bool reparsed = false;
+                string parstr = string.Empty;
 
                 if (addedRule.Any())
                 {
                     var rr = ContextSensitiveGrammar.RuleSpace[addedRule.First()];
-                    var lhs = new SyntacticCategory(rr.LeftHandSide);
-                    var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr, new DerivedCategory(lhs.ToString()));
-                    Console.WriteLine($" added {r}");
 
+                    var lhs = new SyntacticCategory(rr.LeftHandSide);
+                    var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr,
+                        new DerivedCategory(lhs.ToString()));
+                    Console.WriteLine($" added {r}");
+                    r.NumberOfGeneratingRule = rr.Number;
+                    for (int i = 0; i < _learner._sentencesParser.Length; i++)
+                        parstr += _learner._sentencesParser[i].ToString();
                     reparsed = _learner.ReparseWithAddition(mutatedGrammar, r);
                 }
                 else
                 {
-                    
+
                     var rr = ContextSensitiveGrammar.RuleSpace[removedRule.First()];
-                    //var rc = new RuleCoordinates()
-                    //{
-                    //    LHSIndex = 0,
-                    //    RHSIndex = 73,
-                    //    RuleType = RuleType.CFGRules
-                    //};
-                    //var rr = ContextSensitiveGrammar.RuleSpace[rc];
-
                     var lhs = new SyntacticCategory(rr.LeftHandSide);
-                    var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr, new DerivedCategory(lhs.ToString()));
+                    var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr,
+                        new DerivedCategory(lhs.ToString()));
                     Console.WriteLine($" removed {r}");
-
+                    r.NumberOfGeneratingRule = rr.Number;
+                    for (int i = 0; i < _learner._sentencesParser.Length; i++)
+                        parstr += _learner._sentencesParser[i].ToString();
                     reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r);
-
                 }
 
                 if (reparsed == false) continue;
+
+                
                 var newValue =  _objectiveFunction.Compute(mutatedGrammar);
                 //if (counter++ % 100 == 0)
                 //    LogManager.GetCurrentClassLogger().Info($"currentTemp {currentTemp}, probability {newValue}");
@@ -94,6 +95,17 @@ namespace LinearIndexedGrammarLearner
                     Console.WriteLine("rejected");
 
                     _learner.RejectChanges();
+
+                    var parstr1 = string.Empty;
+
+                    for (int i = 0; i < _learner._sentencesParser.Length; i++)
+                        parstr1 += _learner._sentencesParser[i].ToString();
+
+                    if (parstr != parstr1)
+                    {
+                        int x = 1;
+                    }
+
                 }
             }
 

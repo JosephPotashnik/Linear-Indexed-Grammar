@@ -52,7 +52,9 @@ namespace LinearIndexedGrammarParser
         internal Dictionary<DerivedCategory, List<EarleyState>> Predecessors;
         internal Dictionary<DerivedCategory, List<EarleyState>> Reductors;
         internal Dictionary<int, List<EarleyState>> Predicted;
-        internal HashSet<EarleyState> predictedToDelete = new HashSet<EarleyState>();
+        private HashSet<int> _statesToUnPredict = new HashSet<int>();
+        internal Stack<EarleyState> statesToDelete = new Stack<EarleyState>();
+
         public EarleyColumn(int index, string token)
         {
             Index = index;
@@ -134,11 +136,18 @@ namespace LinearIndexedGrammarParser
                 }
 
 
+                if (oldState.DotIndex == 0)
+                {
+                    Predicted[oldState.Rule.NumberOfGeneratingRule].Remove(oldState);
+                    if (Predicted[oldState.Rule.NumberOfGeneratingRule].Count == 0)
+                        Predicted.Remove(oldState.Rule.NumberOfGeneratingRule);
+                }
+
                 //if this state is the only source of predictions for the next term,
                 //we need to recursively delete all earley states predicted from next term.
                 if (Predecessors[nextTerm].Count == 0)
                 {
-                     //Predecessors.Remove(nextTerm);
+                     Predecessors.Remove(nextTerm);
 
                     if (grammar.StaticRules.ContainsKey(nextTerm))
                     {
@@ -146,24 +155,12 @@ namespace LinearIndexedGrammarParser
                         var ruleList = grammar.StaticRules[nextTerm];
 
                         foreach (var rule in ruleList)
-                        {
-                           
-                            //you need to change it to generating rule number when dealing with CSG
-                            var statesToDelete = Predicted[rule.NumberOfGeneratingRule];
-                            foreach (var state in statesToDelete)
-                            {
-                                if (!predictedToDelete.Contains(state))
-                                {
-                                    predictedToDelete.Add(state);
-                                    DeleteState(state, grammar);
-                                }
-                            }
+                                Unpredict(rule);
 
-                            Predicted[rule.NumberOfGeneratingRule].Clear();
-                            Predicted.Remove(rule.NumberOfGeneratingRule); 
-                        }
                     }
                 }
+
+
             }
             else
             {
@@ -193,15 +190,13 @@ namespace LinearIndexedGrammarParser
                 }
 
 
-                //if (oldState.StartColumn.Reductors[oldState.Rule.LeftHandSide].Count == 0)
-                //    oldState.StartColumn.Reductors.Remove(oldState.Rule.LeftHandSide);
-
-
+                if (reductors.Count == 0)
+                    oldState.StartColumn.Reductors.Remove(oldState.Rule.LeftHandSide);
 
             }
 
             foreach (var state in oldState.Parents)
-                state.EndColumn.DeleteState(state, grammar);
+                state.EndColumn.statesToDelete.Push(state);
         }
 
         //The responsibility not to add a state that already exists in the column
@@ -279,6 +274,8 @@ namespace LinearIndexedGrammarParser
 
             statesRemovedInLastReparse.Clear();
 
+            _statesToUnPredict.Clear();
+
         }
 
         public void RejectChanges()
@@ -305,8 +302,8 @@ namespace LinearIndexedGrammarParser
                     else
                     {
                         state.StartColumn.Reductors[state.Rule.LeftHandSide].Remove(state);
-                        //if (state.StartColumn.Reductors[state.Rule.LeftHandSide].Count == 0)
-                        //    state.StartColumn.Reductors.Remove(state.Rule.LeftHandSide);
+                        if (state.StartColumn.Reductors[state.Rule.LeftHandSide].Count == 0)
+                            state.StartColumn.Reductors.Remove(state.Rule.LeftHandSide);
 
                     }
 
@@ -316,8 +313,8 @@ namespace LinearIndexedGrammarParser
                 {
                     var nextTerm = state.NextTerm;
                     state.EndColumn.Predecessors[nextTerm].Remove(state);
-                    //if (state.StartColumn.Predecessors[nextTerm].Count == 0)
-                    //    state.StartColumn.Predecessors.Remove(nextTerm);
+                    if (state.EndColumn.Predecessors[nextTerm].Count == 0)
+                        state.EndColumn.Predecessors.Remove(nextTerm);
 
                     if (state.DotIndex == 0)
                     {
@@ -356,18 +353,20 @@ namespace LinearIndexedGrammarParser
                     }
                     else
                     {
+                        if (!state.StartColumn.Reductors.ContainsKey(state.Rule.LeftHandSide))
+                            state.StartColumn.Reductors[state.Rule.LeftHandSide] = new List<EarleyState>();
                         state.StartColumn.Reductors[state.Rule.LeftHandSide].Add(state);
-                        //if (state.StartColumn.Reductors[state.Rule.LeftHandSide].Count == 0)
-                        //    state.StartColumn.Reductors.Remove(state.Rule.LeftHandSide);
+                       
 
                     }
                 }
                 else
                 {
                     var nextTerm = state.NextTerm;
+                    if (!state.EndColumn.Predecessors.ContainsKey(nextTerm))
+                        state.EndColumn.Predecessors[nextTerm] = new List<EarleyState>();
                     state.EndColumn.Predecessors[nextTerm].Add(state);
-                    //if (state.StartColumn.Predecessors[nextTerm].Count == 0)
-                    //    state.StartColumn.Predecessors.Remove(nextTerm);
+
 
                     if (state.DotIndex == 0)
                     {
@@ -396,6 +395,18 @@ namespace LinearIndexedGrammarParser
             }
 
             AcceptChanges();
+        }
+
+        public void Unpredict(Rule r)
+        {
+            if (!_statesToUnPredict.Contains(r.NumberOfGeneratingRule))
+            {
+                _statesToUnPredict.Add(r.NumberOfGeneratingRule);
+
+                var states = Predicted[r.NumberOfGeneratingRule];
+                foreach (var state in states)
+                    statesToDelete.Push(state);
+            }
         }
     }
 }

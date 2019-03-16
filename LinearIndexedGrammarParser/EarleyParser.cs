@@ -192,23 +192,15 @@ namespace LinearIndexedGrammarParser
 
             foreach (var col in _table)
             {
+                //check if the deleted rule(s) is predicted in this column ,if so, insert to to deletion queue.
                 if (col.Predicted.ContainsKey(r.NumberOfGeneratingRule))
+                    col.Unpredict(r);
+
+                while (col.statesToDelete.Count > 0)
                 {
-                    var statesToDelete = col.Predicted[r.NumberOfGeneratingRule];
-                    foreach (var state in statesToDelete)
-                    {
-                        if (!col.predictedToDelete.Contains(state))
-                        {
-                            col.predictedToDelete.Add(state);
-                            col.DeleteState(state, _grammar);
-                        }
-                    }
-
-                    col.Predicted[r.NumberOfGeneratingRule].Clear();
-                    col.Predicted.Remove(r.NumberOfGeneratingRule);
+                    var stateToDelete = col.statesToDelete.Pop();
+                    col.DeleteState(stateToDelete, _grammar);
                 }
-
-                col.predictedToDelete.Clear();
             }
 
             foreach (var index in _finalColumns)
@@ -224,6 +216,9 @@ namespace LinearIndexedGrammarParser
 
             return (_nodes, gammaStates);
         }
+
+        
+
         public (List<EarleyNode> nodes, List<EarleyState> gammaStates) ParseSentence(string[] text, CancellationTokenSource cts, int maxWords = 0)
         {
             _text = text;
@@ -354,37 +349,71 @@ namespace LinearIndexedGrammarParser
             return anyCompleted;
         }
 
+        public class categoryCompare : IComparer<DerivedCategory>
+        {
+            public int Compare(DerivedCategory x, DerivedCategory y)
+            {
+                return string.Compare(x.ToString(), y.ToString());
+            }
+        }
         public override string ToString()
         {
             var sb = new StringBuilder();
-         
+            var cc = new categoryCompare();
+
             foreach (var col in _table)
             {
                 sb.AppendLine($"col {col.Index}");
 
                 sb.AppendLine("Predecessors:");
-                foreach (var predecessorKeyAndValue in col.Predecessors)
+                var keys = col.Predecessors.Keys.ToArray();
+                Array.Sort(keys, cc);
+
+                foreach (var key in keys)
                 {
-                    var key = predecessorKeyAndValue.Key;
                     sb.AppendLine($"key {key}");
-                    foreach (var state in predecessorKeyAndValue.Value)
-                        sb.AppendLine(state.ToString());
+                    List<string> values = new List<string>();
+                    foreach (var state in col.Predecessors[key])
+                        values.Add(state.ToString());
+                    values.Sort();
+
+                    foreach (var value in values)
+                        sb.AppendLine(value);
+
                 }
                 sb.AppendLine("Predicted:");
-                foreach (var predictedKeyAndValue in col.Predicted)
+                var keys1 = col.Predicted.Keys.ToArray();
+                Array.Sort(keys1);
+
+                foreach (var key in keys1)
                 {
-                    var key = predictedKeyAndValue.Key;
+           
                     sb.AppendLine($"key {key}");
-                    foreach (var state in predictedKeyAndValue.Value)
-                        sb.AppendLine(state.ToString());
+                    List<string> values = new List<string>();
+
+                    foreach (var state in col.Predicted[key])
+                        values.Add(state.ToString());
+                    values.Sort();
+
+                    foreach (var value in values)
+                        sb.AppendLine(value);
                 }
                 sb.AppendLine("Reductors:");
-                foreach (var reductorsKeyAndValue in col.Reductors)
+
+                var keys2 = col.Reductors.Keys.ToArray();
+                Array.Sort(keys2, cc);
+                foreach (var key in keys2)
                 {
-                    var key = reductorsKeyAndValue.Key;
+               
                     sb.AppendLine($"key {key}");
-                    foreach (var state in reductorsKeyAndValue.Value)
-                        sb.AppendLine(state.ToString());
+                    List<string> values = new List<string>();
+
+                    foreach (var state in col.Reductors[key])
+                        values.Add(state.ToString());
+                    values.Sort();
+
+                    foreach (var value in values)
+                        sb.AppendLine(value);
                 }
             }
 

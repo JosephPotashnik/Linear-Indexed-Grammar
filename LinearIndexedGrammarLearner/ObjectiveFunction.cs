@@ -192,8 +192,13 @@ namespace LinearIndexedGrammarLearner
 
             double prob = 0;
 
+            if (currentCFHypothesis.ToString() != _learner._sentencesParser[0]._grammar.ToString())
+            {
+                int x = 1;
+            }
+
             //allParses = _learner.ParseAllSentences(currentCFHypothesis);
-            var allParses = _learner.Parses;
+                var allParses = _learner.Parses;
 
             //if (allParses != null)
             {
