@@ -194,11 +194,12 @@ namespace LinearIndexedGrammarLearner
 
             if (currentCFHypothesis.ToString() != _learner._sentencesParser[0]._grammar.ToString())
             {
+                throw new Exception("hypothesis to compute is different from hypothesis stored at the parser");
                 int x = 1;
             }
 
-            //allParses = _learner.ParseAllSentences(currentCFHypothesis);
-                var allParses = _learner.Parses;
+            var allParses1 = _learner.ParseAllSentences(currentCFHypothesis, _learner._sentencesParser);
+            var allParses = _learner.Parses;
 
             //if (allParses != null)
             {
@@ -235,6 +236,7 @@ namespace LinearIndexedGrammarLearner
 
                     if (grammarTreesPerLength.Count == 0)
                     {
+                        throw new Exception("grammar trees are zero although data is parsed");
                         int x = 1; //horribly wrong.
                     }
                     double totalProbabilityOfGrammarTrees = 0;

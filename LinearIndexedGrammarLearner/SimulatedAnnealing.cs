@@ -34,7 +34,6 @@ namespace LinearIndexedGrammarLearner
             var currentTemp = _params.InitialTemperature;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
-
             while (currentTemp > 0.3)
             { 
                 var mutatedGrammar = _learner.GetNeighbor(currentGrammar);
@@ -45,11 +44,9 @@ namespace LinearIndexedGrammarLearner
                 var removedRule = currentGrammar.StackConstantRules.Except(mutatedGrammar.StackConstantRules);
                 bool reparsed = false;
                 string parstr = string.Empty;
-
                 if (addedRule.Any())
                 {
                     var rr = ContextSensitiveGrammar.RuleSpace[addedRule.First()];
-
                     var lhs = new SyntacticCategory(rr.LeftHandSide);
                     var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr,
                         new DerivedCategory(lhs.ToString()));
@@ -58,10 +55,10 @@ namespace LinearIndexedGrammarLearner
                     for (int i = 0; i < _learner._sentencesParser.Length; i++)
                         parstr += _learner._sentencesParser[i].ToString();
                     reparsed = _learner.ReparseWithAddition(mutatedGrammar, r);
+
                 }
                 else
                 {
-
                     var rr = ContextSensitiveGrammar.RuleSpace[removedRule.First()];
                     var lhs = new SyntacticCategory(rr.LeftHandSide);
                     var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr,
@@ -71,11 +68,11 @@ namespace LinearIndexedGrammarLearner
                     for (int i = 0; i < _learner._sentencesParser.Length; i++)
                         parstr += _learner._sentencesParser[i].ToString();
                     reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r);
+
                 }
 
                 if (reparsed == false) continue;
 
-                
                 var newValue =  _objectiveFunction.Compute(mutatedGrammar);
                 //if (counter++ % 100 == 0)
                 //    LogManager.GetCurrentClassLogger().Info($"currentTemp {currentTemp}, probability {newValue}");
@@ -103,6 +100,7 @@ namespace LinearIndexedGrammarLearner
 
                     if (parstr != parstr1)
                     {
+                        throw new Exception("parser representation after rejected hyptohesis is not the same as original");
                         int x = 1;
                     }
 

@@ -441,7 +441,7 @@ namespace LinearIndexedGrammarParserTests
             //    output.WriteLine(item.TreeString());
             //}
         }
-        
+        /*
         [Fact]
         public void ReparseWithRuleDeletion1()
         {
@@ -473,7 +473,7 @@ namespace LinearIndexedGrammarParserTests
             var expected = File.ReadAllText(@"ExpectedRuleDeletion1.txt");
             //Assert.Equal(expected, actual);
         }
-        /*
+        
         [Fact]
         public void ReparseWithRuleDeletion2()
         {

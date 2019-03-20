@@ -187,8 +187,13 @@ namespace LinearIndexedGrammarLearner
             return true;
         }
 
-        public SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis)
+        public SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis, EarleyParser[] diffparsers = null)
         {
+            EarleyParser[] parsers = new EarleyParser[diffparsers.Length];
+            for (int i = 0; i < parsers.Length; i++)
+            {
+                parsers[i] = new EarleyParser(currentHypothesis, _voc, false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
+            }
             try
             {
                 var cts = new CancellationTokenSource(ParsingTimeOut);
@@ -196,12 +201,27 @@ namespace LinearIndexedGrammarLearner
                 Parallel.ForEach(_sentencesWithCounts, po,
                     (sentenceItem, loopState, i) =>
                     {
-                        var parser = new EarleyParser(currentHypothesis, _voc, false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
-                        var n = parser.ParseSentence(sentenceItem.Sentence, cts);
+                        //var parser = new EarleyParser(currentHypothesis, _voc, false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
+                        var n = parsers[i].ParseSentence(sentenceItem.Sentence, cts);
                          _sentencesWithCounts[i].Trees = n.nodes;
                         _sentencesWithCounts[i].GammaStates = n.gammaStates;
                         po.CancellationToken.ThrowIfCancellationRequested();
                     });
+
+                if (diffparsers != null)
+                {
+                    for (int i = 0; i < diffparsers.Length; i++)
+                    {
+                        var actual = diffparsers[i].ToString();
+                        var expected = parsers[i].ToString();
+                        if ( actual != expected)
+                        {
+                            var grammar = parsers[i]._grammar.ToString();
+
+                            int x = 1;
+                        }
+                    }
+                }
 
                 return _sentencesWithCounts;
             }

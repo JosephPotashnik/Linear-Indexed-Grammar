@@ -52,8 +52,6 @@ namespace LinearIndexedGrammarParser
         internal Dictionary<DerivedCategory, List<EarleyState>> Predecessors;
         internal Dictionary<DerivedCategory, List<EarleyState>> Reductors;
         internal Dictionary<int, List<EarleyState>> Predicted;
-        private HashSet<int> _statesToUnPredict = new HashSet<int>();
-        internal Stack<EarleyState> statesToDelete = new Stack<EarleyState>();
 
         public EarleyColumn(int index, string token)
         {
@@ -63,20 +61,27 @@ namespace LinearIndexedGrammarParser
             //completed agenda is ordered in decreasing order of start indices (see Stolcke 1995 about completion priority queue).
             ActionableCompleteStates =
                 new SortedDictionary<EarleyState, Queue<EarleyState>>(new CompletedStateComparer());
+            ActionableDeletedStates =
+                new SortedDictionary<EarleyState, Stack<EarleyState>>(new CompletedStateComparer());
+
             ActionableNonCompleteStates = new Queue<EarleyState>();
             Predecessors = new Dictionary<DerivedCategory, List<EarleyState>>();
             Reductors = new Dictionary<DerivedCategory, List<EarleyState>>();
             Predicted = new Dictionary<int, List<EarleyState>>();
             GammaStates = new List<EarleyState>();
             ActionableNonTerminalsToPredict = new Queue<DerivedCategory>();
+
         }
 
+        internal HashSet<DerivedCategory> NonTerminalsToUnpredict = new HashSet<DerivedCategory>();
         internal SortedDictionary<EarleyState, Queue<EarleyState>> ActionableCompleteStates { get; set; }
+        internal SortedDictionary<EarleyState, Stack<EarleyState>> ActionableDeletedStates { get; set; }
+
         internal Queue<EarleyState> ActionableNonCompleteStates { get; set; }
         internal Queue<DerivedCategory> ActionableNonTerminalsToPredict;
         internal List<EarleyState> statesAddedInLastReparse = new List<EarleyState>();
         internal List<EarleyState> statesRemovedInLastReparse = new List<EarleyState>();
-
+        
         public List<EarleyState> GammaStates { get; set; }
         public int Index { get; }
         public string Token { get; set; }
@@ -100,6 +105,7 @@ namespace LinearIndexedGrammarParser
             completedState.EndColumn.AddState(newState, grammar);
         }
 
+        
         public void DeleteState(EarleyState oldState, ContextFreeGrammar grammar)
         {
             if (oldState.Removed) return;
@@ -115,26 +121,34 @@ namespace LinearIndexedGrammarParser
 
             if (oldState.Reductor != null)
             {
-                if (oldState.Reductor.Removed == false)          
+                if (oldState.Reductor.Removed == false)
                     //need to remove the parent edge between the reductor to the deleted state
-                    oldState.Reductor.Parents.Remove(oldState);        
+                    oldState.Reductor.Parents.Remove(oldState);
             }
 
 
             if (!oldState.IsCompleted)
             {
+
                 var nextTerm = oldState.NextTerm;
+                var isPOS = !grammar.StaticRules.ContainsKey(nextTerm);
 
-                var predecessors = Predecessors[nextTerm];
-                for (int i = 0; i < predecessors.Count; i++)
+                if (Predecessors.ContainsKey(nextTerm))
                 {
-                    if (predecessors[i] == oldState)
+               
+                    var predecessors = Predecessors[nextTerm];
+                    for (int i = 0; i < predecessors.Count; i++)
                     {
-                        predecessors.RemoveAt(i);
-                        break;
+                        if (predecessors[i] == oldState)
+                        {
+                            predecessors.RemoveAt(i);
+                            break;
+                        }
                     }
-                }
 
+                    if (predecessors.Count == 0)
+                        Predecessors.Remove(nextTerm);
+                }
 
                 if (oldState.DotIndex == 0)
                 {
@@ -143,27 +157,19 @@ namespace LinearIndexedGrammarParser
                         Predicted.Remove(oldState.Rule.NumberOfGeneratingRule);
                 }
 
-                //if this state is the only source of predictions for the next term,
-                //we need to recursively delete all earley states predicted from next term.
-                if (Predecessors[nextTerm].Count == 0)
+                if (!isPOS)
                 {
-                     Predecessors.Remove(nextTerm);
-
-                    if (grammar.StaticRules.ContainsKey(nextTerm))
+                    if (!NonTerminalsToUnpredict.Contains(nextTerm))
                     {
-                        //delete all predictions
-                        var ruleList = grammar.StaticRules[nextTerm];
-
-                        foreach (var rule in ruleList)
-                                Unpredict(rule);
-
+                        //push to check next terminal to predicted state that might need to be deleted.
+                        NonTerminalsToUnpredict.Add(nextTerm);
+                        ActionableNonTerminalsToPredict.Enqueue(nextTerm);
                     }
                 }
-
-
             }
             else
             {
+
                 if (oldState.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
                 {
                     var gammaStates = oldState.EndColumn.GammaStates;
@@ -189,14 +195,64 @@ namespace LinearIndexedGrammarParser
                     }
                 }
 
-
                 if (reductors.Count == 0)
                     oldState.StartColumn.Reductors.Remove(oldState.Rule.LeftHandSide);
-
             }
 
-            foreach (var state in oldState.Parents)
-                state.EndColumn.statesToDelete.Push(state);
+            foreach (var parent in oldState.Parents)
+                parent.EndColumn.EnqueueToDeletedStack(parent);
+        }
+
+        //returns true if it finds a predicting state that is not predicted itself
+        //i.e, if there exists a state X1 -> Y .Z  such that eventually state S is predicted from it.
+        private bool DFSOverPredecessors(EarleyState state, HashSet<EarleyState> visited)
+        {
+            visited.Add(state);
+            if (state.DotIndex != 0) return true;
+            if (Predecessors.ContainsKey(state.Rule.LeftHandSide))
+            {
+                foreach (var predecessor in Predecessors[state.Rule.LeftHandSide])
+                {
+                    if (!visited.Contains(predecessor))
+                    {
+                        var res = DFSOverPredecessors(predecessor, visited);
+                        if (res) return res;
+                    }
+                }
+
+            }
+            return false;
+
+        }
+        public bool CheckForUnprediction(DerivedCategory nextTerm)
+        {
+            if (!Predecessors.ContainsKey(nextTerm)) return true;
+            foreach (var state in Predecessors[nextTerm])
+            {
+                var visited = new HashSet<EarleyState>();
+                bool IsThereANonPredictedPredecessor = DFSOverPredecessors(state, visited);
+                if (IsThereANonPredictedPredecessor)
+                    return false;
+            }
+
+            return true;
+  
+        }
+
+        public void EnqueueToCompletedQueue(EarleyState state)
+        {
+            if (!ActionableCompleteStates.ContainsKey(state))
+                ActionableCompleteStates[state] = new Queue<EarleyState>();
+
+            ActionableCompleteStates[state].Enqueue(state);
+        }
+
+        public void EnqueueToDeletedStack(EarleyState state)
+        {
+            if (!ActionableDeletedStates.ContainsKey(state))
+                ActionableDeletedStates[state] = new Stack<EarleyState>();
+
+            ActionableDeletedStates[state].Push(state);
         }
 
         //The responsibility not to add a state that already exists in the column
@@ -252,10 +308,7 @@ namespace LinearIndexedGrammarParser
             }
             else
             {
-                if (!ActionableCompleteStates.ContainsKey(newState))
-                    ActionableCompleteStates[newState] = new Queue<EarleyState>();
-
-                ActionableCompleteStates[newState].Enqueue(newState);
+                EnqueueToCompletedQueue(newState);
             }
         }
 
@@ -274,7 +327,7 @@ namespace LinearIndexedGrammarParser
 
             statesRemovedInLastReparse.Clear();
 
-            _statesToUnPredict.Clear();
+            NonTerminalsToUnpredict.Clear();
 
         }
 
@@ -393,19 +446,15 @@ namespace LinearIndexedGrammarParser
                 }
 
             }
-
-            AcceptChanges();
         }
 
         public void Unpredict(Rule r)
         {
-            if (!_statesToUnPredict.Contains(r.NumberOfGeneratingRule))
+            if (Predicted.ContainsKey(r.NumberOfGeneratingRule))
             {
-                _statesToUnPredict.Add(r.NumberOfGeneratingRule);
-
                 var states = Predicted[r.NumberOfGeneratingRule];
                 foreach (var state in states)
-                    statesToDelete.Push(state);
+                    state.EndColumn.EnqueueToDeletedStack(state);
             }
         }
     }

@@ -35,6 +35,7 @@ namespace LinearIndexedGrammarParser
             }
         }
 
+
         protected void Scan(EarleyColumn startColumn, EarleyColumn nextCol, EarleyState state, DerivedCategory term, string token)
         {
             if (!startColumn.Reductors.ContainsKey(term))
@@ -159,10 +160,10 @@ namespace LinearIndexedGrammarParser
                     }
                 }
 
-                //1. complete
                 bool exhaustedCompletion = false;
                 while (!exhaustedCompletion)
                 {
+                    //1. complete
                     TraverseCompletedStates(col);
 
                     //2. predict after complete:
@@ -174,13 +175,16 @@ namespace LinearIndexedGrammarParser
                 TraverseScannableStates(_table, col);
             }
 
+
             foreach (var index in _finalColumns)
             {
                 var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
                 _nodes.AddRange(n);
                 gammaStates.AddRange(_table[index].GammaStates);
 
+
             }
+
 
             return (_nodes, gammaStates);
         }
@@ -189,17 +193,27 @@ namespace LinearIndexedGrammarParser
         {
             _nodes = new List<EarleyNode>();
             var gammaStates = new List<EarleyState>();
+            var seedNumberToUnpredict = r.NumberOfGeneratingRule;
 
             foreach (var col in _table)
             {
-                //check if the deleted rule(s) is predicted in this column ,if so, insert to to deletion queue.
-                if (col.Predicted.ContainsKey(r.NumberOfGeneratingRule))
-                    col.Unpredict(r);
-
-                while (col.statesToDelete.Count > 0)
+                if (col.Predicted.ContainsKey(seedNumberToUnpredict))
                 {
-                    var stateToDelete = col.statesToDelete.Pop();
-                    col.DeleteState(stateToDelete, _grammar);
+                    var firstTerm = r.RightHandSide[0];
+                    if (!col.NonTerminalsToUnpredict.Contains(firstTerm))
+                        col.Unpredict(r);
+                }
+
+                bool exhaustedCompletion = false;
+                while (!exhaustedCompletion)
+                {
+                    //1. uncomplete
+                    TraverseCompletedStatesToDelete(col);
+
+                    //2. unpredict
+                    //(unpredicting nullable production can lead to uncompleting, as in the regular case)
+                    TraversePredictedStatesToDelete(col);
+                    exhaustedCompletion = col.ActionableDeletedStates.Count == 0;
                 }
             }
 
@@ -213,11 +227,50 @@ namespace LinearIndexedGrammarParser
 
             _oldGrammar = _grammar;
             _grammar = g;
-
             return (_nodes, gammaStates);
         }
 
-        
+        private void TraversePredictedStatesToDelete(EarleyColumn col)
+        {
+            while (col.ActionableNonTerminalsToPredict.Count > 0)
+            {
+                var nextTerm = col.ActionableNonTerminalsToPredict.Dequeue();
+
+                bool toUnpredict = col.CheckForUnprediction(nextTerm);
+              
+                if (toUnpredict)
+                {
+                    if (_grammar.StaticRules.ContainsKey(nextTerm))
+                    {
+                        //delete all predictions
+                        var ruleList = _grammar.StaticRules[nextTerm];
+
+                        foreach (var rule in ruleList)
+                        {
+                            col.Unpredict(rule);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void TraverseCompletedStatesToDelete(EarleyColumn col)
+        {
+            while (col.ActionableDeletedStates.Count > 0)
+            {
+                var kvp = col.ActionableDeletedStates.First();
+                var deletedStatesStackKey = kvp.Key;
+                var deletedStatesStack = kvp.Value;
+
+                var state = deletedStatesStack.Pop();
+
+                if (deletedStatesStack.Count == 0)
+                    col.ActionableDeletedStates.Remove(deletedStatesStackKey);
+
+                state.EndColumn.DeleteState(state, _grammar);
+            }
+        }
+
 
         public (List<EarleyNode> nodes, List<EarleyState> gammaStates) ParseSentence(string[] text, CancellationTokenSource cts, int maxWords = 0)
         {
@@ -296,7 +349,11 @@ namespace LinearIndexedGrammarParser
         private bool TraverseScannableStates(EarleyColumn[] table, EarleyColumn col)
         {
             bool anyScanned = col.ActionableNonCompleteStates.Count > 0;
-            if (col.Index + 1 >= table.Length) return false;
+            if (col.Index + 1 >= table.Length)
+            {
+                col.ActionableNonCompleteStates.Clear();
+                return false;
+            }
 
             while (col.ActionableNonCompleteStates.Count > 0)
             {
@@ -349,7 +406,7 @@ namespace LinearIndexedGrammarParser
             return anyCompleted;
         }
 
-        public class categoryCompare : IComparer<DerivedCategory>
+        public class CategoryCompare : IComparer<DerivedCategory>
         {
             public int Compare(DerivedCategory x, DerivedCategory y)
             {
@@ -359,7 +416,7 @@ namespace LinearIndexedGrammarParser
         public override string ToString()
         {
             var sb = new StringBuilder();
-            var cc = new categoryCompare();
+            var cc = new CategoryCompare();
 
             foreach (var col in _table)
             {
@@ -404,7 +461,15 @@ namespace LinearIndexedGrammarParser
                 Array.Sort(keys2, cc);
                 foreach (var key in keys2)
                 {
-               
+                    //do not write POS keys into string
+                    //reason: for comparison purposes (debugging) between 
+                    //from-scratch earley parser and differential earley parser.
+                    //the differential parser contains also reductor items for
+                    //POS although the column might not be parsed at all.
+                    //the from-scratch parser will not contain those reductor items
+                    //but this is OK, we don't care about these items.
+                    if (!_grammar.StaticRules.ContainsKey(key)) continue;
+
                     sb.AppendLine($"key {key}");
                     List<string> values = new List<string>();
 
@@ -433,6 +498,9 @@ namespace LinearIndexedGrammarParser
         {
             foreach (var col in _table)
                 col.RejectChanges();
+
+            foreach (var col in _table)
+                col.AcceptChanges();
 
             _grammar = _oldGrammar;
             _oldGrammar = null;
