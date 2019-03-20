@@ -189,7 +189,7 @@ namespace LinearIndexedGrammarParser
             return (_nodes, gammaStates);
         }
 
-        public (List<EarleyNode> nodes, List<EarleyState> gammaStates) ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, Rule r)
+        public (List<EarleyNode> nodes, List<EarleyState> gammaStates) ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, Rule r, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
         {
             _nodes = new List<EarleyNode>();
             var gammaStates = new List<EarleyState>();
@@ -201,7 +201,7 @@ namespace LinearIndexedGrammarParser
                 {
                     var firstTerm = r.RightHandSide[0];
                     if (!col.NonTerminalsToUnpredict.Contains(firstTerm))
-                        col.Unpredict(r);
+                        col.Unpredict(r, _grammar);
                 }
 
                 bool exhaustedCompletion = false;
@@ -212,7 +212,7 @@ namespace LinearIndexedGrammarParser
 
                     //2. unpredict
                     //(unpredicting nullable production can lead to uncompleting, as in the regular case)
-                    TraversePredictedStatesToDelete(col);
+                    TraversePredictedStatesToDelete(col, predictionSet);
                     exhaustedCompletion = col.ActionableDeletedStates.Count == 0;
                 }
             }
@@ -230,13 +230,24 @@ namespace LinearIndexedGrammarParser
             return (_nodes, gammaStates);
         }
 
-        private void TraversePredictedStatesToDelete(EarleyColumn col)
+        private void TraversePredictedStatesToDelete(EarleyColumn col, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
         {
+            int counter = 0;
             while (col.ActionableNonTerminalsToPredict.Count > 0)
             {
+                counter++;
+                if (counter > 100)
+                {
+                    int x = 1;
+                    throw new Exception("loop of unpredictions!");
+                }
                 var nextTerm = col.ActionableNonTerminalsToPredict.Dequeue();
 
-                bool toUnpredict = col.CheckForUnprediction(nextTerm);
+                //you might need to re-check the term following deletions of other predicted states!
+                col.NonTerminalsToUnpredict.Remove(nextTerm); 
+
+
+                bool toUnpredict = col.CheckForUnprediction(nextTerm, predictionSet);
               
                 if (toUnpredict)
                 {
@@ -246,9 +257,7 @@ namespace LinearIndexedGrammarParser
                         var ruleList = _grammar.StaticRules[nextTerm];
 
                         foreach (var rule in ruleList)
-                        {
-                            col.Unpredict(rule);
-                        }
+                            col.Unpredict(rule, _grammar);
                     }
                 }
             }

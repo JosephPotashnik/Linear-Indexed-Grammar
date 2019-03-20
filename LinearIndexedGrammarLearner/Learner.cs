@@ -154,9 +154,12 @@ namespace LinearIndexedGrammarLearner
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
                 return false;
 
+            var leftCorner = new LeftCorner();
+            var predictionSet = leftCorner.ComputeLeftCorner(_sentencesParser[0]._grammar);
+
             for (int i = 0; i < _sentencesWithCounts.Length; i++)
             {
-                var n = _sentencesParser[i].ReParseSentenceWithRuleDeletion(currentCFHypothesis, r);
+                var n = _sentencesParser[i].ReParseSentenceWithRuleDeletion(currentCFHypothesis, r, predictionSet);
                 _sentencesWithCounts[i].Trees = n.nodes;
                 _sentencesWithCounts[i].GammaStates = n.gammaStates;
             }

@@ -205,17 +205,21 @@ namespace LinearIndexedGrammarParser
 
         //returns true if it finds a predicting state that is not predicted itself
         //i.e, if there exists a state X1 -> Y .Z  such that eventually state S is predicted from it.
-        private bool DFSOverPredecessors(EarleyState state, HashSet<EarleyState> visited)
+        private bool DFSOverPredecessors(EarleyState state, HashSet<EarleyState> visited, DerivedCategory nextTerm, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
         {
             visited.Add(state);
             if (state.DotIndex != 0) return true;
+
+            if (!predictionSet[nextTerm].Contains(state.Rule))
+                return true;
+
             if (Predecessors.ContainsKey(state.Rule.LeftHandSide))
             {
                 foreach (var predecessor in Predecessors[state.Rule.LeftHandSide])
                 {
                     if (!visited.Contains(predecessor))
                     {
-                        var res = DFSOverPredecessors(predecessor, visited);
+                        var res = DFSOverPredecessors(predecessor, visited, nextTerm, predictionSet);
                         if (res) return res;
                     }
                 }
@@ -224,16 +228,25 @@ namespace LinearIndexedGrammarParser
             return false;
 
         }
-        public bool CheckForUnprediction(DerivedCategory nextTerm)
+        public bool CheckForUnprediction(DerivedCategory nextTerm, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
         {
             if (!Predecessors.ContainsKey(nextTerm)) return true;
             foreach (var state in Predecessors[nextTerm])
             {
                 var visited = new HashSet<EarleyState>();
-                bool IsThereANonPredictedPredecessor = DFSOverPredecessors(state, visited);
+                bool IsThereANonPredictedPredecessor = DFSOverPredecessors(state, visited, nextTerm, predictionSet);
                 if (IsThereANonPredictedPredecessor)
                     return false;
+
             }
+
+            //foreach (var state in Predecessors[nextTerm])
+            //{
+            //    var visited = new HashSet<EarleyState>();
+            //    bool IsThereANonPredictedPredecessor = DFSOverPredecessors(state, visited);
+            //    if (IsThereANonPredictedPredecessor)
+            //        return false;
+            //}
 
             return true;
   
@@ -448,13 +461,13 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        public void Unpredict(Rule r)
+        public void Unpredict(Rule r, ContextFreeGrammar grammar)
         {
             if (Predicted.ContainsKey(r.NumberOfGeneratingRule))
             {
-                var states = Predicted[r.NumberOfGeneratingRule];
+                var states = Predicted[r.NumberOfGeneratingRule].ToList();
                 foreach (var state in states)
-                    state.EndColumn.EnqueueToDeletedStack(state);
+                    state.EndColumn.DeleteState(state, grammar);
             }
         }
     }

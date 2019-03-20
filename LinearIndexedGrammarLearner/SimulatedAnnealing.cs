@@ -46,6 +46,7 @@ namespace LinearIndexedGrammarLearner
                 string parstr = string.Empty;
                 if (addedRule.Any())
                 {
+                    continue;
                     var rr = ContextSensitiveGrammar.RuleSpace[addedRule.First()];
                     var lhs = new SyntacticCategory(rr.LeftHandSide);
                     var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr,
@@ -55,7 +56,6 @@ namespace LinearIndexedGrammarLearner
                     for (int i = 0; i < _learner._sentencesParser.Length; i++)
                         parstr += _learner._sentencesParser[i].ToString();
                     reparsed = _learner.ReparseWithAddition(mutatedGrammar, r);
-
                 }
                 else
                 {
@@ -68,7 +68,6 @@ namespace LinearIndexedGrammarLearner
                     for (int i = 0; i < _learner._sentencesParser.Length; i++)
                         parstr += _learner._sentencesParser[i].ToString();
                     reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r);
-
                 }
 
                 if (reparsed == false) continue;
