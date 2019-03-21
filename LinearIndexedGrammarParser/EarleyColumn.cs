@@ -200,7 +200,13 @@ namespace LinearIndexedGrammarParser
             }
 
             foreach (var parent in oldState.Parents)
-                parent.EndColumn.EnqueueToDeletedStack(parent);
+            {
+                if (parent.IsCompleted)
+                    parent.EndColumn.EnqueueToDeletedStack(parent);
+                else
+                    parent.EndColumn.ActionableNonCompleteStates.Enqueue(parent);
+
+            }
         }
 
         //returns true if it finds a predicting state that is not predicted itself

@@ -46,7 +46,6 @@ namespace LinearIndexedGrammarLearner
                 string parstr = string.Empty;
                 if (addedRule.Any())
                 {
-                    continue;
                     var rr = ContextSensitiveGrammar.RuleSpace[addedRule.First()];
                     var lhs = new SyntacticCategory(rr.LeftHandSide);
                     var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr,
