@@ -34,8 +34,9 @@ namespace LinearIndexedGrammarLearner
             var currentTemp = _params.InitialTemperature;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
+
             while (currentTemp > 0.3)
-            { 
+            {
                 var mutatedGrammar = _learner.GetNeighbor(currentGrammar);
                 currentTemp *= _params.CoolingFactor;
                 if (mutatedGrammar == null) continue;
@@ -47,14 +48,16 @@ namespace LinearIndexedGrammarLearner
                 if (addedRule.Any())
                 {
                     var rr = ContextSensitiveGrammar.RuleSpace[addedRule.First()];
+
                     var lhs = new SyntacticCategory(rr.LeftHandSide);
                     var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr,
                         new DerivedCategory(lhs.ToString()));
-                    Console.WriteLine($" added {r}");
+                    //Console.WriteLine($" added {r}");
                     r.NumberOfGeneratingRule = rr.Number;
                     for (int i = 0; i < _learner._sentencesParser.Length; i++)
                         parstr += _learner._sentencesParser[i].ToString();
                     reparsed = _learner.ReparseWithAddition(mutatedGrammar, r);
+
                 }
                 else
                 {
@@ -62,23 +65,24 @@ namespace LinearIndexedGrammarLearner
                     var lhs = new SyntacticCategory(rr.LeftHandSide);
                     var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr,
                         new DerivedCategory(lhs.ToString()));
-                    Console.WriteLine($" removed {r}");
+                    //Console.WriteLine($" removed {r}");
                     r.NumberOfGeneratingRule = rr.Number;
                     for (int i = 0; i < _learner._sentencesParser.Length; i++)
                         parstr += _learner._sentencesParser[i].ToString();
                     reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r);
+
                 }
 
                 if (reparsed == false) continue;
 
-                var newValue =  _objectiveFunction.Compute(mutatedGrammar);
+                var newValue = _objectiveFunction.Compute(mutatedGrammar);
                 //if (counter++ % 100 == 0)
                 //    LogManager.GetCurrentClassLogger().Info($"currentTemp {currentTemp}, probability {newValue}");
 
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
                 if (accept)
                 {
-                    Console.WriteLine("accepted");
+                    //Console.WriteLine("accepted");
                     currentValue = newValue;
                     currentGrammar = mutatedGrammar;
                     _learner.AcceptChanges();
@@ -87,7 +91,7 @@ namespace LinearIndexedGrammarLearner
                 }
                 else
                 {
-                    Console.WriteLine("rejected");
+                    //Console.WriteLine("rejected");
 
                     _learner.RejectChanges();
 

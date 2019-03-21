@@ -204,22 +204,25 @@ namespace LinearIndexedGrammarParser
                         col.Unpredict(r, _grammar);
                 }
 
-                bool exhaustedCompletion = false;
-                while (!exhaustedCompletion)
+                bool exhausted = false;
+                while (!exhausted)
                 {
                     //1. remove completed states
                     TraverseCompletedStatesToDelete(col);
 
-                    //2. unpredict
-                    TraversePredictedStatesToDelete(col, predictionSet);
-
-                    //3. remove uncompleted states
+                    //2. remove uncompleted states
                     while (col.ActionableNonCompleteStates.Count > 0)
                     {
                         var state = col.ActionableNonCompleteStates.Dequeue();
                         state.EndColumn.DeleteState(state, _grammar);
                     }
-                    exhaustedCompletion = col.ActionableDeletedStates.Count == 0;
+
+                    //3. unpredict
+                    TraversePredictedStatesToDelete(col, predictionSet);
+
+                    //unprediction can lead to completed /uncompleted parents in the same column
+                    //if there is a nullable production, same as in the regular case.
+                    exhausted = (col.ActionableDeletedStates.Count == 0 && col.ActionableNonCompleteStates.Count == 0);
 
                 }
             }
