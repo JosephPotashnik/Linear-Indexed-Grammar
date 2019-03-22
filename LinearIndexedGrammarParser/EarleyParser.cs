@@ -138,6 +138,20 @@ namespace LinearIndexedGrammarParser
             return false;
         }
 
+        //read the current gamma states from what's stored in the Earley Table.
+        public List<EarleyState> GetGammaStates()
+        {
+            var gammaStates = new List<EarleyState>();
+            foreach (var index in _finalColumns)
+            {
+                var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
+                _nodes.AddRange(n);
+                gammaStates.AddRange(_table[index].GammaStates);
+            }
+
+            return gammaStates;
+        }
+
         public (List<EarleyNode> nodes, List<EarleyState> gammaStates) ReParseSentenceWithRuleAddition(ContextFreeGrammar g, Rule r)
         {
             _nodes = new List<EarleyNode>();

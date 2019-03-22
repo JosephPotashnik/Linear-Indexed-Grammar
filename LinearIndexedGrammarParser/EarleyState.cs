@@ -114,5 +114,24 @@ namespace LinearIndexedGrammarParser
         {
             return (this == other);
         }
+
+        public string GetNonTerminalStringUnderNode(HashSet<string> pos)
+        {
+            var leaves = new List<string>();
+            GetNonTerminalStringUnderNode(leaves, pos);
+            return string.Join(" ", leaves);
+        }
+
+        private void GetNonTerminalStringUnderNode(List<string> leavesList, HashSet<string> pos)
+        {
+            if (!IsCompleted)
+            {
+                var nextTerm = NextTerm.ToString();
+                if (pos.Contains(nextTerm))
+                    leavesList.Insert(0, nextTerm);
+            }
+            Reductor?.GetNonTerminalStringUnderNode(leavesList, pos);
+            Predecessor?.GetNonTerminalStringUnderNode(leavesList, pos);
+        }
     }
 }

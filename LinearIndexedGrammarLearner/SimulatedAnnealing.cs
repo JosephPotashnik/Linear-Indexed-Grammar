@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
@@ -108,16 +109,13 @@ namespace LinearIndexedGrammarLearner
 
                 }
             }
-
-            var ruleDistribution = _learner.CollectUsages(currentGrammar);
+            _learner.RefreshParses();
+            var ruleDistribution = _learner.CollectUsages();
             currentGrammar.PruneUnusedRules(ruleDistribution);
-
             //after pruning unused rules, parse from scratch in order to remove
             //all resultant unused earley items (i.e, all items using those unused rules
             //that are a part of partial, unsuccessful, derivation)
             _learner.ParseAllSentencesFromScratch(currentGrammar);
-
-
             return (currentGrammar, currentValue);
         }
 

@@ -198,6 +198,7 @@ namespace LinearIndexedGrammarLearner
             //    int x = 1;
             //}
 
+            //uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
             //var allParses1 = _learner.ParseAllSentences(currentCFHypothesis, _learner._sentencesParser);
             var allParses = _learner.Parses;
 

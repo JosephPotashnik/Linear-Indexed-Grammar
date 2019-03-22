@@ -9,9 +9,9 @@ namespace LinearIndexedGrammarParser
 {
     public class GrammarFileReader
     {
-        private static List<string> GetSentencesNonTerminals(List<EarleyNode> n)
+        private static List<string> GetSentencesNonTerminals(List<EarleyState> n, HashSet<string> pos)
         {
-            return n.Select(x => x.GetNonTerminalStringUnderNode()).ToList();
+            return n.Select(x => x.GetNonTerminalStringUnderNode(pos)).ToList();
         }
 
         public static (string[][] sentences, HashSet<string> POSCategoriesInData)  GetSentencesInWordLengthRange(string[][] allData, Vocabulary universalVocabulary, int minWords, int maxWords)
@@ -37,11 +37,11 @@ namespace LinearIndexedGrammarParser
             return (sentences.ToArray(), posCategories);
         }
 
-        public static (string[][] sentences, Vocabulary textVocabulary) GetSentencesOfGenerator(List<EarleyNode> n,
-            Vocabulary universalVocabulary, int numberOfSentencesPerTree, bool isRandom = true)
+        public static (string[][] sentences, Vocabulary textVocabulary) GetSentencesOfGenerator(List<EarleyState> n,
+            Vocabulary universalVocabulary, int numberOfSentencesPerTree, HashSet<string> pos, bool isRandom = true)
         {
             var textVocabulary = new Vocabulary();
-            var nonTerminalSentences = GetSentencesNonTerminals(n);
+            var nonTerminalSentences = GetSentencesNonTerminals(n, pos);
             var sentences = new List<string[]>();
             var rand = new Random();
             var posCategories = new HashSet<string>();

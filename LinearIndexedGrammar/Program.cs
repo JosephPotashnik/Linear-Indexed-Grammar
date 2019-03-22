@@ -79,10 +79,12 @@ namespace LinearIndexedGrammar
         private static (string[][] data, Vocabulary dataVocabulary) PrepareDataFromTargetGrammar(List<Rule> grammarRules, Vocabulary universalVocabulary, int maxWords)
         {
             int numberOfSentencesPerTree = 10;
+            var pos = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
+
             var cfGrammar = new ContextFreeGrammar(grammarRules);
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
             var nodeList = generator.ParseSentence(null, new CancellationTokenSource(), maxWords);
-            return GrammarFileReader.GetSentencesOfGenerator(nodeList.nodes, universalVocabulary, numberOfSentencesPerTree);
+            return GrammarFileReader.GetSentencesOfGenerator(nodeList.gammaStates, universalVocabulary, numberOfSentencesPerTree, pos);
         }
 
         private static IEnumerable<string> GetSentenceFromDataFile(string dataFileName)
