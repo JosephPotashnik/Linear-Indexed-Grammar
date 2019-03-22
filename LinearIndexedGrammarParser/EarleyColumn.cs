@@ -88,8 +88,7 @@ namespace LinearIndexedGrammarParser
 
         private void SpontaneousDotShift(EarleyState state, EarleyState completedState, ContextFreeGrammar grammar)
         {
-            var y = EarleyState.MakeNode(state, completedState.EndColumn.Index, completedState.Node);
-            var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn, y);
+            var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn);
             state.Parents.Add(newState);
             completedState.Parents.Add(newState);
             newState.Predecessor = state;

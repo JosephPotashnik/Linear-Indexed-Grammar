@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
+    //deprecated class.
     public class EarleyNode : IEquatable<EarleyNode>
     {
         private const int ScanRuleNumber = 0;

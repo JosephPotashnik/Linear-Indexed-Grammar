@@ -7,14 +7,13 @@ namespace LinearIndexedGrammarParser
 {
     public class EarleyState : IEquatable<EarleyState>
     {
-        public EarleyState(Rule r, int dotIndex, EarleyColumn c, EarleyNode n)
+        public EarleyState(Rule r, int dotIndex, EarleyColumn c)
         {
             Removed = false;
             Rule = r;
             DotIndex = dotIndex;
             StartColumn = c;
             EndColumn = null;
-            Node = n;
         }
 
         public bool Added { get; set; }
@@ -23,7 +22,6 @@ namespace LinearIndexedGrammarParser
         public EarleyColumn StartColumn { get; }
         public EarleyColumn EndColumn { get; set; }
         public int DotIndex { get; }
-        public EarleyNode Node { get; set; }
         public HashSet<EarleyState> Parents  = new HashSet<EarleyState>();
         public EarleyState Predecessor { get; set; }
         public EarleyState Reductor { get; set; }
@@ -85,29 +83,6 @@ namespace LinearIndexedGrammarParser
                 hash = hash * 23 + StartColumn.Index;
                 return hash;
             }
-        }
-
-
-        public static EarleyNode MakeNode(EarleyState predecessorState, int endIndex, EarleyNode reductor)
-        {
-            EarleyNode y;
-            var nextDotIndex = predecessorState.DotIndex + 1;
-            var nodeName = RuleWithDotNotation(predecessorState.Rule, nextDotIndex);
-
-            if (nextDotIndex == 1 && predecessorState.Rule.RightHandSide.Length > 1)
-            {
-                y = reductor;
-            }
-            else
-            {
-                y = new EarleyNode(nodeName, predecessorState.StartColumn.Index, endIndex);
-                if (!y.HasChildren() && reductor != null) //reductor is null in case of epsilon transition.
-                    y.AddChildren(reductor, predecessorState.Node);
-                
-                y.RuleNumber = predecessorState.Rule.NumberOfGeneratingRule;
-            }
-
-            return y;
         }
 
         public bool Equals(EarleyState other)

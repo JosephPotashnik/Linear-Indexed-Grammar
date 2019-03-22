@@ -80,7 +80,7 @@ namespace LinearIndexedGrammarParser
             return (sentences.ToArray(), textVocabulary);
         }
 
-        public static (List<EarleyNode> nodeList, List<Rule> grammarRules) GenerateSentenceAccordingToGrammar(
+        public static (List<EarleyState> nodeList, List<Rule> grammarRules) GenerateSentenceAccordingToGrammar(
             string filename, string vocabularyFilename, int maxWords)
         {
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(vocabularyFilename);
@@ -92,11 +92,11 @@ namespace LinearIndexedGrammarParser
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
 
             var cts = new CancellationTokenSource();
-            var nodeList = generator.ParseSentence(null, cts, maxWords);
-            return (nodeList.nodes, rules);
+            var statesList = generator.ParseSentence(null, cts, maxWords);
+            return (statesList, rules);
         }
 
-        public static List<EarleyNode> ParseSentenceAccordingToGrammar(string filename, string vocabularyFilename, string sentence)
+        public static List<EarleyState> ParseSentenceAccordingToGrammar(string filename, string vocabularyFilename, string sentence)
         {
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(vocabularyFilename);
             ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
@@ -107,7 +107,7 @@ namespace LinearIndexedGrammarParser
             var parser = new EarleyParser(cfGrammar, universalVocabulary);
 
             var n = parser.ParseSentence(sentence.Split(), new CancellationTokenSource());
-            return n.nodes;
+            return n;
         }
 
 

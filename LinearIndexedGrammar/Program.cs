@@ -83,8 +83,8 @@ namespace LinearIndexedGrammar
 
             var cfGrammar = new ContextFreeGrammar(grammarRules);
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
-            var nodeList = generator.ParseSentence(null, new CancellationTokenSource(), maxWords);
-            return GrammarFileReader.GetSentencesOfGenerator(nodeList.gammaStates, universalVocabulary, numberOfSentencesPerTree, pos);
+            var statesList = generator.ParseSentence(null, new CancellationTokenSource(), maxWords);
+            return GrammarFileReader.GetSentencesOfGenerator(statesList, universalVocabulary, numberOfSentencesPerTree, pos);
         }
 
         private static IEnumerable<string> GetSentenceFromDataFile(string dataFileName)

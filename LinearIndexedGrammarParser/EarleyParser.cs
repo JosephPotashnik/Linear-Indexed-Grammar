@@ -14,7 +14,6 @@ namespace LinearIndexedGrammarParser
         public ContextFreeGrammar _grammar;
         protected Vocabulary Voc;
         private EarleyColumn[] _table;
-        private List<EarleyNode> _nodes;
         private string[] _text;
         int[] _finalColumns;
         private readonly bool _checkForCyclicUnitProductions;
@@ -30,7 +29,7 @@ namespace LinearIndexedGrammarParser
         {
             foreach (var rule in ruleList)
             {
-                var newState = new EarleyState(rule, 0, col, null);
+                var newState = new EarleyState(rule, 0, col);
                 col.AddState(newState, _grammar);
             }
         }
@@ -40,22 +39,18 @@ namespace LinearIndexedGrammarParser
         {
             if (!startColumn.Reductors.ContainsKey(term))
             {
-                var v = new EarleyNode(term.ToString(), startColumn.Index, nextCol.Index)
-                {
-                    AssociatedTerminal = token
-                };
+
 
                 //prepared a scanned Earley rule (the scanned rule does not appear in this representations,
                 //the terminals are stored separately in a vocabulary under their heading non-terminal, a.k.a their part of speech).
                 var scannedStateRule = new Rule(term.ToString(), new[] {token});
-                var scannedState = new EarleyState(scannedStateRule, 1, startColumn, v);
+                var scannedState = new EarleyState(scannedStateRule, 1, startColumn);
                 scannedState.EndColumn = nextCol;
                 startColumn.Reductors[term] = new List<EarleyState>() {scannedState};
             }
 
             var reductor = startColumn.Reductors[term][0];
-            var y = EarleyState.MakeNode(state, reductor.EndColumn.Index, reductor.Node);
-            var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn, y);
+            var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn);
             state.Parents.Add(newState);
             newState.Predecessor = state;
             nextCol.AddState(newState, _grammar);
@@ -80,8 +75,7 @@ namespace LinearIndexedGrammarParser
 
             foreach (var predecessor in predecessorStates)
             {
-                var y = EarleyState.MakeNode(predecessor, reductorState.EndColumn.Index, reductorState.Node);
-                var newState = new EarleyState(predecessor.Rule, predecessor.DotIndex + 1, predecessor.StartColumn, y);
+                var newState = new EarleyState(predecessor.Rule, predecessor.DotIndex + 1, predecessor.StartColumn);
                 predecessor.Parents.Add(newState);
                 reductorState.Parents.Add(newState);
                 newState.Predecessor = predecessor;
@@ -143,18 +137,13 @@ namespace LinearIndexedGrammarParser
         {
             var gammaStates = new List<EarleyState>();
             foreach (var index in _finalColumns)
-            {
-                var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
-                _nodes.AddRange(n);
                 gammaStates.AddRange(_table[index].GammaStates);
-            }
 
             return gammaStates;
         }
 
-        public (List<EarleyNode> nodes, List<EarleyState> gammaStates) ReParseSentenceWithRuleAddition(ContextFreeGrammar g, Rule r)
+        public List<EarleyState> ReParseSentenceWithRuleAddition(ContextFreeGrammar g, Rule r)
         {
-            _nodes = new List<EarleyNode>();
             var gammaStates = new List<EarleyState>();
             _oldGrammar = _grammar;
             _grammar = g;
@@ -169,7 +158,7 @@ namespace LinearIndexedGrammarParser
                     //if not already marked to be predicted, predict.
                     if (!col.ActionableNonTerminalsToPredict.Contains(cat))
                     {
-                        var newState = new EarleyState(r, 0, col, null);
+                        var newState = new EarleyState(r, 0, col);
                         col.AddState(newState, _grammar);
                     }
                 }
@@ -191,21 +180,13 @@ namespace LinearIndexedGrammarParser
 
 
             foreach (var index in _finalColumns)
-            {
-                var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
-                _nodes.AddRange(n);
                 gammaStates.AddRange(_table[index].GammaStates);
 
-
-            }
-
-
-            return (_nodes, gammaStates);
+            return gammaStates;
         }
 
-        public (List<EarleyNode> nodes, List<EarleyState> gammaStates) ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, Rule r, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
+        public List<EarleyState>  ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, Rule r, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
         {
-            _nodes = new List<EarleyNode>();
             var gammaStates = new List<EarleyState>();
             var seedNumberToUnpredict = r.NumberOfGeneratingRule;
 
@@ -242,16 +223,12 @@ namespace LinearIndexedGrammarParser
             }
 
             foreach (var index in _finalColumns)
-            {
-                var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
-                _nodes.AddRange(n);
                 gammaStates.AddRange(_table[index].GammaStates);
 
-            }
 
             _oldGrammar = _grammar;
             _grammar = g;
-            return (_nodes, gammaStates);
+            return gammaStates;
         }
 
         private void TraversePredictedStatesToDelete(EarleyColumn col, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
@@ -304,20 +281,17 @@ namespace LinearIndexedGrammarParser
         }
 
 
-        public (List<EarleyNode> nodes, List<EarleyState> gammaStates) ParseSentence(string[] text, CancellationTokenSource cts, int maxWords = 0)
+        public List<EarleyState> ParseSentence(string[] text, CancellationTokenSource cts, int maxWords = 0)
         {
             _text = text;
-            _nodes = new List<EarleyNode>();
             List<EarleyState> gammaStates = new List<EarleyState>();
-
-
             (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
 
             //assumption: GenerateAllStaticRulesFromDynamicRules has been called before parsing
             //and added the GammaRule
             var startRule = _grammar.StaticRules[new DerivedCategory(ContextFreeGrammar.GammaRule)][0];
 
-            var startState = new EarleyState(startRule, 0, _table[0], null);
+            var startState = new EarleyState(startRule, 0, _table[0]);
             _table[0].AddState(startState, _grammar);
             try
             {
@@ -346,11 +320,8 @@ namespace LinearIndexedGrammarParser
                 }
 
                 foreach (var index in _finalColumns)
-                {
-                    var n = _table[index].GammaStates.Select(x => x.Node.Children[0]).ToList();
-                    _nodes.AddRange(n);
                     gammaStates.AddRange(_table[index].GammaStates);
-                }
+
             }
             catch (Exception e)
             {
@@ -358,7 +329,7 @@ namespace LinearIndexedGrammarParser
                 LogManager.GetCurrentClassLogger().Warn(s);
             }
 
-            return (_nodes, gammaStates);
+            return gammaStates;
         }
 
         protected virtual (EarleyColumn[], int[]) PrepareEarleyTable(string[] text, int maxWord)

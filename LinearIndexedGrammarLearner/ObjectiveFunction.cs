@@ -5,31 +5,6 @@ using LinearIndexedGrammarParser;
 
 namespace LinearIndexedGrammarLearner
 {
-    class FullTreeComparer : IEqualityComparer<EarleyNode>
-    {
-        public bool Equals(EarleyNode  x, EarleyNode  y)
-        {
-            
-            if (x.Name != y.Name) return false;
-            if (x.Children?.Count != y.Children?.Count) return false;
-            if (x.Children != null)
-            {
-                for (int i = 0; i < x.Children.Count; i++)
-                {
-                    var isChildEqual = this.Equals(x.Children[i], y.Children[i]);
-                    if (!isChildEqual) return false;
-                }
-            }
-
-            return true;
-        }
-
-        public int GetHashCode(EarleyNode  obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
-
     class EarleyStateComparer : IEqualityComparer<EarleyState>
     {
         public bool Equals(EarleyState x, EarleyState y)
@@ -56,22 +31,7 @@ namespace LinearIndexedGrammarLearner
             return obj.GetHashCode();
         }
     }
-
-    class LengthAndEarleyNodeComparer : IEqualityComparer<(int length, EarleyNode node)>
-    {
-        static readonly FullTreeComparer comp = new FullTreeComparer();
-
-        public bool Equals((int length, EarleyNode node) x, (int length, EarleyNode node) y)
-        {
-            return comp.Equals(x.node, y.node);
-        }
-
-        public int GetHashCode((int length, EarleyNode node) obj)
-        {
-            return obj.length;
-        }
-    }
-
+    
     class LengthAndEarleyStateComparer : IEqualityComparer<(int length, EarleyState state)>
     {
         static readonly EarleyStateComparer comp = new EarleyStateComparer();
