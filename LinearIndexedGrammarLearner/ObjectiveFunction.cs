@@ -192,34 +192,17 @@ namespace LinearIndexedGrammarLearner
 
             double prob = 0;
 
-            if (currentCFHypothesis.ToString() != _learner._sentencesParser[0]._grammar.ToString())
-            {
-                throw new Exception("hypothesis to compute is different from hypothesis stored at the parser");
-                int x = 1;
-            }
+            //if (currentCFHypothesis.ToString() != _learner._sentencesParser[0]._grammar.ToString())
+            //{
+            //    throw new Exception("hypothesis to compute is different from hypothesis stored at the parser");
+            //    int x = 1;
+            //}
 
-            var allParses1 = _learner.ParseAllSentences(currentCFHypothesis, _learner._sentencesParser);
+            //var allParses1 = _learner.ParseAllSentences(currentCFHypothesis, _learner._sentencesParser);
             var allParses = _learner.Parses;
 
             //if (allParses != null)
             {
-                //var pairs = allParses.SelectMany(x => x.Trees.Select(y => (x.Sentence, y.GetNonTerminalStringUnderNode()))).ToArray();
-                //using (System.IO.StreamWriter file =
-                //    new System.IO.StreamWriter(@"PossibleTrees.txt"))
-                //{
-                //    for (int i = 0; i < pairs.Length; i++)
-                //    {
-                //        file.WriteLine($"{pairs[i].Sentence} , {pairs[i].Item2}");
-                //    }
-                //}
-
-                //var trees = new HashSet<(int, EarleyNode)>(new LengthAndEarleyNodeComparer());
-                //for (int i = 0; i < allParses.Length; i++)
-                //{
-                //    for (int j = 0; j < allParses[i].Trees.Count; j++)
-                //        trees.Add((allParses[i].Length, allParses[i].Trees[j]));
-                //}
-
                 var trees = new HashSet<(int, EarleyState)>(new LengthAndEarleyStateComparer());
                 for (int i = 0; i < allParses.Length; i++)
                 {
@@ -234,11 +217,10 @@ namespace LinearIndexedGrammarLearner
                     prob = 1;
                     var grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis);
 
-                    if (grammarTreesPerLength.Count == 0)
-                    {
-                        throw new Exception("grammar trees are zero although data is parsed");
-                        int x = 1; //horribly wrong.
-                    }
+                    //if (grammarTreesPerLength.Count == 0)
+                    //{
+                    //    throw new Exception("grammar trees are zero although data is parsed");
+                    //}
                     double totalProbabilityOfGrammarTrees = 0;
                     foreach (var length in grammarTreesPerLength.Keys)
                         totalProbabilityOfGrammarTrees += powersOfMinus2[length];

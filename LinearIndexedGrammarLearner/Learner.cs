@@ -192,7 +192,7 @@ namespace LinearIndexedGrammarLearner
 
         public SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis, EarleyParser[] diffparsers = null)
         {
-            EarleyParser[] parsers = new EarleyParser[diffparsers.Length];
+            EarleyParser[] parsers = new EarleyParser[_sentencesWithCounts.Length];
             for (int i = 0; i < parsers.Length; i++)
             {
                 parsers[i] = new EarleyParser(currentHypothesis, _voc, false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
@@ -220,8 +220,8 @@ namespace LinearIndexedGrammarLearner
                         if ( actual != expected)
                         {
                             var grammar = parsers[i]._grammar.ToString();
-
                             int x = 1;
+                            throw new Exception("actual parse differs from expected parse");
                         }
                     }
                 }

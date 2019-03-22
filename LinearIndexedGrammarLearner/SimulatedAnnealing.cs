@@ -37,6 +37,7 @@ namespace LinearIndexedGrammarLearner
 
             while (currentTemp > 0.3)
             {
+            
                 var mutatedGrammar = _learner.GetNeighbor(currentGrammar);
                 currentTemp *= _params.CoolingFactor;
                 if (mutatedGrammar == null) continue;
@@ -44,7 +45,7 @@ namespace LinearIndexedGrammarLearner
                 var addedRule = mutatedGrammar.StackConstantRules.Except(currentGrammar.StackConstantRules);
                 var removedRule = currentGrammar.StackConstantRules.Except(mutatedGrammar.StackConstantRules);
                 bool reparsed = false;
-                string parstr = string.Empty;
+                //string parstr = string.Empty;
                 if (addedRule.Any())
                 {
                     var rr = ContextSensitiveGrammar.RuleSpace[addedRule.First()];
@@ -54,8 +55,8 @@ namespace LinearIndexedGrammarLearner
                         new DerivedCategory(lhs.ToString()));
                     //Console.WriteLine($" added {r}");
                     r.NumberOfGeneratingRule = rr.Number;
-                    for (int i = 0; i < _learner._sentencesParser.Length; i++)
-                        parstr += _learner._sentencesParser[i].ToString();
+                    //for (int i = 0; i < _learner._sentencesParser.Length; i++)
+                    //    parstr += _learner._sentencesParser[i].ToString();
                     reparsed = _learner.ReparseWithAddition(mutatedGrammar, r);
 
                 }
@@ -67,8 +68,8 @@ namespace LinearIndexedGrammarLearner
                         new DerivedCategory(lhs.ToString()));
                     //Console.WriteLine($" removed {r}");
                     r.NumberOfGeneratingRule = rr.Number;
-                    for (int i = 0; i < _learner._sentencesParser.Length; i++)
-                        parstr += _learner._sentencesParser[i].ToString();
+                    //for (int i = 0; i < _learner._sentencesParser.Length; i++)
+                    //    parstr += _learner._sentencesParser[i].ToString();
                     reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r);
 
                 }
@@ -78,7 +79,7 @@ namespace LinearIndexedGrammarLearner
                 var newValue = _objectiveFunction.Compute(mutatedGrammar);
                 //if (counter++ % 100 == 0)
                 //    LogManager.GetCurrentClassLogger().Info($"currentTemp {currentTemp}, probability {newValue}");
-
+            
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
                 if (accept)
                 {
@@ -95,22 +96,28 @@ namespace LinearIndexedGrammarLearner
 
                     _learner.RejectChanges();
 
-                    var parstr1 = string.Empty;
+                    //var parstr1 = string.Empty;
 
-                    for (int i = 0; i < _learner._sentencesParser.Length; i++)
-                        parstr1 += _learner._sentencesParser[i].ToString();
+                    //for (int i = 0; i < _learner._sentencesParser.Length; i++)
+                    //    parstr1 += _learner._sentencesParser[i].ToString();
 
-                    if (parstr != parstr1)
-                    {
-                        throw new Exception("parser representation after rejected hyptohesis is not the same as original");
-                        int x = 1;
-                    }
+                    //if (parstr != parstr1)
+                    //{
+                    //    throw new Exception("parser representation after rejected hyptohesis is not the same as original");
+                    //}
 
                 }
             }
 
             var ruleDistribution = _learner.CollectUsages(currentGrammar);
             currentGrammar.PruneUnusedRules(ruleDistribution);
+
+            //after pruning unused rules, parse from scratch in order to remove
+            //all resultant unused earley items (i.e, all items using those unused rules
+            //that are a part of partial, unsuccessful, derivation)
+            _learner.ParseAllSentencesFromScratch(currentGrammar);
+
+
             return (currentGrammar, currentValue);
         }
 

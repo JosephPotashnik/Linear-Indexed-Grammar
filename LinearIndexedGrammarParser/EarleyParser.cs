@@ -221,7 +221,7 @@ namespace LinearIndexedGrammarParser
                     TraversePredictedStatesToDelete(col, predictionSet);
 
                     //unprediction can lead to completed /uncompleted parents in the same column
-                    //if there is a nullable production, same as in the regular case.
+                    //if there is a nullable production, same as in the regular
                     exhausted = (col.ActionableDeletedStates.Count == 0 && col.ActionableNonCompleteStates.Count == 0);
 
                 }
@@ -248,7 +248,6 @@ namespace LinearIndexedGrammarParser
                 counter++;
                 if (counter > 100)
                 {
-                    int x = 1;
                     throw new Exception("loop of unpredictions!");
                 }
                 var nextTerm = col.ActionableNonTerminalsToPredict.Dequeue();
