@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Newtonsoft.Json;
 using NLog;
 
 namespace LinearIndexedGrammarParser
@@ -37,19 +36,18 @@ namespace LinearIndexedGrammarParser
 
         protected void Scan(EarleyColumn startColumn, EarleyColumn nextCol, EarleyState state, DerivedCategory term, string token)
         {
-            if (!startColumn.Reductors.ContainsKey(term))
+            if (!startColumn.Reductors.TryGetValue(term, out var stateList))
             {
-
-
-                //prepared a scanned Earley rule (the scanned rule does not appear in this representations,
-                //the terminals are stored separately in a vocabulary under their heading non-terminal, a.k.a their part of speech).
-                var scannedStateRule = new Rule(term.ToString(), new[] {token});
+                var scannedStateRule = new Rule(term.ToString(), new[] { token });
                 var scannedState = new EarleyState(scannedStateRule, 1, startColumn);
                 scannedState.EndColumn = nextCol;
-                startColumn.Reductors[term] = new List<EarleyState>() {scannedState};
+                stateList = new List<EarleyState>() { scannedState };
+                startColumn.Reductors.Add(term, stateList);
+
             }
 
-            var reductor = startColumn.Reductors[term][0];
+
+            //var reductor = stateList[0];
             var newState = new EarleyState(state.Rule, state.DotIndex + 1, state.StartColumn);
             state.Parents.Add(newState);
             newState.Predecessor = state;
@@ -68,10 +66,14 @@ namespace LinearIndexedGrammarParser
             var completedSyntacticCategory = reductorState.Rule.LeftHandSide;
             var predecessorStates = startColumn.Predecessors[completedSyntacticCategory];
 
-            if (!startColumn.Reductors.ContainsKey(reductorState.Rule.LeftHandSide))
-                startColumn.Reductors[reductorState.Rule.LeftHandSide] = new List<EarleyState>();
+            if (!startColumn.Reductors.TryGetValue(reductorState.Rule.LeftHandSide, out var reductorList))
+            {
+                reductorList = new List<EarleyState>();
+                startColumn.Reductors.Add(reductorState.Rule.LeftHandSide, reductorList);
 
-            startColumn.Reductors[reductorState.Rule.LeftHandSide].Add(reductorState);
+            }
+
+            reductorList.Add(reductorState);
 
             foreach (var predecessor in predecessorStates)
             {
@@ -101,10 +103,8 @@ namespace LinearIndexedGrammarParser
 
             if (newState.IsCompleted)
             {
-                if (startColumn.Reductors.ContainsKey(newState.Rule.LeftHandSide))
+                if (startColumn.Reductors.TryGetValue(newState.Rule.LeftHandSide, out var reductors))
                 {
-                    var reductors = startColumn.Reductors[newState.Rule.LeftHandSide];
-
                     foreach (var reductor in reductors)
                     {
                         if (newState.Rule.Equals(reductor.Rule) && newState.StartColumn == reductor.StartColumn)
@@ -251,11 +251,9 @@ namespace LinearIndexedGrammarParser
               
                 if (toUnpredict)
                 {
-                    if (_grammar.StaticRules.ContainsKey(nextTerm))
+                    if (_grammar.StaticRules.TryGetValue(nextTerm, out var ruleList))
                     {
                         //delete all predictions
-                        var ruleList = _grammar.StaticRules[nextTerm];
-
                         foreach (var rule in ruleList)
                             col.Unpredict(rule, _grammar);
                     }

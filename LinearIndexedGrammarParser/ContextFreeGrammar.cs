@@ -78,10 +78,12 @@ namespace LinearIndexedGrammarParser
             foreach (var rule in xy)
             {
                 var newSynCat = new SyntacticCategory(rule.LeftHandSide);
-                if (!rulesDic.ContainsKey(newSynCat))
-                    rulesDic[newSynCat] = new List<Rule>();
-
-                rulesDic[newSynCat].Add(new Rule(rule));
+                if (!rulesDic.TryGetValue(newSynCat, out var rules))
+                {
+                    rules = new List<Rule>();
+                    rulesDic.Add(newSynCat, rules);
+                }
+                rules.Add(new Rule(rule));
             }
 
             return rulesDic;
@@ -102,11 +104,12 @@ namespace LinearIndexedGrammarParser
             {
                 Number = ruleNumbering++
             };
-
-            if (!StaticRules.ContainsKey(newRule.LeftHandSide))
-                StaticRules[newRule.LeftHandSide] = new List<Rule>();
-
-            StaticRules[newRule.LeftHandSide].Add(newRule);
+            if (!StaticRules.TryGetValue(newRule.LeftHandSide, out var rules))
+            {
+                rules = new List<Rule>();
+                StaticRules.Add(newRule.LeftHandSide, rules);
+            }
+            rules.Add(newRule);
         }
         
         
@@ -190,9 +193,8 @@ namespace LinearIndexedGrammarParser
                     StaticRulesGeneratedForCategory.Add(nextTerm);
                     var baseSyntacticCategory = new SyntacticCategory(nextTerm);
 
-                    if (dynamicRules.ContainsKey(baseSyntacticCategory))
+                    if (dynamicRules.TryGetValue(baseSyntacticCategory, out var grammarRuleList))
                     {
-                        var grammarRuleList = dynamicRules[baseSyntacticCategory];
                         foreach (var item in grammarRuleList)
                         {
                             var derivedRule = GenerateStaticRuleFromDynamicRule(item, nextTerm);
@@ -314,9 +316,8 @@ namespace LinearIndexedGrammarParser
             if (visited.Contains(root)) return true;
             visited.Add(root);
 
-            if (dic.ContainsKey(root))
+            if (dic.TryGetValue(root, out var neighbors))
             {
-                var neighbors = dic[root];
                 foreach (var neighbor in neighbors)
                 {
                     var containsCycle = ContainsCycle(neighbor, visited, dic);
@@ -335,15 +336,18 @@ namespace LinearIndexedGrammarParser
 
             foreach (var r in allRules)
             {
-                if (!unitProductions.ContainsKey(r.LeftHandSide))
-                    unitProductions[r.LeftHandSide] = new List<DerivedCategory>();
+                if (!unitProductions.TryGetValue(r.LeftHandSide, out var categories))
+                {
+                    categories = new List<DerivedCategory>();
+                    unitProductions.Add(r.LeftHandSide, categories);
+                }
 
                 if (r.RightHandSide.Length == 1)
-                    unitProductions[r.LeftHandSide].Add(r.RightHandSide[0]);
+                    categories.Add(r.RightHandSide[0]);
                 else if (possibleNullableCategories.Contains(r.RightHandSide[0]))
-                    unitProductions[r.LeftHandSide].Add(r.RightHandSide[1]);
+                    categories.Add(r.RightHandSide[1]);
                 else if (possibleNullableCategories.Contains(r.RightHandSide[1]))
-                    unitProductions[r.LeftHandSide].Add(r.RightHandSide[0]);
+                    categories.Add(r.RightHandSide[0]);
             }
 
             foreach (var root in unitProductions.Keys)

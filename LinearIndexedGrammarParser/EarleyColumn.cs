@@ -1,39 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
-    //internal class CompletedStateEqualityComparer : IEqualityComparer<EarleyState>
-    //{
-
-    //    public bool Equals(EarleyState x, EarleyState y)
-    //    {
-    //        return (x.StartColumn.Index == y.StartColumn.Index && x.EndColumn.Index == y.EndColumn.Index &&
-    //                x.Rule.LeftHandSide.Equals(y.Rule.LeftHandSide));
-    //    }
-
-    //    public int GetHashCode(EarleyState obj)
-    //    {
-    //        return obj.Rule.LeftHandSide.GetHashCode();
-    //    }
-    //}
-    internal class EarleyStateReferenceComparer : IEqualityComparer<EarleyState>
-    {
-
-        public bool Equals(EarleyState x, EarleyState y)
-        {
-            return (x.StartColumn.Index == y.StartColumn.Index && x.EndColumn.Index == y.EndColumn.Index &&
-                    x.Rule.LeftHandSide.Equals(y.Rule.LeftHandSide));
-        }
-
-        public int GetHashCode(EarleyState obj)
-        {
-            return obj.Rule.LeftHandSide.GetHashCode();
-        }
-    }
-
 
     internal class CompletedStateComparer : IComparer<EarleyState>
     {
@@ -132,10 +102,8 @@ namespace LinearIndexedGrammarParser
                 var nextTerm = oldState.NextTerm;
                 var isPOS = !grammar.StaticRules.ContainsKey(nextTerm);
 
-                if (Predecessors.ContainsKey(nextTerm))
-                {
-               
-                    var predecessors = Predecessors[nextTerm];
+                if (Predecessors.TryGetValue(nextTerm, out var predecessors))
+                {       
                     for (int i = 0; i < predecessors.Count; i++)
                     {
                         if (predecessors[i] == oldState)
@@ -218,9 +186,9 @@ namespace LinearIndexedGrammarParser
             if (!predictionSet[nextTerm].Contains(state.Rule))
                 return true;
 
-            if (Predecessors.ContainsKey(state.Rule.LeftHandSide))
+            if (Predecessors.TryGetValue(state.Rule.LeftHandSide, out var predecessors))
             {
-                foreach (var predecessor in Predecessors[state.Rule.LeftHandSide])
+                foreach (var predecessor in predecessors)
                 {
                     if (!visited.Contains(predecessor))
                     {
@@ -259,18 +227,25 @@ namespace LinearIndexedGrammarParser
 
         public void EnqueueToCompletedQueue(EarleyState state)
         {
-            if (!ActionableCompleteStates.ContainsKey(state))
-                ActionableCompleteStates[state] = new Queue<EarleyState>();
+            if (!ActionableCompleteStates.TryGetValue(state, out var queue))
+            {
+                queue = new Queue<EarleyState>();
+                ActionableCompleteStates.Add(state, queue);
+            }
 
-            ActionableCompleteStates[state].Enqueue(state);
+            queue.Enqueue(state);
+
         }
 
         public void EnqueueToDeletedStack(EarleyState state)
         {
-            if (!ActionableDeletedStates.ContainsKey(state))
-                ActionableDeletedStates[state] = new Stack<EarleyState>();
+            if (!ActionableDeletedStates.TryGetValue(state, out var stack))
+            {
+                stack = new Stack<EarleyState>();
+                ActionableDeletedStates.Add(state, stack);
+            }
 
-            ActionableDeletedStates[state].Push(state);
+            stack.Push(state);
         }
 
         //The responsibility not to add a state that already exists in the column
@@ -286,22 +261,26 @@ namespace LinearIndexedGrammarParser
             {
                 var term = newState.NextTerm;
                 bool isPOS = !grammar.StaticRules.ContainsKey(term);
-                if (!Predecessors.ContainsKey(term))
+                if (!Predecessors.TryGetValue(term, out var predecessors))
                 {
-                    Predecessors[term] = new List<EarleyState>();
+                    predecessors = new List<EarleyState>();
+                    Predecessors.Add(term, predecessors);
 
                     if (!isPOS)
                         ActionableNonTerminalsToPredict.Enqueue(term);
                 }
 
-                Predecessors[term].Add(newState);
+                predecessors.Add(newState);
 
                 if (newState.DotIndex == 0)
                 {
                     //predicted - add to predicted dictionary
-                    if (!Predicted.ContainsKey(newState.Rule.NumberOfGeneratingRule))
-                        Predicted[newState.Rule.NumberOfGeneratingRule] = new List<EarleyState>();
-                    Predicted[newState.Rule.NumberOfGeneratingRule].Add(newState);
+                    if (!Predicted.TryGetValue(newState.Rule.NumberOfGeneratingRule, out var predicted))
+                    {
+                        predicted = new List<EarleyState>();
+                        Predicted.Add(newState.Rule.NumberOfGeneratingRule, predicted);
+                    }
+                    predicted.Add(newState);
                 }
 
                 if (isPOS && !Reductors.ContainsKey(term))
@@ -309,17 +288,18 @@ namespace LinearIndexedGrammarParser
 
                 if (term.ToString() == ContextFreeGrammar.EpsilonSymbol)
                 {
-                    if (!Reductors.ContainsKey(term))
+                    if (!Reductors.TryGetValue(term, out var reductors1))
                     {
-                        Reductors[term] = new List<EarleyState>();
-                        Reductors[term].Add(newState);
+                        reductors1 = new List<EarleyState>();
+                        Reductors.Add(term, reductors1);
+                        reductors1.Add(newState);
                     }
                 }
 
-                if (Reductors.ContainsKey(term))
+                if (Reductors.TryGetValue(term, out var reductors))
                 {
                     //spontaneous dot shift.
-                    foreach (var completedState in Reductors[term])
+                    foreach (var completedState in reductors)
                         SpontaneousDotShift(newState, completedState, grammar);
                     
                 }
@@ -390,6 +370,7 @@ namespace LinearIndexedGrammarParser
                     if (state.DotIndex == 0)
                     {
                         state.EndColumn.Predicted[state.Rule.NumberOfGeneratingRule].Remove(state);
+
                         if (state.EndColumn.Predicted[state.Rule.NumberOfGeneratingRule].Count == 0)
                             state.EndColumn.Predicted.Remove(state.Rule.NumberOfGeneratingRule);
                     }
@@ -424,28 +405,35 @@ namespace LinearIndexedGrammarParser
                     }
                     else
                     {
-                        if (!state.StartColumn.Reductors.ContainsKey(state.Rule.LeftHandSide))
-                            state.StartColumn.Reductors[state.Rule.LeftHandSide] = new List<EarleyState>();
-                        state.StartColumn.Reductors[state.Rule.LeftHandSide].Add(state);
-                       
-
+                        if (!state.StartColumn.Reductors.TryGetValue(state.Rule.LeftHandSide, out var reductors))
+                        {
+                            reductors = new List<EarleyState>();
+                            state.StartColumn.Reductors.Add(state.Rule.LeftHandSide, reductors);
+                        }
+                        reductors.Add(state);
                     }
                 }
                 else
                 {
                     var nextTerm = state.NextTerm;
-                    if (!state.EndColumn.Predecessors.ContainsKey(nextTerm))
-                        state.EndColumn.Predecessors[nextTerm] = new List<EarleyState>();
-                    state.EndColumn.Predecessors[nextTerm].Add(state);
 
+                    if (!state.EndColumn.Predecessors.TryGetValue(nextTerm, out var predecessors))
+                    {
+                        predecessors = new List<EarleyState>();
+                        state.EndColumn.Predecessors.Add(nextTerm, predecessors);
+                    }
+
+                    predecessors.Add(state);
 
                     if (state.DotIndex == 0)
                     {
-                        if (!state.EndColumn.Predicted.ContainsKey(state.Rule.NumberOfGeneratingRule))
-                            state.EndColumn.Predicted[state.Rule.NumberOfGeneratingRule] = new List<EarleyState>();
-
-                        state.EndColumn.Predicted[state.Rule.NumberOfGeneratingRule].Add(state);
-
+                        if (!state.EndColumn.Predicted.TryGetValue(state.Rule.NumberOfGeneratingRule,
+                            out var predicted))
+                        {
+                            predicted = new List<EarleyState>();
+                            state.EndColumn.Predicted.Add(state.Rule.NumberOfGeneratingRule, predicted);
+                        }
+                        predicted.Add(state);
                     }
                 }
 
@@ -468,9 +456,9 @@ namespace LinearIndexedGrammarParser
 
         public void Unpredict(Rule r, ContextFreeGrammar grammar)
         {
-            if (Predicted.ContainsKey(r.NumberOfGeneratingRule))
+            if (Predicted.TryGetValue(r.NumberOfGeneratingRule, out var predicted))
             {
-                var states = Predicted[r.NumberOfGeneratingRule].ToList();
+                var states = predicted.ToList();
                 foreach (var state in states)
                     state.EndColumn.DeleteState(state, grammar);
             }

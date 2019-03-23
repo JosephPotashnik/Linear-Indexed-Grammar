@@ -168,7 +168,7 @@ namespace LinearIndexedGrammarLearner
                     noImprovemetCounter++;
                 }
 
-                if (noImprovemetCounter == 50)
+                if (noImprovemetCounter == 20)
                 {
                     var rand = new Random();
                     int randomPastBestGrammar = rand.Next(numberOfBestGrammarsToKeep);

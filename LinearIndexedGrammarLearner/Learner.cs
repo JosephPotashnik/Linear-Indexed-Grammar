@@ -210,7 +210,7 @@ namespace LinearIndexedGrammarLearner
 
             try
             {
-                var cts = new CancellationTokenSource(ParsingTimeOut);
+                var cts = new CancellationTokenSource(int.MaxValue);
                 var po = new ParallelOptions {CancellationToken = cts.Token};
                 Parallel.ForEach(sentencesWithCounts, po,
                     (sentenceItem, loopState, i) =>
@@ -236,7 +236,6 @@ namespace LinearIndexedGrammarLearner
                     }
                 }
 
-                return sentencesWithCounts;
             }
             catch (OperationCanceledException)
             {
@@ -247,6 +246,7 @@ namespace LinearIndexedGrammarLearner
                 //NLog.LogManager.GetCurrentClassLogger().Info(s);
                 return null; //parsing failed.
             }
+            return sentencesWithCounts;
 
         }
 
