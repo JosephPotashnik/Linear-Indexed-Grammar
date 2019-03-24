@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
@@ -25,6 +26,27 @@ namespace LinearIndexedGrammarParser
         public HashSet<EarleyState> Parents  = new HashSet<EarleyState>();
         public EarleyState Predecessor { get; set; }
         public EarleyState Reductor { get; set; }
+        public string BracketedTreeRepresentation;
+
+        public void CreateBracketedRepresentation(StringBuilder sb, ContextFreeGrammar g)
+        {
+            if (IsCompleted) sb.Append($"({Rule.LeftHandSide} ");
+            
+            //predecessor
+            if (DotIndex > 1)
+            {
+                Predecessor.CreateBracketedRepresentation(sb, g);
+                sb.Append(" ");
+            }
+
+            //reductor
+            if (g.StaticRules.ContainsKey(Rule.RightHandSide[DotIndex - 1]))
+                Reductor.CreateBracketedRepresentation(sb, g);
+            else
+                sb.Append($"{Rule.RightHandSide[DotIndex - 1]}");
+
+            if (IsCompleted) sb.Append(")");
+        }
 
         public List<EarleyState> GetTransitiveClosureOfParents()
         {

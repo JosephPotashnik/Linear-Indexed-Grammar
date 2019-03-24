@@ -5,43 +5,14 @@ using LinearIndexedGrammarParser;
 
 namespace LinearIndexedGrammarLearner
 {
-    class EarleyStateComparer : IEqualityComparer<EarleyState>
+    class LengthAndBracketedStringComparer : IEqualityComparer<(int length, string bracketed)>
     {
-        public bool Equals(EarleyState x, EarleyState y)
+        public bool Equals((int length, string bracketed) x, (int length, string bracketed) y)
         {
-            if (x.Rule.Number != y.Rule.Number || x.StartColumn.Index != y.StartColumn.Index || x.EndColumn.Index != y.EndColumn.Index ||
-                x.DotIndex != y.DotIndex) return false;
-
-            bool predSide = x.Predecessor == null && y.Predecessor == null;
-            if (x.Predecessor != null && y.Predecessor != null)
-                predSide = this.Equals(x.Predecessor, y.Predecessor);
-
-            if (!predSide) return false;
-
-            bool reductorSide = x.Reductor == null && y.Reductor == null;
-            if (x.Reductor != null && y.Reductor != null)
-                reductorSide = this.Equals(x.Reductor, y.Reductor);
-            if (!reductorSide) return false;
-
-            return true;
+            return x.bracketed.Equals(y.bracketed, StringComparison.Ordinal);
         }
 
-        public int GetHashCode(EarleyState obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
-    
-    class LengthAndEarleyStateComparer : IEqualityComparer<(int length, EarleyState state)>
-    {
-        static readonly EarleyStateComparer comp = new EarleyStateComparer();
-
-        public bool Equals((int length, EarleyState state) x, (int length, EarleyState state) y)
-        {
-            return comp.Equals(x.state, y.state);
-        }
-
-        public int GetHashCode((int length, EarleyState state) obj)
+        public int GetHashCode((int length, string bracketed) obj)
         {
             return obj.length;
         }
@@ -162,63 +133,51 @@ namespace LinearIndexedGrammarLearner
             //var allParses1 = _learner.ParseAllSentences(currentCFHypothesis, _learner._sentencesParser);
             var allParses = _learner.Parses;
 
-            //if (allParses != null)
+            var lengthsAndTreesReps = allParses.SelectMany(x => x.GammaStates.Select(y => (x.Length, y.BracketedTreeRepresentation)));
+            var xyz = lengthsAndTreesReps.Distinct(new LengthAndBracketedStringComparer());
+            var dataTreesPerLength = xyz.GroupBy(x => x.Item1).ToDictionary(g => g.Key, g => g.Count());
+
+            if (dataTreesPerLength.Values.Count > 0)
             {
-                var trees = new HashSet<(int, EarleyState)>(new LengthAndEarleyStateComparer());
-                for (int i = 0; i < allParses.Length; i++)
+                prob = 1;
+                var grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis);
+                double totalProbabilityOfGrammarTrees = 0;
+                foreach (var length in grammarTreesPerLength.Keys)
+                    totalProbabilityOfGrammarTrees += powersOfMinus2[length];
+
+                foreach (var length in grammarTreesPerLength.Keys)
                 {
-                    for (int j = 0; j < allParses[i].GammaStates.Count; j++)
-                        trees.Add((allParses[i].Length, allParses[i].GammaStates[j]));
+                    dataTreesPerLength.TryGetValue(length, out int dataTreesInLength);
+                    var grammarTreesInLength = grammarTreesPerLength[length];
+                    int diff = grammarTreesInLength - dataTreesInLength;
+                    if (diff > 0)
+                    {
+                        prob -= diff / (double)grammarTreesInLength * powersOfMinus2[length] /
+                            totalProbabilityOfGrammarTrees;
+                    }
                 }
 
-                var dataTreesPerLength = trees.GroupBy(x => x.Item1).ToDictionary(g => g.Key, g => g.Count());
-
-                if (trees.Count > 0)
+                if (prob > 1)
                 {
-                    prob = 1;
-                    var grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis);
+                    return 0;
+                    //the case where probabilityOfInputGivenGrammar > 1 arises when
+                    //totalTreesCountofData > totalTreesCountofGrammar, which can happen because totalTreesCountofGrammar
+                    //is computed only up to a certain depth of the tree.
+                    //so it's possible that the input data is parsed in a tree whose depth exceeds the depth we have allowed above.
 
-                    //if (grammarTreesPerLength.Count == 0)
-                    //{
-                    //    throw new Exception("grammar trees are zero although data is parsed");
-                    //}
-                    double totalProbabilityOfGrammarTrees = 0;
-                    foreach (var length in grammarTreesPerLength.Keys)
-                        totalProbabilityOfGrammarTrees += powersOfMinus2[length];
-
-                    foreach (var length in grammarTreesPerLength.Keys)
-                    {
-                        dataTreesPerLength.TryGetValue(length, out int dataTreesInLength);
-                        var grammarTreesInLength = grammarTreesPerLength[length];
-                        int diff = grammarTreesInLength - dataTreesInLength;
-                        if (diff > 0)
-                        {
-                            prob -= diff / (double)grammarTreesInLength * powersOfMinus2[length] /
-                                totalProbabilityOfGrammarTrees;
-                        }
-                    }
-
-                    if (prob > 1)
-                    {
-                        return 0;
-                        //the case where probabilityOfInputGivenGrammar > 1 arises when
-                        //totalTreesCountofData > totalTreesCountofGrammar, which can happen because totalTreesCountofGrammar
-                        //is computed only up to a certain depth of the tree.
-                        //so it's possible that the input data is parsed in a tree whose depth exceeds the depth we have allowed above.
-
-                        //assumption: we will reject grammars with data parsed too deep.
-                        //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
-                        //right now: it is depth = maxWords+3. change?
-                    }
-
-
-                    var numberOfSentenceUnParsed = allParses.Count(x => x.GammaStates.Count == 0);
-                    var unexplainedSentences = (numberOfSentenceUnParsed / (double)allParses.Length);
-
-                    prob *= ( 1 - unexplainedSentences);
-                    if (prob < 0) prob = 0;
+                    //assumption: we will reject grammars with data parsed too deep.
+                    //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
+                    //right now: it is depth = maxWords+3. change?
                 }
+
+
+                var numberOfSentenceUnParsed = allParses.Count(x => x.GammaStates.Count == 0);
+                var unexplainedSentences = (numberOfSentenceUnParsed / (double)allParses.Length);
+
+                prob *= ( 1 - unexplainedSentences);
+                if (prob < 0) prob = 0;
             }
+
             return prob;
         }
     }
