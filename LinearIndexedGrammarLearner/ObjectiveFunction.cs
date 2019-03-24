@@ -5,19 +5,6 @@ using LinearIndexedGrammarParser;
 
 namespace LinearIndexedGrammarLearner
 {
-    class LengthAndBracketedStringComparer : IEqualityComparer<(int length, string bracketed)>
-    {
-        public bool Equals((int length, string bracketed) x, (int length, string bracketed) y)
-        {
-            return x.bracketed.Equals(y.bracketed, StringComparison.Ordinal);
-        }
-
-        public int GetHashCode((int length, string bracketed) obj)
-        {
-            return obj.length;
-        }
-    }
-
     public interface IObjectiveFunction
     {
         double Compute(ContextSensitiveGrammar currentHypothesis);
@@ -25,7 +12,6 @@ namespace LinearIndexedGrammarLearner
         bool IsMaximalValue(double val);
         void SetMaximalValue(double val);
         Learner GetLearner();
-
     }
 
     public class GrammarFitnessObjectiveFunction : IObjectiveFunction
@@ -122,22 +108,18 @@ namespace LinearIndexedGrammarLearner
                 return 0;
 
             double prob = 0;
-
-            //if (currentCFHypothesis.ToString() != _learner._sentencesParser[0]._grammar.ToString())
-            //{
-            //    throw new Exception("hypothesis to compute is different from hypothesis stored at the parser");
-            //    int x = 1;
-            //}
-
-            //uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
-            //var allParses1 = _learner.ParseAllSentences(currentCFHypothesis, _learner._sentencesParser);
             var allParses = _learner.Parses;
 
-            var lengthsAndTreesReps = allParses.SelectMany(x => x.GammaStates.Select(y => (x.Length, y.BracketedTreeRepresentation)));
-            var xyz = lengthsAndTreesReps.Distinct(new LengthAndBracketedStringComparer());
-            var dataTreesPerLength = xyz.GroupBy(x => x.Item1).ToDictionary(g => g.Key, g => g.Count());
+            var trees = new HashSet<(int, string)>();
+            for (int i = 0; i < allParses.Length; i++)
+            {
+                for (int j = 0; j < allParses[i].GammaStates.Count; j++)
+                    trees.Add((allParses[i].Length, allParses[i].GammaStates[j].BracketedTreeRepresentation));
+            }
 
-            if (dataTreesPerLength.Values.Count > 0)
+            var dataTreesPerLength = trees.GroupBy(x => x.Item1).ToDictionary(g => g.Key, g => g.Count());
+
+            if (trees.Count > 0)
             {
                 prob = 1;
                 var grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis);
