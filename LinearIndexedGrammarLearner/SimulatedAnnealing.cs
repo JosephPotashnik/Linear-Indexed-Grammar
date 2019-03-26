@@ -35,45 +35,21 @@ namespace LinearIndexedGrammarLearner
             var currentTemp = _params.InitialTemperature;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
-
             while (currentTemp > 0.3)
             {
-            
-                var mutatedGrammar = _learner.GetNeighbor(currentGrammar);
+                bool reparsed = false;
+                (var mutatedGrammar, var rr, var op) = _learner.GetNeighbor(currentGrammar);
                 currentTemp *= _params.CoolingFactor;
                 if (mutatedGrammar == null) continue;
 
-                var addedRule = mutatedGrammar.StackConstantRules.Except(currentGrammar.StackConstantRules);
-                var removedRule = currentGrammar.StackConstantRules.Except(mutatedGrammar.StackConstantRules);
-                bool reparsed = false;
-                //string parstr = string.Empty;
-                if (addedRule.Any())
-                {
-                    var rr = ContextSensitiveGrammar.RuleSpace[addedRule.First()];
+                var lhs = new SyntacticCategory(rr.LeftHandSide);
+                var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr,
+                    new DerivedCategory(lhs.ToString()));
 
-                    var lhs = new SyntacticCategory(rr.LeftHandSide);
-                    var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr,
-                        new DerivedCategory(lhs.ToString()));
-                    //Console.WriteLine($" added {r}");
-                    r.NumberOfGeneratingRule = rr.Number;
-                    //for (int i = 0; i < _learner._sentencesParser.Length; i++)
-                    //    parstr += _learner._sentencesParser[i].ToString();
+                if (op == GrammarPermutationsOperation.Addition)
                     reparsed = _learner.ReparseWithAddition(mutatedGrammar, r);
-
-                }
                 else
-                {
-                    var rr = ContextSensitiveGrammar.RuleSpace[removedRule.First()];
-                    var lhs = new SyntacticCategory(rr.LeftHandSide);
-                    var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr,
-                        new DerivedCategory(lhs.ToString()));
-                    //Console.WriteLine($" removed {r}");
-                    r.NumberOfGeneratingRule = rr.Number;
-                    //for (int i = 0; i < _learner._sentencesParser.Length; i++)
-                    //    parstr += _learner._sentencesParser[i].ToString();
                     reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r);
-
-                }
 
                 if (reparsed == false) continue;
 

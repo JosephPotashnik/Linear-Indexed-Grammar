@@ -194,12 +194,18 @@ namespace LinearIndexedGrammarParser
 
             foreach (var col in _table)
             {
+                //TODO: version 1, re-test with un-commenting parser.ToString()
+                //when you have switched to version 2, supporting LIG addition/deletion.
                 if (col.Predicted.ContainsKey(seedNumberToUnpredict))
                 {
                     var firstTerm = r.RightHandSide[0];
                     if (!col.NonTerminalsToUnpredict.Contains(firstTerm))
                         col.Unpredict(r, _grammar);
                 }
+
+                //TODO: version 2, for LIG addition/deletion.
+                //if (col.Predicted.ContainsKey(seedNumberToUnpredict))
+                //    col.Unpredict(r, _grammar);
 
                 bool exhausted = false;
                 while (!exhausted)

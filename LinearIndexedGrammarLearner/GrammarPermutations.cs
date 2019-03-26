@@ -8,9 +8,15 @@ using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarLearner
 {
+    public enum GrammarPermutationsOperation
+    {
+        Addition = 0,
+        Deletion = 1
+    }
+
     public class GrammarPermutations
     {
-        public delegate ContextSensitiveGrammar GrammarMutation(ContextSensitiveGrammar grammar);
+        public delegate (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) GrammarMutation(ContextSensitiveGrammar grammar);
 
         private static Tuple<GrammarMutation, int>[] _mutations;
         private static int _totalWeights;
@@ -29,8 +35,8 @@ namespace LinearIndexedGrammarLearner
             int LIGWeight = isCFGGrammar  ? 0 : LIGOperationWeight;
             l.Add(new GrammarMutationData("InsertMovement", LIGWeight));
             l.Add(new GrammarMutationData("DeleteMovement", LIGWeight));
-            l.Add(new GrammarMutationData("ChangeLHSPush", LIGWeight));
-            l.Add(new GrammarMutationData("ChangeRHSPush", LIGWeight));
+            //l.Add(new GrammarMutationData("ChangeLHSPush", LIGWeight));
+            //l.Add(new GrammarMutationData("ChangeRHSPush", LIGWeight));
 
             var typeInfo = GetType().GetTypeInfo();
             _mutations = new Tuple<GrammarMutation, int>[l.Count];
@@ -62,12 +68,12 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
-        public ContextSensitiveGrammar InsertStackConstantRule(ContextSensitiveGrammar grammar)
+        public (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) InsertStackConstantRule(ContextSensitiveGrammar grammar)
         {
             var rc = CreateRandomRule(RuleType.CFGRules);
-            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackConstantRules)) return null;
+            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackConstantRules)) return (null, null, GrammarPermutationsOperation.Addition);
             grammar.StackConstantRules.Add(rc);
-            return grammar;
+            return (grammar, ContextSensitiveGrammar.RuleSpace[rc], GrammarPermutationsOperation.Addition);
         }
 
         private RuleCoordinates CreateRandomRule(int ruleType)
@@ -80,85 +86,85 @@ namespace LinearIndexedGrammarLearner
             };
         }
 
-        public ContextSensitiveGrammar DeleteStackConstantRule(ContextSensitiveGrammar grammar)
+        public (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) DeleteStackConstantRule(ContextSensitiveGrammar grammar)
         {
             var rc = grammar.GetRandomRule(grammar.StackConstantRules);
             grammar.StackConstantRules.Remove(rc);
-            return grammar;
+            return (grammar, ContextSensitiveGrammar.RuleSpace[rc], GrammarPermutationsOperation.Deletion);
         }
 
-        public ContextSensitiveGrammar ChangeLHS(ContextSensitiveGrammar grammar)
+        //public ContextSensitiveGrammar ChangeLHS(ContextSensitiveGrammar grammar)
+        //{
+        //    var rc = grammar.GetRandomRule(grammar.StackConstantRules);
+        //    var newLHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex();
+        //    if (rc.LHSIndex == newLHSIndex) return null;
+
+        //    rc.LHSIndex = newLHSIndex;
+        //    return grammar;
+        //}
+
+        //public ContextSensitiveGrammar ChangeLHSPush(ContextSensitiveGrammar grammar)
+        //{
+        //    if (grammar.StackPush1Rules.Count == 0) return null;
+
+        //    var rc = grammar.GetRandomRule(grammar.StackPush1Rules);
+        //    var newLHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex();
+        //    if (rc.LHSIndex == newLHSIndex) return null;
+
+        //    rc.LHSIndex = newLHSIndex;
+        //    return grammar;
+        //}
+
+        //public ContextSensitiveGrammar ChangeRHS(ContextSensitiveGrammar grammar)
+        //{
+        //    var rc = grammar.GetRandomRule(grammar.StackConstantRules);
+        //    var changedRc = new RuleCoordinates
+        //    {
+        //        LHSIndex = rc.LHSIndex,
+        //        RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex(RuleType.CFGRules)
+        //    };
+        //    if (grammar.ContainsRuleWithSameRHS(changedRc, grammar.StackConstantRules)) return null;
+
+        //    rc.RHSIndex = changedRc.RHSIndex;
+        //    return grammar;
+        //}
+
+        //public ContextSensitiveGrammar ChangeRHSPush(ContextSensitiveGrammar grammar)
+        //{
+        //    if (grammar.StackPush1Rules.Count == 0) return null;
+
+        //    var rc = grammar.GetRandomRule(grammar.StackPush1Rules);
+        //    var changedRc = new RuleCoordinates
+        //    {
+        //        LHSIndex = rc.LHSIndex,
+        //        RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex(RuleType.Push1Rules)
+        //    };
+        //    if (grammar.ContainsRuleWithSameRHS(changedRc, grammar.StackPush1Rules)) return null;
+
+        //    grammar.DeleteCorrespondingPopRule(rc);
+        //    rc.RHSIndex = changedRc.RHSIndex;
+        //    grammar.AddCorrespondingPopRule(rc);
+
+        //    return grammar;
+        //}
+
+        public (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) DeleteMovement(ContextSensitiveGrammar grammar)
         {
-            var rc = grammar.GetRandomRule(grammar.StackConstantRules);
-            var newLHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex();
-            if (rc.LHSIndex == newLHSIndex) return null;
-
-            rc.LHSIndex = newLHSIndex;
-            return grammar;
-        }
-
-        public ContextSensitiveGrammar ChangeLHSPush(ContextSensitiveGrammar grammar)
-        {
-            if (grammar.StackPush1Rules.Count == 0) return null;
-
-            var rc = grammar.GetRandomRule(grammar.StackPush1Rules);
-            var newLHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex();
-            if (rc.LHSIndex == newLHSIndex) return null;
-
-            rc.LHSIndex = newLHSIndex;
-            return grammar;
-        }
-
-        public ContextSensitiveGrammar ChangeRHS(ContextSensitiveGrammar grammar)
-        {
-            var rc = grammar.GetRandomRule(grammar.StackConstantRules);
-            var changedRc = new RuleCoordinates
-            {
-                LHSIndex = rc.LHSIndex,
-                RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex(RuleType.CFGRules)
-            };
-            if (grammar.ContainsRuleWithSameRHS(changedRc, grammar.StackConstantRules)) return null;
-
-            rc.RHSIndex = changedRc.RHSIndex;
-            return grammar;
-        }
-
-        public ContextSensitiveGrammar ChangeRHSPush(ContextSensitiveGrammar grammar)
-        {
-            if (grammar.StackPush1Rules.Count == 0) return null;
-
-            var rc = grammar.GetRandomRule(grammar.StackPush1Rules);
-            var changedRc = new RuleCoordinates
-            {
-                LHSIndex = rc.LHSIndex,
-                RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex(RuleType.Push1Rules)
-            };
-            if (grammar.ContainsRuleWithSameRHS(changedRc, grammar.StackPush1Rules)) return null;
-
-            grammar.DeleteCorrespondingPopRule(rc);
-            rc.RHSIndex = changedRc.RHSIndex;
-            grammar.AddCorrespondingPopRule(rc);
-
-            return grammar;
-        }
-
-        public ContextSensitiveGrammar DeleteMovement(ContextSensitiveGrammar grammar)
-        {
-            if (grammar.StackPush1Rules.Count == 0) return null;
+            if (grammar.StackPush1Rules.Count == 0) return (null, null, GrammarPermutationsOperation.Deletion);
 
             var rc = grammar.GetRandomRule(grammar.StackPush1Rules);
             grammar.DeleteCorrespondingPopRule(rc);
             grammar.StackPush1Rules.Remove(rc);
-            return grammar;
+            return (grammar, ContextSensitiveGrammar.RuleSpace[rc], GrammarPermutationsOperation.Deletion);
         }
 
-        public ContextSensitiveGrammar InsertMovement(ContextSensitiveGrammar grammar)
+        public (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) InsertMovement(ContextSensitiveGrammar grammar)
         {
             var rc = CreateRandomRule(RuleType.Push1Rules);
-            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackPush1Rules)) return null;
+            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackPush1Rules)) return (null, null, GrammarPermutationsOperation.Addition);
             grammar.StackPush1Rules.Add(rc);
             grammar.AddCorrespondingPopRule(rc);
-            return grammar;
+            return (grammar, ContextSensitiveGrammar.RuleSpace[rc], GrammarPermutationsOperation.Addition);
         }
 
         [JsonObject(MemberSerialization.OptIn)]

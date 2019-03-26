@@ -300,15 +300,15 @@ namespace LinearIndexedGrammarLearner
             }
         }
 
-        internal ContextSensitiveGrammar GetNeighbor(ContextSensitiveGrammar currentHypothesis)
+        internal (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) GetNeighbor(ContextSensitiveGrammar currentHypothesis)
         {
             //choose mutation function in random (weighted according to weights file)
             var m = GrammarPermutations.GetWeightedRandomMutation();
             var newGrammar = new ContextSensitiveGrammar(currentHypothesis);
 
             //mutate the grammar.
-            var g = m(newGrammar);
-            return g;
+            (var g, var r, var op) = m(newGrammar);
+            return (g, r, op);
         }
 
 
