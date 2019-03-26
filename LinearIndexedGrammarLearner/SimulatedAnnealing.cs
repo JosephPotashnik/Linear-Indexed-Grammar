@@ -38,18 +38,14 @@ namespace LinearIndexedGrammarLearner
             while (currentTemp > 0.3)
             {
                 bool reparsed = false;
-                (var mutatedGrammar, var rr, var op) = _learner.GetNeighbor(currentGrammar);
+                (var mutatedGrammar, var r, var op) = _learner.GetNeighbor(currentGrammar);
                 currentTemp *= _params.CoolingFactor;
                 if (mutatedGrammar == null) continue;
 
-                var lhs = new SyntacticCategory(rr.LeftHandSide);
-                var r = ContextFreeGrammar.GenerateStaticRuleFromDynamicRule(rr,
-                    new DerivedCategory(lhs.ToString()));
-
                 if (op == GrammarPermutationsOperation.Addition)
-                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r);
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
                 else
-                    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r);
+                    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
 
                 if (reparsed == false) continue;
 

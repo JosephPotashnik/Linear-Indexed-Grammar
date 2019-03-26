@@ -212,17 +212,7 @@ namespace LinearIndexedGrammarParser
                     return false;
 
             }
-
-            //foreach (var state in Predecessors[nextTerm])
-            //{
-            //    var visited = new HashSet<EarleyState>();
-            //    bool IsThereANonPredictedPredecessor = DFSOverPredecessors(state, visited);
-            //    if (IsThereANonPredictedPredecessor)
-            //        return false;
-            //}
-
             return true;
-  
         }
 
         public void EnqueueToCompletedQueue(EarleyState state)
@@ -459,8 +449,30 @@ namespace LinearIndexedGrammarParser
             if (Predicted.TryGetValue(r.NumberOfGeneratingRule, out var predicted))
             {
                 var states = predicted.ToList();
+
                 foreach (var state in states)
-                    state.EndColumn.DeleteState(state, grammar);
+                {
+                    bool equals = false;
+
+                    //check that the instantiated rule to remove is exactly one of the rule stored in the states list.
+                    if (state.Rule.LeftHandSide.Equals(r.LeftHandSide))
+                    {
+                        equals = true;
+                        for (int i = 0; i < r.RightHandSide.Length; i++)
+                        {
+                            if (!state.Rule.RightHandSide[i].Equals(r.RightHandSide[i]))
+                                equals = false;
+                        }
+
+                        if (equals)
+                        {
+                            state.EndColumn.DeleteState(state, grammar);
+                            break;
+                        }
+                    }
+
+                }
+
             }
         }
     }

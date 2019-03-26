@@ -11,7 +11,7 @@ namespace LinearIndexedGrammarParser
         {
         }
 
-        public Rule(DerivedCategory leftHandSide, DerivedCategory[] rightHandSide, int num = -1)
+        public Rule(DerivedCategory leftHandSide, DerivedCategory[] rightHandSide)
         {
             LeftHandSide = new DerivedCategory(leftHandSide);
             if (rightHandSide != null)
@@ -22,10 +22,9 @@ namespace LinearIndexedGrammarParser
                     RightHandSide[i] = new DerivedCategory(rightHandSide[i]);
             }
 
-            Number = num;
         }
 
-        public Rule(string leftHandSide, string[] rightHandSide, int num = -1)
+        public Rule(string leftHandSide, string[] rightHandSide)
         {
             LeftHandSide = new DerivedCategory(leftHandSide);
             if (rightHandSide != null)
@@ -35,7 +34,6 @@ namespace LinearIndexedGrammarParser
                 for (int i = 0; i < length; i++)
                     RightHandSide[i] = new DerivedCategory(rightHandSide[i]);
             }
-            Number = num;
         }
 
         public Rule(Rule otherRule)
@@ -48,7 +46,6 @@ namespace LinearIndexedGrammarParser
                 for (int i = 0; i < length; i++)
                     RightHandSide[i] = new DerivedCategory(otherRule.RightHandSide[i]);
             }
-            Number = otherRule.Number;
             NumberOfGeneratingRule = otherRule.NumberOfGeneratingRule;
         }
 
@@ -56,23 +53,22 @@ namespace LinearIndexedGrammarParser
 
         [JsonProperty] public DerivedCategory[] RightHandSide { get; set; }
 
-        public int Number { get; set; }
         public int NumberOfGeneratingRule { get; set; }
 
         public override string ToString() 
         {
             var p = RightHandSide.Select(x => x.ToString()).ToArray();
-            return $"{Number}. {LeftHandSide} -> {string.Join(" ", p)}";
+            return $"{NumberOfGeneratingRule}. {LeftHandSide} -> {string.Join(" ", p)}";
         }
 
         public override int GetHashCode()
         {
-            return Number;
+            return NumberOfGeneratingRule;
         }
 
         public bool Equals(Rule other)
         {
-            return Number == other.Number;
+            return NumberOfGeneratingRule == other.NumberOfGeneratingRule;
         }
     }
 }

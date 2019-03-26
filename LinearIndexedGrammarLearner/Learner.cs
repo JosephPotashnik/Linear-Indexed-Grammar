@@ -111,13 +111,30 @@ namespace LinearIndexedGrammarLearner
                 _sentencesWithCounts[i].GammaStates = _sentencesParser[i].GetGammaStates();
         }
 
-        public bool ReparseWithAddition(ContextSensitiveGrammar currentHypothesis, Rule r)
+        public bool ReparseWithAddition(ContextSensitiveGrammar currentHypothesis, int numberOfGeneratingRule)
         {
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
 
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
                 return false;
 
+
+            var rs = currentCFHypothesis.Rules.Where(x => x.NumberOfGeneratingRule == numberOfGeneratingRule).ToList();
+
+
+            if (rs.Count == 0)
+            {
+                //rs.Count == 0 when the new rule is unreachable from the existing set of rules.
+                //that means that the parser earley items are exactly the same as before.
+                //we can return immediately with no change.
+
+                //set the old grammar to the current grammar in case we reject the addition 
+                //(rejection restores the old grammar).
+                for (int i = 0; i < _sentencesWithCounts.Length; i++)
+                    _sentencesParser[i]._oldGrammar = _sentencesParser[i]._grammar;
+
+                return true;
+            }
             //for (int i = 0; i < _sentencesWithCounts.Length; i++)
             //{
             //    var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, r);
@@ -131,7 +148,7 @@ namespace LinearIndexedGrammarLearner
                 Parallel.ForEach(_sentencesWithCounts, po,
                     (sentenceItem, loopState, i) =>
                     {
-                        var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, r);
+                        var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
                         _sentencesWithCounts[i].GammaStates = n;
                         po.CancellationToken.ThrowIfCancellationRequested();
                     });
@@ -150,7 +167,7 @@ namespace LinearIndexedGrammarLearner
             return true;
         }
 
-        public bool ReparseWithDeletion(ContextSensitiveGrammar currentHypothesis, Rule r)
+        public bool ReparseWithDeletion(ContextSensitiveGrammar currentHypothesis, int numberOfGeneratingRule)
         {
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
 
@@ -172,7 +189,7 @@ namespace LinearIndexedGrammarLearner
                 Parallel.ForEach(_sentencesWithCounts, po,
                     (sentenceItem, loopState, i) =>
                     {
-                        var n = _sentencesParser[i].ReParseSentenceWithRuleDeletion(currentCFHypothesis, r, predictionSet);
+                        var n = _sentencesParser[i].ReParseSentenceWithRuleDeletion(currentCFHypothesis, numberOfGeneratingRule, predictionSet);
                         _sentencesWithCounts[i].GammaStates = n;
                         po.CancellationToken.ThrowIfCancellationRequested();
                     });

@@ -153,13 +153,13 @@ namespace LinearIndexedGrammarParser
 
 
             var unusedConstantRules =
-                StackConstantRules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].Number)).ToArray();
+                StackConstantRules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].NumberOfGeneratingRule)).ToArray();
 
             foreach (var unusedRule in unusedConstantRules.ToList())
                 StackConstantRules.Remove(unusedRule);
 
             var unusedChangingRules =
-                StackPush1Rules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].Number)).ToArray();
+                StackPush1Rules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].NumberOfGeneratingRule)).ToArray();
 
             foreach (var unusedRule in unusedChangingRules.ToList())
                 StackPush1Rules.Remove(unusedRule);

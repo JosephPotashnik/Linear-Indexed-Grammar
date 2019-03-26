@@ -15,7 +15,6 @@ namespace LinearIndexedGrammarParser
         public const string StarSymbol = "*";
         public const int MaxStackDepth = 3;
 
-        private int ruleNumbering = 1;
         public readonly Dictionary<DerivedCategory, List<Rule>> StaticRules =
             new Dictionary<DerivedCategory, List<Rule>>();
         public readonly HashSet<DerivedCategory> StaticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
@@ -100,10 +99,7 @@ namespace LinearIndexedGrammarParser
         {
             if (r == null) return;
 
-            var newRule = new Rule(r)
-            {
-                Number = ruleNumbering++
-            };
+            var newRule = new Rule(r);
             if (!StaticRules.TryGetValue(newRule.LeftHandSide, out var rules))
             {
                 rules = new List<Rule>();
@@ -116,10 +112,7 @@ namespace LinearIndexedGrammarParser
         public static Rule GenerateStaticRuleFromDynamicRule(Rule dynamicGrammarRule, DerivedCategory leftHandSide)
         {
             var patternStringLeftHandSide = dynamicGrammarRule.LeftHandSide.Stack;
-            var newRule = new Rule(dynamicGrammarRule)
-            {
-                NumberOfGeneratingRule = dynamicGrammarRule.Number,
-            };
+            var newRule = new Rule(dynamicGrammarRule);
 
             if (!patternStringLeftHandSide.Contains(StarSymbol))
                 return dynamicGrammarRule.LeftHandSide.Equals(leftHandSide) ? newRule : null;

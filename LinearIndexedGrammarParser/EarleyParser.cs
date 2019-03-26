@@ -149,26 +149,28 @@ namespace LinearIndexedGrammarParser
             return gammaStates;
         }
 
-        public List<EarleyState> ReParseSentenceWithRuleAddition(ContextFreeGrammar g, Rule r)
+        public List<EarleyState> ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs)
         {
-            var gammaStates = new List<EarleyState>();
             _oldGrammar = _grammar;
             _grammar = g;
-            var cat = r.LeftHandSide;
 
             foreach (var col in _table)
             {
-                //seed the new rule in the column
-                //think about categories if this would be context sensitive grammar.
-                if (col.Predecessors.ContainsKey(cat))
+                for (int i = 0; i < rs.Count; i++)
                 {
-                    //if not already marked to be predicted, predict.
-                    if (!col.ActionableNonTerminalsToPredict.Contains(cat))
+                    //seed the new rule in the column
+                    //think about categories if this would be context sensitive grammar.
+                    if (col.Predecessors.ContainsKey(rs[i].LeftHandSide))
                     {
-                        var newState = new EarleyState(r, 0, col);
-                        col.AddState(newState, _grammar);
+                        //if not already marked to be predicted, predict.
+                        if (!col.ActionableNonTerminalsToPredict.Contains(rs[i].LeftHandSide))
+                        {
+                            var newState = new EarleyState(rs[i], 0, col);
+                            col.AddState(newState, _grammar);
+                        }
                     }
                 }
+                
 
                 bool exhaustedCompletion = false;
                 while (!exhaustedCompletion)
@@ -188,24 +190,20 @@ namespace LinearIndexedGrammarParser
             return GetGammaStates();
         }
 
-        public List<EarleyState>  ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, Rule r, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
+        public List<EarleyState>  ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, int seedNumberToUnpredict, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
         {
-            var seedNumberToUnpredict = r.NumberOfGeneratingRule;
-
             foreach (var col in _table)
             {
-                //TODO: version 1, re-test with un-commenting parser.ToString()
-                //when you have switched to version 2, supporting LIG addition/deletion.
-                if (col.Predicted.ContainsKey(seedNumberToUnpredict))
+                if (col.Predicted.TryGetValue(seedNumberToUnpredict, out var predicted))
                 {
-                    var firstTerm = r.RightHandSide[0];
-                    if (!col.NonTerminalsToUnpredict.Contains(firstTerm))
-                        col.Unpredict(r, _grammar);
+                    for (int i = 0; i < predicted.Count; i++)
+                    {
+                        var rule = col.Predicted[seedNumberToUnpredict][i].Rule;
+                        var firstTerm = rule.RightHandSide[0];
+                        if (!col.NonTerminalsToUnpredict.Contains(firstTerm))
+                            col.Unpredict(rule, _grammar);
+                    }
                 }
-
-                //TODO: version 2, for LIG addition/deletion.
-                //if (col.Predicted.ContainsKey(seedNumberToUnpredict))
-                //    col.Unpredict(r, _grammar);
 
                 bool exhausted = false;
                 while (!exhausted)

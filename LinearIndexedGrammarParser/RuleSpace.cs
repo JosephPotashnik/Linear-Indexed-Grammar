@@ -174,7 +174,7 @@ namespace LinearIndexedGrammarParser
                 for (int j = 0; j < _ruleSpace[k].Length; j++)
                 {
                     for (var i = 0; i < _ruleSpace[k][j].Length; i++)
-                        _ruleSpace[k][j][i].Number = counter++;
+                        _ruleSpace[k][j][i].NumberOfGeneratingRule = counter++;
                 }
             }
 
