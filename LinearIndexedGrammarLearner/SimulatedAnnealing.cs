@@ -151,6 +151,7 @@ namespace LinearIndexedGrammarLearner
 
                 if (_objectiveFunction.IsMaximalValue(currentValue))
                 {
+                    //LogManager.GetCurrentClassLogger().Info($"Best Grammar so far {currentGrammar}\r\n, probability {currentValue}");
                     bestGrammars.Enqueue(currentValue, currentGrammar);
                     break;
                 }

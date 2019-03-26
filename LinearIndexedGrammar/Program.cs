@@ -190,7 +190,7 @@ namespace LinearIndexedGrammar
             {
                 //leave only sentences in range [minWordsInSentence,maxWordsInSentence]
                 int minWordsInSentence = 1;
-                int maxWordsInSentence = 7;
+                int maxWordsInSentence = 6;
                 var sentences = FilterDataAccordingToTargetGrammar(grammarRules, programParams.DataFileName, minWordsInSentence, maxWordsInSentence, universalVocabulary);
                 (data, dataVocabulary) = (sentences, universalVocabulary);
             }
@@ -301,6 +301,7 @@ namespace LinearIndexedGrammar
             while (currentWordLength <= maxSentenceLength)
             {
                 LogManager.GetCurrentClassLogger().Info($"learning word length  {currentWordLength}");
+
                 (currentGrammar, currentValue) = LearnGrammarFromDataUpToLengthN(data, universalVocabulary, currentWordLength, minWordsInSentences, isCFGGrammar, initialGrammars[currentWordLength]);
                 //LogManager.GetCurrentClassLogger().Info($"End of learning word Length { currentWordLength}, \r\n Current Grammar {currentGrammar} \r\n CurrentValue { currentValue}");
                
