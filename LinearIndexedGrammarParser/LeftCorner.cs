@@ -1,22 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace LinearIndexedGrammarParser
 {
-    public class RuleLCComparer : IEqualityComparer<Rule>
-    {
-        public bool Equals(Rule x, Rule y)
-        {
-            return x.NumberOfGeneratingRule == y.NumberOfGeneratingRule;
-        }
-
-        public int GetHashCode(Rule obj)
-        {
-            return obj.NumberOfGeneratingRule;
-        }
-    }
     public class LeftCorner
     {
         public Dictionary<DerivedCategory, HashSet<Rule>> ComputeLeftCorner(ContextFreeGrammar grammar)
@@ -30,7 +16,7 @@ namespace LinearIndexedGrammarParser
                 var cat = item.LeftHandSide;
                 if (!leftCorners.TryGetValue(cat, out var lcRules))
                 {
-                    lcRules = new HashSet<Rule>(new RuleLCComparer());
+                    lcRules = new HashSet<Rule>(new RuleValueEquals());
                     leftCorners.Add(cat, lcRules);
                 }
 

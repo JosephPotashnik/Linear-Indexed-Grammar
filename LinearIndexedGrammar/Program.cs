@@ -303,6 +303,7 @@ namespace LinearIndexedGrammar
                 LogManager.GetCurrentClassLogger().Info($"learning word length  {currentWordLength}");
 
                 (currentGrammar, currentValue) = LearnGrammarFromDataUpToLengthN(data, universalVocabulary, currentWordLength, minWordsInSentences, isCFGGrammar, initialGrammars[currentWordLength]);
+                //SEFI
                 //LogManager.GetCurrentClassLogger().Info($"End of learning word Length { currentWordLength}, \r\n Current Grammar {currentGrammar} \r\n CurrentValue { currentValue}");
                
                 /*

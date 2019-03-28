@@ -35,6 +35,7 @@ namespace LinearIndexedGrammarLearner
             var currentTemp = _params.InitialTemperature;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
+            int counter = 1;
             while (currentTemp > 0.3)
             {
                 bool reparsed = false;
@@ -43,9 +44,54 @@ namespace LinearIndexedGrammarLearner
                 if (mutatedGrammar == null) continue;
 
                 if (op == GrammarPermutationsOperation.Addition)
-                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                {
+                    //if (counter == 2 && r.NumberOfGeneratingRule == 493)
+                    //{
+                    //    counter++;
+                    //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                    //}
+                    //if (counter == 3 && r.NumberOfGeneratingRule == 148)
+                    //{
+                    //    counter++;
+                    //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                    //}
+                    //if (counter == 4 && r.NumberOfGeneratingRule == 1625)
+                    //{
+                    //    counter++;
+                    //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                    //}
+
+                    //if (counter == 5 && r.NumberOfGeneratingRule == 611)
+                    //{
+                    //    counter++;
+                    //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                    //}
+                    //if (counter == 6 && r.NumberOfGeneratingRule == 988)
+                    //{
+                    //    counter++;
+                    //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                    //}
+
+                        reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+
+                }
                 else
+                {
+                    //    if (counter == 1 && r.NumberOfGeneratingRule == 71)
+                    //    {
+                    //        counter++;
+                    //        reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
+                    //    }
+
+                    //    if (counter == 7 && r.NumberOfGeneratingRule == 493)
+                    //    {
+                    //        counter++;
+                    //        reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
+
+
                     reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
+            
 
                 if (reparsed == false) continue;
 
@@ -123,6 +169,7 @@ namespace LinearIndexedGrammarLearner
 
                 if (_objectiveFunction.IsMaximalValue(currentValue))
                 {
+                    //SEFI
                     //LogManager.GetCurrentClassLogger().Info($"Best Grammar so far {currentGrammar}\r\n, probability {currentValue}");
                     bestGrammars.Enqueue(currentValue, currentGrammar);
                     break;

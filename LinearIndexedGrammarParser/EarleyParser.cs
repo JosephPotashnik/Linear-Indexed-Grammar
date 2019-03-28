@@ -190,20 +190,17 @@ namespace LinearIndexedGrammarParser
             return GetGammaStates();
         }
 
-        public List<EarleyState>  ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, int seedNumberToUnpredict, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
+        public List<EarleyState> ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, List<Rule> rs, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
         {
             foreach (var col in _table)
             {
-                if (col.Predicted.TryGetValue(seedNumberToUnpredict, out var predicted))
+                foreach (var rule in rs)
                 {
-                    for (int i = 0; i < predicted.Count; i++)
-                    {
-                        var rule = col.Predicted[seedNumberToUnpredict][i].Rule;
-                        var firstTerm = rule.RightHandSide[0];
-                        if (!col.NonTerminalsToUnpredict.Contains(firstTerm))
-                            col.Unpredict(rule, _grammar);
-                    }
+                    var firstTerm = rule.RightHandSide[0];
+                    if (!col.NonTerminalsToUnpredict.Contains(firstTerm))
+                        col.Unpredict(rule, _grammar);
                 }
+               
 
                 bool exhausted = false;
                 while (!exhausted)
@@ -246,11 +243,9 @@ namespace LinearIndexedGrammarParser
                 var nextTerm = col.ActionableNonTerminalsToPredict.Dequeue();
 
                 //you might need to re-check the term following deletions of other predicted states!
-                col.NonTerminalsToUnpredict.Remove(nextTerm); 
-
+                col.NonTerminalsToUnpredict.Remove(nextTerm);
 
                 bool toUnpredict = col.CheckForUnprediction(nextTerm, predictionSet);
-              
                 if (toUnpredict)
                 {
                     if (_grammar.StaticRules.TryGetValue(nextTerm, out var ruleList))
@@ -437,21 +432,18 @@ namespace LinearIndexedGrammarParser
 
                 }
                 sb.AppendLine("Predicted:");
-                var keys1 = col.Predicted.Keys.ToArray();
-                Array.Sort(keys1);
-
-                foreach (var key in keys1)
+                var keys1 = col.Predicted.Keys.Select(x => (x.ToString(), x));
+                var ordered = keys1.OrderBy(x => x.Item1);
+                foreach (var stringAndRule in ordered)
                 {
            
-                    sb.AppendLine($"key {key}");
-                    List<string> values = new List<string>();
+                    sb.AppendLine($"{stringAndRule.Item1}");
+                    //List<string> values = new List<string>();
+                    //values.Add(col.Predicted[key].ToString());
+                    //values.Sort();
 
-                    foreach (var state in col.Predicted[key])
-                        values.Add(state.ToString());
-                    values.Sort();
-
-                    foreach (var value in values)
-                        sb.AppendLine(value);
+                    //foreach (var value in values)
+                    //    sb.AppendLine(value);
                 }
                 sb.AppendLine("Reductors:");
 

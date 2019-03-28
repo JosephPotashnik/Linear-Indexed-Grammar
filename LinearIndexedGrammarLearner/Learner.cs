@@ -118,12 +118,12 @@ namespace LinearIndexedGrammarLearner
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
                 return false;
 
-
             var rs = currentCFHypothesis.Rules.Where(x => x.NumberOfGeneratingRule == numberOfGeneratingRule).ToList();
-
 
             if (rs.Count == 0)
             {
+                //Console.WriteLine($"added ");
+
                 //rs.Count == 0 when the new rule is unreachable from the existing set of rules.
                 //that means that the parser earley items are exactly the same as before.
                 //we can return immediately with no change.
@@ -135,6 +135,11 @@ namespace LinearIndexedGrammarLearner
 
                 return true;
             }
+
+            //for (int i = 0; i < rs.Count; i++)
+            //{
+            //    Console.WriteLine($"added {rs[i]}");
+            //}
             //for (int i = 0; i < _sentencesWithCounts.Length; i++)
             //{
             //    var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, r);
@@ -177,11 +182,21 @@ namespace LinearIndexedGrammarLearner
             var leftCorner = new LeftCorner();
             var predictionSet = leftCorner.ComputeLeftCorner(_sentencesParser[0]._grammar);
 
+
+            var rs = _sentencesParser[0]._grammar.Rules.Where(x => x.NumberOfGeneratingRule == numberOfGeneratingRule).ToList();
+
+
+            //for (int i = 0; i < unreachableRules.Count; i++)
+            //{
+            //    Console.WriteLine($"removed {unreachableRules[i]}");
+            //}
+
             //for (int i = 0; i < _sentencesWithCounts.Length; i++)
             //{
-            //    var n = _sentencesParser[i].ReParseSentenceWithRuleDeletion(currentCFHypothesis, r, predictionSet);
+            //    var n = _sentencesParser[i].ReParseSentenceWithRuleDeletion(currentCFHypothesis, numberOfGeneratingRule, predictionSet);
             //    _sentencesWithCounts[i].GammaStates = n;
             //}
+
             try
             {
                 var cts = new CancellationTokenSource(ParsingTimeOut);
@@ -189,7 +204,7 @@ namespace LinearIndexedGrammarLearner
                 Parallel.ForEach(_sentencesWithCounts, po,
                     (sentenceItem, loopState, i) =>
                     {
-                        var n = _sentencesParser[i].ReParseSentenceWithRuleDeletion(currentCFHypothesis, numberOfGeneratingRule, predictionSet);
+                        var n = _sentencesParser[i].ReParseSentenceWithRuleDeletion(currentCFHypothesis, rs, predictionSet);
                         _sentencesWithCounts[i].GammaStates = n;
                         po.CancellationToken.ThrowIfCancellationRequested();
                     });

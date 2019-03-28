@@ -1,9 +1,46 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
+
+    public class RuleReferenceEquals : IEqualityComparer<Rule>
+    {
+        public bool Equals(Rule x, Rule y)
+        {
+            return x == y;
+        }
+
+        public int GetHashCode(Rule obj)
+        {
+            return obj.GetHashCode();
+        }
+    }
+
+    public class RuleValueEquals : IEqualityComparer<Rule>
+    {
+        public bool Equals(Rule x, Rule y)
+        {
+            if (!x.LeftHandSide.Equals(y.LeftHandSide)) return false;
+            if (x.RightHandSide.Length != y.RightHandSide.Length) return false;
+
+            for (int i = 0; i < x.RightHandSide.Length; i++)
+            {
+                if (!x.RightHandSide[i].Equals(y.RightHandSide[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public int GetHashCode(Rule obj)
+        {
+            return obj.GetHashCode();
+        }
+    }
+
     [JsonObject(MemberSerialization.OptIn)]
     public class Rule : IEquatable<Rule>
     {
@@ -69,6 +106,11 @@ namespace LinearIndexedGrammarParser
         public bool Equals(Rule other)
         {
             return NumberOfGeneratingRule == other.NumberOfGeneratingRule;
+        }
+
+        public bool IsEpsilon()
+        {
+            return RightHandSide[0].IsEpsilon();
         }
     }
 }

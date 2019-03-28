@@ -1,25 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace LinearIndexedGrammarParser
 {
-    /*public class GeneratingRuleComparer : IEqualityComparer<Rule>
-    {
-        public bool Equals(Rule x, Rule y)
-        {
-            return (x.NumberOfGeneratingRule == y.NumberOfGeneratingRule);
-        }
-
-        public int GetHashCode(Rule obj)
-        {
-            return obj.NumberOfGeneratingRule;
-        }
-    }
-    */
+   
     public class SubTreeCountsCache
     {
+
         public Dictionary<DerivedCategory, int[][]> CategoriesCache;
         public Dictionary<Rule, int[][]> RuleCache;
         
@@ -37,7 +24,7 @@ namespace LinearIndexedGrammarParser
             }
 
             //RuleCache = new Dictionary<Rule, int[][]>(new GeneratingRuleComparer());
-            RuleCache = new Dictionary<Rule, int[][]>();
+            RuleCache = new Dictionary<Rule, int[][]>(new RuleReferenceEquals());
 
             var staticRules = g.StaticRules.Values.SelectMany(x => x);
             foreach (var rule in staticRules)

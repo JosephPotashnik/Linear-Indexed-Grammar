@@ -135,8 +135,6 @@ namespace LinearIndexedGrammarParser
             //3. replace the contents of the stack * in the right hand side productions.
             for (var i = 0; i < newRule.RightHandSide.Length; i++)
             {
-                if (PartsOfSpeech.Contains(newRule.RightHandSide[i]))
-                    posInRhsCount++;
 
                 var patternRightHandSide = newRule.RightHandSide[i].Stack;
                 if (patternRightHandSide != string.Empty)
@@ -155,11 +153,30 @@ namespace LinearIndexedGrammarParser
 
 
                 }
+                else
+                    posInRhsCount++;
+
             }
 
             if (stackContents != string.Empty && posInRhsCount == newRule.RightHandSide.Length)
                 return null;
 
+
+            if (newRule.LeftHandSide.Stack.Length > 0)
+            {
+                bool found = false;
+                for (int i = 0; i < newRule.RightHandSide.Length; i++)
+                {
+                    if (newRule.RightHandSide[i].Stack.Length > 0)
+                        found = true;
+
+                }
+
+                if (found == false)
+                {
+                    int x = 1;//bug.
+                }
+            }
             return newRule;
         }
 

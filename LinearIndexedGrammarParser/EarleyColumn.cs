@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
-
     internal class CompletedStateComparer : IComparer<EarleyState>
     {
         public int Compare(EarleyState x, EarleyState y)
@@ -21,7 +20,7 @@ namespace LinearIndexedGrammarParser
     {
         internal Dictionary<DerivedCategory, List<EarleyState>> Predecessors;
         internal Dictionary<DerivedCategory, List<EarleyState>> Reductors;
-        internal Dictionary<int, List<EarleyState>> Predicted;
+        internal Dictionary<Rule, EarleyState> Predicted;
 
         public EarleyColumn(int index, string token)
         {
@@ -37,7 +36,7 @@ namespace LinearIndexedGrammarParser
             ActionableNonCompleteStates = new Queue<EarleyState>();
             Predecessors = new Dictionary<DerivedCategory, List<EarleyState>>();
             Reductors = new Dictionary<DerivedCategory, List<EarleyState>>();
-            Predicted = new Dictionary<int, List<EarleyState>>();
+            Predicted = new Dictionary<Rule, EarleyState>(new RuleValueEquals());
             GammaStates = new List<EarleyState>();
             ActionableNonTerminalsToPredict = new Queue<DerivedCategory>();
 
@@ -119,9 +118,12 @@ namespace LinearIndexedGrammarParser
 
                 if (oldState.DotIndex == 0)
                 {
-                    Predicted[oldState.Rule.NumberOfGeneratingRule].Remove(oldState);
-                    if (Predicted[oldState.Rule.NumberOfGeneratingRule].Count == 0)
-                        Predicted.Remove(oldState.Rule.NumberOfGeneratingRule);
+                    if (!Predicted.ContainsKey(oldState.Rule))
+                    {
+                        int x = 1;
+                        throw new Exception("tried to remove predicted rule not in Predicted Dict");
+                    }
+                    Predicted.Remove(oldState.Rule);
                 }
 
                 if (!isPOS)
@@ -264,13 +266,13 @@ namespace LinearIndexedGrammarParser
 
                 if (newState.DotIndex == 0)
                 {
-                    //predicted - add to predicted dictionary
-                    if (!Predicted.TryGetValue(newState.Rule.NumberOfGeneratingRule, out var predicted))
+                    if (Predicted.ContainsKey(newState.Rule))
                     {
-                        predicted = new List<EarleyState>();
-                        Predicted.Add(newState.Rule.NumberOfGeneratingRule, predicted);
+                        int x = 1;
+                        throw new Exception("rule should not be predicted twice");
                     }
-                    predicted.Add(newState);
+
+                    Predicted[newState.Rule] = newState;
                 }
 
                 if (isPOS && !Reductors.ContainsKey(term))
@@ -280,9 +282,11 @@ namespace LinearIndexedGrammarParser
                 {
                     if (!Reductors.TryGetValue(term, out var reductors1))
                     {
-                        reductors1 = new List<EarleyState>();
+                        var epsilon = new Rule(term.ToString(), new[] { "" });
+                        var epsilonState = new EarleyState(epsilon, 1, this);
+                        epsilonState.EndColumn = this;
+                        reductors1 = new List<EarleyState>() { epsilonState };
                         Reductors.Add(term, reductors1);
-                        reductors1.Add(newState);
                     }
                 }
 
@@ -291,7 +295,7 @@ namespace LinearIndexedGrammarParser
                     //spontaneous dot shift.
                     foreach (var completedState in reductors)
                         SpontaneousDotShift(newState, completedState, grammar);
-                    
+
                 }
             }
             else
@@ -359,10 +363,12 @@ namespace LinearIndexedGrammarParser
 
                     if (state.DotIndex == 0)
                     {
-                        state.EndColumn.Predicted[state.Rule.NumberOfGeneratingRule].Remove(state);
-
-                        if (state.EndColumn.Predicted[state.Rule.NumberOfGeneratingRule].Count == 0)
-                            state.EndColumn.Predicted.Remove(state.Rule.NumberOfGeneratingRule);
+                        if (!state.EndColumn.Predicted.ContainsKey(state.Rule))
+                        {
+                            int x = 1;
+                            throw new Exception("trying to remove from predicted inconsistent");
+                        }
+                        state.EndColumn.Predicted.Remove(state.Rule);
                     }
                 }
 
@@ -379,9 +385,6 @@ namespace LinearIndexedGrammarParser
                         //need to remove the parent edge between the reductor to the deleted state
                         state.Reductor.Parents.Remove(state);
                 }
-
-
-
             }
 
             foreach (var state in statesRemovedInLastReparse)
@@ -417,13 +420,14 @@ namespace LinearIndexedGrammarParser
 
                     if (state.DotIndex == 0)
                     {
-                        if (!state.EndColumn.Predicted.TryGetValue(state.Rule.NumberOfGeneratingRule,
-                            out var predicted))
+                        if (state.EndColumn.Predicted.ContainsKey(state.Rule))
                         {
-                            predicted = new List<EarleyState>();
-                            state.EndColumn.Predicted.Add(state.Rule.NumberOfGeneratingRule, predicted);
+                            int x = 1;
+                            throw new Exception("inconsistent predicted");
+
                         }
-                        predicted.Add(state);
+
+                        state.EndColumn.Predicted[state.Rule] = state;
                     }
                 }
 
@@ -446,34 +450,8 @@ namespace LinearIndexedGrammarParser
 
         public void Unpredict(Rule r, ContextFreeGrammar grammar)
         {
-            if (Predicted.TryGetValue(r.NumberOfGeneratingRule, out var predicted))
-            {
-                var states = predicted.ToList();
-
-                foreach (var state in states)
-                {
-                    bool equals = false;
-
-                    //check that the instantiated rule to remove is exactly one of the rule stored in the states list.
-                    if (state.Rule.LeftHandSide.Equals(r.LeftHandSide))
-                    {
-                        equals = true;
-                        for (int i = 0; i < r.RightHandSide.Length; i++)
-                        {
-                            if (!state.Rule.RightHandSide[i].Equals(r.RightHandSide[i]))
-                                equals = false;
-                        }
-
-                        if (equals)
-                        {
-                            state.EndColumn.DeleteState(state, grammar);
-                            break;
-                        }
-                    }
-
-                }
-
-            }
+            if (Predicted.TryGetValue(r, out var state))
+                state.EndColumn.DeleteState(state, grammar);
         }
     }
 }
