@@ -110,7 +110,7 @@ namespace LinearIndexedGrammarLearner
             double prob = 0;
             var allParses = _learner.Parses;
             //uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
-            //var allParses1 = _learner.ParseAllSentences(currentCFHypothesis, _learner._sentencesParser);
+            var allParses1 = _learner.ParseAllSentences(currentCFHypothesis, _learner._sentencesParser);
 
             var trees = new HashSet<(int, string)>();
             for (int i = 0; i < allParses.Length; i++)

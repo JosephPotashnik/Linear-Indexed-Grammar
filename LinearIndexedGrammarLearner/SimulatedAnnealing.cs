@@ -72,6 +72,7 @@ namespace LinearIndexedGrammarLearner
                     //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
                     //}
 
+                        Console.WriteLine($"added {r}---");
                         reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
 
                 }
@@ -88,6 +89,7 @@ namespace LinearIndexedGrammarLearner
                     //        counter++;
                     //        reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
 
+                    Console.WriteLine($"removed {r}:---");
 
                     reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
                 }

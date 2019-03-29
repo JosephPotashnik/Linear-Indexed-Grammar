@@ -194,13 +194,7 @@ namespace LinearIndexedGrammarParser
         {
             foreach (var col in _table)
             {
-                foreach (var rule in rs)
-                {
-                    var firstTerm = rule.RightHandSide[0];
-                    if (!col.NonTerminalsToUnpredict.Contains(firstTerm))
-                        col.Unpredict(rule, _grammar);
-                }
-               
+
 
                 bool exhausted = false;
                 while (!exhausted)
@@ -214,6 +208,9 @@ namespace LinearIndexedGrammarParser
                         var state = col.ActionableNonCompleteStates.Dequeue();
                         state.EndColumn.DeleteState(state, _grammar);
                     }
+
+                    foreach (var rule in rs)
+                            col.Unpredict(rule, _grammar);
 
                     //3. unpredict
                     TraversePredictedStatesToDelete(col, predictionSet);
