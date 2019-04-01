@@ -122,7 +122,7 @@ namespace LinearIndexedGrammarLearner
 
             if (rs.Count == 0)
             {
-                Console.WriteLine($"added ");
+                //Console.WriteLine($"added ");
 
                 //rs.Count == 0 when the new rule is unreachable from the existing set of rules.
                 //that means that the parser earley items are exactly the same as before.
@@ -136,10 +136,10 @@ namespace LinearIndexedGrammarLearner
                 return true;
             }
 
-            for (int i = 0; i < rs.Count; i++)
-            {
-                Console.WriteLine($"added {rs[i]}");
-            }
+            //for (int i = 0; i < rs.Count; i++)
+            //{
+            //    Console.WriteLine($"added {rs[i]}");
+            //}
             //for (int i = 0; i < _sentencesWithCounts.Length; i++)
             //{
             //    var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, r);
@@ -186,14 +186,14 @@ namespace LinearIndexedGrammarLearner
             var rs = _sentencesParser[0]._grammar.Rules.Where(x => x.NumberOfGeneratingRule == numberOfGeneratingRule).ToList();
 
 
-            for (int i = 0; i < rs.Count; i++)
-            {
-                Console.WriteLine($"removed {rs[i]}");
-            }
+            //for (int i = 0; i < rs.Count; i++)
+            //{
+            //    Console.WriteLine($"removed {rs[i]}");
+            //}
 
             //for (int i = 0; i < _sentencesWithCounts.Length; i++)
             //{
-            //    var n = _sentencesParser[i].ReParseSentenceWithRuleDeletion(currentCFHypothesis, numberOfGeneratingRule, predictionSet);
+            //    var n = _sentencesParser[i].ReParseSentenceWithRuleDeletion(currentCFHypothesis, rs, predictionSet);
             //    _sentencesWithCounts[i].GammaStates = n;
             //}
 

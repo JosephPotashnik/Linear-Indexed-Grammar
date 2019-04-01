@@ -16,7 +16,7 @@ namespace LinearIndexedGrammarParser
         private string[] _text;
         int[] _finalColumns;
         private readonly bool _checkForCyclicUnitProductions;
-
+        private HashSet<EarleyState> statesRemovedInLastReparse = new HashSet<EarleyState>();
         public EarleyParser(ContextFreeGrammar g, Vocabulary v, bool checkUnitProductionCycles = true)
         {
             Voc = v;
@@ -192,33 +192,23 @@ namespace LinearIndexedGrammarParser
 
         public List<EarleyState> ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, List<Rule> rs, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
         {
+            
             foreach (var col in _table)
             {
+                foreach (var rule in rs)
+                    col.Unpredict(rule, _grammar, statesRemovedInLastReparse);
 
 
                 bool exhausted = false;
                 while (!exhausted)
                 {
-                    //1. remove completed states
-                    TraverseCompletedStatesToDelete(col);
+                    TraverseStatesToDelete(col, statesRemovedInLastReparse);
 
-                    //2. remove uncompleted states
-                    while (col.ActionableNonCompleteStates.Count > 0)
-                    {
-                        var state = col.ActionableNonCompleteStates.Dequeue();
-                        state.EndColumn.DeleteState(state, _grammar);
-                    }
-
-                    foreach (var rule in rs)
-                            col.Unpredict(rule, _grammar);
-
-                    //3. unpredict
-                    TraversePredictedStatesToDelete(col, predictionSet);
+                    TraversePredictedStatesToDelete(col, predictionSet, statesRemovedInLastReparse);
 
                     //unprediction can lead to completed /uncompleted parents in the same column
                     //if there is a nullable production, same as in the regular
-                    exhausted = (col.ActionableDeletedStates.Count == 0 && col.ActionableNonCompleteStates.Count == 0);
-
+                    exhausted = (col.ActionableDeletedStates.Count == 0);
                 }
             }
 
@@ -227,7 +217,7 @@ namespace LinearIndexedGrammarParser
             return GetGammaStates(); 
         }
 
-        private void TraversePredictedStatesToDelete(EarleyColumn col, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
+        private void TraversePredictedStatesToDelete(EarleyColumn col, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet, HashSet<EarleyState> statesRemovedInLastReparse)
         {
             int counter = 0;
             while (col.ActionableNonTerminalsToPredict.Count > 0)
@@ -242,20 +232,20 @@ namespace LinearIndexedGrammarParser
                 //you might need to re-check the term following deletions of other predicted states!
                 col.NonTerminalsToUnpredict.Remove(nextTerm);
 
-                bool toUnpredict = col.CheckForUnprediction(nextTerm, predictionSet);
+                bool toUnpredict = col.CheckForUnprediction(nextTerm, predictionSet, statesRemovedInLastReparse);
                 if (toUnpredict)
                 {
                     if (_grammar.StaticRules.TryGetValue(nextTerm, out var ruleList))
                     {
                         //delete all predictions
                         foreach (var rule in ruleList)
-                            col.Unpredict(rule, _grammar);
+                            col.Unpredict(rule, _grammar, statesRemovedInLastReparse);
                     }
                 }
             }
         }
 
-        private void TraverseCompletedStatesToDelete(EarleyColumn col)
+        private void TraverseStatesToDelete(EarleyColumn col, HashSet<EarleyState> statesRemovedInLastReparse)
         {
             while (col.ActionableDeletedStates.Count > 0)
             {
@@ -268,7 +258,7 @@ namespace LinearIndexedGrammarParser
                 if (deletedStatesStack.Count == 0)
                     col.ActionableDeletedStates.Remove(deletedStatesStackKey);
 
-                state.EndColumn.DeleteState(state, _grammar);
+                state.EndColumn.MarkStateDeleted(state, _grammar, statesRemovedInLastReparse);
             }
         }
 
@@ -477,6 +467,13 @@ namespace LinearIndexedGrammarParser
             foreach (var col in _table)
                 col.AcceptChanges();
 
+            foreach (var state in statesRemovedInLastReparse)
+                state.EndColumn.DeleteState(state, statesRemovedInLastReparse);
+
+            foreach (var col in _table)
+                col.OldGammaStates.Clear();
+
+            statesRemovedInLastReparse.Clear();
             _oldGrammar = null;
 
         }
@@ -489,6 +486,7 @@ namespace LinearIndexedGrammarParser
             foreach (var col in _table)
                 col.AcceptChanges();
 
+            statesRemovedInLastReparse.Clear();
             _grammar = _oldGrammar;
             _oldGrammar = null;
         }

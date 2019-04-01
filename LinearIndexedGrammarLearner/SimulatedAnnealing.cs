@@ -45,6 +45,7 @@ namespace LinearIndexedGrammarLearner
 
                 if (op == GrammarPermutationsOperation.Addition)
                 {
+
                     //if (counter == 2 && r.NumberOfGeneratingRule == 493)
                     //{
                     //    counter++;
@@ -72,25 +73,24 @@ namespace LinearIndexedGrammarLearner
                     //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
                     //}
 
-                        Console.WriteLine($"added {r}---");
-                        reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                    //Console.WriteLine($"added {r}---");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
 
                 }
                 else
                 {
-                    //    if (counter == 1 && r.NumberOfGeneratingRule == 71)
-                    //    {
-                    //        counter++;
-                    //        reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
-                    //    }
+                    //if (counter == 1 && r.NumberOfGeneratingRule == 1)
+                    //{
+                    //    counter++;
+                    //    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
+                    //}
 
                     //    if (counter == 7 && r.NumberOfGeneratingRule == 493)
                     //    {
                     //        counter++;
                     //        reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
 
-                    Console.WriteLine($"removed {r}:---");
-
+                    //Console.WriteLine($"removed {r}:---");
                     reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
                 }
             
@@ -114,20 +114,13 @@ namespace LinearIndexedGrammarLearner
                 else
                 {
                     //Console.WriteLine("rejected");
-
                     _learner.RejectChanges();
-
-                    //var parstr1 = string.Empty;
-
-                    //for (int i = 0; i < _learner._sentencesParser.Length; i++)
-                    //    parstr1 += _learner._sentencesParser[i].ToString();
-
-                    //if (parstr != parstr1)
-                    //{
-                    //    throw new Exception("parser representation after rejected hyptohesis is not the same as original");
-                    //}
-
                 }
+
+                //var currentCFHypothesis = new ContextFreeGrammar(currentGrammar);
+                ////uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
+                //var allParses1 = _learner.ParseAllSentences(currentCFHypothesis, _learner._sentencesParser);
+
             }
             _learner.RefreshParses();
             var ruleDistribution = _learner.CollectUsages();

@@ -36,26 +36,6 @@ namespace LinearIndexedGrammarLearner
             Math.Pow(2, -15),
         };
 
-        //private static double[] powersOfMinus2 =
-        //{
-        //    1,
-        //   1,
-        //    1,
-        //    1,
-        //   1,
-        //    1,
-        //    1,
-        //    1,
-        //    1,
-        //    1,
-        //    1,
-        //   1,
-        //    1,
-        //    1,
-        //    1,
-        //    1,
-        //};
-
         public const double Tolerance = 0.000001;
         private readonly Learner _learner;
         static double maxVal;
@@ -109,9 +89,7 @@ namespace LinearIndexedGrammarLearner
 
             double prob = 0;
             var allParses = _learner.Parses;
-            //uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
-            var allParses1 = _learner.ParseAllSentences(currentCFHypothesis, _learner._sentencesParser);
-
+            
             var trees = new HashSet<(int, string)>();
             for (int i = 0; i < allParses.Length; i++)
             {

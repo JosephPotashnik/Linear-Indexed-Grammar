@@ -38,6 +38,7 @@ namespace LinearIndexedGrammarParser
             Reductors = new Dictionary<DerivedCategory, List<EarleyState>>();
             Predicted = new Dictionary<Rule, EarleyState>(new RuleValueEquals());
             GammaStates = new List<EarleyState>();
+            OldGammaStates = new List<EarleyState>();
             ActionableNonTerminalsToPredict = new Queue<DerivedCategory>();
 
         }
@@ -49,9 +50,10 @@ namespace LinearIndexedGrammarParser
         internal Queue<EarleyState> ActionableNonCompleteStates { get; set; }
         internal Queue<DerivedCategory> ActionableNonTerminalsToPredict;
         internal List<EarleyState> statesAddedInLastReparse = new List<EarleyState>();
-        internal List<EarleyState> statesRemovedInLastReparse = new List<EarleyState>();
         
         public List<EarleyState> GammaStates { get; set; }
+        public List<EarleyState> OldGammaStates { get; set; }
+
         public int Index { get; }
         public string Token { get; set; }
 
@@ -73,58 +75,16 @@ namespace LinearIndexedGrammarParser
             completedState.EndColumn.AddState(newState, grammar);
         }
 
-        
-        public void DeleteState(EarleyState oldState, ContextFreeGrammar grammar)
+        public void MarkStateDeleted(EarleyState oldState, ContextFreeGrammar grammar, HashSet<EarleyState> statesRemovedInLastReparse)
         {
-            if (oldState.Removed) return;
-            oldState.Removed = true;
+            if (statesRemovedInLastReparse.Contains(oldState)) return;
             statesRemovedInLastReparse.Add(oldState);
-
-            if (oldState.Predecessor != null)
-            {
-                if (oldState.Predecessor.Removed == false)
-                    //need to remove the parent edge between the predecessor to the deleted state
-                    oldState.Predecessor.Parents.Remove(oldState);
-            }
-
-            if (oldState.Reductor != null)
-            {
-                if (oldState.Reductor.Removed == false)
-                    //need to remove the parent edge between the reductor to the deleted state
-                    oldState.Reductor.Parents.Remove(oldState);
-            }
-
 
             if (!oldState.IsCompleted)
             {
 
                 var nextTerm = oldState.NextTerm;
-                var isPOS = !grammar.StaticRules.ContainsKey(nextTerm);
-
-                if (Predecessors.TryGetValue(nextTerm, out var predecessors))
-                {       
-                    for (int i = 0; i < predecessors.Count; i++)
-                    {
-                        if (predecessors[i] == oldState)
-                        {
-                            predecessors.RemoveAt(i);
-                            break;
-                        }
-                    }
-
-                    if (predecessors.Count == 0)
-                        Predecessors.Remove(nextTerm);
-                }
-
-                if (oldState.DotIndex == 0)
-                {
-                    if (!Predicted.ContainsKey(oldState.Rule))
-                    {
-                        int x = 1;
-                        throw new Exception("tried to remove predicted rule not in Predicted Dict");
-                    }
-                    Predicted.Remove(oldState.Rule);
-                }
+                var isPOS = !grammar.StaticRules.ContainsKey(nextTerm);     
 
                 if (!isPOS)
                 {
@@ -142,45 +102,70 @@ namespace LinearIndexedGrammarParser
                 if (oldState.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
                 {
                     var gammaStates = oldState.EndColumn.GammaStates;
-                    for (int i = 0; i < gammaStates.Count; i++)
-                    {
-                        if (gammaStates[i] == oldState)
-                        {
-                            gammaStates.RemoveAt(i);
-                            break;
-                        }
-                    }
+                    gammaStates.Remove(oldState);
+                    OldGammaStates.Add(oldState);
+                    return;
+                }
+            }
 
+            foreach (var parent in oldState.Parents)
+                parent.EndColumn.EnqueueToDeletedStack(parent);
+                
+        }
+
+        public void DeleteState(EarleyState oldState, HashSet<EarleyState> statesRemovedInLastReparse)
+        {
+            if (oldState.Predecessor != null)
+            {
+                if (!statesRemovedInLastReparse.Contains(oldState.Predecessor))
+                    //need to remove the parent edge between the predecessor to the deleted state
+                    oldState.Predecessor.Parents.Remove(oldState);
+            }
+
+            if (oldState.Reductor != null)
+            {
+                if (!statesRemovedInLastReparse.Contains(oldState.Reductor))
+                    //need to remove the parent edge between the reductor to the deleted state
+                    oldState.Reductor.Parents.Remove(oldState);
+            }
+
+
+            if (!oldState.IsCompleted)
+            {
+                var nextTerm = oldState.NextTerm;
+
+                if (Predecessors.TryGetValue(nextTerm, out var predecessors))
+                {
+                    predecessors.Remove(oldState);
+                    if (predecessors.Count == 0)
+                        Predecessors.Remove(nextTerm);
+                }
+
+                if (oldState.DotIndex == 0)
+                    Predicted.Remove(oldState.Rule);
+                
+            }
+            else
+            {
+
+                if (oldState.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
+                {
+                    var oldgammaStates = oldState.EndColumn.OldGammaStates;
+                    oldgammaStates.Remove(oldState);
                     return;
                 }
 
                 var reductors = oldState.StartColumn.Reductors[oldState.Rule.LeftHandSide];
-                for (int i = 0; i < reductors.Count; i++)
-                {
-                    if (reductors[i] == oldState)
-                    {
-                        reductors.RemoveAt(i);
-                        break;
-                    }
-                }
-
+                reductors.Remove(oldState);
                 if (reductors.Count == 0)
                     oldState.StartColumn.Reductors.Remove(oldState.Rule.LeftHandSide);
             }
 
-            foreach (var parent in oldState.Parents)
-            {
-                if (parent.IsCompleted)
-                    parent.EndColumn.EnqueueToDeletedStack(parent);
-                else
-                    parent.EndColumn.ActionableNonCompleteStates.Enqueue(parent);
-
-            }
         }
 
         //returns true if it finds a predicting state that is not predicted itself
         //i.e, if there exists a state X1 -> Y .Z  such that eventually state S is predicted from it.
-        private bool DFSOverPredecessors(EarleyState state, HashSet<EarleyState> visited, DerivedCategory nextTerm, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
+        private bool DFSOverPredecessors(EarleyState state, HashSet<EarleyState> visited, DerivedCategory nextTerm, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet, HashSet<EarleyState> statesRemovedInLastReparse)
         {
             visited.Add(state);
             if (state.DotIndex != 0) return true;
@@ -188,33 +173,47 @@ namespace LinearIndexedGrammarParser
             if (!predictionSet[nextTerm].Contains(state.Rule))
                 return true;
 
-            if (Predecessors.TryGetValue(state.Rule.LeftHandSide, out var predecessors))
+            var predecessorsUnmarkedForDeletion = PredecessorsUnmarkedForDeletion(state.Rule.LeftHandSide, statesRemovedInLastReparse);
+            foreach (var predecessor in predecessorsUnmarkedForDeletion)
             {
-                foreach (var predecessor in predecessors)
+                if (!visited.Contains(predecessor))
                 {
-                    if (!visited.Contains(predecessor))
-                    {
-                        var res = DFSOverPredecessors(predecessor, visited, nextTerm, predictionSet);
-                        if (res) return res;
-                    }
+                    var res = DFSOverPredecessors(predecessor, visited, nextTerm, predictionSet, statesRemovedInLastReparse);
+                    if (res) return res;
                 }
-
             }
             return false;
 
         }
-        public bool CheckForUnprediction(DerivedCategory nextTerm, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
+        public bool CheckForUnprediction(DerivedCategory nextTerm, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet, HashSet<EarleyState> statesRemovedInLastReparse)
         {
-            if (!Predecessors.ContainsKey(nextTerm)) return true;
-            foreach (var state in Predecessors[nextTerm])
+            var predecessorsUnmarkedForDeletion = PredecessorsUnmarkedForDeletion(nextTerm, statesRemovedInLastReparse);
+            if (predecessorsUnmarkedForDeletion.Count == 0) return true;
+
+            foreach (var state in predecessorsUnmarkedForDeletion)
             {
                 var visited = new HashSet<EarleyState>();
-                bool IsThereANonPredictedPredecessor = DFSOverPredecessors(state, visited, nextTerm, predictionSet);
+                bool IsThereANonPredictedPredecessor = DFSOverPredecessors(state, visited, nextTerm, predictionSet, statesRemovedInLastReparse);
                 if (IsThereANonPredictedPredecessor)
                     return false;
 
             }
             return true;
+        }
+
+        private List<EarleyState> PredecessorsUnmarkedForDeletion(DerivedCategory nextTerm, HashSet<EarleyState> statesRemovedInLastReparse)
+        {
+            var predecessorsUnmarkedForDeletion = new List<EarleyState>();
+            if (Predecessors.TryGetValue(nextTerm, out var predecessors))
+            {
+                foreach (var predecessor in predecessors)
+                {
+                    if (!statesRemovedInLastReparse.Contains(predecessor))
+                        predecessorsUnmarkedForDeletion.Add(predecessor);
+                }
+            }
+
+            return predecessorsUnmarkedForDeletion;
         }
 
         public void EnqueueToCompletedQueue(EarleyState state)
@@ -265,15 +264,8 @@ namespace LinearIndexedGrammarParser
                 predecessors.Add(newState);
 
                 if (newState.DotIndex == 0)
-                {
-                    if (Predicted.ContainsKey(newState.Rule))
-                    {
-                        int x = 1;
-                        throw new Exception("rule should not be predicted twice");
-                    }
-
                     Predicted[newState.Rule] = newState;
-                }
+
 
                 if (isPOS && !Reductors.ContainsKey(term))
                     ActionableNonCompleteStates.Enqueue(newState);
@@ -306,27 +298,16 @@ namespace LinearIndexedGrammarParser
 
         public void AcceptChanges()
         {
-            if (statesAddedInLastReparse.Count > 0 && statesRemovedInLastReparse.Count > 0)
-                throw new Exception("states should not have been both added and removed");
 
             foreach (var state in statesAddedInLastReparse)
                 state.Added = false;
-
             statesAddedInLastReparse.Clear();
 
-            foreach (var state in statesRemovedInLastReparse)
-                state.Removed = false;
-
-            statesRemovedInLastReparse.Clear();
-
             NonTerminalsToUnpredict.Clear();
-
         }
 
         public void RejectChanges()
         {
-            if (statesAddedInLastReparse.Count > 0 && statesRemovedInLastReparse.Count > 0)
-                throw new Exception("states should not have been both added and removed");
 
             foreach (var state in statesAddedInLastReparse)
             {
@@ -335,14 +316,7 @@ namespace LinearIndexedGrammarParser
                     if (state.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
                     {
                         var gammaStates = state.EndColumn.GammaStates;
-                        for (int i = 0; i < gammaStates.Count; i++)
-                        {
-                            if (gammaStates[i] == state)
-                            {
-                                gammaStates.RemoveAt(i);
-                                break;
-                            }
-                        }
+                        gammaStates.Remove(state);
                     }
                     else
                     {
@@ -362,14 +336,8 @@ namespace LinearIndexedGrammarParser
                         state.EndColumn.Predecessors.Remove(nextTerm);
 
                     if (state.DotIndex == 0)
-                    {
-                        if (!state.EndColumn.Predicted.ContainsKey(state.Rule))
-                        {
-                            int x = 1;
-                            throw new Exception("trying to remove from predicted inconsistent");
-                        }
                         state.EndColumn.Predicted.Remove(state.Rule);
-                    }
+
                 }
 
                 if (state.Predecessor != null)
@@ -387,71 +355,18 @@ namespace LinearIndexedGrammarParser
                 }
             }
 
-            foreach (var state in statesRemovedInLastReparse)
+            foreach (var state in OldGammaStates.ToList())
             {
-                if (state.IsCompleted)
-                {
-                    if (state.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
-                    {
-                        var gammaStates = state.EndColumn.GammaStates;
-                        gammaStates.Add(state);
-                    }
-                    else
-                    {
-                        if (!state.StartColumn.Reductors.TryGetValue(state.Rule.LeftHandSide, out var reductors))
-                        {
-                            reductors = new List<EarleyState>();
-                            state.StartColumn.Reductors.Add(state.Rule.LeftHandSide, reductors);
-                        }
-                        reductors.Add(state);
-                    }
-                }
-                else
-                {
-                    var nextTerm = state.NextTerm;
-
-                    if (!state.EndColumn.Predecessors.TryGetValue(nextTerm, out var predecessors))
-                    {
-                        predecessors = new List<EarleyState>();
-                        state.EndColumn.Predecessors.Add(nextTerm, predecessors);
-                    }
-
-                    predecessors.Add(state);
-
-                    if (state.DotIndex == 0)
-                    {
-                        if (state.EndColumn.Predicted.ContainsKey(state.Rule))
-                        {
-                            int x = 1;
-                            throw new Exception("inconsistent predicted");
-
-                        }
-
-                        state.EndColumn.Predicted[state.Rule] = state;
-                    }
-                }
-
-                if (state.Predecessor != null)
-                {
-                    if (state.Predecessor.Removed == false)
-                        //need to re-add the parent edge between the predecessor to the deleted state
-                        state.Predecessor.Parents.Add(state);
-                }
-
-                if (state.Reductor != null)
-                {
-                    if (state.Reductor.Removed == false)
-                        //need to re-add the parent edge between the reductor to the deleted state
-                        state.Reductor.Parents.Add(state);
-                }
-
+                    GammaStates.Add(state);
+                    OldGammaStates.Remove(state);
             }
+
         }
 
-        public void Unpredict(Rule r, ContextFreeGrammar grammar)
+        public void Unpredict(Rule r, ContextFreeGrammar grammar, HashSet<EarleyState> statesRemovedInLastReparse)
         {
             if (Predicted.TryGetValue(r, out var state))
-                state.EndColumn.DeleteState(state, grammar);
+                state.EndColumn.MarkStateDeleted(state, grammar, statesRemovedInLastReparse);
         }
     }
 }

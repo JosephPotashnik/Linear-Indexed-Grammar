@@ -6,11 +6,11 @@ using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
+    
     public class EarleyState : IEquatable<EarleyState>
     {
         public EarleyState(Rule r, int dotIndex, EarleyColumn c)
         {
-            Removed = false;
             Rule = r;
             DotIndex = dotIndex;
             StartColumn = c;
@@ -18,7 +18,6 @@ namespace LinearIndexedGrammarParser
         }
 
         public bool Added { get; set; }
-        public bool Removed { get; set; }
         public Rule Rule { get; }
         public EarleyColumn StartColumn { get; }
         public EarleyColumn EndColumn { get; set; }
