@@ -13,7 +13,7 @@ namespace LinearIndexedGrammarParser
         public const string StartSymbol = "START";
         public const string EpsilonSymbol = "Epsilon";
         public const string StarSymbol = "*";
-        public const int MaxStackDepth = 1;
+        public const int MaxStackDepth = 3;
 
         public readonly Dictionary<DerivedCategory, List<Rule>> StaticRules =
             new Dictionary<DerivedCategory, List<Rule>>();
