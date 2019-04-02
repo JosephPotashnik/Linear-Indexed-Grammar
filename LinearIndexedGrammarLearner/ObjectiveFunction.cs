@@ -16,6 +16,8 @@ namespace LinearIndexedGrammarLearner
 
     public class GrammarFitnessObjectiveFunction : IObjectiveFunction
     {
+        public const double Tolerance = 0.000001;
+
         private static readonly double[] powersOfMinus2 =
         {
             Math.Pow(2, 0),
@@ -33,22 +35,21 @@ namespace LinearIndexedGrammarLearner
             Math.Pow(2, -12),
             Math.Pow(2, -13),
             Math.Pow(2, -14),
-            Math.Pow(2, -15),
+            Math.Pow(2, -15)
         };
 
-        public const double Tolerance = 0.000001;
+        private static double maxVal;
         private readonly Learner _learner;
-        static double maxVal;
+
+        public GrammarFitnessObjectiveFunction(Learner l)
+        {
+            _learner = l;
+        }
 
 
         public Learner GetLearner()
         {
             return _learner;
-
-        }
-        public GrammarFitnessObjectiveFunction(Learner l)
-        {
-            _learner = l;
         }
 
         public void SetMaximalValue(double val)
@@ -65,7 +66,7 @@ namespace LinearIndexedGrammarLearner
             //degradation - accept with a probability proportional to the delta and the iteration
             //bigger delta (bigger degradation) => lower probability.
             //bigger temperature => higher probability
-            var exponent = 100* (Math.Log(newValue) - Math.Log(oldValue)) / temperature;
+            var exponent = 100 * (Math.Log(newValue) - Math.Log(oldValue)) / temperature;
             var prob = Math.Exp(exponent);
             var rand = ThreadSafeRandom.ThisThreadsRandom;
             var randomThrow = rand.NextDouble();
@@ -89,13 +90,14 @@ namespace LinearIndexedGrammarLearner
 
             double prob = 0;
             var allParses = _learner.Parses;
-            
+
             var trees = new HashSet<(int, string)>();
-            for (int i = 0; i < allParses.Length; i++)
+            for (var i = 0; i < allParses.Length; i++)
             {
-                for (int j = 0; j < allParses[i].GammaStates.Count; j++)
+                for (var j = 0; j < allParses[i].GammaStates.Count; j++)
                     trees.Add((allParses[i].Length, allParses[i].GammaStates[j].BracketedTreeRepresentation));
             }
+        
 
             var dataTreesPerLength = trees.GroupBy(x => x.Item1).ToDictionary(g => g.Key, g => g.Count());
 
@@ -109,14 +111,12 @@ namespace LinearIndexedGrammarLearner
 
                 foreach (var length in grammarTreesPerLength.Keys)
                 {
-                    dataTreesPerLength.TryGetValue(length, out int dataTreesInLength);
+                    dataTreesPerLength.TryGetValue(length, out var dataTreesInLength);
                     var grammarTreesInLength = grammarTreesPerLength[length];
-                    int diff = grammarTreesInLength - dataTreesInLength;
+                    var diff = grammarTreesInLength - dataTreesInLength;
                     if (diff > 0)
-                    {
-                        prob -= diff / (double)grammarTreesInLength * powersOfMinus2[length] /
-                            totalProbabilityOfGrammarTrees;
-                    }
+                        prob -= diff / (double) grammarTreesInLength * powersOfMinus2[length] /
+                                totalProbabilityOfGrammarTrees;
                 }
 
                 if (prob > 1)
@@ -132,11 +132,10 @@ namespace LinearIndexedGrammarLearner
                     //right now: it is depth = maxWords+3. change?
                 }
 
-
                 var numberOfSentenceUnParsed = allParses.Count(x => x.GammaStates.Count == 0);
-                var unexplainedSentences = (numberOfSentenceUnParsed / (double)allParses.Length);
+                var unexplainedSentences = numberOfSentenceUnParsed / (double) allParses.Length;
 
-                prob *= ( 1 - unexplainedSentences);
+                prob *= 1 - unexplainedSentences;
                 if (prob < 0) prob = 0;
             }
 

@@ -5,28 +5,29 @@ using System.Text.RegularExpressions;
 
 namespace LinearIndexedGrammarParser
 {
-
     public class ContextFreeGrammar
     {
-        public static HashSet<SyntacticCategory> PartsOfSpeech;
         public const string GammaRule = "Gamma";
         public const string StartSymbol = "START";
         public const string EpsilonSymbol = "Epsilon";
         public const string StarSymbol = "*";
         public const int MaxStackDepth = 3;
+        public static HashSet<SyntacticCategory> PartsOfSpeech;
 
         public readonly Dictionary<DerivedCategory, List<Rule>> StaticRules =
             new Dictionary<DerivedCategory, List<Rule>>();
+
         public readonly HashSet<DerivedCategory> StaticRulesGeneratedForCategory = new HashSet<DerivedCategory>();
 
-        private void ConstructCFG(IEnumerable<Rule> ruleList)
-        {
-            var rulesDic = CreateRulesDictionary(ruleList);
-            GenerateAllStaticRulesFromDynamicRules(rulesDic);
-        }
         public ContextFreeGrammar(List<Rule> ruleList)
         {
             ConstructCFG(ruleList);
+        }
+
+        public ContextFreeGrammar(ContextSensitiveGrammar cs)
+        {
+            var rules = ExtractRules(cs);
+            ConstructCFG(rules);
         }
 
         public List<Rule> Rules
@@ -34,10 +35,10 @@ namespace LinearIndexedGrammarParser
             get { return StaticRules.Values.SelectMany(x => x).ToList(); }
         }
 
-        public ContextFreeGrammar(ContextSensitiveGrammar cs)
+        private void ConstructCFG(IEnumerable<Rule> ruleList)
         {
-            var rules = ExtractRules(cs);
-            ConstructCFG(rules);
+            var rulesDic = CreateRulesDictionary(ruleList);
+            GenerateAllStaticRulesFromDynamicRules(rulesDic);
         }
 
         public static IEnumerable<Rule> ExtractRules(ContextSensitiveGrammar cs)
@@ -48,10 +49,9 @@ namespace LinearIndexedGrammarParser
             {
                 var stackChangingRules = cs.StackPush1Rules.Select(x => ContextSensitiveGrammar.RuleSpace[x]).ToList();
                 foreach (var moveableKvp in cs.MoveableReferences)
-                {
                     if (moveableKvp.Value > 0) //if number of references to this moveable is positive
                     {
-                        var rc = new RuleCoordinates() //find moveable in pop rules table.
+                        var rc = new RuleCoordinates //find moveable in pop rules table.
                         {
                             LHSIndex = moveableKvp.Key,
                             RHSIndex = 0,
@@ -60,12 +60,13 @@ namespace LinearIndexedGrammarParser
 
                         stackChangingRules.Add(ContextSensitiveGrammar.RuleSpace[rc]);
                     }
-                }
 
                 rules = stackConstantRules.Concat(stackChangingRules);
             }
             else
+            {
                 rules = stackConstantRules;
+            }
 
             return rules;
         }
@@ -82,6 +83,7 @@ namespace LinearIndexedGrammarParser
                     rules = new List<Rule>();
                     rulesDic.Add(newSynCat, rules);
                 }
+
                 rules.Add(new Rule(rule));
             }
 
@@ -105,10 +107,11 @@ namespace LinearIndexedGrammarParser
                 rules = new List<Rule>();
                 StaticRules.Add(newRule.LeftHandSide, rules);
             }
+
             rules.Add(newRule);
         }
-        
-        
+
+
         public static Rule GenerateStaticRuleFromDynamicRule(Rule dynamicGrammarRule, DerivedCategory leftHandSide)
         {
             var patternStringLeftHandSide = dynamicGrammarRule.LeftHandSide.Stack;
@@ -130,16 +133,14 @@ namespace LinearIndexedGrammarParser
 
             var stackContents = match.Groups[1].Value;
             newRule.LeftHandSide = leftHandSide;
-            int posInRhsCount = 0;
+            var posInRhsCount = 0;
 
             //3. replace the contents of the stack * in the right hand side productions.
             for (var i = 0; i < newRule.RightHandSide.Length; i++)
             {
-
                 var patternRightHandSide = newRule.RightHandSide[i].Stack;
                 if (patternRightHandSide != string.Empty)
                 {
-
                     var res = patternRightHandSide.Replace(StarSymbol, stackContents);
                     newRule.RightHandSide[i].Stack = res;
                     newRule.RightHandSide[i].StackSymbolsCount += newRule.LeftHandSide.StackSymbolsCount;
@@ -147,15 +148,14 @@ namespace LinearIndexedGrammarParser
                     if (newRule.RightHandSide[i].StackSymbolsCount > MaxStackDepth)
                         return null;
 
-                    if (newRule.RightHandSide[i].StackSymbolsCount > 0 
+                    if (newRule.RightHandSide[i].StackSymbolsCount > 0
                         && PartsOfSpeech.Contains(newRule.RightHandSide[i]))
                         return null;
-
-
                 }
                 else
+                {
                     posInRhsCount++;
-
+                }
             }
 
             if (stackContents != string.Empty && posInRhsCount == newRule.RightHandSide.Length)
@@ -164,19 +164,14 @@ namespace LinearIndexedGrammarParser
 
             if (newRule.LeftHandSide.Stack.Length > 0)
             {
-                bool found = false;
-                for (int i = 0; i < newRule.RightHandSide.Length; i++)
-                {
+                var found = false;
+                for (var i = 0; i < newRule.RightHandSide.Length; i++)
                     if (newRule.RightHandSide[i].Stack.Length > 0)
                         found = true;
 
-                }
-
-                if (found == false)
-                {
-                    throw new Exception("illegal GenerateStaticRuleFromDynamicRule");
-                }
+                if (found == false) throw new Exception("illegal GenerateStaticRuleFromDynamicRule");
             }
+
             return newRule;
         }
 
@@ -204,25 +199,19 @@ namespace LinearIndexedGrammarParser
                     var baseSyntacticCategory = new SyntacticCategory(nextTerm);
 
                     if (dynamicRules.TryGetValue(baseSyntacticCategory, out var grammarRuleList))
-                    {
                         foreach (var item in grammarRuleList)
                         {
                             var derivedRule = GenerateStaticRuleFromDynamicRule(item, nextTerm);
                             AddStaticRule(derivedRule);
 
                             if (derivedRule != null)
-                            {
                                 foreach (var rhs in derivedRule.RightHandSide)
-                                {
                                     if (!visited.Contains(rhs))
                                     {
                                         visited.Add(rhs);
                                         toVisit.Enqueue(rhs);
                                     }
-                                }
-                            }
                         }
-                    }
                 }
             }
         }
@@ -238,35 +227,30 @@ namespace LinearIndexedGrammarParser
                 replaceVariables.Add($"X{i + 1}");
 
             foreach (var originalVariable in originalVariables)
-            {
                 if (replaceVariables.Contains(originalVariable))
                     throw new Exception("renaming variables failed. Please do not use X1,X2,X3 nonterminals");
-            }
-            var replaceDic = originalVariables.Zip(replaceVariables, (x, y) => new { key = x, value = y })
+            var replaceDic = originalVariables.Zip(replaceVariables, (x, y) => new {key = x, value = y})
                 .ToDictionary(x => x.key, x => x.value);
 
             var startRenamedVariable = replaceDic[StartSymbol];
             replaceDic.Remove(StartSymbol);
             ReplaceVariables(replaceDic, rules);
 
-            DerivedCategory startCategory = new DerivedCategory(StartSymbol);
-            List<Rule> startRulesToReplace = new List<Rule>();
+            var startCategory = new DerivedCategory(StartSymbol);
+            var startRulesToReplace = new List<Rule>();
             foreach (var rule in rules)
             {
                 if (rule.RightHandSide.Length == 2)
-                {
                     if (rule.LeftHandSide.BaseEquals(startCategory) ||
                         rule.RightHandSide[0].BaseEquals(startCategory) ||
                         rule.RightHandSide[1].BaseEquals(startCategory))
                         startRulesToReplace.Add(rule);
-                }
 
                 if (rule.RightHandSide.Length == 1)
                 {
                     var baseCat = new SyntacticCategory(rule.RightHandSide[0]);
                     if (partOfSpeechCategories.Contains(baseCat.ToString()))
                         startRulesToReplace.Add(rule);
-
                 }
             }
 
@@ -274,10 +258,9 @@ namespace LinearIndexedGrammarParser
             {
                 replaceDic[StartSymbol] = startRenamedVariable;
                 ReplaceVariables(replaceDic, startRulesToReplace);
-                var newStartRule = new Rule(StartSymbol, new[] { startRenamedVariable });
+                var newStartRule = new Rule(StartSymbol, new[] {startRenamedVariable});
                 rules.Add(newStartRule);
             }
-
         }
 
 
@@ -292,13 +275,13 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        public static HashSet<(string rhs1, string rhs2)> GetBigramsOfData(string[][] data, Vocabulary universalVocabulary)
+        public static HashSet<(string rhs1, string rhs2)> GetBigramsOfData(string[][] data,
+            Vocabulary universalVocabulary)
         {
             var bigrams = new HashSet<(string rhs1, string rhs2)>();
 
             foreach (var words in data)
-            {
-                for (int i = 0; i < words.Length-1; i++)
+                for (var i = 0; i < words.Length - 1; i++)
                 {
                     var rhs1 = words[i];
                     var rhs2 = words[i + 1];
@@ -307,14 +290,9 @@ namespace LinearIndexedGrammarParser
                     var possiblePOSforrhs2 = universalVocabulary.WordWithPossiblePOS[rhs2].ToArray();
 
                     foreach (var pos1 in possiblePOSforrhs1)
-                    {
-                        foreach (var pos2 in possiblePOSforrhs2)
-                        {
-                            bigrams.Add((pos1, pos2));
-                        }
-                    }
+                    foreach (var pos2 in possiblePOSforrhs2)
+                        bigrams.Add((pos1, pos2));
                 }
-            }
 
             return bigrams;
         }
@@ -327,13 +305,11 @@ namespace LinearIndexedGrammarParser
             visited.Add(root);
 
             if (dic.TryGetValue(root, out var neighbors))
-            {
                 foreach (var neighbor in neighbors)
                 {
                     var containsCycle = ContainsCycle(neighbor, visited, dic);
                     if (containsCycle) return true;
                 }
-            }
 
             return false;
         }
@@ -374,7 +350,7 @@ namespace LinearIndexedGrammarParser
         {
             var allRules = StaticRules.Values.SelectMany(x => x).ToArray();
             var epsilonCat = new DerivedCategory(EpsilonSymbol);
-            HashSet<DerivedCategory> possibleNullableCategories = new HashSet<DerivedCategory>();
+            var possibleNullableCategories = new HashSet<DerivedCategory>();
             possibleNullableCategories.Add(epsilonCat);
             var added = true;
 
@@ -403,6 +379,5 @@ namespace LinearIndexedGrammarParser
 
             return possibleNullableCategories;
         }
-
     }
 }

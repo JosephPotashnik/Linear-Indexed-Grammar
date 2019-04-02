@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
-
     public class RuleReferenceEquals : IEqualityComparer<Rule>
     {
         public bool Equals(Rule x, Rule y)
@@ -26,11 +25,9 @@ namespace LinearIndexedGrammarParser
             if (!x.LeftHandSide.Equals(y.LeftHandSide)) return false;
             if (x.RightHandSide.Length != y.RightHandSide.Length) return false;
 
-            for (int i = 0; i < x.RightHandSide.Length; i++)
-            {
+            for (var i = 0; i < x.RightHandSide.Length; i++)
                 if (!x.RightHandSide[i].Equals(y.RightHandSide[i]))
                     return false;
-            }
 
             return true;
         }
@@ -53,12 +50,11 @@ namespace LinearIndexedGrammarParser
             LeftHandSide = new DerivedCategory(leftHandSide);
             if (rightHandSide != null)
             {
-                int length = rightHandSide.Length;
+                var length = rightHandSide.Length;
                 RightHandSide = new DerivedCategory[length];
-                for (int i = 0; i < length; i++)
+                for (var i = 0; i < length; i++)
                     RightHandSide[i] = new DerivedCategory(rightHandSide[i]);
             }
-
         }
 
         public Rule(string leftHandSide, string[] rightHandSide)
@@ -66,9 +62,9 @@ namespace LinearIndexedGrammarParser
             LeftHandSide = new DerivedCategory(leftHandSide);
             if (rightHandSide != null)
             {
-                int length = rightHandSide.Length;
+                var length = rightHandSide.Length;
                 RightHandSide = new DerivedCategory[length];
-                for (int i = 0; i < length; i++)
+                for (var i = 0; i < length; i++)
                     RightHandSide[i] = new DerivedCategory(rightHandSide[i]);
             }
         }
@@ -78,11 +74,12 @@ namespace LinearIndexedGrammarParser
             LeftHandSide = new DerivedCategory(otherRule.LeftHandSide);
             if (otherRule.RightHandSide != null)
             {
-                int length = otherRule.RightHandSide.Length;
+                var length = otherRule.RightHandSide.Length;
                 RightHandSide = new DerivedCategory[length];
-                for (int i = 0; i < length; i++)
+                for (var i = 0; i < length; i++)
                     RightHandSide[i] = new DerivedCategory(otherRule.RightHandSide[i]);
             }
+
             NumberOfGeneratingRule = otherRule.NumberOfGeneratingRule;
         }
 
@@ -92,7 +89,12 @@ namespace LinearIndexedGrammarParser
 
         public int NumberOfGeneratingRule { get; set; }
 
-        public override string ToString() 
+        public bool Equals(Rule other)
+        {
+            return NumberOfGeneratingRule == other.NumberOfGeneratingRule;
+        }
+
+        public override string ToString()
         {
             var p = RightHandSide.Select(x => x.ToString()).ToArray();
             return $"{NumberOfGeneratingRule}. {LeftHandSide} -> {string.Join(" ", p)}";
@@ -101,11 +103,6 @@ namespace LinearIndexedGrammarParser
         public override int GetHashCode()
         {
             return NumberOfGeneratingRule;
-        }
-
-        public bool Equals(Rule other)
-        {
-            return NumberOfGeneratingRule == other.NumberOfGeneratingRule;
         }
 
         public bool IsEpsilon()

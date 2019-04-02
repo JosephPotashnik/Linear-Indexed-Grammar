@@ -31,6 +31,15 @@ namespace LinearIndexedGrammarParser
 
         [JsonIgnore] public int RuleNumber { get; set; }
 
+        public bool Equals(EarleyNode other)
+        {
+            var s =
+                "Node.Equals should not be used, the node comparer is only used FullTreeComparer";
+            Console.WriteLine(s);
+            throw new Exception(s);
+            //return Name == other.Name && StartIndex == other.StartIndex && EndIndex == other.EndIndex;
+        }
+
         public override int GetHashCode()
         {
             unchecked
@@ -88,7 +97,7 @@ namespace LinearIndexedGrammarParser
             GetNonTerminalStringUnderNode(leaves);
             return string.Join(" ", leaves);
         }
-        
+
         private void GetNonTerminalStringUnderNode(List<string> leavesList)
         {
             if (Children == null)
@@ -103,15 +112,6 @@ namespace LinearIndexedGrammarParser
                 foreach (var child in Children)
                     child.GetNonTerminalStringUnderNode(leavesList);
             }
-        }
-
-        public bool Equals(EarleyNode other)
-        {
-            string s =
-                "Node.Equals should not be used, the node comparer is only used FullTreeComparer";
-            Console.WriteLine(s);
-            throw new Exception(s);
-            //return Name == other.Name && StartIndex == other.StartIndex && EndIndex == other.EndIndex;
         }
     }
 }

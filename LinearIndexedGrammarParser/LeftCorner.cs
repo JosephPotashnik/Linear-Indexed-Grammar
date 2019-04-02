@@ -20,15 +20,11 @@ namespace LinearIndexedGrammarParser
                     leftCorners.Add(cat, lcRules);
                 }
 
-          
+
                 if (grammar.StaticRules.TryGetValue(cat, out var ruleList))
-                {
                     foreach (var predicted in ruleList)
-                    {
                         if (!lcRules.Contains(predicted))
                             lcRules.Add(predicted);
-                    }
-                }
             }
 
             var changed = true;
@@ -40,21 +36,16 @@ namespace LinearIndexedGrammarParser
                     var cat = item.Key;
                     var reachableRules = item.Value;
                     foreach (var reachable in reachableRules.ToArray())
-                    {
                         if (leftCorners.TryGetValue(reachable.RightHandSide[0], out var reachablesFromReachable))
-                        {
                             foreach (var reachreach in reachablesFromReachable)
-                            {
                                 if (!leftCorners[cat].Contains(reachreach))
                                 {
                                     leftCorners[cat].Add(reachreach);
                                     changed = true;
                                 }
-                            }
-                        }
-                    }
                 }
             }
+
             return leftCorners;
         }
     }

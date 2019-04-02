@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
-    
     public class EarleyState : IEquatable<EarleyState>
     {
+        public string BracketedTreeRepresentation;
+        public HashSet<EarleyState> Parents = new HashSet<EarleyState>();
+
         public EarleyState(Rule r, int dotIndex, EarleyColumn c)
         {
             Rule = r;
@@ -22,15 +22,21 @@ namespace LinearIndexedGrammarParser
         public EarleyColumn StartColumn { get; }
         public EarleyColumn EndColumn { get; set; }
         public int DotIndex { get; }
-        public HashSet<EarleyState> Parents  = new HashSet<EarleyState>();
         public EarleyState Predecessor { get; set; }
         public EarleyState Reductor { get; set; }
-        public string BracketedTreeRepresentation;
+        public bool IsCompleted => DotIndex >= Rule.RightHandSide.Length;
+
+        public DerivedCategory NextTerm => IsCompleted ? null : Rule.RightHandSide[DotIndex];
+
+        public bool Equals(EarleyState other)
+        {
+            return this == other;
+        }
 
         public void CreateBracketedRepresentation(StringBuilder sb, ContextFreeGrammar g)
         {
             if (IsCompleted) sb.Append($"({Rule.LeftHandSide} ");
-            
+
             //predecessor
             if (DotIndex > 1)
             {
@@ -49,7 +55,7 @@ namespace LinearIndexedGrammarParser
 
         public List<EarleyState> GetTransitiveClosureOfParents()
         {
-            List<EarleyState> l = new List<EarleyState>();
+            var l = new List<EarleyState>();
 
             foreach (var parent in Parents)
             {
@@ -60,9 +66,6 @@ namespace LinearIndexedGrammarParser
 
             return l;
         }
-        public bool IsCompleted => DotIndex >= Rule.RightHandSide.Length;
-
-        public DerivedCategory NextTerm => IsCompleted ? null : Rule.RightHandSide[DotIndex];
 
         private static string RuleWithDotNotation(Rule rule, int dotIndex)
         {
@@ -74,15 +77,15 @@ namespace LinearIndexedGrammarParser
                     return $"{rule.LeftHandSide} -> $ {rule.RightHandSide[0]}";
 
                 return $"{rule.LeftHandSide} -> {rule.RightHandSide[0]} $";
-
             }
+
             //length  = 2
             if (dotIndex == 0)
                 return $"{rule.LeftHandSide} -> $ {rule.RightHandSide[0]} {rule.RightHandSide[1]}";
             if (dotIndex == 1)
                 return $"{rule.LeftHandSide} -> {rule.RightHandSide[0]} $ {rule.RightHandSide[1]}";
 
-            return $"{rule.LeftHandSide} -> {rule.RightHandSide[0]} {rule.RightHandSide[1]} $";  
+            return $"{rule.LeftHandSide} -> {rule.RightHandSide[0]} {rule.RightHandSide[1]} $";
         }
 
         public override string ToString()
@@ -106,11 +109,6 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        public bool Equals(EarleyState other)
-        {
-            return (this == other);
-        }
-
         public string GetNonTerminalStringUnderNode(HashSet<string> pos)
         {
             var leaves = new List<string>();
@@ -126,6 +124,7 @@ namespace LinearIndexedGrammarParser
                 if (pos.Contains(nextTerm))
                     leavesList.Insert(0, nextTerm);
             }
+
             Reductor?.GetNonTerminalStringUnderNode(leavesList, pos);
             Predecessor?.GetNonTerminalStringUnderNode(leavesList, pos);
         }

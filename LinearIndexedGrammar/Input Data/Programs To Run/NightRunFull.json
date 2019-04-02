@@ -5,7 +5,7 @@
       "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,
       "GrammarFileName": "NoNPNoV3.txt",
-      "DataFileName" :  null 
+      "DataFileName": null
     },
     {
       "IsCFG": true,

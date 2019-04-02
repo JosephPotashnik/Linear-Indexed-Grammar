@@ -9,21 +9,22 @@ namespace LinearIndexedGrammarParser
 {
     public class EarleyParser
     {
-        public ContextFreeGrammar _oldGrammar;
+        private readonly bool _checkForCyclicUnitProductions;
+        private int[] _finalColumns;
         public ContextFreeGrammar _grammar;
-        protected Vocabulary Voc;
+        public ContextFreeGrammar _oldGrammar;
         private EarleyColumn[] _table;
         private string[] _text;
-        int[] _finalColumns;
-        private readonly bool _checkForCyclicUnitProductions;
-        private HashSet<EarleyState> statesRemovedInLastReparse = new HashSet<EarleyState>();
+        private readonly HashSet<EarleyState> statesRemovedInLastReparse = new HashSet<EarleyState>();
+        protected Vocabulary Voc;
+
         public EarleyParser(ContextFreeGrammar g, Vocabulary v, bool checkUnitProductionCycles = true)
         {
             Voc = v;
             _grammar = g;
             _checkForCyclicUnitProductions = checkUnitProductionCycles;
         }
-        
+
         private void Predict(EarleyColumn col, List<Rule> ruleList, DerivedCategory nextTerm)
         {
             foreach (var rule in ruleList)
@@ -34,16 +35,16 @@ namespace LinearIndexedGrammarParser
         }
 
 
-        protected void Scan(EarleyColumn startColumn, EarleyColumn nextCol, EarleyState state, DerivedCategory term, string token)
+        protected void Scan(EarleyColumn startColumn, EarleyColumn nextCol, EarleyState state, DerivedCategory term,
+            string token)
         {
             if (!startColumn.Reductors.TryGetValue(term, out var stateList))
             {
-                var scannedStateRule = new Rule(term.ToString(), new[] { token });
+                var scannedStateRule = new Rule(term.ToString(), new[] {token});
                 var scannedState = new EarleyState(scannedStateRule, 1, startColumn);
                 scannedState.EndColumn = nextCol;
-                stateList = new List<EarleyState>() { scannedState };
+                stateList = new List<EarleyState> {scannedState};
                 startColumn.Reductors.Add(term, stateList);
-
             }
 
 
@@ -74,7 +75,6 @@ namespace LinearIndexedGrammarParser
             {
                 reductorList = new List<EarleyState>();
                 startColumn.Reductors.Add(reductorState.Rule.LeftHandSide, reductorList);
-
             }
 
             reductorList.Add(reductorState);
@@ -88,11 +88,8 @@ namespace LinearIndexedGrammarParser
                 newState.Reductor = reductorState;
 
                 if (_checkForCyclicUnitProductions)
-                {
-                    //if the state completes a unit production cycle, do not add it.
                     if (IsNewStatePartOfUnitProductionCycle(reductorState, newState, startColumn, predecessor))
                         continue;
-                }
 
                 col.AddState(newState, _grammar);
             }
@@ -103,27 +100,19 @@ namespace LinearIndexedGrammarParser
         {
             //check if the new state completed and is a parent of past reductor for its LHS,
             //if so - you arrived at a unit production cycle.
-            bool foundCycle = false;
+            var foundCycle = false;
 
             if (newState.IsCompleted)
-            {
                 if (startColumn.Reductors.TryGetValue(newState.Rule.LeftHandSide, out var reductors))
-                {
                     foreach (var reductor in reductors)
-                    {
                         if (newState.Rule.Equals(reductor.Rule) && newState.StartColumn == reductor.StartColumn)
                         {
                             var parents = reductor.GetTransitiveClosureOfParents();
                             foreach (var parent in parents)
-                            {
                                 //found a unit production cycle.
                                 if (newState == parent)
                                     foundCycle = true;
-                            }
                         }
-                    }
-                }
-            }
 
             if (foundCycle)
             {
@@ -140,7 +129,7 @@ namespace LinearIndexedGrammarParser
         public List<EarleyState> GetGammaStates()
         {
             if (_finalColumns.Length == 1)
-               return _table[_finalColumns[0]].GammaStates;
+                return _table[_finalColumns[0]].GammaStates;
 
             var gammaStates = new List<EarleyState>();
             foreach (var index in _finalColumns)
@@ -156,23 +145,18 @@ namespace LinearIndexedGrammarParser
 
             foreach (var col in _table)
             {
-                for (int i = 0; i < rs.Count; i++)
-                {
+                for (var i = 0; i < rs.Count; i++)
                     //seed the new rule in the column
                     //think about categories if this would be context sensitive grammar.
                     if (col.Predecessors.ContainsKey(rs[i].LeftHandSide))
-                    {
-                        //if not already marked to be predicted, predict.
                         if (!col.ActionableNonTerminalsToPredict.Contains(rs[i].LeftHandSide))
                         {
                             var newState = new EarleyState(rs[i], 0, col);
                             col.AddState(newState, _grammar);
                         }
-                    }
-                }
-                
 
-                bool exhaustedCompletion = false;
+
+                var exhaustedCompletion = false;
                 while (!exhaustedCompletion)
                 {
                     //1. complete
@@ -190,16 +174,16 @@ namespace LinearIndexedGrammarParser
             return GetGammaStates();
         }
 
-        public List<EarleyState> ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, List<Rule> rs, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
+        public List<EarleyState> ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, List<Rule> rs,
+            Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
         {
-            
             foreach (var col in _table)
             {
                 foreach (var rule in rs)
                     col.Unpredict(rule, _grammar, statesRemovedInLastReparse);
 
 
-                bool exhausted = false;
+                var exhausted = false;
                 while (!exhausted)
                 {
                     TraverseStatesToDelete(col, statesRemovedInLastReparse);
@@ -208,16 +192,17 @@ namespace LinearIndexedGrammarParser
 
                     //unprediction can lead to completed /uncompleted parents in the same column
                     //if there is a nullable production, same as in the regular
-                    exhausted = (col.ActionableDeletedStates.Count == 0);
+                    exhausted = col.ActionableDeletedStates.Count == 0;
                 }
             }
 
             _oldGrammar = _grammar;
             _grammar = g;
-            return GetGammaStates(); 
+            return GetGammaStates();
         }
 
-        private void TraversePredictedStatesToDelete(EarleyColumn col, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet, HashSet<EarleyState> statesRemovedInLastReparse)
+        private void TraversePredictedStatesToDelete(EarleyColumn col,
+            Dictionary<DerivedCategory, HashSet<Rule>> predictionSet, HashSet<EarleyState> statesRemovedInLastReparse)
         {
             while (col.ActionableNonTerminalsToPredict.Count > 0)
             {
@@ -226,16 +211,11 @@ namespace LinearIndexedGrammarParser
                 //you might need to re-check the term following deletions of other predicted states!
                 col.NonTerminalsToUnpredict.Remove(nextTerm);
 
-                bool toUnpredict = col.CheckForUnprediction(nextTerm, predictionSet, statesRemovedInLastReparse);
+                var toUnpredict = col.CheckForUnprediction(nextTerm, predictionSet, statesRemovedInLastReparse);
                 if (toUnpredict)
-                {
                     if (_grammar.StaticRules.TryGetValue(nextTerm, out var ruleList))
-                    {
-                        //delete all predictions
                         foreach (var rule in ruleList)
                             col.Unpredict(rule, _grammar, statesRemovedInLastReparse);
-                    }
-                }
             }
         }
 
@@ -272,7 +252,7 @@ namespace LinearIndexedGrammarParser
             {
                 foreach (var col in _table)
                 {
-                    bool exhaustedCompletion = false;
+                    var exhaustedCompletion = false;
                     var anyCompleted = false;
                     var anyPredicted = false;
                     while (!exhaustedCompletion)
@@ -322,7 +302,7 @@ namespace LinearIndexedGrammarParser
 
         private bool TraverseScannableStates(EarleyColumn[] table, EarleyColumn col)
         {
-            bool anyScanned = col.ActionableNonCompleteStates.Count > 0;
+            var anyScanned = col.ActionableNonCompleteStates.Count > 0;
             if (col.Index + 1 >= table.Length)
             {
                 col.ActionableNonCompleteStates.Clear();
@@ -340,7 +320,7 @@ namespace LinearIndexedGrammarParser
                 {
                     var currentCategory = new DerivedCategory(item);
                     if (stateToScan.NextTerm.Equals(currentCategory))
-                            Scan(table[col.Index], table[col.Index+1],stateToScan, currentCategory, nextScannableTerm);
+                        Scan(table[col.Index], table[col.Index + 1], stateToScan, currentCategory, nextScannableTerm);
                 }
             }
 
@@ -349,7 +329,7 @@ namespace LinearIndexedGrammarParser
 
         private bool TraversePredictableStates(EarleyColumn col)
         {
-            bool anyPredicted = col.ActionableNonTerminalsToPredict.Count > 0;
+            var anyPredicted = col.ActionableNonTerminalsToPredict.Count > 0;
             while (col.ActionableNonTerminalsToPredict.Count > 0)
             {
                 var nextTerm = col.ActionableNonTerminalsToPredict.Dequeue();
@@ -362,7 +342,7 @@ namespace LinearIndexedGrammarParser
 
         private bool TraverseCompletedStates(EarleyColumn col)
         {
-            bool anyCompleted = col.ActionableCompleteStates.Count > 0;
+            var anyCompleted = col.ActionableCompleteStates.Count > 0;
             while (col.ActionableCompleteStates.Count > 0)
             {
                 var kvp = col.ActionableCompleteStates.First();
@@ -380,13 +360,6 @@ namespace LinearIndexedGrammarParser
             return anyCompleted;
         }
 
-        public class CategoryCompare : IComparer<DerivedCategory>
-        {
-            public int Compare(DerivedCategory x, DerivedCategory y)
-            {
-                return string.Compare(x.ToString(), y.ToString());
-            }
-        }
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -403,29 +376,26 @@ namespace LinearIndexedGrammarParser
                 foreach (var key in keys)
                 {
                     sb.AppendLine($"key {key}");
-                    List<string> values = new List<string>();
+                    var values = new List<string>();
                     foreach (var state in col.Predecessors[key])
                         values.Add(state.ToString());
                     values.Sort();
 
                     foreach (var value in values)
                         sb.AppendLine(value);
-
                 }
+
                 sb.AppendLine("Predicted:");
                 var keys1 = col.Predicted.Keys.Select(x => (x.ToString(), x));
                 var ordered = keys1.OrderBy(x => x.Item1);
                 foreach (var stringAndRule in ordered)
-                {
-           
                     sb.AppendLine($"{stringAndRule.Item1}");
-                    //List<string> values = new List<string>();
-                    //values.Add(col.Predicted[key].ToString());
-                    //values.Sort();
+                //List<string> values = new List<string>();
+                //values.Add(col.Predicted[key].ToString());
+                //values.Sort();
 
-                    //foreach (var value in values)
-                    //    sb.AppendLine(value);
-                }
+                //foreach (var value in values)
+                //    sb.AppendLine(value);
                 sb.AppendLine("Reductors:");
 
                 var keys2 = col.Reductors.Keys.ToArray();
@@ -442,7 +412,7 @@ namespace LinearIndexedGrammarParser
                     if (!_grammar.StaticRules.ContainsKey(key)) continue;
 
                     sb.AppendLine($"key {key}");
-                    List<string> values = new List<string>();
+                    var values = new List<string>();
 
                     foreach (var state in col.Reductors[key])
                         values.Add(state.ToString());
@@ -469,7 +439,6 @@ namespace LinearIndexedGrammarParser
 
             statesRemovedInLastReparse.Clear();
             _oldGrammar = null;
-
         }
 
         public void RejectChanges()
@@ -483,6 +452,14 @@ namespace LinearIndexedGrammarParser
             statesRemovedInLastReparse.Clear();
             _grammar = _oldGrammar;
             _oldGrammar = null;
+        }
+
+        public class CategoryCompare : IComparer<DerivedCategory>
+        {
+            public int Compare(DerivedCategory x, DerivedCategory y)
+            {
+                return string.Compare(x.ToString(), y.ToString());
+            }
         }
     }
 }

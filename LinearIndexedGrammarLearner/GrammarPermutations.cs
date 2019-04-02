@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-
 using System.Reflection;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
+
 #pragma warning disable 649
 
 namespace LinearIndexedGrammarLearner
@@ -16,23 +16,25 @@ namespace LinearIndexedGrammarLearner
 
     public class GrammarPermutations
     {
-        public delegate (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) GrammarMutation(ContextSensitiveGrammar grammar);
+        public delegate (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op)
+            GrammarMutation(ContextSensitiveGrammar grammar);
 
-        private static Tuple<GrammarMutation, int>[] _mutations;
-        private static int _totalWeights;
         public const int CFGOperationWeight = 20;
         public const int LIGOperationWeight = 5;
 
+        private static Tuple<GrammarMutation, int>[] _mutations;
+        private static int _totalWeights;
+
         public GrammarPermutations(bool isCFGGrammar)
         {
-            List<GrammarMutationData> l = new List<GrammarMutationData>();
+            var l = new List<GrammarMutationData>();
 
             l.Add(new GrammarMutationData("InsertStackConstantRule", CFGOperationWeight));
             l.Add(new GrammarMutationData("DeleteStackConstantRule", CFGOperationWeight));
             //l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
             //l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
 
-            int LIGWeight = isCFGGrammar  ? 0 : LIGOperationWeight;
+            var LIGWeight = isCFGGrammar ? 0 : LIGOperationWeight;
             l.Add(new GrammarMutationData("InsertMovement", LIGWeight));
             l.Add(new GrammarMutationData("DeleteMovement", LIGWeight));
             //l.Add(new GrammarMutationData("ChangeLHSPush", LIGWeight));
@@ -43,7 +45,7 @@ namespace LinearIndexedGrammarLearner
             for (var i = 0; i < l.Count; i++)
                 foreach (var method in typeInfo.GetDeclaredMethods(l[i].Mutation))
                 {
-                    var m = (GrammarMutation)method.CreateDelegate(typeof(GrammarMutation), this);
+                    var m = (GrammarMutation) method.CreateDelegate(typeof(GrammarMutation), this);
                     _mutations[i] = new Tuple<GrammarMutation, int>(m, l[i].MutationWeight);
                 }
 
@@ -68,10 +70,12 @@ namespace LinearIndexedGrammarLearner
             return null;
         }
 
-        public (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) InsertStackConstantRule(ContextSensitiveGrammar grammar)
+        public (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op)
+            InsertStackConstantRule(ContextSensitiveGrammar grammar)
         {
             var rc = CreateRandomRule(RuleType.CFGRules);
-            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackConstantRules)) return (null, null, GrammarPermutationsOperation.Addition);
+            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackConstantRules))
+                return (null, null, GrammarPermutationsOperation.Addition);
             grammar.StackConstantRules.Add(rc);
             return (grammar, ContextSensitiveGrammar.RuleSpace[rc], GrammarPermutationsOperation.Addition);
         }
@@ -86,7 +90,8 @@ namespace LinearIndexedGrammarLearner
             };
         }
 
-        public (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) DeleteStackConstantRule(ContextSensitiveGrammar grammar)
+        public (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op)
+            DeleteStackConstantRule(ContextSensitiveGrammar grammar)
         {
             var rc = grammar.GetRandomRule(grammar.StackConstantRules);
             grammar.StackConstantRules.Remove(rc);
@@ -148,7 +153,8 @@ namespace LinearIndexedGrammarLearner
         //    return grammar;
         //}
 
-        public (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) DeleteMovement(ContextSensitiveGrammar grammar)
+        public (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) DeleteMovement(
+            ContextSensitiveGrammar grammar)
         {
             if (grammar.StackPush1Rules.Count == 0) return (null, null, GrammarPermutationsOperation.Deletion);
 
@@ -158,10 +164,12 @@ namespace LinearIndexedGrammarLearner
             return (grammar, ContextSensitiveGrammar.RuleSpace[rc], GrammarPermutationsOperation.Deletion);
         }
 
-        public (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) InsertMovement(ContextSensitiveGrammar grammar)
+        public (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) InsertMovement(
+            ContextSensitiveGrammar grammar)
         {
             var rc = CreateRandomRule(RuleType.Push1Rules);
-            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackPush1Rules)) return (null, null, GrammarPermutationsOperation.Addition);
+            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackPush1Rules))
+                return (null, null, GrammarPermutationsOperation.Addition);
             grammar.StackPush1Rules.Add(rc);
             grammar.AddCorrespondingPopRule(rc);
             return (grammar, ContextSensitiveGrammar.RuleSpace[rc], GrammarPermutationsOperation.Addition);

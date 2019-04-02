@@ -14,7 +14,8 @@ namespace LinearIndexedGrammarParser
             return n.Select(x => x.GetNonTerminalStringUnderNode(pos)).ToList();
         }
 
-        public static (string[][] sentences, HashSet<string> POSCategoriesInData)  GetSentencesInWordLengthRange(string[][] allData, Vocabulary universalVocabulary, int minWords, int maxWords)
+        public static (string[][] sentences, HashSet<string> POSCategoriesInData) GetSentencesInWordLengthRange(
+            string[][] allData, Vocabulary universalVocabulary, int minWords, int maxWords)
         {
             var sentences = new List<string[]>();
             var posCategories = new HashSet<string>();
@@ -50,7 +51,7 @@ namespace LinearIndexedGrammarParser
             {
                 var arr = item.Split();
 
-                for (int k = 0; k < numberOfSentencesPerTree; k++)
+                for (var k = 0; k < numberOfSentencesPerTree; k++)
                 {
                     var sentence = new string[arr.Length];
 
@@ -71,8 +72,8 @@ namespace LinearIndexedGrammarParser
 
                     sentences.Add(sentence);
                 }
-                
             }
+
             foreach (var category in posCategories)
                 textVocabulary.AddWordsToPOSCategory(category,
                     universalVocabulary.POSWithPossibleWords[category].ToArray());
@@ -84,7 +85,8 @@ namespace LinearIndexedGrammarParser
             string filename, string vocabularyFilename, int maxWords)
         {
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(vocabularyFilename);
-            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys
+                .Select(x => new SyntacticCategory(x)).ToHashSet();
 
             var rules = ReadRulesFromFile(filename);
             var cfGrammar = new ContextFreeGrammar(rules);
@@ -96,10 +98,12 @@ namespace LinearIndexedGrammarParser
             return (statesList, rules);
         }
 
-        public static List<EarleyState> ParseSentenceAccordingToGrammar(string filename, string vocabularyFilename, string sentence)
+        public static List<EarleyState> ParseSentenceAccordingToGrammar(string filename, string vocabularyFilename,
+            string sentence)
         {
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(vocabularyFilename);
-            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys.Select(x => new SyntacticCategory(x)).ToHashSet();
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys
+                .Select(x => new SyntacticCategory(x)).ToHashSet();
 
             var rules = ReadRulesFromFile(filename);
             var cfGrammar = new ContextFreeGrammar(rules);
@@ -156,18 +160,13 @@ namespace LinearIndexedGrammarParser
 
             if (leftHandCat.Stack.Contains(ContextFreeGrammar.StarSymbol))
                 if (leftHandCat.Stack.Length > 1)
-                {
                     popRule = true;
-                    //TODO: in future, implement pop2 stack changing operation.
-                    //key = MoveableOperationsKey.Pop2;
-                    //moveable = new SyntacticCategory(leftHandCat.Stack.Substring(1));
-                }
 
             if (nonTerminals.Length == 1)
             {
                 var epsilonCat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol) {StackSymbolsCount = -1};
                 //moveable = new SyntacticCategory(leftHandCat);
-                return new Rule(leftHandCat, new[] { epsilonCat });
+                return new Rule(leftHandCat, new[] {epsilonCat});
 
                 //key = MoveableOperationsKey.Pop1;
                 //return new StackChangingRule(baseRule, key, moveable);
