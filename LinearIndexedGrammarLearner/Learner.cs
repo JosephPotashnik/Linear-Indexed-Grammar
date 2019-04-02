@@ -136,16 +136,6 @@ namespace LinearIndexedGrammarLearner
                 return true;
             }
 
-            //for (int i = 0; i < rs.Count; i++)
-            //{
-            //    Console.WriteLine($"added {rs[i]}");
-            //}
-            //for (int i = 0; i < _sentencesWithCounts.Length; i++)
-            //{
-            //    var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, r);
-            //    _sentencesWithCounts[i].GammaStates = n;
-            //}
-
             try
             {
                 var cts = new CancellationTokenSource(ParsingTimeOut);
@@ -185,18 +175,6 @@ namespace LinearIndexedGrammarLearner
 
             var rs = _sentencesParser[0]._grammar.Rules.Where(x => x.NumberOfGeneratingRule == numberOfGeneratingRule).ToList();
 
-
-            //for (int i = 0; i < rs.Count; i++)
-            //{
-            //    Console.WriteLine($"removed {rs[i]}");
-            //}
-
-            //for (int i = 0; i < _sentencesWithCounts.Length; i++)
-            //{
-            //    var n = _sentencesParser[i].ReParseSentenceWithRuleDeletion(currentCFHypothesis, rs, predictionSet);
-            //    _sentencesWithCounts[i].GammaStates = n;
-            //}
-
             try
             {
                 var cts = new CancellationTokenSource(ParsingTimeOut);
@@ -223,7 +201,7 @@ namespace LinearIndexedGrammarLearner
             return true;
         }
 
-        public SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis, EarleyParser[] diffparsers = null)
+        public SentenceParsingResults[] ParseAllSentencesWithDebuggingAssertion(ContextFreeGrammar currentHypothesis, EarleyParser[] diffparsers = null)
         {
             SentenceParsingResults[] sentencesWithCounts = new SentenceParsingResults[_sentencesWithCounts.Length];
           
@@ -282,6 +260,34 @@ namespace LinearIndexedGrammarLearner
 
         }
 
+        public SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis)
+        {
+            try
+            {
+                var cts = new CancellationTokenSource(int.MaxValue);
+                var po = new ParallelOptions { CancellationToken = cts.Token };
+                Parallel.ForEach(_sentencesWithCounts, po,
+                    (sentenceItem, loopState, i) =>
+                    {
+                        var parser = new EarleyParser(currentHypothesis, _voc, false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
+                        var n = parser.ParseSentence(sentenceItem.Sentence, cts);
+                        _sentencesWithCounts[i].GammaStates = n;
+                        po.CancellationToken.ThrowIfCancellationRequested();
+                    });
+
+            }
+            catch (OperationCanceledException)
+            {
+                //parse tree too long to parse
+                //the grammar is too recursive,
+                //decision - discard it and continue.
+                //string s = "parsing took too long, for the grammar:\r\n" + currentHypothesis.ToString();
+                //NLog.LogManager.GetCurrentClassLogger().Info(s);
+                return null; //parsing failed.
+            }
+            return _sentencesWithCounts;
+
+        }
 
         public Dictionary<int,int> GetGrammarTrees(ContextFreeGrammar hypothesis)
         {

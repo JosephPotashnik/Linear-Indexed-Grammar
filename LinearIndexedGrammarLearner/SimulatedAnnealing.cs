@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
@@ -44,82 +43,30 @@ namespace LinearIndexedGrammarLearner
                 if (mutatedGrammar == null) continue;
 
                 if (op == GrammarPermutationsOperation.Addition)
-                {
-
-                    //if (counter == 2 && r.NumberOfGeneratingRule == 493)
-                    //{
-                    //    counter++;
-                    //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                    //}
-                    //if (counter == 3 && r.NumberOfGeneratingRule == 148)
-                    //{
-                    //    counter++;
-                    //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                    //}
-                    //if (counter == 4 && r.NumberOfGeneratingRule == 1625)
-                    //{
-                    //    counter++;
-                    //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                    //}
-
-                    //if (counter == 5 && r.NumberOfGeneratingRule == 611)
-                    //{
-                    //    counter++;
-                    //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                    //}
-                    //if (counter == 6 && r.NumberOfGeneratingRule == 988)
-                    //{
-                    //    counter++;
-                    //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                    //}
-
-                    //Console.WriteLine($"added {r}---");
                     reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-
-                }
                 else
-                {
-                    //if (counter == 1 && r.NumberOfGeneratingRule == 1)
-                    //{
-                    //    counter++;
-                    //    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
-                    //}
-
-                    //    if (counter == 7 && r.NumberOfGeneratingRule == 493)
-                    //    {
-                    //        counter++;
-                    //        reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
-
-                    //Console.WriteLine($"removed {r}:---");
                     reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
-                }
-            
 
                 if (reparsed == false) continue;
 
                 var newValue = _objectiveFunction.Compute(mutatedGrammar);
-                //if (counter++ % 100 == 0)
-                //    LogManager.GetCurrentClassLogger().Info($"currentTemp {currentTemp}, probability {newValue}");
-            
+
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
                 if (accept)
                 {
-                    //Console.WriteLine("accepted");
                     currentValue = newValue;
                     currentGrammar = mutatedGrammar;
                     _learner.AcceptChanges();
-
                     if (_objectiveFunction.IsMaximalValue(currentValue)) break;
                 }
                 else
                 {
-                    //Console.WriteLine("rejected");
                     _learner.RejectChanges();
                 }
 
                 //var currentCFHypothesis = new ContextFreeGrammar(currentGrammar);
                 ////uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
-                //var allParses1 = _learner.ParseAllSentences(currentCFHypothesis, _learner._sentencesParser);
+                //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
 
             }
             _learner.RefreshParses();

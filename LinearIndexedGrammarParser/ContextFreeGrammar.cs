@@ -174,7 +174,7 @@ namespace LinearIndexedGrammarParser
 
                 if (found == false)
                 {
-                    int x = 1;//bug.
+                    throw new Exception("illegal GenerateStaticRuleFromDynamicRule");
                 }
             }
             return newRule;

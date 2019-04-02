@@ -219,14 +219,8 @@ namespace LinearIndexedGrammarParser
 
         private void TraversePredictedStatesToDelete(EarleyColumn col, Dictionary<DerivedCategory, HashSet<Rule>> predictionSet, HashSet<EarleyState> statesRemovedInLastReparse)
         {
-            int counter = 0;
             while (col.ActionableNonTerminalsToPredict.Count > 0)
             {
-                counter++;
-                if (counter > 100)
-                {
-                    throw new Exception("loop of unpredictions!");
-                }
                 var nextTerm = col.ActionableNonTerminalsToPredict.Dequeue();
 
                 //you might need to re-check the term following deletions of other predicted states!

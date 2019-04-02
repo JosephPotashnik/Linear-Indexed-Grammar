@@ -57,7 +57,7 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "PalindromeCFGWithTD.txt",
       "DataFileName": null
-    }
+    },
     {
       "IsCFG": false,
       "VocabularyFileName": "Vocabulary.json",
