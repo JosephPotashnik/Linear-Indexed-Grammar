@@ -41,10 +41,18 @@ namespace LinearIndexedGrammar
                 RunProgram(programParams);
         }
 
-        private static void Main()
+        private static void Main(string[] args)
         {
+            bool nightRun = false;
+            if (args.Length > 0)
+            {
+                if (args[0] != "-NightRun" || args.Length > 1)
+                    throw new Exception("the single (optional) argument expected is \"-NightRun\"");
+                nightRun = true;
+            }
+
             ConfigureLogger();
-            Learn();
+            Learn(nightRun);
         }
 
         private static void ConfigureLogger()
