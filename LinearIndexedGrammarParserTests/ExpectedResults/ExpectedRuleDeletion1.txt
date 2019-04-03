@@ -1,0 +1,46 @@
+col 0
+Predecessors:
+key START
+Gamma -> $ START [0-0]
+key NP
+START -> $ NP VP [0-0]
+key ZP
+START -> $ ZP VP [0-0]
+Predicted:
+key 1
+Gamma -> $ START [0-0]
+key 2
+START -> $ NP VP [0-0]
+key 3
+START -> $ ZP VP [0-0]
+Reductors:
+key D
+D -> the $ [0-1]
+col 1
+Predecessors:
+Predicted:
+Reductors:
+key N
+N -> man $ [1-2]
+col 2
+Predecessors:
+Predicted:
+Reductors:
+key V1
+V1 -> kissed $ [2-3]
+col 3
+Predecessors:
+Predicted:
+Reductors:
+key D
+D -> the $ [3-4]
+col 4
+Predecessors:
+Predicted:
+Reductors:
+key N
+N -> woman $ [4-5]
+col 5
+Predecessors:
+Predicted:
+Reductors:

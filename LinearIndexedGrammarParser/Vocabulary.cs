@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
@@ -81,25 +80,25 @@ namespace LinearIndexedGrammarParser
                 }
             }
         }
-        
+
         //filter sentences with words that are not recognized by vocabulary
         //note: this function also adds inflected nouns and conjugated verbs in text to
         //the vocabulary they are not present (i.e. remembered (-> remember), gates -> gate)
         public string[][] LeaveOnlySentencesWithWordsInVocabulary(IEnumerable<string> sentences)
         {
-            List<string[]> sentencesToLearn = new List<string[]>();
-            HashSet<string> wordsNotInVocabulary = new HashSet<string>();
-            HashSet<string> encounteredWords = new HashSet<string>();
+            var sentencesToLearn = new List<string[]>();
+            var wordsNotInVocabulary = new HashSet<string>();
+            var encounteredWords = new HashSet<string>();
             foreach (var sentence1 in sentences)
             {
                 //first stage of preprocessing =
                 //replace contractions with full words.
                 var sentence = ReplaceContractions(sentence1);
-                bool unableToResolveWord = false;
+                var unableToResolveWord = false;
 
                 //split to words
-                var sentenceWords = sentence.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                Dictionary<string, List<string>> newWords = new Dictionary<string, List<string>>
+                var sentenceWords = sentence.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+                var newWords = new Dictionary<string, List<string>>
                 {
                     ["N"] = new List<string>(),
                     ["V"] = new List<string>(),
@@ -113,7 +112,7 @@ namespace LinearIndexedGrammarParser
                 //if it does not appear in dictionary,
                 //infer its base form and part of speech from known conjugations
                 //(i.e ing/ed/s , er/est, etc)
-                List<string> s = new List<string>();
+                var s = new List<string>();
                 foreach (var wordOrig in sentenceWords)
                 {
                     //trim leading or trailing single apostrophe
@@ -152,7 +151,7 @@ namespace LinearIndexedGrammarParser
                     }
                     else if (word.EndsWith("s") || word.EndsWith("es") || word.EndsWith("ies"))
                     {
-                        List<string> baseWords = new List<string>();
+                        var baseWords = new List<string>();
                         //"s"
                         baseWords.Add(word.Substring(0, word.Length - 1));
 
@@ -162,7 +161,6 @@ namespace LinearIndexedGrammarParser
                             baseWords.Add(word.Substring(0, word.Length - 2));
 
                         foreach (var baseWord in baseWords)
-                        {
                             if (ContainsWord(baseWord))
                             {
                                 var possiblePOS = WordWithPossiblePOS[baseWord];
@@ -181,12 +179,11 @@ namespace LinearIndexedGrammarParser
 
                                 //adverbs and adjectives in English do not conjugate.
                             }
-                        }
                     }
                     //superlative (more)
                     else if (word.EndsWith("er") || word.EndsWith("ier"))
                     {
-                        List<string> baseWords = new List<string>();
+                        var baseWords = new List<string>();
                         //"er"
                         baseWords.Add(word.Substring(0, word.Length - 1)); //safer -> safe
                         baseWords.Add(word.Substring(0, word.Length - 2)); //thicker -> thick
@@ -195,7 +192,6 @@ namespace LinearIndexedGrammarParser
                             baseWords.Add(word.Substring(0, word.Length - 3) + "y");
 
                         foreach (var baseWord in baseWords)
-                        {
                             if (ContainsWord(baseWord))
                             {
                                 var possiblePOS = WordWithPossiblePOS[baseWord];
@@ -206,12 +202,11 @@ namespace LinearIndexedGrammarParser
                                     newWords["ADJ"].Add(word);
                                 }
                             }
-                        }
                     }
                     //superlatives (most)
                     else if (word.EndsWith("est") || word.EndsWith("iest"))
                     {
-                        List<string> baseWords = new List<string>();
+                        var baseWords = new List<string>();
                         //"est"
                         baseWords.Add(word.Substring(0, word.Length - 3)); //thickest -> thick
                         baseWords.Add(word.Substring(0, word.Length - 2)); //safest -> safe
@@ -220,7 +215,6 @@ namespace LinearIndexedGrammarParser
                             baseWords.Add(word.Substring(0, word.Length - 4) + "y");
 
                         foreach (var baseWord in baseWords)
-                        {
                             if (ContainsWord(baseWord))
                             {
                                 var possiblePOS = WordWithPossiblePOS[baseWord];
@@ -231,17 +225,14 @@ namespace LinearIndexedGrammarParser
                                     unableToResolveWord = false;
                                 }
                             }
-                        }
                     }
 
                     if (!ContainsWord(word))
-                    {
-                        if (unableToResolveWord == true)
+                        if (unableToResolveWord)
                         {
                             wordsNotInVocabulary.Add(word);
                             break;
                         }
-                    }
 
                     unableToResolveWord = false;
                     s.Add(word);
@@ -251,8 +242,7 @@ namespace LinearIndexedGrammarParser
                     AddWordsToPOSCategory(pos, newWords[pos].ToArray());
 
                 if (unableToResolveWord == false && s.Count > 0)
-                   sentencesToLearn.Add(s.ToArray());
-
+                    sentencesToLearn.Add(s.ToArray());
             }
 
             return sentencesToLearn.ToArray();
@@ -264,19 +254,18 @@ namespace LinearIndexedGrammarParser
 
         private string ReplaceContractions(string sentence)
         {
-            string s = sentence.Replace("'ll", " will"); //ambiguous: I'll = I will / I shall
-            string s1 = s.Replace("'ve", " have");
-            string s2 = s1.Replace("'m", " am");
-            string s3 = s2.Replace("'d", " had"); //ambiguous: I'd = I had / I would, how'd = how did / how would.
-            string s4 = s3.Replace("n't", " not");
-            string s5 = s4.Replace("'re", " are");
+            var s = sentence.Replace("'ll", " will"); //ambiguous: I'll = I will / I shall
+            var s1 = s.Replace("'ve", " have");
+            var s2 = s1.Replace("'m", " am");
+            var s3 = s2.Replace("'d", " had"); //ambiguous: I'd = I had / I would, how'd = how did / how would.
+            var s4 = s3.Replace("n't", " not");
+            var s5 = s4.Replace("'re", " are");
 
             //
             //string s6 = s5.Replace("'s", " is"); //ambiguous: it's = it is / it has
             //another problem: 's could be also the possessive:
             //[john's father] -> not! [john is/has father].
             return s5;
-
         }
 
         //private bool RuleOutSentence(string prevWord, string word)

@@ -1,28 +1,71 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.Text;
 
 namespace LinearIndexedGrammarParser
 {
     public class EarleyState : IEquatable<EarleyState>
     {
-        public EarleyState(Rule r, int dotIndex, EarleyColumn c, EarleyNode n)
+        public string BracketedTreeRepresentation;
+        public HashSet<EarleyState> Parents = new HashSet<EarleyState>();
+
+        public EarleyState(Rule r, int dotIndex, EarleyColumn c)
         {
             Rule = r;
             DotIndex = dotIndex;
             StartColumn = c;
             EndColumn = null;
-            Node = n;
         }
 
+        public bool Added { get; set; }
         public Rule Rule { get; }
         public EarleyColumn StartColumn { get; }
         public EarleyColumn EndColumn { get; set; }
         public int DotIndex { get; }
-        public EarleyNode Node { get; set; }
-
+        public EarleyState Predecessor { get; set; }
+        public EarleyState Reductor { get; set; }
         public bool IsCompleted => DotIndex >= Rule.RightHandSide.Length;
 
         public DerivedCategory NextTerm => IsCompleted ? null : Rule.RightHandSide[DotIndex];
+
+        public bool Equals(EarleyState other)
+        {
+            return this == other;
+        }
+
+        public void CreateBracketedRepresentation(StringBuilder sb, ContextFreeGrammar g)
+        {
+            if (IsCompleted) sb.Append($"({Rule.LeftHandSide} ");
+
+            //predecessor
+            if (DotIndex > 1)
+            {
+                Predecessor.CreateBracketedRepresentation(sb, g);
+                sb.Append(" ");
+            }
+
+            //reductor
+            if (g.StaticRules.ContainsKey(Rule.RightHandSide[DotIndex - 1]))
+                Reductor.CreateBracketedRepresentation(sb, g);
+            else
+                sb.Append($"{Rule.RightHandSide[DotIndex - 1]}");
+
+            if (IsCompleted) sb.Append(")");
+        }
+
+        public List<EarleyState> GetTransitiveClosureOfParents()
+        {
+            var l = new List<EarleyState>();
+
+            foreach (var parent in Parents)
+            {
+                l.Add(parent);
+                var grandParents = parent.GetTransitiveClosureOfParents();
+                l.AddRange(grandParents);
+            }
+
+            return l;
+        }
 
         private static string RuleWithDotNotation(Rule rule, int dotIndex)
         {
@@ -34,15 +77,15 @@ namespace LinearIndexedGrammarParser
                     return $"{rule.LeftHandSide} -> $ {rule.RightHandSide[0]}";
 
                 return $"{rule.LeftHandSide} -> {rule.RightHandSide[0]} $";
-
             }
+
             //length  = 2
             if (dotIndex == 0)
                 return $"{rule.LeftHandSide} -> $ {rule.RightHandSide[0]} {rule.RightHandSide[1]}";
             if (dotIndex == 1)
                 return $"{rule.LeftHandSide} -> {rule.RightHandSide[0]} $ {rule.RightHandSide[1]}";
 
-            return $"{rule.LeftHandSide} -> {rule.RightHandSide[0]} {rule.RightHandSide[1]} $";  
+            return $"{rule.LeftHandSide} -> {rule.RightHandSide[0]} {rule.RightHandSide[1]} $";
         }
 
         public override string ToString()
@@ -66,35 +109,24 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-
-        public static EarleyNode MakeNode(EarleyState predecessorState, int endIndex, EarleyNode reductor)
+        public string GetNonTerminalStringUnderNode(HashSet<string> pos)
         {
-            EarleyNode y;
-            var nextDotIndex = predecessorState.DotIndex + 1;
-            var nodeName = RuleWithDotNotation(predecessorState.Rule, nextDotIndex);
-
-            if (nextDotIndex == 1 && predecessorState.Rule.RightHandSide.Length > 1)
-            {
-                y = reductor;
-            }
-            else
-            {
-                y = new EarleyNode(nodeName, predecessorState.StartColumn.Index, endIndex);
-                if (!y.HasChildren())
-                    y.AddChildren(reductor, predecessorState.Node);
-
-                y.RuleNumber = predecessorState.Rule.NumberOfGeneratingRule;
-            }
-
-            return y;
+            var leaves = new List<string>();
+            GetNonTerminalStringUnderNode(leaves, pos);
+            return string.Join(" ", leaves);
         }
 
-        public bool Equals(EarleyState other)
+        private void GetNonTerminalStringUnderNode(List<string> leavesList, HashSet<string> pos)
         {
-            var val = Rule.Equals(other.Rule) && DotIndex == other.DotIndex && StartColumn.Index == other.StartColumn.Index;
-            if (Node == null || other.Node == null)
-                return val;
-            return val && Node.Equals(other.Node);
+            if (!IsCompleted)
+            {
+                var nextTerm = NextTerm.ToString();
+                if (pos.Contains(nextTerm))
+                    leavesList.Insert(0, nextTerm);
+            }
+
+            Reductor?.GetNonTerminalStringUnderNode(leavesList, pos);
+            Predecessor?.GetNonTerminalStringUnderNode(leavesList, pos);
         }
     }
 }

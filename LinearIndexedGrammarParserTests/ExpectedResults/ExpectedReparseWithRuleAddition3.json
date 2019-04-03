@@ -1,51 +1,44 @@
 [
   {
-    "Name": "START -> PP CPPP $",
+    "Name": "START -> NP YP $",
     "StartIndex": 0,
-    "EndIndex": 6,
+    "EndIndex": 7,
     "Children": [
       {
-        "Name": "PP -> P NP $",
+        "Name": "NP -> D N $",
         "StartIndex": 0,
-        "EndIndex": 3,
+        "EndIndex": 2,
         "Children": [
           {
-            "Name": "P",
+            "Name": "D",
             "StartIndex": 0,
             "EndIndex": 1,
-            "AssociatedTerminal": "to"
+            "AssociatedTerminal": "the"
           },
           {
-            "Name": "NP -> D N $",
+            "Name": "N",
             "StartIndex": 1,
-            "EndIndex": 3,
-            "Children": [
-              {
-                "Name": "D",
-                "StartIndex": 1,
-                "EndIndex": 2,
-                "AssociatedTerminal": "a"
-              },
-              {
-                "Name": "N",
-                "StartIndex": 2,
-                "EndIndex": 3,
-                "AssociatedTerminal": "girl"
-              }
-            ]
+            "EndIndex": 2,
+            "AssociatedTerminal": "man"
           }
         ]
       },
       {
-        "Name": "CPPP -> IPPP $",
-        "StartIndex": 3,
-        "EndIndex": 6,
+        "Name": "YP -> VP ADJP $",
+        "StartIndex": 2,
+        "EndIndex": 7,
         "Children": [
           {
-            "Name": "IPPP -> NP VPPP $",
-            "StartIndex": 3,
-            "EndIndex": 6,
+            "Name": "VP -> V1 NP $",
+            "StartIndex": 2,
+            "EndIndex": 5,
             "Children": [
+              {
+                "Name": "V1",
+                "StartIndex": 2,
+                "EndIndex": 3,
+                "AssociatedTerminal": "kissed"
+              },
               {
                 "Name": "NP -> D N $",
                 "StartIndex": 3,
@@ -61,25 +54,33 @@
                     "Name": "N",
                     "StartIndex": 4,
                     "EndIndex": 5,
-                    "AssociatedTerminal": "man"
+                    "AssociatedTerminal": "woman"
                   }
                 ]
-              },
+              }
+            ]
+          },
+          {
+            "Name": "ADJP -> NP $",
+            "StartIndex": 5,
+            "EndIndex": 7,
+            "Children": [
               {
-                "Name": "VPPP -> V2 PPPP $",
+                "Name": "NP -> D N $",
                 "StartIndex": 5,
-                "EndIndex": 6,
+                "EndIndex": 7,
                 "Children": [
                   {
-                    "Name": "V2",
+                    "Name": "D",
                     "StartIndex": 5,
                     "EndIndex": 6,
-                    "AssociatedTerminal": "went"
+                    "AssociatedTerminal": "the"
                   },
                   {
-                    "Name": "PPPP -> Epsilon $",
+                    "Name": "N",
                     "StartIndex": 6,
-                    "EndIndex": 6
+                    "EndIndex": 7,
+                    "AssociatedTerminal": "woman"
                   }
                 ]
               }

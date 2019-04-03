@@ -22,9 +22,16 @@
             "AssociatedTerminal": "went"
           },
           {
-            "Name": "trace",
+            "Name": "STARTV2 -> V2V2 $",
             "StartIndex": 2,
-            "EndIndex": 2
+            "EndIndex": 2,
+            "Children": [
+              {
+                "Name": "V2V2 -> Epsilon $",
+                "StartIndex": 2,
+                "EndIndex": 2
+              }
+            ]
           }
         ]
       }
