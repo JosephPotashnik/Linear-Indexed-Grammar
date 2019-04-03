@@ -18,7 +18,7 @@ namespace LinearIndexedGrammarLearner
     {
         private readonly Learner _learner;
         private readonly IObjectiveFunction _objectiveFunction;
-        private SimulatedAnnealingParameters _params;
+        private readonly SimulatedAnnealingParameters _params;
 
         public SimulatedAnnealing(Learner l, SimulatedAnnealingParameters parameters,
             IObjectiveFunction objectiveFunction)
@@ -34,36 +34,61 @@ namespace LinearIndexedGrammarLearner
             var currentTemp = _params.InitialTemperature;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
-            //int counter = 0;
+            var counter = 1;
             while (currentTemp > 0.3)
-            { 
-                var mutatedGrammar = _learner.GetNeighbor(currentGrammar);
+            {
+                var reparsed = false;
+                var (mutatedGrammar, r, op) = _learner.GetNeighbor(currentGrammar);
                 currentTemp *= _params.CoolingFactor;
                 if (mutatedGrammar == null) continue;
 
-                var newValue =  _objectiveFunction.Compute(mutatedGrammar);
-                //if (counter++ % 100 == 0)
-                //    LogManager.GetCurrentClassLogger().Info($"currentTemp {currentTemp}, probability {newValue}");
+                if (op == GrammarPermutationsOperation.Addition)
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                else
+                    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
+
+                if (reparsed == false) continue;
+
+                var newValue = _objectiveFunction.Compute(mutatedGrammar);
 
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
                 if (accept)
                 {
                     currentValue = newValue;
                     currentGrammar = mutatedGrammar;
+                    _learner.AcceptChanges();
                     if (_objectiveFunction.IsMaximalValue(currentValue)) break;
-
                 }
+                else
+                {
+                    _learner.RejectChanges();
+                }
+
+                //var currentCFHypothesis = new ContextFreeGrammar(currentGrammar);
+                ////uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
+                //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
             }
 
-            var ruleDistribution = _learner.CollectUsages(currentGrammar);
+            _learner.RefreshParses();
+            var ruleDistribution = _learner.CollectUsages();
             currentGrammar.PruneUnusedRules(ruleDistribution);
+            //after pruning unused rules, parse from scratch in order to remove
+            //all resultant unused earley items (i.e, all items using those unused rules
+            //that are a part of partial, unsuccessful, derivation)
+            _learner.ParseAllSentencesFromScratch(currentGrammar);
             return (currentGrammar, currentValue);
         }
 
-        public (ContextSensitiveGrammar bestGrammar, double bestValue) Run(bool isCFGGrammar, ContextSensitiveGrammar initiaGrammar = null)
+        public (ContextSensitiveGrammar bestGrammar, double bestValue) Run(bool isCFGGrammar,
+            ContextSensitiveGrammar initiaGrammar = null)
         {
             var currentIteration = 0;
             var currentGrammar = initiaGrammar ?? _learner.CreateInitialGrammar(isCFGGrammar);
+
+            //set the parsers to the initial grammar.
+            _learner.ParseAllSentencesFromScratch(currentGrammar);
+
+
             var currentValue = _objectiveFunction.Compute(currentGrammar);
 
             //if current grammar is already optimal on data, no need to learn anything,
@@ -71,22 +96,23 @@ namespace LinearIndexedGrammarLearner
             if (_objectiveFunction.IsMaximalValue(currentValue))
                 return (currentGrammar, currentValue);
 
-            PriorityQueue<double, ContextSensitiveGrammar> bestGrammars = new PriorityQueue<double, ContextSensitiveGrammar>();
-            int numberOfBestGrammarsToKeep = 10;
-            for (int i = 0; i < numberOfBestGrammarsToKeep; i++)
+            var bestGrammars = new PriorityQueue<double, ContextSensitiveGrammar>();
+            var numberOfBestGrammarsToKeep = 10;
+            for (var i = 0; i < numberOfBestGrammarsToKeep; i++)
                 bestGrammars.Enqueue(currentValue, new ContextSensitiveGrammar(currentGrammar));
 
-            double smallestBestValue = bestGrammars.PeekFirstKey();
-            int noImprovemetCounter = 0;
+            var smallestBestValue = bestGrammars.PeekFirstKey();
+            var noImprovemetCounter = 0;
 
             while (currentIteration++ < _params.NumberOfIterations)
             {
-
                 LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, probability {currentValue}");
                 (currentGrammar, currentValue) = RunSingleIteration(currentGrammar, currentValue);
 
                 if (_objectiveFunction.IsMaximalValue(currentValue))
                 {
+                    //SEFI
+                    //LogManager.GetCurrentClassLogger().Info($"Best Grammar so far {currentGrammar}\r\n, probability {currentValue}");
                     bestGrammars.Enqueue(currentValue, currentGrammar);
                     break;
                 }
@@ -97,23 +123,22 @@ namespace LinearIndexedGrammarLearner
                     bestGrammars.Dequeue();
                     bestGrammars.Enqueue(currentValue, currentGrammar);
                     smallestBestValue = bestGrammars.PeekFirstKey();
-
                 }
                 else
                 {
                     noImprovemetCounter++;
                 }
 
-                if (noImprovemetCounter == 50)
+                if (noImprovemetCounter == 20)
                 {
                     var rand = new Random();
-                    int randomPastBestGrammar = rand.Next(numberOfBestGrammarsToKeep);
+                    var randomPastBestGrammar = rand.Next(numberOfBestGrammarsToKeep);
                     var candidates = bestGrammars.KeyValuePairs.ToArray();
                     noImprovemetCounter = 0;
                     currentValue = candidates[randomPastBestGrammar].Item1;
                     currentGrammar = candidates[randomPastBestGrammar].Item2;
-                    LogManager.GetCurrentClassLogger().Info($"reverting to random previous best grammar that has probability {currentValue}");
-
+                    LogManager.GetCurrentClassLogger()
+                        .Info($"reverting to random previous best grammar that has probability {currentValue}");
                 }
             }
 

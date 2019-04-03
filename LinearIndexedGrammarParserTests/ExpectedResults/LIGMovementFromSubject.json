@@ -34,7 +34,7 @@
             "EndIndex": 5,
             "Children": [
               {
-                "Name": "trace",
+                "Name": "NPNP -> Epsilon $",
                 "StartIndex": 2,
                 "EndIndex": 2
               },

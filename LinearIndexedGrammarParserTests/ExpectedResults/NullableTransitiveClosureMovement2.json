@@ -34,7 +34,7 @@
                 ]
               },
               {
-                "Name": "trace",
+                "Name": "X4 -> Epsilon $",
                 "StartIndex": 2,
                 "EndIndex": 2
               }
@@ -46,7 +46,7 @@
             "EndIndex": 3,
             "Children": [
               {
-                "Name": "trace",
+                "Name": "X6 -> Epsilon $",
                 "StartIndex": 2,
                 "EndIndex": 2
               },

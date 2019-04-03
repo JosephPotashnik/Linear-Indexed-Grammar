@@ -1,9 +1,43 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
+    public class RuleReferenceEquals : IEqualityComparer<Rule>
+    {
+        public bool Equals(Rule x, Rule y)
+        {
+            return x == y;
+        }
+
+        public int GetHashCode(Rule obj)
+        {
+            return obj.GetHashCode();
+        }
+    }
+
+    public class RuleValueEquals : IEqualityComparer<Rule>
+    {
+        public bool Equals(Rule x, Rule y)
+        {
+            if (!x.LeftHandSide.Equals(y.LeftHandSide)) return false;
+            if (x.RightHandSide.Length != y.RightHandSide.Length) return false;
+
+            for (var i = 0; i < x.RightHandSide.Length; i++)
+                if (!x.RightHandSide[i].Equals(y.RightHandSide[i]))
+                    return false;
+
+            return true;
+        }
+
+        public int GetHashCode(Rule obj)
+        {
+            return obj.GetHashCode();
+        }
+    }
+
     [JsonObject(MemberSerialization.OptIn)]
     public class Rule : IEquatable<Rule>
     {
@@ -11,31 +45,28 @@ namespace LinearIndexedGrammarParser
         {
         }
 
-        public Rule(DerivedCategory leftHandSide, DerivedCategory[] rightHandSide, int num = -1)
+        public Rule(DerivedCategory leftHandSide, DerivedCategory[] rightHandSide)
         {
             LeftHandSide = new DerivedCategory(leftHandSide);
             if (rightHandSide != null)
             {
-                int length = rightHandSide.Length;
+                var length = rightHandSide.Length;
                 RightHandSide = new DerivedCategory[length];
-                for (int i = 0; i < length; i++)
+                for (var i = 0; i < length; i++)
                     RightHandSide[i] = new DerivedCategory(rightHandSide[i]);
             }
-
-            Number = num;
         }
 
-        public Rule(string leftHandSide, string[] rightHandSide, int num = -1)
+        public Rule(string leftHandSide, string[] rightHandSide)
         {
             LeftHandSide = new DerivedCategory(leftHandSide);
             if (rightHandSide != null)
             {
-                int length = rightHandSide.Length;
+                var length = rightHandSide.Length;
                 RightHandSide = new DerivedCategory[length];
-                for (int i = 0; i < length; i++)
+                for (var i = 0; i < length; i++)
                     RightHandSide[i] = new DerivedCategory(rightHandSide[i]);
             }
-            Number = num;
         }
 
         public Rule(Rule otherRule)
@@ -43,12 +74,12 @@ namespace LinearIndexedGrammarParser
             LeftHandSide = new DerivedCategory(otherRule.LeftHandSide);
             if (otherRule.RightHandSide != null)
             {
-                int length = otherRule.RightHandSide.Length;
+                var length = otherRule.RightHandSide.Length;
                 RightHandSide = new DerivedCategory[length];
-                for (int i = 0; i < length; i++)
+                for (var i = 0; i < length; i++)
                     RightHandSide[i] = new DerivedCategory(otherRule.RightHandSide[i]);
             }
-            Number = otherRule.Number;
+
             NumberOfGeneratingRule = otherRule.NumberOfGeneratingRule;
         }
 
@@ -56,28 +87,27 @@ namespace LinearIndexedGrammarParser
 
         [JsonProperty] public DerivedCategory[] RightHandSide { get; set; }
 
-        public int Number { get; set; }
         public int NumberOfGeneratingRule { get; set; }
 
-        public override string ToString() 
+        public bool Equals(Rule other)
+        {
+            return NumberOfGeneratingRule == other.NumberOfGeneratingRule;
+        }
+
+        public override string ToString()
         {
             var p = RightHandSide.Select(x => x.ToString()).ToArray();
-            return $"{Number}. {LeftHandSide} -> {string.Join(" ", p)}";
+            return $"{NumberOfGeneratingRule}. {LeftHandSide} -> {string.Join(" ", p)}";
         }
 
         public override int GetHashCode()
         {
-            return Number;
+            return NumberOfGeneratingRule;
         }
 
-        public bool IsEpsilonRule()
+        public bool IsEpsilon()
         {
             return RightHandSide[0].IsEpsilon();
-        }
-
-        public bool Equals(Rule other)
-        {
-            return Number == other.Number;
         }
     }
 }

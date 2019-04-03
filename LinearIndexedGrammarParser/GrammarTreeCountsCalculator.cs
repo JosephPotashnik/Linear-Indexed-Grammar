@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace LinearIndexedGrammarParser
 {
     public class GrammarTreeCountsCalculator
     {
-        private SubTreeCountsCache _cache;
-        public ContextFreeGrammar _g;
         private readonly HashSet<string> _pos;
 
         private readonly int _treeDepth;
+        private SubTreeCountsCache _cache;
+        public ContextFreeGrammar _g;
 
         public GrammarTreeCountsCalculator(HashSet<string> pos, int min, int max)
         {
@@ -20,7 +18,7 @@ namespace LinearIndexedGrammarParser
 
         public int[] NumberOfParseTreesPerWords()
         {
-            return ParseTreesForCategoryInDepth(new DerivedCategory(ContextFreeGrammar.StartSymbol), _treeDepth-1);
+            return ParseTreesForCategoryInDepth(new DerivedCategory(ContextFreeGrammar.StartSymbol), _treeDepth - 1);
         }
 
         //in a given depth treedepth, we have array of arr[wc] = tc;
@@ -36,12 +34,7 @@ namespace LinearIndexedGrammarParser
             while (IsEmpty(cachedRuleCounts) && ++indexInRuleCacheArr < _treeDepth)
                 cachedRuleCounts = storedCountsOfRules[indexInRuleCacheArr];
 
-            if (!IsEmpty(cachedRuleCounts))
-            {
-                //if (cachedRuleCounts != ruleCounts)
-                //   UpdateCounts(ruleCounts, cachedRuleCounts);
-                return cachedRuleCounts;
-            }
+            if (!IsEmpty(cachedRuleCounts)) return cachedRuleCounts;
 
             //from now on, not found cached rule information
             var rhs = r.RightHandSide;
@@ -68,10 +61,10 @@ namespace LinearIndexedGrammarParser
 
         private void UpdateCounts(int[] res, int[] fromCat1, int[] fromCat2)
         {
-            for (int i = 0; i < _treeDepth; i++)
+            for (var i = 0; i < _treeDepth; i++)
             {
                 if (fromCat1[i] <= 0) continue;
-                for (int j = 0; j < _treeDepth; j++)
+                for (var j = 0; j < _treeDepth; j++)
                 {
                     if (fromCat2[j] <= 0) continue;
 
@@ -80,16 +73,13 @@ namespace LinearIndexedGrammarParser
 
                     if (wc < _treeDepth)
                         res[wc] += tc;
-
                 }
-
             }
-
         }
 
         private bool IsEmpty(int[] res)
         {
-            return (res[_treeDepth] == 0);
+            return res[_treeDepth] == 0;
         }
 
         private int[] ParseTreesForCategoryInDepth(DerivedCategory cat, int treeDepth)
@@ -104,16 +94,11 @@ namespace LinearIndexedGrammarParser
             while (IsEmpty(cachedCategoryCounts) && ++indexInCatCacheArr < _treeDepth)
                 cachedCategoryCounts = storedCountsOfCat[indexInCatCacheArr];
 
-            if (!IsEmpty(cachedCategoryCounts))
-            {
-                //if (cachedCategoryCounts != categoryCounts)
-                //    UpdateCounts(categoryCounts, cachedCategoryCounts);
-                return cachedCategoryCounts;
-            }
+            if (!IsEmpty(cachedCategoryCounts)) return cachedCategoryCounts;
 
             //from now on, not found cached category information.
             if (_g.StaticRules.ContainsKey(cat))
-            {                
+            {
                 var ruleList = _g.StaticRules[cat];
                 foreach (var rule in ruleList)
                 {
@@ -146,7 +131,7 @@ namespace LinearIndexedGrammarParser
 
         private void UpdateCounts(int[] res, int[] fromRHS)
         {
-            for (int i = 0; i < _treeDepth; i++)
+            for (var i = 0; i < _treeDepth; i++)
                 res[i] += fromRHS[i];
         }
 
@@ -158,7 +143,4 @@ namespace LinearIndexedGrammarParser
             return NumberOfParseTreesPerWords();
         }
     }
-
-
-
 }

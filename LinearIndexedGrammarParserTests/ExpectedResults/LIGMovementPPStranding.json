@@ -75,7 +75,7 @@
                         "AssociatedTerminal": "to"
                       },
                       {
-                        "Name": "trace",
+                        "Name": "NPNP -> Epsilon $",
                         "StartIndex": 6,
                         "EndIndex": 6
                       }

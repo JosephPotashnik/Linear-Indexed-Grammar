@@ -1,0 +1,250 @@
+col 0
+Predecessors:
+key START
+Gamma -> $ START [0-0]
+key NP
+START -> $ NP VP [0-0]
+NP -> $ NP ADJP [0-0]
+key D
+NP -> $ D N [0-0]
+key PN
+NP -> $ PN [0-0]
+Predicted:
+key 1
+Gamma -> $ START [0-0]
+key 2
+START -> $ NP VP [0-0]
+key 3
+NP -> $ D N [0-0]
+key 4
+NP -> $ PN [0-0]
+key 6
+NP -> $ NP ADJP [0-0]
+Reductors:
+key PN
+PN -> John $ [0-1]
+key NP
+NP -> PN $ [0-1]
+col 1
+Predecessors:
+key VP
+START -> NP $ VP [0-1]
+VP -> $ VP ADJP [1-1]
+key D
+NP -> $ D N [1-1]
+key ADJP
+NP -> NP $ ADJP [0-1]
+key V0
+VP -> $ V0 [1-1]
+key NP
+ADJP -> $ NP [1-1]
+NP -> $ NP ADJP [1-1]
+key PN
+NP -> $ PN [1-1]
+Predicted:
+key 7
+VP -> $ V0 [1-1]
+key 8
+VP -> $ VP ADJP [1-1]
+key 9
+ADJP -> $ NP [1-1]
+key 3
+NP -> $ D N [1-1]
+key 4
+NP -> $ PN [1-1]
+key 6
+NP -> $ NP ADJP [1-1]
+Reductors:
+key D
+D -> a $ [1-2]
+col 2
+Predecessors:
+key N
+NP -> D $ N [1-2]
+key VP
+VP -> $ VP ADJP [2-2]
+key D
+NP -> $ D N [2-2]
+key V0
+VP -> $ V0 [2-2]
+key NP
+NP -> $ NP ADJP [2-2]
+key PN
+NP -> $ PN [2-2]
+Predicted:
+key 7
+VP -> $ V0 [2-2]
+key 8
+VP -> $ VP ADJP [2-2]
+key 3
+NP -> $ D N [2-2]
+key 4
+NP -> $ PN [2-2]
+key 6
+NP -> $ NP ADJP [2-2]
+Reductors:
+key D
+D -> the $ [2-3]
+col 3
+Predecessors:
+key N
+NP -> D $ N [2-3]
+key VP
+VP -> $ VP ADJP [3-3]
+key D
+NP -> $ D N [3-3]
+key V0
+VP -> $ V0 [3-3]
+key NP
+NP -> $ NP ADJP [3-3]
+key PN
+NP -> $ PN [3-3]
+Predicted:
+key 7
+VP -> $ V0 [3-3]
+key 8
+VP -> $ VP ADJP [3-3]
+key 3
+NP -> $ D N [3-3]
+key 4
+NP -> $ PN [3-3]
+key 6
+NP -> $ NP ADJP [3-3]
+Reductors:
+key D
+D -> a $ [3-4]
+col 4
+Predecessors:
+key N
+NP -> D $ N [3-4]
+key VP
+VP -> $ VP ADJP [4-4]
+key D
+NP -> $ D N [4-4]
+key V0
+VP -> $ V0 [4-4]
+key NP
+NP -> $ NP ADJP [4-4]
+key PN
+NP -> $ PN [4-4]
+Predicted:
+key 7
+VP -> $ V0 [4-4]
+key 8
+VP -> $ VP ADJP [4-4]
+key 3
+NP -> $ D N [4-4]
+key 4
+NP -> $ PN [4-4]
+key 6
+NP -> $ NP ADJP [4-4]
+Reductors:
+key D
+D -> the $ [4-5]
+col 5
+Predecessors:
+key N
+NP -> D $ N [4-5]
+key VP
+VP -> $ VP ADJP [5-5]
+key D
+NP -> $ D N [5-5]
+key V0
+VP -> $ V0 [5-5]
+key NP
+NP -> $ NP ADJP [5-5]
+key PN
+NP -> $ PN [5-5]
+Predicted:
+key 7
+VP -> $ V0 [5-5]
+key 8
+VP -> $ VP ADJP [5-5]
+key 3
+NP -> $ D N [5-5]
+key 4
+NP -> $ PN [5-5]
+key 6
+NP -> $ NP ADJP [5-5]
+Reductors:
+key D
+D -> a $ [5-6]
+col 6
+Predecessors:
+key N
+NP -> D $ N [5-6]
+key VP
+VP -> $ VP ADJP [6-6]
+key D
+NP -> $ D N [6-6]
+key V0
+VP -> $ V0 [6-6]
+key NP
+NP -> $ NP ADJP [6-6]
+key PN
+NP -> $ PN [6-6]
+Predicted:
+key 7
+VP -> $ V0 [6-6]
+key 8
+VP -> $ VP ADJP [6-6]
+key 3
+NP -> $ D N [6-6]
+key 4
+NP -> $ PN [6-6]
+key 6
+NP -> $ NP ADJP [6-6]
+Reductors:
+key D
+D -> the $ [6-7]
+col 7
+Predecessors:
+key N
+NP -> D $ N [6-7]
+key VP
+VP -> $ VP ADJP [7-7]
+key D
+NP -> $ D N [7-7]
+key V0
+VP -> $ V0 [7-7]
+key NP
+NP -> $ NP ADJP [7-7]
+key PN
+NP -> $ PN [7-7]
+Predicted:
+key 7
+VP -> $ V0 [7-7]
+key 8
+VP -> $ VP ADJP [7-7]
+key 3
+NP -> $ D N [7-7]
+key 4
+NP -> $ PN [7-7]
+key 6
+NP -> $ NP ADJP [7-7]
+Reductors:
+key V0
+V0 -> cried $ [7-8]
+key VP
+VP -> V0 $ [7-8]
+col 8
+Predecessors:
+key ADJP
+VP -> VP $ ADJP [7-8]
+key NP
+ADJP -> $ NP [8-8]
+NP -> $ NP ADJP [8-8]
+key D
+NP -> $ D N [8-8]
+key PN
+NP -> $ PN [8-8]
+Predicted:
+key 9
+ADJP -> $ NP [8-8]
+key 3
+NP -> $ D N [8-8]
+key 4
+NP -> $ PN [8-8]
+key 6
+NP -> $ NP ADJP [8-8]
+Reductors:

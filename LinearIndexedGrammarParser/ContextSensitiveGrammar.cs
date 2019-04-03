@@ -16,7 +16,7 @@ namespace LinearIndexedGrammarParser
             RHSIndex = other.RHSIndex;
             RuleType = other.RuleType;
         }
-        
+
         public int RuleType { get; set; }
 
         //the LHS index in the Rule Space (index 0 = LHS "X1", index 1 = LHS "X2", etc)
@@ -24,6 +24,11 @@ namespace LinearIndexedGrammarParser
 
         //the RHS index in the Rule Space ( same RHS index for different LHS indices means they share the same RHS)
         public int RHSIndex { get; set; }
+
+        public bool Equals(RuleCoordinates other)
+        {
+            return RuleType == other.RuleType && LHSIndex == other.LHSIndex && RHSIndex == other.RHSIndex;
+        }
 
         public override int GetHashCode()
         {
@@ -35,11 +40,6 @@ namespace LinearIndexedGrammarParser
                 return hashCode;
             }
         }
-
-        public bool Equals(RuleCoordinates other)
-        {
-            return RuleType == other.RuleType && LHSIndex == other.LHSIndex && RHSIndex == other.RHSIndex;
-        }
     }
 
     public class ContextSensitiveGrammar
@@ -50,9 +50,10 @@ namespace LinearIndexedGrammarParser
         //second index is RHS, the row in the relevant rule table such that [0][i] = [1][i] = [2][i] etc. 
         //(note, RHS index 0 is a special case, see RuleSpace class).
         public static RuleSpace RuleSpace;
+        public readonly Dictionary<int, int> MoveableReferences = new Dictionary<int, int>();
         public readonly List<RuleCoordinates> StackConstantRules = new List<RuleCoordinates>();
         public readonly List<RuleCoordinates> StackPush1Rules = new List<RuleCoordinates>();
-        public readonly Dictionary<int, int> MoveableReferences = new Dictionary<int, int>();
+
         public ContextSensitiveGrammar()
         {
         }
@@ -63,7 +64,9 @@ namespace LinearIndexedGrammarParser
             {
                 var rc = RuleSpace.FindRule(rule);
                 if (rc.RuleType == RuleType.CFGRules)
+                {
                     StackConstantRules.Add(rc);
+                }
                 else if (rc.RuleType == RuleType.Push1Rules)
                 {
                     StackPush1Rules.Add(rc);
@@ -78,13 +81,13 @@ namespace LinearIndexedGrammarParser
             StackPush1Rules = otherGrammar.StackPush1Rules.Select(x => new RuleCoordinates(x)).ToList();
             MoveableReferences = otherGrammar.MoveableReferences.ToDictionary(x => x.Key, x => x.Value);
         }
-        
+
         public override string ToString()
         {
             var s1 = "Stack Constant Rules:\r\n" +
-                     String.Join("\r\n", StackConstantRules.Select(x => RuleSpace[x].ToString()));
+                     string.Join("\r\n", StackConstantRules.Select(x => RuleSpace[x].ToString()));
             var s2 = "Stack Changing Rules:\r\n" +
-                     String.Join("\r\n", StackPush1Rules.Select(x => RuleSpace[x].ToString()));
+                     string.Join("\r\n", StackPush1Rules.Select(x => RuleSpace[x].ToString()));
             return s1 + "\r\n" + s2;
         }
 
@@ -117,33 +120,30 @@ namespace LinearIndexedGrammarParser
             try
             {
                 foreach (var rule in StackConstantRules)
-                {
                     if (RuleSpace[rule] == null)
                     {
-                        Console.WriteLine($"Rule lhs {rule.LHSIndex}, rule rhs {rule.RHSIndex}, rule space type: {rule.RuleType} ");
+                        Console.WriteLine(
+                            $"Rule lhs {rule.LHSIndex}, rule rhs {rule.RHSIndex}, rule space type: {rule.RuleType} ");
                         throw new Exception();
-
                     }
-                }
 
                 if (StackConstantRules == null)
                 {
-                    Console.WriteLine($"Stack Constant Rules is null");
+                    Console.WriteLine("Stack Constant Rules is null");
                     throw new Exception();
                 }
 
                 if (usagesDic == null)
                 {
-                    Console.WriteLine($"usages dic is null");
+                    Console.WriteLine("usages dic is null");
                     throw new Exception();
                 }
 
                 if (RuleSpace == null)
                 {
-                    Console.WriteLine($"rule space is null");
+                    Console.WriteLine("rule space is null");
                     throw new Exception();
                 }
-                    
             }
             catch (Exception e)
             {
@@ -153,17 +153,16 @@ namespace LinearIndexedGrammarParser
 
 
             var unusedConstantRules =
-                StackConstantRules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].Number)).ToArray();
+                StackConstantRules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].NumberOfGeneratingRule)).ToArray();
 
             foreach (var unusedRule in unusedConstantRules.ToList())
                 StackConstantRules.Remove(unusedRule);
 
             var unusedChangingRules =
-                StackPush1Rules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].Number)).ToArray();
+                StackPush1Rules.Where(x => !usagesDic.ContainsKey(RuleSpace[x].NumberOfGeneratingRule)).ToArray();
 
             foreach (var unusedRule in unusedChangingRules.ToList())
                 StackPush1Rules.Remove(unusedRule);
-
         }
 
         public void AddCorrespondingPopRule(RuleCoordinates rc)
@@ -171,8 +170,8 @@ namespace LinearIndexedGrammarParser
             var pushRule = RuleSpace[rc];
 
             //assumption: moveable is first RHS, to be relaxed.
-            string moveable = pushRule.RightHandSide[0].ToString();
-            int LHSIndex = RuleSpace.FindLHSIndex(moveable);
+            var moveable = pushRule.RightHandSide[0].ToString();
+            var LHSIndex = RuleSpace.FindLHSIndex(moveable);
             if (!MoveableReferences.ContainsKey(LHSIndex))
                 MoveableReferences[LHSIndex] = 0;
 
@@ -184,8 +183,8 @@ namespace LinearIndexedGrammarParser
         {
             var pushRule = RuleSpace[rc];
             //assumption: moveable is first RHS, to be relaxed.
-            string moveable = pushRule.RightHandSide[0].ToString();
-            int LHSIndex = RuleSpace.FindLHSIndex(moveable);
+            var moveable = pushRule.RightHandSide[0].ToString();
+            var LHSIndex = RuleSpace.FindLHSIndex(moveable);
             if (!MoveableReferences.ContainsKey(LHSIndex))
                 throw new Exception("missing key");
 

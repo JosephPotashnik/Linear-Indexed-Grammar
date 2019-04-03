@@ -17,6 +17,11 @@ namespace LinearIndexedGrammarParser
             Symbol = otherCategory.Symbol;
         }
 
+        public bool Equals(SyntacticCategory other)
+        {
+            return string.Equals(Symbol, other.Symbol);
+        }
+
         public override int GetHashCode()
         {
             return Symbol.GetHashCode();
@@ -30,11 +35,6 @@ namespace LinearIndexedGrammarParser
         internal bool IsEpsilon()
         {
             return Symbol == ContextFreeGrammar.EpsilonSymbol;
-        }
-
-        public bool Equals(SyntacticCategory other)
-        {
-            return string.Equals(Symbol, other.Symbol);
         }
     }
 
@@ -56,6 +56,11 @@ namespace LinearIndexedGrammarParser
         public int StackSymbolsCount { get; set; }
 
         private string Contents => Symbol + Stack;
+
+        public bool Equals(DerivedCategory other)
+        {
+            return string.Equals(Stack, other.Stack) && base.Equals(other);
+        }
 
 
         public override int GetHashCode()
@@ -95,11 +100,6 @@ namespace LinearIndexedGrammarParser
             if (moveable != null)
                 if (replaceDic.ContainsKey(moveable))
                     Stack = Stack.Replace(moveable, replaceDic[moveable]);
-        }
-
-        public bool Equals(DerivedCategory other)
-        {
-            return string.Equals(Stack, other.Stack) && base.Equals(other);
         }
     }
 }
