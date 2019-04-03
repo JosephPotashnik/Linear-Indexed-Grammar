@@ -43,7 +43,7 @@ namespace LinearIndexedGrammarParser
                 var scannedStateRule = new Rule(term.ToString(), new[] {token});
                 var scannedState = new EarleyState(scannedStateRule, 1, startColumn);
                 scannedState.EndColumn = nextCol;
-                stateList = new List<EarleyState> {scannedState};
+                stateList = new HashSet<EarleyState> {scannedState};
                 startColumn.Reductors.Add(term, stateList);
             }
 
@@ -73,7 +73,7 @@ namespace LinearIndexedGrammarParser
 
             if (!startColumn.Reductors.TryGetValue(reductorState.Rule.LeftHandSide, out var reductorList))
             {
-                reductorList = new List<EarleyState>();
+                reductorList = new HashSet<EarleyState>();
                 startColumn.Reductors.Add(reductorState.Rule.LeftHandSide, reductorList);
             }
 

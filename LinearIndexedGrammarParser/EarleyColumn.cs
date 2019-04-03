@@ -20,9 +20,9 @@ namespace LinearIndexedGrammarParser
         internal Queue<DerivedCategory> ActionableNonTerminalsToPredict;
 
         internal HashSet<DerivedCategory> NonTerminalsToUnpredict = new HashSet<DerivedCategory>();
-        internal Dictionary<DerivedCategory, List<EarleyState>> Predecessors;
+        internal Dictionary<DerivedCategory, HashSet<EarleyState>> Predecessors;
         internal Dictionary<Rule, EarleyState> Predicted;
-        internal Dictionary<DerivedCategory, List<EarleyState>> Reductors;
+        internal Dictionary<DerivedCategory, HashSet<EarleyState>> Reductors;
         internal List<EarleyState> statesAddedInLastReparse = new List<EarleyState>();
 
         public EarleyColumn(int index, string token)
@@ -37,8 +37,8 @@ namespace LinearIndexedGrammarParser
                 new SortedDictionary<EarleyState, Stack<EarleyState>>(new CompletedStateComparer());
 
             ActionableNonCompleteStates = new Queue<EarleyState>();
-            Predecessors = new Dictionary<DerivedCategory, List<EarleyState>>();
-            Reductors = new Dictionary<DerivedCategory, List<EarleyState>>();
+            Predecessors = new Dictionary<DerivedCategory, HashSet<EarleyState>>();
+            Reductors = new Dictionary<DerivedCategory, HashSet<EarleyState>>();
             Predicted = new Dictionary<Rule, EarleyState>(new RuleValueEquals());
             GammaStates = new List<EarleyState>();
             OldGammaStates = new List<EarleyState>();
@@ -242,7 +242,7 @@ namespace LinearIndexedGrammarParser
                 var isPOS = !grammar.StaticRules.ContainsKey(term);
                 if (!Predecessors.TryGetValue(term, out var predecessors))
                 {
-                    predecessors = new List<EarleyState>();
+                    predecessors = new HashSet<EarleyState>();
                     Predecessors.Add(term, predecessors);
 
                     if (!isPOS)
@@ -264,7 +264,7 @@ namespace LinearIndexedGrammarParser
                         var epsilon = new Rule(term.ToString(), new[] {""});
                         var epsilonState = new EarleyState(epsilon, 1, this);
                         epsilonState.EndColumn = this;
-                        reductors1 = new List<EarleyState> {epsilonState};
+                        reductors1 = new HashSet<EarleyState> {epsilonState};
                         Reductors.Add(term, reductors1);
                     }
 

@@ -11,7 +11,7 @@ namespace LinearIndexedGrammarParser
         public const string StartSymbol = "START";
         public const string EpsilonSymbol = "Epsilon";
         public const string StarSymbol = "*";
-        public const int MaxStackDepth = 3;
+        public const int MaxStackDepth = 2;
         public static HashSet<SyntacticCategory> PartsOfSpeech;
 
         public readonly Dictionary<DerivedCategory, List<Rule>> StaticRules =
@@ -160,17 +160,6 @@ namespace LinearIndexedGrammarParser
 
             if (stackContents != string.Empty && posInRhsCount == newRule.RightHandSide.Length)
                 return null;
-
-
-            if (newRule.LeftHandSide.Stack.Length > 0)
-            {
-                var found = false;
-                for (var i = 0; i < newRule.RightHandSide.Length; i++)
-                    if (newRule.RightHandSide[i].Stack.Length > 0)
-                        found = true;
-
-                if (found == false) throw new Exception("illegal GenerateStaticRuleFromDynamicRule");
-            }
 
             return newRule;
         }
