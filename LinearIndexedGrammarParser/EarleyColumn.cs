@@ -36,7 +36,7 @@ namespace LinearIndexedGrammarParser
             ActionableDeletedStates =
                 new SortedDictionary<EarleyState, Stack<EarleyState>>(new CompletedStateComparer());
 
-            ActionableNonCompleteStates = new Queue<EarleyState>();
+            //ActionableNonCompleteStates = new Queue<EarleyState>();
             Predecessors = new Dictionary<DerivedCategory, HashSet<EarleyState>>();
             Reductors = new Dictionary<DerivedCategory, HashSet<EarleyState>>();
             Predicted = new Dictionary<Rule, EarleyState>(new RuleValueEquals());
@@ -255,8 +255,9 @@ namespace LinearIndexedGrammarParser
                     Predicted[newState.Rule] = newState;
 
 
-                if (isPOS && !Reductors.ContainsKey(term))
-                    ActionableNonCompleteStates.Enqueue(newState);
+                //if grammar is non-lexicalized, we prepare all scannable states in advance.
+                //if (isPOS && !Reductors.ContainsKey(term))
+                //ActionableNonCompleteStates.Enqueue(newState);
 
                 if (term.ToString() == ContextFreeGrammar.EpsilonSymbol)
                     if (!Reductors.TryGetValue(term, out var reductors1))

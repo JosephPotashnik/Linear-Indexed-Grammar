@@ -228,7 +228,7 @@ namespace LinearIndexedGrammarLearner
                     (sentenceItem, loopState, i) =>
                     {
                         //var parser = new EarleyParser(currentHypothesis, _voc, false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
-                        var n = parsers[i].ParseSentence(sentenceItem.Sentence, cts);
+                        var n = parsers[i].ParseSentenceOriginalWithScan(sentenceItem.Sentence, cts);
                         sentencesWithCounts[i].GammaStates = n;
                         po.CancellationToken.ThrowIfCancellationRequested();
                     });

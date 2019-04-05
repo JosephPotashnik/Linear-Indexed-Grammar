@@ -25,6 +25,52 @@ namespace LinearIndexedGrammarParser
             _checkForCyclicUnitProductions = checkUnitProductionCycles;
         }
 
+        public List<EarleyState> ParseSentenceOriginalWithScan(string[] text, CancellationTokenSource cts, int maxWords = 0)
+        {
+            _text = text;
+            (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
+
+            //assumption: GenerateAllStaticRulesFromDynamicRules has been called before parsing
+            //and added the GammaRule
+            var startRule = _grammar.StaticRules[new DerivedCategory(ContextFreeGrammar.GammaRule)][0];
+
+            var startState = new EarleyState(startRule, 0, _table[0]);
+            _table[0].AddState(startState, _grammar);
+            try
+            {
+                foreach (var col in _table)
+                {
+                    var exhaustedCompletion = false;
+                    var anyCompleted = false;
+                    var anyPredicted = false;
+                    while (!exhaustedCompletion)
+                    {
+                        //1. complete
+                        anyCompleted = TraverseCompletedStates(col);
+
+                        //2. predict after complete:
+                        anyPredicted = TraversePredictableStates(col);
+
+                        //prediction of epsilon transitions can lead to completed states.
+                        //hence we might need to complete those states.
+                        exhaustedCompletion = col.ActionableCompleteStates.Count == 0;
+                    }
+
+                    //3. scan after predict.
+                    var anyScanned = TraverseScannableStates(_table, col);
+
+                    if (!anyCompleted && !anyPredicted && !anyScanned) break;
+                }
+            }
+            catch (Exception e)
+            {
+                var s = e.ToString();
+                LogManager.GetCurrentClassLogger().Warn(s);
+            }
+
+            return GetGammaStates();
+        }
+
         private void Predict(EarleyColumn col, List<Rule> ruleList, DerivedCategory nextTerm)
         {
             foreach (var rule in ruleList)
@@ -167,8 +213,13 @@ namespace LinearIndexedGrammarParser
                     exhaustedCompletion = col.ActionableCompleteStates.Count == 0;
                 }
 
-                //3. scan after predict.
-                TraverseScannableStates(_table, col);
+                //3. scan after predict -- not necessary if the grammar is non lexicalized,
+                //i.e if terminals are not mentioned in the grammar rules.
+                //we then can prepare all scanned states in advance (PrepareScannedStates)
+                //if you uncomment the following line make sure to uncomment the 
+                //ActionableNonCompleteStates enqueuing in Column.AddState()
+                //TraverseScannableStates(_table, col);
+
             }
 
             return GetGammaStates();
@@ -241,6 +292,7 @@ namespace LinearIndexedGrammarParser
         {
             _text = text;
             (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
+            PrepareScannedStates();
 
             //assumption: GenerateAllStaticRulesFromDynamicRules has been called before parsing
             //and added the GammaRule
@@ -268,10 +320,14 @@ namespace LinearIndexedGrammarParser
                         exhaustedCompletion = col.ActionableCompleteStates.Count == 0;
                     }
 
-                    //3. scan after predict.
-                    var anyScanned = TraverseScannableStates(_table, col);
+                    //3. scan after predict -- not necessary if the grammar is non lexicalized,
+                    //i.e if terminals are not mentioned in the grammar rules.
+                    //we then can prepare all scanned states in advance (PrepareScannedStates)
+                    //if you uncomment the following line make sure to uncomment the 
+                    //ActionableNonCompleteStates enqueuing in Column.AddState()
+                    //var anyScanned = TraverseScannableStates(_table, col);
 
-                    if (!anyCompleted && !anyPredicted && !anyScanned) break;
+                    //if (!anyCompleted && !anyPredicted /*&& !anyScanned*/) break;
                 }
             }
             catch (Exception e)
@@ -299,6 +355,24 @@ namespace LinearIndexedGrammarParser
             return Voc[nextScannableTerm];
         }
 
+        private void PrepareScannedStates()
+        {
+            for (int i = 0; i < _table.Length-1; i++)
+            {
+                var nextScannableTerm = _table[i + 1].Token;
+                var possibleNonTerminals = GetPossibleSyntacticCategoriesForToken(nextScannableTerm);
+
+                foreach (var nonTerminal in possibleNonTerminals)
+                {
+                    var currentCategory = new DerivedCategory(nonTerminal);
+
+                    var scannedStateRule = new Rule(nonTerminal, new[] { _table[i+1].Token });
+                    var scannedState = new EarleyState(scannedStateRule, 1, _table[i]);
+                    scannedState.EndColumn = _table[i+1];
+                    _table[i].Reductors[currentCategory] = new HashSet<EarleyState> { scannedState };
+                }
+            }
+        }
 
         private bool TraverseScannableStates(EarleyColumn[] table, EarleyColumn col)
         {

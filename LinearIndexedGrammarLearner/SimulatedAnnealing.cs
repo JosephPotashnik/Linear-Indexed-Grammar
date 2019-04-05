@@ -43,9 +43,15 @@ namespace LinearIndexedGrammarLearner
                 if (mutatedGrammar == null) continue;
 
                 if (op == GrammarPermutationsOperation.Addition)
+                {
+                    //Console.WriteLine($"added {r}");
                     reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
                 else
+                {
+                    //Console.WriteLine($"removed {r}");
                     reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
 
                 if (reparsed == false) continue;
 
@@ -54,6 +60,7 @@ namespace LinearIndexedGrammarLearner
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
                 if (accept)
                 {
+                    //Console.WriteLine("accepted");
                     currentValue = newValue;
                     currentGrammar = mutatedGrammar;
                     _learner.AcceptChanges();
@@ -61,11 +68,12 @@ namespace LinearIndexedGrammarLearner
                 }
                 else
                 {
+                    //Console.WriteLine("rejected");
                     _learner.RejectChanges();
                 }
 
+                //uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
                 //var currentCFHypothesis = new ContextFreeGrammar(currentGrammar);
-                ////uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
                 //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
             }
 
