@@ -80,8 +80,7 @@ namespace LinearIndexedGrammarLearner
 
             try
             {
-                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                Parallel.ForEach(Parses, options,
+                Parallel.ForEach(Parses,
                     (sentenceItem, loopState, i) =>
                     {
                         var n = _sentencesParser[i].ParseSentence(sentenceItem.Sentence);
@@ -135,8 +134,7 @@ namespace LinearIndexedGrammarLearner
             try
             {
              
-                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                Parallel.ForEach(Parses, options,
+                Parallel.ForEach(Parses,
                     (sentenceItem, loopState, i) =>
                     {
                         var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
@@ -172,8 +170,7 @@ namespace LinearIndexedGrammarLearner
 
             try
             {
-                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                Parallel.ForEach(Parses, options,
+                Parallel.ForEach(Parses,
                     (sentenceItem, loopState, i) =>
                     {
                         var n = _sentencesParser[i]
@@ -215,8 +212,7 @@ namespace LinearIndexedGrammarLearner
 
             try
             {
-                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                Parallel.ForEach(sentencesWithCounts, options,
+                Parallel.ForEach(sentencesWithCounts,
                     (sentenceItem, loopState, i) =>
                     {
                         //var parser = new EarleyParser(currentHypothesis, _voc, false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
@@ -254,8 +250,7 @@ namespace LinearIndexedGrammarLearner
         {
             try
             {
-                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                Parallel.ForEach(Parses, options,
+                Parallel.ForEach(Parses,
                     (sentenceItem, loopState, i) =>
                     {
                         var parser =
