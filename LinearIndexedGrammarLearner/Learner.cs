@@ -9,8 +9,6 @@ namespace LinearIndexedGrammarLearner
 {
     public class Learner
     {
-        public const int InitialTimeOut = 1500;
-        public static int ParsingTimeOut = InitialTimeOut; //in milliseconds
         private readonly int _maxWordsInSentence;
         private readonly int _minWordsInSentence;
 
@@ -82,14 +80,12 @@ namespace LinearIndexedGrammarLearner
 
             try
             {
-                var cts = new CancellationTokenSource(ParsingTimeOut);
-                var po = new ParallelOptions {CancellationToken = cts.Token};
-                Parallel.ForEach(Parses, po,
+                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                Parallel.ForEach(Parses, options,
                     (sentenceItem, loopState, i) =>
                     {
-                        var n = _sentencesParser[i].ParseSentence(sentenceItem.Sentence, cts);
+                        var n = _sentencesParser[i].ParseSentence(sentenceItem.Sentence);
                         Parses[i].GammaStates = n;
-                        po.CancellationToken.ThrowIfCancellationRequested();
                     });
             }
             catch (OperationCanceledException)
@@ -138,14 +134,13 @@ namespace LinearIndexedGrammarLearner
 
             try
             {
-                var cts = new CancellationTokenSource(ParsingTimeOut);
-                var po = new ParallelOptions {CancellationToken = cts.Token};
-                Parallel.ForEach(Parses, po,
+             
+                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                Parallel.ForEach(Parses, options,
                     (sentenceItem, loopState, i) =>
                     {
                         var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
                         Parses[i].GammaStates = n;
-                        po.CancellationToken.ThrowIfCancellationRequested();
                     });
             }
             catch (OperationCanceledException)
@@ -177,15 +172,13 @@ namespace LinearIndexedGrammarLearner
 
             try
             {
-                var cts = new CancellationTokenSource(ParsingTimeOut);
-                var po = new ParallelOptions {CancellationToken = cts.Token};
-                Parallel.ForEach(Parses, po,
+                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                Parallel.ForEach(Parses, options,
                     (sentenceItem, loopState, i) =>
                     {
                         var n = _sentencesParser[i]
                             .ReParseSentenceWithRuleDeletion(currentCFHypothesis, rs, predictionSet);
                         Parses[i].GammaStates = n;
-                        po.CancellationToken.ThrowIfCancellationRequested();
                     });
             }
             catch (OperationCanceledException)
@@ -222,15 +215,13 @@ namespace LinearIndexedGrammarLearner
 
             try
             {
-                var cts = new CancellationTokenSource(int.MaxValue);
-                var po = new ParallelOptions {CancellationToken = cts.Token};
-                Parallel.ForEach(sentencesWithCounts, po,
+                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                Parallel.ForEach(sentencesWithCounts, options,
                     (sentenceItem, loopState, i) =>
                     {
                         //var parser = new EarleyParser(currentHypothesis, _voc, false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
-                        var n = parsers[i].ParseSentenceOriginalWithScan(sentenceItem.Sentence, cts);
+                        var n = parsers[i].ParseSentenceOriginalWithScan(sentenceItem.Sentence);
                         sentencesWithCounts[i].GammaStates = n;
-                        po.CancellationToken.ThrowIfCancellationRequested();
                     });
 
                 if (diffparsers != null)
@@ -263,17 +254,15 @@ namespace LinearIndexedGrammarLearner
         {
             try
             {
-                var cts = new CancellationTokenSource(int.MaxValue);
-                var po = new ParallelOptions {CancellationToken = cts.Token};
-                Parallel.ForEach(Parses, po,
+                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                Parallel.ForEach(Parses, options,
                     (sentenceItem, loopState, i) =>
                     {
                         var parser =
                             new EarleyParser(currentHypothesis, _voc,
                                 false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
-                        var n = parser.ParseSentence(sentenceItem.Sentence, cts);
+                        var n = parser.ParseSentence(sentenceItem.Sentence);
                         Parses[i].GammaStates = n;
-                        po.CancellationToken.ThrowIfCancellationRequested();
                     });
             }
             catch (OperationCanceledException)

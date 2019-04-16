@@ -91,7 +91,7 @@ namespace LinearIndexedGrammar
 
             var cfGrammar = new ContextFreeGrammar(grammarRules);
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
-            var statesList = generator.ParseSentence(null, new CancellationTokenSource(), maxWords);
+            var statesList = generator.ParseSentence(null,  maxWords);
             return GrammarFileReader.GetSentencesOfGenerator(statesList, universalVocabulary, numberOfSentencesPerTree,
                 pos);
         }
@@ -154,17 +154,11 @@ namespace LinearIndexedGrammar
             ContextFreeGrammar.RenameVariables(grammarRules, partOfSpeechCategories);
             var targetGrammar = new ContextSensitiveGrammar(grammarRules);
 
-            Learner.ParsingTimeOut = int.MaxValue;
 
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
+
             objectiveFunction.GetLearner().ParseAllSentencesFromScratch(targetGrammar);
-
             var targetProb = objectiveFunction.Compute(targetGrammar);
-            stopWatch.Stop();
-            var ts = stopWatch.Elapsed;
-            var parsingTimeout = Math.Max((ts.Seconds * 1000 + ts.Milliseconds) * 3, Learner.InitialTimeOut);
-            Learner.ParsingTimeOut = int.MaxValue;
+
 
             //trying to learn data from incomplete source leads to p < 1
             //so set the maximum value to the target probability, which is the maximal support
@@ -172,7 +166,7 @@ namespace LinearIndexedGrammar
             objectiveFunction.SetMaximalValue(targetProb);
 
             var s =
-                $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar given the data: {targetProb} \r\n parsing timeout is {Learner.ParsingTimeOut}: \r\n";
+                $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar given the data: {targetProb} \r\n";
             LogManager.GetCurrentClassLogger().Info(s);
             if (!objectiveFunction.IsMaximalValue(targetProb))
             {

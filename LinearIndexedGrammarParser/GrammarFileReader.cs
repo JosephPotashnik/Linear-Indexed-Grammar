@@ -93,8 +93,7 @@ namespace LinearIndexedGrammarParser
 
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
 
-            var cts = new CancellationTokenSource();
-            var statesList = generator.ParseSentence(null, cts, maxWords);
+            var statesList = generator.ParseSentence(null, maxWords);
             return (statesList, rules);
         }
 
@@ -110,7 +109,7 @@ namespace LinearIndexedGrammarParser
 
             var parser = new EarleyParser(cfGrammar, universalVocabulary);
 
-            var n = parser.ParseSentence(sentence.Split(), new CancellationTokenSource());
+            var n = parser.ParseSentence(sentence.Split());
             return n;
         }
 

@@ -25,7 +25,7 @@ namespace LinearIndexedGrammarParser
             _checkForCyclicUnitProductions = checkUnitProductionCycles;
         }
 
-        public List<EarleyState> ParseSentenceOriginalWithScan(string[] text, CancellationTokenSource cts, int maxWords = 0)
+        public List<EarleyState> ParseSentenceOriginalWithScan(string[] text, int maxWords = 0)
         {
             _text = text;
             (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
@@ -288,7 +288,7 @@ namespace LinearIndexedGrammarParser
         }
 
 
-        public List<EarleyState> ParseSentence(string[] text, CancellationTokenSource cts, int maxWords = 0)
+        public List<EarleyState> ParseSentence(string[] text, int maxWords = 0)
         {
             _text = text;
             (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
