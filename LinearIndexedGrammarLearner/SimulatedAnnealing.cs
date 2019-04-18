@@ -137,17 +137,18 @@ namespace LinearIndexedGrammarLearner
                     noImprovemetCounter++;
                 }
 
-                if (noImprovemetCounter == 20)
-                {
-                    var rand = new Random();
-                    var randomPastBestGrammar = rand.Next(numberOfBestGrammarsToKeep);
-                    var candidates = bestGrammars.KeyValuePairs.ToArray();
-                    noImprovemetCounter = 0;
-                    currentValue = candidates[randomPastBestGrammar].Item1;
-                    currentGrammar = candidates[randomPastBestGrammar].Item2;
-                    LogManager.GetCurrentClassLogger()
-                        .Info($"reverting to random previous best grammar that has probability {currentValue}");
-                }
+                //TODO: doesn't work, find out why.
+                //if (noImprovemetCounter == 20)
+                //{
+                //    var rand = new Random();
+                //    var randomPastBestGrammar = rand.Next(numberOfBestGrammarsToKeep);
+                //    var candidates = bestGrammars.KeyValuePairs.ToArray();
+                //    noImprovemetCounter = 0;
+                //    currentValue = candidates[randomPastBestGrammar].Item1;
+                //    currentGrammar = candidates[randomPastBestGrammar].Item2;
+                //    LogManager.GetCurrentClassLogger()
+                //        .Info($"reverting to random previous best grammar that has probability {currentValue}");
+                //}
             }
 
             currentValue = bestGrammars.Last().Key;
