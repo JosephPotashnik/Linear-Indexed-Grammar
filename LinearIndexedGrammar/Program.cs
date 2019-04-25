@@ -256,7 +256,7 @@ namespace LinearIndexedGrammar
             {
                 CoolingFactor = 0.999,
                 InitialTemperature = 10,
-                NumberOfIterations = 400
+                NumberOfIterations = 1400
             };
 
             //run
