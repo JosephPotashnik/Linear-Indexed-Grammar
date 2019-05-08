@@ -215,10 +215,10 @@ namespace LinearIndexedGrammarLearner
                 Parallel.ForEach(sentencesWithCounts,
                     (sentenceItem, loopState, i) =>
                     {
-                        //var parser = new EarleyParser(currentHypothesis, _voc, false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
-                        var n = parsers[i].ParseSentenceOriginalWithScan(sentenceItem.Sentence);
+                        var n = parsers[i].ParseSentence(sentenceItem.Sentence);
                         sentencesWithCounts[i].GammaStates = n;
                     });
+
 
                 if (diffparsers != null)
                     for (var i = 0; i < diffparsers.Length; i++)
@@ -319,7 +319,7 @@ namespace LinearIndexedGrammarLearner
             }
         }
 
-        internal (ContextSensitiveGrammar mutatedGrammar, Rule r, GrammarPermutationsOperation op) GetNeighbor(
+        internal (ContextSensitiveGrammar mutatedGrammar, bool reparsed) GetNeighborAndReparse(
             ContextSensitiveGrammar currentHypothesis)
         {
             //choose mutation function in random (weighted according to weights file)
@@ -327,8 +327,8 @@ namespace LinearIndexedGrammarLearner
             var newGrammar = new ContextSensitiveGrammar(currentHypothesis);
 
             //mutate the grammar.
-            var (g, r, op) = m(newGrammar);
-            return (g, r, op);
+            var (g, reparsed) = m(newGrammar, this);
+            return (g, reparsed);
         }
 
 

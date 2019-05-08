@@ -24,53 +24,7 @@ namespace LinearIndexedGrammarParser
             _grammar = g;
             _checkForCyclicUnitProductions = checkUnitProductionCycles;
         }
-
-        public List<EarleyState> ParseSentenceOriginalWithScan(string[] text, int maxWords = 0)
-        {
-            _text = text;
-            (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
-
-            //assumption: GenerateAllStaticRulesFromDynamicRules has been called before parsing
-            //and added the GammaRule
-            var startRule = _grammar.StaticRules[new DerivedCategory(ContextFreeGrammar.GammaRule)][0];
-
-            var startState = new EarleyState(startRule, 0, _table[0]);
-            _table[0].AddState(startState, _grammar);
-            try
-            {
-                foreach (var col in _table)
-                {
-                    var exhaustedCompletion = false;
-                    var anyCompleted = false;
-                    var anyPredicted = false;
-                    while (!exhaustedCompletion)
-                    {
-                        //1. complete
-                        anyCompleted = TraverseCompletedStates(col);
-
-                        //2. predict after complete:
-                        anyPredicted = TraversePredictableStates(col);
-
-                        //prediction of epsilon transitions can lead to completed states.
-                        //hence we might need to complete those states.
-                        exhaustedCompletion = col.ActionableCompleteStates.Count == 0;
-                    }
-
-                    //3. scan after predict.
-                    var anyScanned = TraverseScannableStates(_table, col);
-
-                    if (!anyCompleted && !anyPredicted && !anyScanned) break;
-                }
-            }
-            catch (Exception e)
-            {
-                var s = e.ToString();
-                LogManager.GetCurrentClassLogger().Warn(s);
-            }
-
-            return GetGammaStates();
-        }
-
+        
         private void Predict(EarleyColumn col, List<Rule> ruleList, DerivedCategory nextTerm)
         {
             foreach (var rule in ruleList)

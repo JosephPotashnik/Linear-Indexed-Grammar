@@ -37,23 +37,10 @@ namespace LinearIndexedGrammarLearner
             var counter = 1;
             while (currentTemp > 0.3)
             {
-                var reparsed = false;
-                var (mutatedGrammar, r, op) = _learner.GetNeighbor(currentGrammar);
+                var (mutatedGrammar, reparsed) = _learner.GetNeighborAndReparse(currentGrammar);
+                if (mutatedGrammar == null || !reparsed) continue;
+
                 currentTemp *= _params.CoolingFactor;
-                if (mutatedGrammar == null) continue;
-
-                if (op == GrammarPermutationsOperation.Addition)
-                {
-                    //Console.WriteLine($"added {r}");
-                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                }
-                else
-                {
-                    //Console.WriteLine($"removed {r}");
-                    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
-                }
-
-                if (reparsed == false) continue;
 
                 var newValue = _objectiveFunction.Compute(mutatedGrammar);
 
