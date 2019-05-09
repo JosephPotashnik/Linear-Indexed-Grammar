@@ -77,7 +77,8 @@ namespace LinearIndexedGrammarParser
         public void MarkStateDeleted(EarleyState oldState, ContextFreeGrammar grammar,
             HashSet<EarleyState> statesRemovedInLastReparse)
         {
-            if (statesRemovedInLastReparse.Contains(oldState)) return;
+            if (oldState.Removed) return;
+            oldState.Removed = true;
             statesRemovedInLastReparse.Add(oldState);
 
             if (!oldState.IsCompleted)
@@ -271,7 +272,10 @@ namespace LinearIndexedGrammarParser
 
                 if (Reductors.TryGetValue(term, out var reductors))
                     foreach (var completedState in reductors)
-                        SpontaneousDotShift(newState, completedState, grammar);
+                    {
+                        if (!completedState.Removed)
+                            SpontaneousDotShift(newState, completedState, grammar);
+                    }
             }
             else
             {
@@ -292,6 +296,7 @@ namespace LinearIndexedGrammarParser
         {
             foreach (var state in statesAddedInLastReparse)
             {
+
                 if (state.IsCompleted)
                 {
                     if (state.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)

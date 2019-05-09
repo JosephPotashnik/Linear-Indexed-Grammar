@@ -106,6 +106,14 @@ namespace LinearIndexedGrammarLearner
                 Parses[i].GammaStates = _sentencesParser[i].GetGammaStates();
         }
 
+        public void SetOriginalGrammarBeforePermutation()
+        {
+            for (var i = 0; i < Parses.Length; i++)
+                _sentencesParser[i]._oldGrammar = _sentencesParser[i]._grammar;
+        }
+
+
+
         public bool ReparseWithAddition(ContextSensitiveGrammar currentHypothesis, int numberOfGeneratingRule)
         {
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
@@ -122,18 +130,17 @@ namespace LinearIndexedGrammarLearner
                 //rs.Count == 0 when the new rule is unreachable from the existing set of rules.
                 //that means that the parser earley items are exactly the same as before.
                 //we can return immediately with no change.
-
-                //set the old grammar to the current grammar in case we reject the addition 
-                //(rejection restores the old grammar).
-                for (var i = 0; i < Parses.Length; i++)
-                    _sentencesParser[i]._oldGrammar = _sentencesParser[i]._grammar;
-
                 return true;
             }
 
             try
             {
-             
+
+                //for (int i = 0; i < Parses.Length; i++)
+                //{
+                //    var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
+                //    Parses[i].GammaStates = n;
+                //}
                 Parallel.ForEach(Parses,
                     (sentenceItem, loopState, i) =>
                     {
@@ -164,12 +171,12 @@ namespace LinearIndexedGrammarLearner
             var leftCorner = new LeftCorner();
             var predictionSet = leftCorner.ComputeLeftCorner(_sentencesParser[0]._grammar);
 
-
             var rs = _sentencesParser[0]._grammar.Rules.Where(x => x.NumberOfGeneratingRule == numberOfGeneratingRule)
                 .ToList();
 
             try
             {
+
                 Parallel.ForEach(Parses,
                     (sentenceItem, loopState, i) =>
                     {
@@ -327,6 +334,7 @@ namespace LinearIndexedGrammarLearner
             var newGrammar = new ContextSensitiveGrammar(currentHypothesis);
 
             //mutate the grammar.
+            SetOriginalGrammarBeforePermutation();
             var (g, reparsed) = m(newGrammar, this);
             return (g, reparsed);
         }

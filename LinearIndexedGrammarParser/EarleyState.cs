@@ -18,6 +18,8 @@ namespace LinearIndexedGrammarParser
         }
 
         public bool Added { get; set; }
+        public bool Removed { get; set; }
+
         public Rule Rule { get; }
         public EarleyColumn StartColumn { get; }
         public EarleyColumn EndColumn { get; set; }

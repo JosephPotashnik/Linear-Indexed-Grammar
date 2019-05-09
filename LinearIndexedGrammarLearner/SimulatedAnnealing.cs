@@ -45,6 +45,7 @@ namespace LinearIndexedGrammarLearner
                 var newValue = _objectiveFunction.Compute(mutatedGrammar);
 
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
+
                 if (accept)
                 {
                     //Console.WriteLine("accepted");

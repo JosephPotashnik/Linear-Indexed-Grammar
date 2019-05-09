@@ -57,6 +57,11 @@ namespace LinearIndexedGrammarParser
 
         private void Complete(EarleyColumn col, EarleyState reductorState)
         {
+            if (reductorState.Removed)
+            {
+                int x = 1;
+            }
+
             if (reductorState.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
             {
                 var sb = new StringBuilder();
@@ -81,6 +86,9 @@ namespace LinearIndexedGrammarParser
 
             foreach (var predecessor in predecessorStates)
             {
+                if (predecessor.Removed)
+                    continue;
+
                 var newState = new EarleyState(predecessor.Rule, predecessor.DotIndex + 1, predecessor.StartColumn);
                 predecessor.Parents.Add(newState);
                 reductorState.Parents.Add(newState);
@@ -140,20 +148,31 @@ namespace LinearIndexedGrammarParser
 
         public List<EarleyState> ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs)
         {
-            _oldGrammar = _grammar;
             _grammar = g;
 
             foreach (var col in _table)
             {
                 for (var i = 0; i < rs.Count; i++)
+                {
                     //seed the new rule in the column
                     //think about categories if this would be context sensitive grammar.
-                    if (col.Predecessors.ContainsKey(rs[i].LeftHandSide))
-                        if (!col.ActionableNonTerminalsToPredict.Contains(rs[i].LeftHandSide))
+                    if (col.Predecessors.TryGetValue(rs[i].LeftHandSide, out var predecessorsWithKey))
+                    {
+                        foreach (var predecessor in predecessorsWithKey)
                         {
-                            var newState = new EarleyState(rs[i], 0, col);
-                            col.AddState(newState, _grammar);
+                            if (!predecessor.Removed)
+                            {
+                                if (!col.ActionableNonTerminalsToPredict.Contains(rs[i].LeftHandSide))
+                                {
+                                    var newState = new EarleyState(rs[i], 0, col);
+                                    col.AddState(newState, _grammar);
+                                }
+
+                                break;
+                            }
                         }
+                    }
+                }
 
 
                 var exhaustedCompletion = false;
@@ -201,7 +220,6 @@ namespace LinearIndexedGrammarParser
                 }
             }
 
-            _oldGrammar = _grammar;
             _grammar = g;
             return GetGammaStates();
         }
@@ -471,6 +489,9 @@ namespace LinearIndexedGrammarParser
 
         public void RejectChanges()
         {
+            foreach (var state in statesRemovedInLastReparse)
+                state.Removed = false;
+
             foreach (var col in _table)
                 col.RejectChanges();
 
