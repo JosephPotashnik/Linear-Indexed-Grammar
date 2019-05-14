@@ -27,8 +27,8 @@ namespace LinearIndexedGrammarLearner
 
             l.Add(new GrammarMutationData("InsertStackConstantRule", CFGOperationWeight));
             l.Add(new GrammarMutationData("DeleteStackConstantRule", CFGOperationWeight));
-            //l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
-            //l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
+            l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
+            l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
 
             var LIGWeight = isCFGGrammar ? 0 : LIGOperationWeight;
             l.Add(new GrammarMutationData("InsertMovement", LIGWeight));
@@ -123,29 +123,7 @@ namespace LinearIndexedGrammarLearner
             bool reparsed1, reparsed2;
 
             var rcOld = grammar.GetRandomRule(grammar.StackConstantRules);
-            //var rcOld = new RuleCoordinates();
-
-            //var rcNew = new RuleCoordinates();
-            //if (count == 1)
-            //{
-            //    count++;
-            //    rcOld.LHSIndex = 0;
-            //    rcOld.RHSIndex = 21;
-            //    rcNew.RHSIndex = rcOld.RHSIndex;
-            //    rcNew.LHSIndex = 1;
-            //    rcNew.RuleType = rcOld.RuleType;
-            //}
-            //else
-            //{
-            //    count++;
-            //    rcOld.LHSIndex = 0;
-            //    rcOld.RHSIndex = 73;
-            //    rcNew.RHSIndex = rcOld.RHSIndex;
-            //    rcNew.LHSIndex = 2;
-            //    rcNew.RuleType = rcOld.RuleType;
-            //}
-
-            //if (rcOld.RHSIndex == 0) return (null, false); //do not change LHS for rules of the form START -> Xi
+            if (rcOld.RHSIndex == 0) return (null, false); //do not change LHS for rules of the form START -> Xi
 
             var rcNew = new RuleCoordinates()
             {
@@ -154,11 +132,11 @@ namespace LinearIndexedGrammarLearner
                 RuleType = rcOld.RuleType
             };
             if (rcOld.LHSIndex == rcNew.LHSIndex) return (null, false);
-            Console.WriteLine($"in lhs change part1");
+            //Console.WriteLine($"in lhs change part1");
 
             (grammar, reparsed1) = InnerDeleteStackConstantRule(grammar, learner, rcOld);
             if (reparsed1 == false) return (null, false);
-            Console.WriteLine($"in lhs change part2");
+            //Console.WriteLine($"in lhs change part2");
 
             (grammar, reparsed2) = InnerInsertStackConstantRule(grammar, learner, rcNew);
             return (grammar, reparsed2);
@@ -176,36 +154,14 @@ namespace LinearIndexedGrammarLearner
                 LHSIndex = rcOld.LHSIndex,
                 RuleType = rcOld.RuleType
             };
-
-            //var rcOld = new RuleCoordinates();
-
-            //var rcNew = new RuleCoordinates();
-            //if (count == 1)
-            //{
-            //    count++;
-            //    rcOld.LHSIndex = 0;
-            //    rcOld.RHSIndex = 53;
-            //    rcNew.RHSIndex = 89;
-            //    rcNew.LHSIndex = 0;
-            //    rcNew.RuleType = rcOld.RuleType;
-            //}
-            //else
-            //{
-            //    count++;
-            //    rcOld.LHSIndex = 0;
-            //    rcOld.RHSIndex = 73;
-            //    rcNew.RHSIndex = rcOld.RHSIndex;
-            //    rcNew.LHSIndex = 2;
-            //    rcNew.RuleType = rcOld.RuleType;
-            //}
-
+            
 
             if (grammar.ContainsRuleWithSameRHS(rcNew, grammar.StackConstantRules)) return (null,false);
-            Console.WriteLine($"in rhs change part1");
+            //Console.WriteLine($"in rhs change part1");
 
             (grammar, reparsed1) = InnerDeleteStackConstantRule(grammar, learner, rcOld);
             if (reparsed1 == false) return (null, false);
-            Console.WriteLine($"in rhs change part2");
+            //Console.WriteLine($"in rhs change part2");
 
             (grammar, reparsed2) = InnerInsertStackConstantRule(grammar, learner, rcNew);
             return (grammar, reparsed2);

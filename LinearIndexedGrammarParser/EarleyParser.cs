@@ -57,11 +57,6 @@ namespace LinearIndexedGrammarParser
 
         private void Complete(EarleyColumn col, EarleyState reductorState)
         {
-            if (reductorState.Removed)
-            {
-                int x = 1;
-            }
-
             if (reductorState.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
             {
                 var sb = new StringBuilder();

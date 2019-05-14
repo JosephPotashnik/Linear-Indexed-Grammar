@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LinearIndexedGrammarParser
@@ -21,7 +22,7 @@ namespace LinearIndexedGrammarParser
 
         internal HashSet<DerivedCategory> NonTerminalsToUnpredict = new HashSet<DerivedCategory>();
         internal Dictionary<DerivedCategory, HashSet<EarleyState>> Predecessors;
-        internal Dictionary<Rule, EarleyState> Predicted;
+        internal Dictionary<Rule, List<EarleyState>> Predicted;
         internal Dictionary<DerivedCategory, HashSet<EarleyState>> Reductors;
         internal List<EarleyState> statesAddedInLastReparse = new List<EarleyState>();
 
@@ -39,7 +40,7 @@ namespace LinearIndexedGrammarParser
             //ActionableNonCompleteStates = new Queue<EarleyState>();
             Predecessors = new Dictionary<DerivedCategory, HashSet<EarleyState>>();
             Reductors = new Dictionary<DerivedCategory, HashSet<EarleyState>>();
-            Predicted = new Dictionary<Rule, EarleyState>(new RuleValueEquals());
+            Predicted = new Dictionary<Rule, List<EarleyState>>(new RuleValueEquals());
             GammaStates = new List<EarleyState>();
             OldGammaStates = new List<EarleyState>();
             ActionableNonTerminalsToPredict = new Queue<DerivedCategory>();
@@ -134,7 +135,12 @@ namespace LinearIndexedGrammarParser
                 }
 
                 if (oldState.DotIndex == 0)
-                    Predicted.Remove(oldState.Rule);
+                {
+                    Predicted[oldState.Rule].Remove(oldState);
+                    if (Predicted[oldState.Rule].Count == 0)
+                        Predicted.Remove(oldState.Rule);
+
+                }
             }
             else
             {
@@ -241,19 +247,41 @@ namespace LinearIndexedGrammarParser
             {
                 var term = newState.NextTerm;
                 var isPOS = !grammar.StaticRules.ContainsKey(term);
+                bool addTermToPredict = !isPOS;
+
                 if (!Predecessors.TryGetValue(term, out var predecessors))
                 {
                     predecessors = new HashSet<EarleyState>();
                     Predecessors.Add(term, predecessors);
-
-                    if (!isPOS)
-                        ActionableNonTerminalsToPredict.Enqueue(term);
                 }
+                else
+                {
+                    if (addTermToPredict)
+                    {
+                        foreach (var predecessor in predecessors)
+                        {
+                            if (!predecessor.Removed)
+                            {
+                                addTermToPredict = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (addTermToPredict)
+                    ActionableNonTerminalsToPredict.Enqueue(term);
 
                 predecessors.Add(newState);
 
                 if (newState.DotIndex == 0)
-                    Predicted[newState.Rule] = newState;
+                {
+                    if (!Predicted.TryGetValue(newState.Rule, out var list))
+                    {
+                        list = new List<EarleyState>();
+                        Predicted[newState.Rule] = list;
+                    }
+                    list.Add(newState);
+                }
 
 
                 //if grammar is non-lexicalized, we prepare all scannable states in advance.
@@ -319,7 +347,12 @@ namespace LinearIndexedGrammarParser
                         state.EndColumn.Predecessors.Remove(nextTerm);
 
                     if (state.DotIndex == 0)
-                        state.EndColumn.Predicted.Remove(state.Rule);
+                    {
+                        state.EndColumn.Predicted[state.Rule].Remove(state);
+                        if (state.EndColumn.Predicted[state.Rule].Count == 0)
+                            state.EndColumn.Predicted.Remove(state.Rule); 
+                    }
+
                 }
 
                 if (state.Predecessor != null)
@@ -342,8 +375,18 @@ namespace LinearIndexedGrammarParser
 
         public void Unpredict(Rule r, ContextFreeGrammar grammar, HashSet<EarleyState> statesRemovedInLastReparse)
         {
-            if (Predicted.TryGetValue(r, out var state))
+
+            if (Predicted.TryGetValue(r, out var list))
+            {
+                if (list.Count > 1)
+                {
+                    int x = 1;
+                    throw new Exception("list of predicted should be at this stage 1 item only.");
+                }
+
+                var state = list[0];
                 state.EndColumn.MarkStateDeleted(state, grammar, statesRemovedInLastReparse);
+            }
         }
     }
 }
