@@ -18,24 +18,43 @@ namespace LinearIndexedGrammarLearner
     {
         public const double Tolerance = 0.000001;
 
+        //private static readonly double[] powersOfMinus2 =
+        //{
+        //    Math.Pow(2, 0),
+        //    Math.Pow(2, -1),
+        //    Math.Pow(2, -2),
+        //    Math.Pow(2, -3),
+        //    Math.Pow(2, -4),
+        //    Math.Pow(2, -5),
+        //    Math.Pow(2, -6),
+        //    Math.Pow(2, -7),
+        //    Math.Pow(2, -8),
+        //    Math.Pow(2, -9),
+        //    Math.Pow(2, -10),
+        //    Math.Pow(2, -11),
+        //    Math.Pow(2, -12),
+        //    Math.Pow(2, -13),
+        //    Math.Pow(2, -14),
+        //    Math.Pow(2, -15)
+        //};
         private static readonly double[] powersOfMinus2 =
         {
-            Math.Pow(2, 0),
-            Math.Pow(2, -1),
-            Math.Pow(2, -2),
-            Math.Pow(2, -3),
-            Math.Pow(2, -4),
-            Math.Pow(2, -5),
-            Math.Pow(2, -6),
-            Math.Pow(2, -7),
-            Math.Pow(2, -8),
-            Math.Pow(2, -9),
-            Math.Pow(2, -10),
-            Math.Pow(2, -11),
-            Math.Pow(2, -12),
-            Math.Pow(2, -13),
-            Math.Pow(2, -14),
-            Math.Pow(2, -15)
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
         };
 
         private static double maxVal;

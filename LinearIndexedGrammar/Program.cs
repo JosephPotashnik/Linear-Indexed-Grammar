@@ -197,7 +197,7 @@ namespace LinearIndexedGrammar
             {
                 //leave only sentences in range [minWordsInSentence,maxWordsInSentence]
                 var minWordsInSentence = 1;
-                var maxWordsInSentence = 6;
+                var maxWordsInSentence = 8;
                 var sentences = FilterDataAccordingToTargetGrammar(grammarRules, programParams.DataFileName,
                     minWordsInSentence, maxWordsInSentence, universalVocabulary);
                 (data, dataVocabulary) = (sentences, universalVocabulary);

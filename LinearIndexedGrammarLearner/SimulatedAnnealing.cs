@@ -28,13 +28,69 @@ namespace LinearIndexedGrammarLearner
             _objectiveFunction = objectiveFunction;
         }
 
+        private (ContextSensitiveGrammar bestGrammar, double bestValue) DownhillSlideWithGibbs(
+            ContextSensitiveGrammar initialGrammar, double initialValue)
+        {
+            var bestValue = initialValue;
+            var currentGrammar = initialGrammar;
+            var foundImprovement = true;
+
+            while (foundImprovement)
+            {
+                foundImprovement = false;
+                var rules = currentGrammar.StackConstantRules;
+
+                int rowsCount = ContextSensitiveGrammar.RuleSpace.RowsCount(RuleType.CFGRules);
+                foreach (var coord in rules)
+                {
+                    var originalGrammar = currentGrammar;
+                    
+                    for (int i = 0; i < rowsCount; i++)
+                    {
+                        if (coord.LHSIndex == i) continue;
+
+                        var newGrammar = new ContextSensitiveGrammar(originalGrammar);
+                        var newCoord = new RuleCoordinates()
+                        {
+                            LHSIndex = i,
+                            RHSIndex = coord.RHSIndex,
+                            RuleType = coord.RuleType
+                        };
+
+                        // change RHS of existing coordinate:
+                        _learner.SetOriginalGrammarBeforePermutation();
+
+                        newGrammar.StackConstantRules.Remove(coord);
+                        _learner.ReparseWithDeletion(newGrammar,
+                            ContextSensitiveGrammar.RuleSpace[coord].NumberOfGeneratingRule);
+
+                        newGrammar.StackConstantRules.Add(newCoord);
+                        _learner.ReparseWithAddition(newGrammar,
+                        ContextSensitiveGrammar.RuleSpace[newCoord].NumberOfGeneratingRule);
+
+                        var newValue = _objectiveFunction.Compute(newGrammar);
+
+                        if (newValue > bestValue)
+                        {
+                            currentGrammar = newGrammar;
+                            bestValue = newValue;
+                            foundImprovement = true;
+                        }
+                        _learner.RejectChanges();
+                    }
+                }
+            }
+
+            return (currentGrammar, bestValue);
+        }
+
         private (ContextSensitiveGrammar bestGrammar, double bestValue) RunSingleIteration(
             ContextSensitiveGrammar initialGrammar, double initialValue)
         {
             var currentTemp = _params.InitialTemperature;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
-            var counter = 1;
+            var rejectCounter = 0;
             while (currentTemp > 0.3)
             {
                 var (mutatedGrammar, reparsed) = _learner.GetNeighborAndReparse(currentGrammar);
@@ -47,6 +103,7 @@ namespace LinearIndexedGrammarLearner
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
                 if (accept)
                 {
+                    rejectCounter = 0;
                     //Console.WriteLine("accepted");
                     currentValue = newValue;
                     currentGrammar = mutatedGrammar;
@@ -55,6 +112,7 @@ namespace LinearIndexedGrammarLearner
                 }
                 else
                 {
+                    rejectCounter++;
                     //Console.WriteLine("rejected");
                     _learner.RejectChanges();
                 }
@@ -62,9 +120,19 @@ namespace LinearIndexedGrammarLearner
                 //uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
                 //var currentCFHypothesis = new ContextFreeGrammar(currentGrammar);
                 //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
+
+                //cooling factor 0.999 from temp 10 to temp 0.3 takes 3500 iterations
+                //350 rejections consecutively (10% of total)- give up, reheat system.
+                if (rejectCounter > 350) break;
             }
 
             _learner.RefreshParses();
+
+            // do a local search - downhill strictly
+            if (!_objectiveFunction.IsMaximalValue(currentValue))
+            {
+                (currentGrammar, currentValue)  = DownhillSlideWithGibbs(currentGrammar, currentValue);
+            }
             var ruleDistribution = _learner.CollectUsages();
             currentGrammar.PruneUnusedRules(ruleDistribution);
             //after pruning unused rules, parse from scratch in order to remove

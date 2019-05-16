@@ -30,6 +30,11 @@ namespace LinearIndexedGrammarParser
 
         private readonly Rule[][][] _ruleSpace;
 
+        public int RowsCount(int ruleTypeCount)
+        {
+            return _ruleSpace[ruleTypeCount].Length;
+
+        }
         public RuleSpace(HashSet<string> partsOfSpeechCategories, HashSet<(string rhs1, string rhs2)> bigrams,
             int maxNonTerminals)
         {
