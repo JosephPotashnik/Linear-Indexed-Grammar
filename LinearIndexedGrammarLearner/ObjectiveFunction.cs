@@ -37,6 +37,7 @@ namespace LinearIndexedGrammarLearner
         //    Math.Pow(2, -14),
         //    Math.Pow(2, -15)
         //};
+
         private static readonly double[] powersOfMinus2 =
         {
             1,

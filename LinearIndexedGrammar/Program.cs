@@ -203,6 +203,8 @@ namespace LinearIndexedGrammar
                 (data, dataVocabulary) = (sentences, universalVocabulary);
             }
 
+            //var grammarRulesTest = GrammarFileReader.ReadRulesFromFile("CorwinIdealGrammarLearned.txt");
+
             if (!ValidateTargetGrammar(grammarRules, data, dataVocabulary))
                 return;
 

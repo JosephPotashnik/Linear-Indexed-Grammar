@@ -32,18 +32,18 @@ namespace LinearIndexedGrammarLearner
             ContextSensitiveGrammar initialGrammar, double initialValue)
         {
             var bestValue = initialValue;
-            var currentGrammar = initialGrammar;
+            var bestGrammar = initialGrammar;
             var foundImprovement = true;
 
             while (foundImprovement)
             {
                 foundImprovement = false;
-                var rules = currentGrammar.StackConstantRules;
+                var rules = bestGrammar.StackConstantRules;
 
                 int rowsCount = ContextSensitiveGrammar.RuleSpace.RowsCount(RuleType.CFGRules);
                 foreach (var coord in rules)
                 {
-                    var originalGrammar = currentGrammar;
+                    var originalGrammar = new ContextSensitiveGrammar(bestGrammar);
                     
                     for (int i = 0; i < rowsCount; i++)
                     {
@@ -72,16 +72,27 @@ namespace LinearIndexedGrammarLearner
 
                         if (newValue > bestValue)
                         {
-                            currentGrammar = newGrammar;
+                            bestGrammar = newGrammar;
                             bestValue = newValue;
                             foundImprovement = true;
                         }
                         _learner.RejectChanges();
+
+                        //for debugging purposes only.
+                        //var currentCFHypothesis = new ContextFreeGrammar(originalGrammar);
+                        //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
+
                     }
+
+                    //the best grammar (pointer) was selected among the candidates,
+                    //Now reparse the data according to the best grammar
+                    //(because you have rejected the best parse above in order to check possible better ones)
+                    _learner.ParseAllSentencesFromScratch(bestGrammar);
+
                 }
             }
 
-            return (currentGrammar, bestValue);
+            return (bestGrammar, bestValue);
         }
 
         private (ContextSensitiveGrammar bestGrammar, double bestValue) RunSingleIteration(
@@ -133,6 +144,10 @@ namespace LinearIndexedGrammarLearner
             {
                 (currentGrammar, currentValue)  = DownhillSlideWithGibbs(currentGrammar, currentValue);
             }
+
+            _learner.RefreshParses();
+
+          
             var ruleDistribution = _learner.CollectUsages();
             currentGrammar.PruneUnusedRules(ruleDistribution);
             //after pruning unused rules, parse from scratch in order to remove

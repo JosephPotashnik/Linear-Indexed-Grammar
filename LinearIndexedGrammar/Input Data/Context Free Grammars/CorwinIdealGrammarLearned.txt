@@ -8,15 +8,16 @@
 #    please see run configuration
 #
 START -> IP
-IP -> NP VP
-NP -> PRON
-NP -> NBAR
-NP -> D NBAR
-NBAR -> N
-NBAR -> ADJ NBAR
-VP -> V PP
-VP -> V NP
-VP -> V IP
-VP -> V
-VP -> VP ADV
-PP -> P NP
+NP -> N
+IP -> NP V
+NP -> D NP
+IP -> PP NP
+PP -> IP P
+IP -> IP ADJ
+IP -> PRON V
+NP -> ADJ N
+NP -> PP PRON
+BP -> EP P
+EP -> BP CONJ
+EP -> BP N
+BP -> EP V
