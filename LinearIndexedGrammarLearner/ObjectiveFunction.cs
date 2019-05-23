@@ -18,27 +18,27 @@ namespace LinearIndexedGrammarLearner
     {
         public const double Tolerance = 0.000001;
 
-        //private static readonly double[] powersOfMinus2 =
-        //{
-        //    Math.Pow(2, 0),
-        //    Math.Pow(2, -1),
-        //    Math.Pow(2, -2),
-        //    Math.Pow(2, -3),
-        //    Math.Pow(2, -4),
-        //    Math.Pow(2, -5),
-        //    Math.Pow(2, -6),
-        //    Math.Pow(2, -7),
-        //    Math.Pow(2, -8),
-        //    Math.Pow(2, -9),
-        //    Math.Pow(2, -10),
-        //    Math.Pow(2, -11),
-        //    Math.Pow(2, -12),
-        //    Math.Pow(2, -13),
-        //    Math.Pow(2, -14),
-        //    Math.Pow(2, -15)
-        //};
+        private static readonly double[] exponential =
+        {
+            Math.Pow(2, 0),
+            Math.Pow(2, -1),
+            Math.Pow(2, -2),
+            Math.Pow(2, -3),
+            Math.Pow(2, -4),
+            Math.Pow(2, -5),
+            Math.Pow(2, -6),
+            Math.Pow(2, -7),
+            Math.Pow(2, -8),
+            Math.Pow(2, -9),
+            Math.Pow(2, -10),
+            Math.Pow(2, -11),
+            Math.Pow(2, -12),
+            Math.Pow(2, -13),
+            Math.Pow(2, -14),
+            Math.Pow(2, -15)
+        };
 
-        private static readonly double[] powersOfMinus2 =
+        private static readonly double[] uniform =
         {
             1,
             1,
@@ -56,6 +56,26 @@ namespace LinearIndexedGrammarLearner
             1,
             1,
             1
+        };
+
+        private static readonly double[] harmonic =
+        {
+            1,
+            1/2f,
+            1/3f,
+            1/4f,
+            1/5f,
+            1/6f,
+            1/7f,
+            1/8f,
+            1/9f,
+            1/10f,
+            1/11f,
+            1/12f,
+            1/13f,
+            1/14f,
+            1/15f,
+            1/16f
         };
 
         private static double maxVal;
@@ -101,6 +121,8 @@ namespace LinearIndexedGrammarLearner
 
         public double Compute(ContextSensitiveGrammar currentHypothesis)
         {
+            double[] probabilityMassOfLength = harmonic;
+
             if (currentHypothesis == null) return 0;
 
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
@@ -127,7 +149,7 @@ namespace LinearIndexedGrammarLearner
                 var grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis);
                 double totalProbabilityOfGrammarTrees = 0;
                 foreach (var length in grammarTreesPerLength.Keys)
-                    totalProbabilityOfGrammarTrees += powersOfMinus2[length];
+                    totalProbabilityOfGrammarTrees += probabilityMassOfLength[length];
 
                 foreach (var length in grammarTreesPerLength.Keys)
                 {
@@ -135,7 +157,7 @@ namespace LinearIndexedGrammarLearner
                     var grammarTreesInLength = grammarTreesPerLength[length];
                     var diff = grammarTreesInLength - dataTreesInLength;
                     if (diff > 0)
-                        prob -= diff / (double) grammarTreesInLength * powersOfMinus2[length] /
+                        prob -= diff / (double) grammarTreesInLength * probabilityMassOfLength[length] /
                                 totalProbabilityOfGrammarTrees;
                 }
 

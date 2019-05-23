@@ -41,8 +41,10 @@ namespace LinearIndexedGrammarLearner
                 var rules = bestGrammar.StackConstantRules;
 
                 int rowsCount = ContextSensitiveGrammar.RuleSpace.RowsCount(RuleType.CFGRules);
+                
                 foreach (var coord in rules)
                 {
+                    RuleCoordinates bestCoord = null; 
                     var originalGrammar = new ContextSensitiveGrammar(bestGrammar);
                     
                     for (int i = 0; i < rowsCount; i++)
@@ -60,21 +62,17 @@ namespace LinearIndexedGrammarLearner
                         // change RHS of existing coordinate:
                         _learner.SetOriginalGrammarBeforePermutation();
 
-                        newGrammar.StackConstantRules.Remove(coord);
-                        _learner.ReparseWithDeletion(newGrammar,
-                            ContextSensitiveGrammar.RuleSpace[coord].NumberOfGeneratingRule);
-
-                        newGrammar.StackConstantRules.Add(newCoord);
-                        _learner.ReparseWithAddition(newGrammar,
-                        ContextSensitiveGrammar.RuleSpace[newCoord].NumberOfGeneratingRule);
+                        ChangeRHSCoordinates(newGrammar, coord, newCoord);
 
                         var newValue = _objectiveFunction.Compute(newGrammar);
 
                         if (newValue > bestValue)
                         {
+                            bestCoord = newCoord;
                             bestGrammar = newGrammar;
                             bestValue = newValue;
                             foundImprovement = true;
+
                         }
                         _learner.RejectChanges();
 
@@ -84,15 +82,35 @@ namespace LinearIndexedGrammarLearner
 
                     }
 
-                    //the best grammar (pointer) was selected among the candidates,
-                    //Now reparse the data according to the best grammar
-                    //(because you have rejected the best parse above in order to check possible better ones)
-                    _learner.ParseAllSentencesFromScratch(bestGrammar);
 
+                    if (bestCoord != null)
+                    {
+                        //switch now to best grammar by accepting the changes of the best coordinate.
+                        var newGrammar = new ContextSensitiveGrammar(originalGrammar);
+                        ChangeRHSCoordinates(newGrammar, coord, bestCoord);
+                        _learner.AcceptChanges();
+                        bestGrammar = newGrammar;
+
+                        //for debugging purposes only
+                        //var currentCFHypothesis = new ContextFreeGrammar(bestGrammar);
+                        //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
+
+                    }
                 }
             }
 
             return (bestGrammar, bestValue);
+        }
+
+        private void ChangeRHSCoordinates(ContextSensitiveGrammar newGrammar, RuleCoordinates coord, RuleCoordinates newCoord)
+        {
+            newGrammar.StackConstantRules.Remove(coord);
+            _learner.ReparseWithDeletion(newGrammar,
+                ContextSensitiveGrammar.RuleSpace[coord].NumberOfGeneratingRule);
+
+            newGrammar.StackConstantRules.Add(newCoord);
+            _learner.ReparseWithAddition(newGrammar,
+                ContextSensitiveGrammar.RuleSpace[newCoord].NumberOfGeneratingRule);
         }
 
         private (ContextSensitiveGrammar bestGrammar, double bestValue) RunSingleIteration(
@@ -141,13 +159,10 @@ namespace LinearIndexedGrammarLearner
 
             // do a local search - downhill strictly
             if (!_objectiveFunction.IsMaximalValue(currentValue))
-            {
                 (currentGrammar, currentValue)  = DownhillSlideWithGibbs(currentGrammar, currentValue);
-            }
 
             _learner.RefreshParses();
 
-          
             var ruleDistribution = _learner.CollectUsages();
             currentGrammar.PruneUnusedRules(ruleDistribution);
             //after pruning unused rules, parse from scratch in order to remove
@@ -165,7 +180,6 @@ namespace LinearIndexedGrammarLearner
 
             //set the parsers to the initial grammar.
             _learner.ParseAllSentencesFromScratch(currentGrammar);
-
 
             var currentValue = _objectiveFunction.Compute(currentGrammar);
 

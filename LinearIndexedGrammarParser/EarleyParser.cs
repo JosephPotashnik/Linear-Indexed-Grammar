@@ -472,13 +472,17 @@ namespace LinearIndexedGrammarParser
             foreach (var col in _table)
                 col.AcceptChanges();
 
-            foreach (var state in statesRemovedInLastReparse)
-                state.EndColumn.DeleteState(state, statesRemovedInLastReparse);
+            if (statesRemovedInLastReparse != null)
+            {
+                foreach (var state in statesRemovedInLastReparse)
+                    state.EndColumn.DeleteState(state, statesRemovedInLastReparse);
+            }
 
             foreach (var col in _table)
-                col.OldGammaStates.Clear();
+                col.OldGammaStates?.Clear();
 
-            statesRemovedInLastReparse.Clear();
+            statesRemovedInLastReparse?.Clear();
+
             _oldGrammar = null;
         }
 

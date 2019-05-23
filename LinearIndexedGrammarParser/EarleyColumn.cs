@@ -313,11 +313,14 @@ namespace LinearIndexedGrammarParser
 
         public void AcceptChanges()
         {
-            foreach (var state in statesAddedInLastReparse)
-                state.Added = false;
-            statesAddedInLastReparse.Clear();
+            if (statesAddedInLastReparse != null)
+            {
+                foreach (var state in statesAddedInLastReparse)
+                    state.Added = false;
+                statesAddedInLastReparse.Clear();
+            }
 
-            NonTerminalsToUnpredict.Clear();
+            NonTerminalsToUnpredict?.Clear();
         }
 
         public void RejectChanges()
