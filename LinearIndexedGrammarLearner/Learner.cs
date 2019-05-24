@@ -28,6 +28,8 @@ namespace LinearIndexedGrammarLearner
             _maxWordsInSentence = maxWordsInSentence;
             _minWordsInSentence = minWordsInSentence;
 
+            //var dict1 = sentences.GroupBy(x => x.Length).ToDictionary(g => g.Key, g => g.Count());
+
             var dict = sentences.GroupBy(x => string.Join(" ", x)).ToDictionary(g => g.Key, g => g.Count());
 
             Parses = new SentenceParsingResults[dict.Count];

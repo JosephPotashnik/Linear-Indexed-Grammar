@@ -156,20 +156,33 @@ namespace LinearIndexedGrammarLearner
             }
 
             _learner.RefreshParses();
+            PruneUnusedRules(currentGrammar);
 
-            // do a local search - downhill strictly
-            if (!_objectiveFunction.IsMaximalValue(currentValue))
-                (currentGrammar, currentValue)  = DownhillSlideWithGibbs(currentGrammar, currentValue);
+            var localSearchAfterAnnealing = false;
+            if (localSearchAfterAnnealing)
+            {
 
-            _learner.RefreshParses();
+                // do a local search - downhill strictly
+                if (!_objectiveFunction.IsMaximalValue(currentValue))
+                {
+                    (currentGrammar, currentValue) = DownhillSlideWithGibbs(currentGrammar, currentValue);
 
+                    _learner.RefreshParses();
+                    PruneUnusedRules(currentGrammar);
+                }
+
+            }
+            return (currentGrammar, currentValue);
+        }
+
+        private void PruneUnusedRules(ContextSensitiveGrammar currentGrammar)
+        {
             var ruleDistribution = _learner.CollectUsages();
             currentGrammar.PruneUnusedRules(ruleDistribution);
             //after pruning unused rules, parse from scratch in order to remove
             //all resultant unused earley items (i.e, all items using those unused rules
             //that are a part of partial, unsuccessful, derivation)
             _learner.ParseAllSentencesFromScratch(currentGrammar);
-            return (currentGrammar, currentValue);
         }
 
         public (ContextSensitiveGrammar bestGrammar, double bestValue) Run(bool isCFGGrammar,
