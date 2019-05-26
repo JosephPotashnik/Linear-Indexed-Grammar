@@ -1,7 +1,8 @@
 {
   "profiles": {
     "LinearIndexedGrammar": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "-NightRun"
     }
   }
 }

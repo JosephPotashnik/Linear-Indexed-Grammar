@@ -121,7 +121,7 @@ namespace LinearIndexedGrammarLearner
 
         public double Compute(ContextSensitiveGrammar currentHypothesis)
         {
-            double[] probabilityMassOfLength = harmonic;
+            double[] probabilityMassOfLength = uniform;
 
             if (currentHypothesis == null) return 0;
 
@@ -133,17 +133,31 @@ namespace LinearIndexedGrammarLearner
             double prob = 0;
             var allParses = _learner.Parses;
 
-            var trees = new HashSet<(int, string)>();
+            //var trees = new HashSet<(int, string)>();
+            var treesDic = new Dictionary<int, HashSet<string>>();
             for (var i = 0; i < allParses.Length; i++)
             {
+                if (!treesDic.TryGetValue(allParses[i].Length, out var set))
+                {
+                    set = new HashSet<string>();
+                    treesDic.Add(allParses[i].Length, set);
+                }
+
                 for (var j = 0; j < allParses[i].GammaStates.Count; j++)
-                    trees.Add((allParses[i].Length, allParses[i].GammaStates[j].BracketedTreeRepresentation));
+                    set.Add(allParses[i].GammaStates[j].BracketedTreeRepresentation);
+
             }
-        
+            int minLength = 1;
 
-            var dataTreesPerLength = trees.GroupBy(x => x.Item1).ToDictionary(g => g.Key, g => g.Count());
+            var dataTreesPerLength = new Dictionary<int, int>();
+            foreach (var length in treesDic.Keys)
+            {
+                dataTreesPerLength[length] = treesDic[length].Count;
+                if (length < minLength)
+                    minLength = length;
+            }
 
-            if (trees.Count > 0)
+            if (treesDic.Count > 0)
             {
                 prob = 1;
                 var grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis);
@@ -154,13 +168,15 @@ namespace LinearIndexedGrammarLearner
                 foreach (var length in grammarTreesPerLength.Keys)
                 {
                     dataTreesPerLength.TryGetValue(length, out var dataTreesInLength);
-                    var grammarTreesInLength = grammarTreesPerLength[length];
-                    var diff = grammarTreesInLength - dataTreesInLength;
+                    var allGrammarTreesInLength = grammarTreesPerLength[length];
+                    //assuming that the expected grammar trees heard decreases harmonically (power law / zipf law).                    
+                    var expectedGrammarTreesInLength = allGrammarTreesInLength / (length - minLength + 1);
+
+                    var diff = expectedGrammarTreesInLength - dataTreesInLength;
                     if (diff > 0)
-                        prob -= diff / (double) grammarTreesInLength * probabilityMassOfLength[length] /
+                        prob -= diff / (double)expectedGrammarTreesInLength * probabilityMassOfLength[length] /
                                 totalProbabilityOfGrammarTrees;
                 }
-
                 if (prob > 1)
                 {
                     return 0;
