@@ -1,11 +1,18 @@
 ﻿{
   "ProgramsToRun": [
     {
-      "IsCFG": true,
-      "VocabularyFileName": "UniversalVocabulary.json",
+      "IsCFG": false,
+      "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,
-      "GrammarFileName": "CorwinIdealGrammar.txt",
-      "DataFileName": "David Copperfield.txt"
+      "GrammarFileName": "MoveNP.txt",
+      "DataFileName": null
     }
+    //{
+    //  "IsCFG": true,
+    //  "VocabularyFileName": "UniversalVocabulary.json",
+    //  "NumberOfRuns": 1,
+    //  "GrammarFileName": "CorwinIdealGrammar.txt",
+    //  "DataFileName": "David Copperfield.txt"
+    //}
   ]
 }

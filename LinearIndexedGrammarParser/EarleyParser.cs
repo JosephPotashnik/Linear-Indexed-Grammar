@@ -300,7 +300,7 @@ namespace LinearIndexedGrammarParser
             catch (Exception e)
             {
                 var s = e.ToString();
-                LogManager.GetCurrentClassLogger().Warn(s);
+                LogManager.GetCurrentClassLogger().Info(s);
             }
 
             return GetGammaStates();

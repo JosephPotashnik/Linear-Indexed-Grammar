@@ -169,8 +169,12 @@ namespace LinearIndexedGrammarLearner
                 {
                     dataTreesPerLength.TryGetValue(length, out var dataTreesInLength);
                     var allGrammarTreesInLength = grammarTreesPerLength[length];
+
                     //assuming that the expected grammar trees heard decreases harmonically (power law / zipf law).                    
-                    var expectedGrammarTreesInLength = allGrammarTreesInLength / (length - minLength + 1);
+                    //var expectedGrammarTreesInLength = allGrammarTreesInLength / (length - minLength + 1);
+
+                    //assuming the source is complete and you will hear every possible grammar tree of length i:
+                    var expectedGrammarTreesInLength = allGrammarTreesInLength;
 
                     var diff = expectedGrammarTreesInLength - dataTreesInLength;
                     if (diff > 0)

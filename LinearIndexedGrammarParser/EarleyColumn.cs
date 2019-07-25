@@ -188,9 +188,12 @@ namespace LinearIndexedGrammarParser
             var predecessorsUnmarkedForDeletion = PredecessorsUnmarkedForDeletion(nextTerm, statesRemovedInLastReparse);
             if (predecessorsUnmarkedForDeletion.Count == 0) return true;
 
+            //SEFI - moved visited from inside the loop to before.
+            //check!
+            var visited = new HashSet<EarleyState>();
+
             foreach (var state in predecessorsUnmarkedForDeletion)
             {
-                var visited = new HashSet<EarleyState>();
                 var IsThereANonPredictedPredecessor = DFSOverPredecessors(state, visited, nextTerm, predictionSet,
                     statesRemovedInLastReparse);
                 if (IsThereANonPredictedPredecessor)
@@ -378,7 +381,6 @@ namespace LinearIndexedGrammarParser
 
         public void Unpredict(Rule r, ContextFreeGrammar grammar, HashSet<EarleyState> statesRemovedInLastReparse)
         {
-
             if (Predicted.TryGetValue(r, out var list))
             {
                 if (list.Count > 1)
@@ -386,9 +388,8 @@ namespace LinearIndexedGrammarParser
                     int x = 1;
                     throw new Exception("list of predicted should be at this stage 1 item only.");
                 }
-
-                var state = list[0];
-                state.EndColumn.MarkStateDeleted(state, grammar, statesRemovedInLastReparse);
+                foreach (var state in list)
+                    state.EndColumn.MarkStateDeleted(state, grammar, statesRemovedInLastReparse);
             }
         }
     }
