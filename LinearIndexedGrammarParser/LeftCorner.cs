@@ -3,46 +3,56 @@ using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
+    //This class is used to store the data required for the dictionary of left corner.
+    public class LeftCornerInfo
+    {
+        //the rules contained in the transitive closure of left corner of the key.
+        public HashSet<Rule> LeftCornerRules { get; set; }
+
+        //the set of nonterminals contained in the transitive left corner of the key.
+        public HashSet<DerivedCategory> NonTerminals { get; set; }
+    }
     public class LeftCorner
     {
-        public Dictionary<DerivedCategory, HashSet<Rule>> ComputeLeftCorner(ContextFreeGrammar grammar)
+        private Dictionary<DerivedCategory, LeftCornerInfo> leftCorners;
+
+        private void DFS(DerivedCategory root, DerivedCategory cat, HashSet<DerivedCategory> visited, Dictionary<DerivedCategory, List<Rule>> rules)
         {
-            var rules = grammar.Rules;
-            //key - nonterminal, value - set of the numbers of reachable rules by transitive left corner.
-            var leftCorners = new Dictionary<DerivedCategory, HashSet<Rule>>();
+            visited.Add(cat);
+            leftCorners[root].NonTerminals.Add(cat);
 
-            foreach (var item in rules)
+            if (rules.TryGetValue(cat, out var rulesOfCat))
             {
-                var cat = item.LeftHandSide;
-                if (!leftCorners.TryGetValue(cat, out var lcRules))
+                foreach (var r in rulesOfCat)
+                    leftCorners[root].LeftCornerRules.Add(r);
+
+                foreach (var r in rulesOfCat)
                 {
-                    lcRules = new HashSet<Rule>(new RuleValueEquals());
-                    leftCorners.Add(cat, lcRules);
+                    if (rules.ContainsKey(r.RightHandSide[0]) && !visited.Contains(r.RightHandSide[0]))
+                        DFS(root, r.RightHandSide[0], visited, rules);
                 }
-
-
-                if (grammar.StaticRules.TryGetValue(cat, out var ruleList))
-                    foreach (var predicted in ruleList)
-                        if (!lcRules.Contains(predicted))
-                            lcRules.Add(predicted);
             }
 
-            var changed = true;
-            while (changed)
+        }
+        public Dictionary<DerivedCategory, LeftCornerInfo> ComputeLeftCorner(Dictionary<DerivedCategory, List<Rule>> rules)
+        {
+            //key - nonterminal, value - see above
+            leftCorners = new Dictionary<DerivedCategory, LeftCornerInfo>();
+
+            var nonTerminals = rules.Keys;
+
+            foreach (var nt in nonTerminals)
             {
-                changed = false;
-                foreach (var item in leftCorners)
+                leftCorners[nt] = new LeftCornerInfo();
+                leftCorners[nt].LeftCornerRules = new HashSet<Rule>();
+                leftCorners[nt].NonTerminals = new HashSet<DerivedCategory>();
+                var visited = new HashSet<DerivedCategory>();
+                foreach (var r in rules[nt])
                 {
-                    var cat = item.Key;
-                    var reachableRules = item.Value;
-                    foreach (var reachable in reachableRules.ToArray())
-                        if (leftCorners.TryGetValue(reachable.RightHandSide[0], out var reachablesFromReachable))
-                            foreach (var reachreach in reachablesFromReachable)
-                                if (!leftCorners[cat].Contains(reachreach))
-                                {
-                                    leftCorners[cat].Add(reachreach);
-                                    changed = true;
-                                }
+                    leftCorners[nt].LeftCornerRules.Add(r);
+
+                    if (rules.ContainsKey(r.RightHandSide[0]) && !visited.Contains(r.RightHandSide[0]))
+                        DFS(nt, r.RightHandSide[0], visited, rules);
                 }
             }
 

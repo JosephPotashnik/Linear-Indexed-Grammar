@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using NLog;
 
 namespace LinearIndexedGrammarParser
@@ -194,12 +195,12 @@ namespace LinearIndexedGrammarParser
         }
 
         public List<EarleyState> ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, List<Rule> rs,
-            Dictionary<DerivedCategory, HashSet<Rule>> predictionSet)
+            Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
         {
             foreach (var col in _table)
             {
                 foreach (var rule in rs)
-                    col.Unpredict(rule, _grammar, statesRemovedInLastReparse);
+                    col.Unpredict(rule, _grammar, statesRemovedInLastReparse, predictionSet);
 
 
                 var exhausted = false;
@@ -220,21 +221,118 @@ namespace LinearIndexedGrammarParser
         }
 
         private void TraversePredictedStatesToDelete(EarleyColumn col,
-            Dictionary<DerivedCategory, HashSet<Rule>> predictionSet, HashSet<EarleyState> statesRemovedInLastReparse)
+            Dictionary<DerivedCategory, LeftCornerInfo> predictionSet, HashSet<EarleyState> statesRemovedInLastReparse)
         {
-            while (col.ActionableNonTerminalsToPredict.Count > 0)
+
+            while (col.NonTerminalsCandidatesToUnpredict.Count > 0)
             {
-                var nextTerm = col.ActionableNonTerminalsToPredict.Dequeue();
+                //1. Choose the topmost (root) nonterminal to consider for unprediction
+                //based on left corner relations graph.
+                //if there is no topmost nonterminal, i.e. a loop, return all nonterminals in the loop.
+                var (topmostNonTerminal, nonTerminalsToConsider) = ComputeRootNonTerminalsToUnpredict(col, predictionSet);
 
-                //you might need to re-check the term following deletions of other predicted states!
-                col.NonTerminalsToUnpredict.Remove(nextTerm);
+                //check the nonterminals to consider if any of them has undeleted predecessor
+                bool foundUndeletedPredecessor = FindUndeletedPredecessor(col, predictionSet,
+                    statesRemovedInLastReparse, nonTerminalsToConsider);
 
-                var toUnpredict = col.CheckForUnprediction(nextTerm, predictionSet, statesRemovedInLastReparse);
-                if (toUnpredict)
-                    if (_grammar.StaticRules.TryGetValue(nextTerm, out var ruleList))
+                var transitiveLeftCornerNonTerminals = predictionSet[topmostNonTerminal].NonTerminals;
+                col.NonTerminalsCandidatesToUnpredict.Remove(topmostNonTerminal);
+                col.visitedCategoriesInUnprediction.Add(topmostNonTerminal);
+
+                if (foundUndeletedPredecessor)
+                {
+                    //remove from candidate and all its transitive left corner
+                    //from non terminals to unprediction candidates
+                    foreach (var nt in transitiveLeftCornerNonTerminals)
+                    {
+                        col.NonTerminalsCandidatesToUnpredict.Remove(nt);
+                        col.visitedCategoriesInUnprediction.Add(nt);
+                    }
+                }
+                else
+                {
+                    //insert all transitive left corner nonterminals to check if they need unprediction too.
+                    //avoid examining nonterminals that we already verified whether they should be predicted or not.
+                    foreach (var nt in transitiveLeftCornerNonTerminals)
+                    {
+                        if (!col.visitedCategoriesInUnprediction.Contains(nt))
+                        {
+                            col.NonTerminalsCandidatesToUnpredict.Add(nt);
+                            col.visitedCategoriesInUnprediction.Add(nt);
+                        }
+                    }
+
+                    //unpredict the relevant nonterminal:
+                    if (_grammar.StaticRules.TryGetValue(topmostNonTerminal, out var ruleList))
                         foreach (var rule in ruleList)
-                            col.Unpredict(rule, _grammar, statesRemovedInLastReparse);
+                            col.Unpredict(rule, _grammar, statesRemovedInLastReparse, predictionSet);
+
+
+                }
             }
+        }
+
+        private static bool FindUndeletedPredecessor(EarleyColumn col, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet,
+            HashSet<EarleyState> statesRemovedInLastReparse, List<DerivedCategory> nonTerminalsToConsider)
+        {
+            bool foundNonDeletedPredecessor = false;
+            foreach (var nonTerminalToConsider in nonTerminalsToConsider)
+            {
+                if (col.Predecessors.TryGetValue(nonTerminalToConsider, out var predecessors))
+                {
+                    foreach (var predecessor in predecessors)
+                    {
+                        if (!statesRemovedInLastReparse.Contains(predecessor))
+                        {
+                            //when have we found a predecessor state which will not be deleted by removing all rules with nonTerminalToConsider as LHS?
+                            //either when the predecessor is not predicted itself,
+                            //or if it is predicted and also not in the prediction set of rules of the transitive left corner of nonTerminalToConsider.
+                            if (predecessor.DotIndex != 0 ||
+                                !predictionSet[nonTerminalToConsider].LeftCornerRules.Contains(predecessor.Rule))
+                            {
+                                foundNonDeletedPredecessor = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (foundNonDeletedPredecessor)
+                        break;
+                }
+                else
+                {
+                    throw new Exception("FindUndeletedPredecessor: show me a nonterminal without predecessors.");
+                    int x = 1;
+                }
+            }
+
+            return foundNonDeletedPredecessor;
+        }
+
+        private static (DerivedCategory topmost, List<DerivedCategory> nonTerminalsToConsider) ComputeRootNonTerminalsToUnpredict(EarleyColumn col, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
+        {
+            var nonTerminalsToConsider = new List<DerivedCategory>();
+
+            var topmostCandidate = col.NonTerminalsCandidatesToUnpredict.First();
+            foreach (var nonterminal in col.NonTerminalsCandidatesToUnpredict)
+            {
+                if (predictionSet[nonterminal].NonTerminals.Contains(topmostCandidate))
+                    topmostCandidate = nonterminal;
+            }
+
+            foreach (var nonterminal in predictionSet[topmostCandidate].NonTerminals)
+            {
+                //for every non terminal in the left corner that contains the topmost candidate,
+                //then it is in a closed loop with the topmost candidate and must be considered.
+                if (predictionSet[nonterminal].NonTerminals.Contains(topmostCandidate))
+                    nonTerminalsToConsider.Add(nonterminal);
+            }
+
+            if (nonTerminalsToConsider.Count == 0)
+                // consider only the topmost candidate if there is no loop with it:
+                nonTerminalsToConsider.Add(topmostCandidate);
+            
+            return (topmostCandidate, nonTerminalsToConsider);
         }
 
         private void TraverseStatesToDelete(EarleyColumn col, HashSet<EarleyState> statesRemovedInLastReparse)

@@ -58,6 +58,7 @@ namespace LinearIndexedGrammarLearner
             var rules = new List<Rule>();
             foreach (var pos in _posInText)
             {
+                //rules.Add(new Rule("X1", new[] { "X1", pos }));
                 rules.Add(new Rule("X1", new[] {pos, "X1"}));
                 rules.Add(new Rule("X1", new[] {pos}));
             }
@@ -170,20 +171,33 @@ namespace LinearIndexedGrammarLearner
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
                 return false;
 
-            var leftCorner = new LeftCorner();
-            var predictionSet = leftCorner.ComputeLeftCorner(_sentencesParser[0]._grammar);
+            Dictionary<DerivedCategory, List<Rule>> rulesExceptDeletedRule =
+                new Dictionary<DerivedCategory, List<Rule>>();
 
-            var rs = _sentencesParser[0]._grammar.Rules.Where(x => x.NumberOfGeneratingRule == numberOfGeneratingRule)
-                .ToList();
+            List<Rule> deletedRule = new List<Rule>();
+            foreach (var kvp in _sentencesParser[0]._grammar.StaticRules)
+            {
+                rulesExceptDeletedRule[kvp.Key] = new List<Rule>();
+
+                foreach (var r in kvp.Value)
+                {
+                    if (r.NumberOfGeneratingRule == numberOfGeneratingRule)
+                        deletedRule.Add(r);
+                    else
+                        rulesExceptDeletedRule[kvp.Key].Add(r);
+                }
+            }
+              
+            var leftCorner = new LeftCorner();
+            var predictionSet = leftCorner.ComputeLeftCorner(rulesExceptDeletedRule);
 
             try
             {
-
                 Parallel.ForEach(Parses,
                     (sentenceItem, loopState, i) =>
                     {
                         var n = _sentencesParser[i]
-                            .ReParseSentenceWithRuleDeletion(currentCFHypothesis, rs, predictionSet);
+                            .ReParseSentenceWithRuleDeletion(currentCFHypothesis, deletedRule, predictionSet);
                         Parses[i].GammaStates = n;
                     });
             }

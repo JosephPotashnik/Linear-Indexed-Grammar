@@ -1,0 +1,45 @@
+﻿				if (counter == 0)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 5,
+                        RHSIndex = 91
+                    };
+
+                    mutatedGrammar.StackConstantRules.Add(rc);
+
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"added {r}");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
+                else if (counter == 1)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 0,
+                        RHSIndex = 154
+                    };
+
+                    mutatedGrammar.StackConstantRules.Add(rc);
+
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"added {r}");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
+                else if (counter == 2)//forever)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 0,
+                        RHSIndex = 154
+                    };
+
+                    mutatedGrammar.StackConstantRules.Remove(rc);
+
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"removed {r}");
+                    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
+                }

@@ -120,12 +120,232 @@ namespace LinearIndexedGrammarLearner
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
             var rejectCounter = 0;
+            //bool reparsed = false;
+            //int counter = 0;
             while (currentTemp > 0.3)
             {
                 var (mutatedGrammar, reparsed) = _learner.GetNeighborAndReparse(currentGrammar);
                 if (mutatedGrammar == null || !reparsed) continue;
 
                 currentTemp *= _params.CoolingFactor;
+                
+                //var mutatedGrammar = new ContextSensitiveGrammar(currentGrammar);
+                //_learner.SetOriginalGrammarBeforePermutation();
+
+                //bug 2
+                //if (counter == 0)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 5,
+                //        RHSIndex = 91
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Add(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"added {r}");
+                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+                //else if (counter == 1)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 0,
+                //        RHSIndex = 154
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Add(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"added {r}");
+                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+                //else if (counter == 2)//forever)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 0,
+                //        RHSIndex = 154
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Remove(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"removed {r}");
+                //    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+                //bug 1
+                //if (counter == 0)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 4,
+                //        RHSIndex = 107
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Add(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"added {r}");
+                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+                //else if (counter == 1)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 3,
+                //        RHSIndex = 98
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Add(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"added {r}");
+                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+                //else if (counter == 2)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 1,
+                //        RHSIndex = 94
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Add(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"added {r}");
+                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+                //else if (counter == 3)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 5,
+                //        RHSIndex = 143
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Add(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"added {r}");
+                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+                //else if (counter == 4)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 3,
+                //        RHSIndex = 119
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Add(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"added {r}");
+                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+                //else if (counter == 5)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 3,
+                //        RHSIndex = 138
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Add(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"added {r}");
+                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+                //else if (counter == 6)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 1,
+                //        RHSIndex = 117
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Add(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"added {r}");
+                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+
+
+                //else if (counter == 7)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 5,
+                //        RHSIndex = 112
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Add(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"added {r}");
+                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+                //else if (counter == 8)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 3,
+                //        RHSIndex = 146
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Add(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"added {r}");
+                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+                //else if (counter == 9)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 0,
+                //        RHSIndex = 50
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Add(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"added {r}");
+                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
+                //else if (counter == 10)//forever)
+                //{
+                //    counter++;
+                //    var rc = new RuleCoordinates()
+                //    {
+                //        LHSIndex = 0,
+                //        RHSIndex = 50
+                //    };
+
+                //    mutatedGrammar.StackConstantRules.Remove(rc);
+
+                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                //    Console.WriteLine($"removed {r}");
+                //    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
+                //}
 
                 var newValue = _objectiveFunction.Compute(mutatedGrammar);
 
