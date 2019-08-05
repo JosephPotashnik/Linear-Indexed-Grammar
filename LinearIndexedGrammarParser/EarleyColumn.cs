@@ -4,18 +4,6 @@ using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
-    internal class CompletedStateComparer : IComparer<EarleyState>
-    {
-        public int Compare(EarleyState x, EarleyState y)
-        {
-            if (x.StartColumn.Index > y.StartColumn.Index)
-                return -1;
-            if (x.StartColumn.Index < y.StartColumn.Index)
-                return 1;
-            return 0;
-        }
-    }
-
     public class EarleyColumn
     {
         internal Queue<DerivedCategory> ActionableNonTerminalsToPredict;
@@ -26,7 +14,6 @@ namespace LinearIndexedGrammarParser
 
         internal HashSet<DerivedCategory> visitedCategoriesInUnprediction = new HashSet<DerivedCategory>();
         internal HashSet<DerivedCategory> NonTerminalsCandidatesToUnpredict = new HashSet<DerivedCategory>();
-        //internal Dictionary<DerivedCategory, HashSet<DerivedCategory>> RemovedEdgesFromLeftCornerGraph = new Dictionary<DerivedCategory, HashSet<DerivedCategory>>();
 
         public EarleyColumn(int index, string token)
         {
@@ -34,10 +21,12 @@ namespace LinearIndexedGrammarParser
             Token = token;
 
             //completed agenda is ordered in decreasing order of start indices (see Stolcke 1995 about completion priority queue).
-            ActionableCompleteStates =
-                new SortedDictionary<EarleyState, Queue<EarleyState>>(new CompletedStateComparer());
-            ActionableDeletedStates =
-                new SortedDictionary<EarleyState, Stack<EarleyState>>(new CompletedStateComparer());
+
+            //ActionableCompleteStates =
+            //    new SortedDictionary<EarleyState, Queue<EarleyState>>(new CompletedStateComparer());
+            ActionableCompleteStates = new CompletedStatesHeap();
+
+            ActionableDeletedStates = new DeletedStatesHeap();
 
             //ActionableNonCompleteStates = new Queue<EarleyState>();
             Predecessors = new Dictionary<DerivedCategory, HashSet<EarleyState>>();
@@ -48,10 +37,11 @@ namespace LinearIndexedGrammarParser
             ActionableNonTerminalsToPredict = new Queue<DerivedCategory>();
         }
 
-        internal SortedDictionary<EarleyState, Queue<EarleyState>> ActionableCompleteStates { get; set; }
-        internal SortedDictionary<EarleyState, Stack<EarleyState>> ActionableDeletedStates { get; set; }
+        internal CompletedStatesHeap ActionableCompleteStates { get; set; }
+        internal DeletedStatesHeap ActionableDeletedStates { get; set; }
 
         internal Queue<EarleyState> ActionableNonCompleteStates { get; set; }
+
 
         public List<EarleyState> GammaStates { get; set; }
         public List<EarleyState> OldGammaStates { get; set; }
@@ -104,7 +94,7 @@ namespace LinearIndexedGrammarParser
             }
 
             foreach (var parent in oldState.Parents)
-                parent.EndColumn.EnqueueToDeletedStack(parent);
+                parent.EndColumn.ActionableDeletedStates.Push(parent);
         }
 
         public void DeleteState(EarleyState oldState, HashSet<EarleyState> statesRemovedInLastReparse)
@@ -154,27 +144,7 @@ namespace LinearIndexedGrammarParser
             }
         }
         
-        public void EnqueueToCompletedQueue(EarleyState state)
-        {
-            if (!ActionableCompleteStates.TryGetValue(state, out var queue))
-            {
-                queue = new Queue<EarleyState>();
-                ActionableCompleteStates.Add(state, queue);
-            }
 
-            queue.Enqueue(state);
-        }
-
-        public void EnqueueToDeletedStack(EarleyState state)
-        {
-            if (!ActionableDeletedStates.TryGetValue(state, out var stack))
-            {
-                stack = new Stack<EarleyState>();
-                ActionableDeletedStates.Add(state, stack);
-            }
-
-            stack.Push(state);
-        }
 
         //The responsibility not to add a state that already exists in the column
         //lays with the caller to AddState(). i.e, either predict, scan or complete,
@@ -249,7 +219,7 @@ namespace LinearIndexedGrammarParser
             }
             else
             {
-                EnqueueToCompletedQueue(newState);
+                ActionableCompleteStates.Enqueue(newState);
             }
         }
 
