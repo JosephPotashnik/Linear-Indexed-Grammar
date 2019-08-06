@@ -91,13 +91,6 @@ namespace LinearIndexedGrammarParser
             return s1 + "\r\n" + s2;
         }
 
-
-        public RuleCoordinates GetRandomRule(List<RuleCoordinates> rules)
-        {
-            var rand = ThreadSafeRandom.ThisThreadsRandom;
-            return rules[rand.Next(rules.Count)];
-        }
-
         //if there is a rule that has the same RHS side, i.e. the same RHS index
         public bool ContainsRuleWithSameRHS(RuleCoordinates rc, List<RuleCoordinates> rules)
         {
