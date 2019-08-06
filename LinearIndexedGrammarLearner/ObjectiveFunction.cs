@@ -17,8 +17,6 @@ namespace LinearIndexedGrammarLearner
     public class GrammarFitnessObjectiveFunction : IObjectiveFunction
     {
         public const double Tolerance = 0.000001;
-        private static Random rand = new Random();
-        private static Object randLock = new object();
         private static readonly double[] exponential =
         {
             Math.Pow(2, 0),
@@ -109,9 +107,7 @@ namespace LinearIndexedGrammarLearner
             //bigger temperature => higher probability
             var exponent = 100 * (Math.Log(newValue) - Math.Log(oldValue)) / temperature;
             var prob = Math.Exp(exponent);
-            double randomThrow = 0;
-            lock (randLock)
-                randomThrow = rand.NextDouble();
+            double randomThrow = Pseudorandom.NextDouble();
 
             return randomThrow < prob;
         }
@@ -134,7 +130,6 @@ namespace LinearIndexedGrammarLearner
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
             {
                 throw new Exception("Cyclic Unit Production Encountered at unexpected place, in preparation to remove the check for cyclic");
-                return 0;
             }
 
             double prob = 0;

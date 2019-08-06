@@ -16,14 +16,6 @@ namespace LinearIndexedGrammarParser
             int index = state.StartColumn.Index;
             if (!items.TryGetValue(index, out var queue))
             {
-                foreach (var element in indicesHeap.elements)
-                {
-                    if (index == element)
-                    {
-                        int x = 1;
-                        throw new Exception("element already exists!");
-                    }
-                }
                 indicesHeap.Add(index);
                 queue = new Queue<EarleyState>();
                 items.Add(index, queue);

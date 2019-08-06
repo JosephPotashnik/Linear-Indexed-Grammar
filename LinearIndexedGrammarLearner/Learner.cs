@@ -251,7 +251,6 @@ namespace LinearIndexedGrammarLearner
                         if (actual != expected)
                         {
                             var grammar = parsers[i]._grammar.ToString();
-                            var x = 1;
                             throw new Exception("actual parse differs from expected parse");
                         }
                     }

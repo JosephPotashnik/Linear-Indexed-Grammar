@@ -16,8 +16,6 @@ namespace LinearIndexedGrammarLearner
 
         public const int CFGOperationWeight = 20;
         public const int LIGOperationWeight = 5;
-        private static Random rand = new Random();
-        private static Object randLock = new object();
 
         private static Tuple<GrammarMutation, int>[] _mutations;
         private static int _totalWeights;
@@ -53,9 +51,7 @@ namespace LinearIndexedGrammarLearner
 
         public static GrammarMutation GetWeightedRandomMutation()
         {
-            int r = 0;
-            lock (randLock)
-                r = rand.Next(_totalWeights);
+            int r = Pseudorandom.NextInt(_totalWeights);
 
             var sum = 0;
             foreach (var mutation in _mutations)
@@ -69,9 +65,7 @@ namespace LinearIndexedGrammarLearner
         }
         public RuleCoordinates GetRandomRule(List<RuleCoordinates> rules)
         {
-            int r = 0;
-            lock (randLock)
-                r = rand.Next(rules.Count);
+            int r = Pseudorandom.NextInt(rules.Count);
             return rules[r];
         }
 

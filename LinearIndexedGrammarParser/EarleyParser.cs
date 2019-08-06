@@ -302,7 +302,6 @@ namespace LinearIndexedGrammarParser
                 else
                 {
                     throw new Exception("FindUndeletedPredecessor: show me a nonterminal without predecessors.");
-                    int x = 1;
                 }
             }
 

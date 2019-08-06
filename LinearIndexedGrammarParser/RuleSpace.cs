@@ -1,19 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace LinearIndexedGrammarParser
 {
-    //public static class ThreadSafeRandom
-    //{
-    //    [ThreadStatic] private static Random _local;
-
-    //    public static Random ThisThreadsRandom => _local ?? (_local =
-    //                                                  new Random(unchecked(Environment.TickCount * 31 +
-    //                                                                       Thread.CurrentThread.ManagedThreadId)));
-    //}
-
+    
     public class RuleType
     {
         public static int CFGRules = 0;
@@ -27,8 +18,7 @@ namespace LinearIndexedGrammarParser
         private readonly List<int>[] _allowedRHSIndices;
         private readonly Dictionary<string, int> _nonTerminalLHS = new Dictionary<string, int>();
         private readonly Dictionary<string, int> _nonTerminalsRHS = new Dictionary<string, int>();
-        private static Random rand= new Random();
-        private static Object randLock = new object();
+
 
         private readonly Rule[][][] _ruleSpace;
 
@@ -198,19 +188,13 @@ namespace LinearIndexedGrammarParser
 
         public int GetRandomRHSIndex(int ruleType)
         {
-            int r = 0;
-            lock (randLock)
-                r = rand.Next(_allowedRHSIndices[ruleType].Count);
-
+            int r = Pseudorandom.NextInt(_allowedRHSIndices[ruleType].Count);
             return _allowedRHSIndices[ruleType][r];
         }
 
         public int GetRandomLHSIndex()
         {
-            int r = 0;
-            lock (randLock)
-                r = rand.Next(_ruleSpace[0].Length);
-
+            int r = Pseudorandom.NextInt(_ruleSpace[0].Length);
             return r; //same LHS indices for all rule type tables.
         }
 
