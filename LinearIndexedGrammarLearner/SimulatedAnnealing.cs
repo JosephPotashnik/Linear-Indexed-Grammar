@@ -372,7 +372,8 @@ namespace LinearIndexedGrammarLearner
 
                 //cooling factor 0.999 from temp 10 to temp 0.3 takes 3500 iterations
                 //350 rejections consecutively (10% of total)- give up, reheat system.
-                if (rejectCounter > 350) break;
+
+                //if (rejectCounter > 350) break;
             }
 
             _learner.RefreshParses();

@@ -16,7 +16,8 @@ namespace LinearIndexedGrammarLearner
 
         public const int CFGOperationWeight = 20;
         public const int LIGOperationWeight = 5;
-        private int count = 1;
+        private static Random rand = new Random();
+        private static Object randLock = new object();
 
         private static Tuple<GrammarMutation, int>[] _mutations;
         private static int _totalWeights;
@@ -52,8 +53,9 @@ namespace LinearIndexedGrammarLearner
 
         public static GrammarMutation GetWeightedRandomMutation()
         {
-            var rand = ThreadSafeRandom.ThisThreadsRandom;
-            var r = rand.Next(_totalWeights);
+            int r = 0;
+            lock (randLock)
+                r = rand.Next(_totalWeights);
 
             var sum = 0;
             foreach (var mutation in _mutations)
@@ -65,6 +67,14 @@ namespace LinearIndexedGrammarLearner
 
             return null;
         }
+        public RuleCoordinates GetRandomRule(List<RuleCoordinates> rules)
+        {
+            int r = 0;
+            lock (randLock)
+                r = rand.Next(rules.Count);
+            return rules[r];
+        }
+
 
         public (ContextSensitiveGrammar mutatedGrammar, bool reparsed)
             InsertStackConstantRule(ContextSensitiveGrammar grammar, Learner learner)
@@ -101,7 +111,7 @@ namespace LinearIndexedGrammarLearner
         public (ContextSensitiveGrammar mutatedGrammar, bool reparsed)
             DeleteStackConstantRule(ContextSensitiveGrammar grammar, Learner learner)
         {
-            var rc = grammar.GetRandomRule(grammar.StackConstantRules);
+            var rc = GetRandomRule(grammar.StackConstantRules);
             return InnerDeleteStackConstantRule(grammar, learner, rc);
         }
 
@@ -122,7 +132,7 @@ namespace LinearIndexedGrammarLearner
 
             bool reparsed1, reparsed2;
 
-            var rcOld = grammar.GetRandomRule(grammar.StackConstantRules);
+            var rcOld = GetRandomRule(grammar.StackConstantRules);
             if (rcOld.RHSIndex == 0) return (null, false); //do not change LHS for rules of the form START -> Xi
 
             var rcNew = new RuleCoordinates()
@@ -147,7 +157,7 @@ namespace LinearIndexedGrammarLearner
         {
             bool reparsed1, reparsed2;
 
-            var rcOld = grammar.GetRandomRule(grammar.StackConstantRules);
+            var rcOld = GetRandomRule(grammar.StackConstantRules);
             var rcNew = new RuleCoordinates()
             {
                 RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex(RuleType.CFGRules),
@@ -204,7 +214,7 @@ namespace LinearIndexedGrammarLearner
         {
             if (grammar.StackPush1Rules.Count == 0) return (null, false);
 
-            var rc = grammar.GetRandomRule(grammar.StackPush1Rules);
+            var rc = GetRandomRule(grammar.StackPush1Rules);
             grammar.DeleteCorrespondingPopRule(rc);
             grammar.StackPush1Rules.Remove(rc);
 

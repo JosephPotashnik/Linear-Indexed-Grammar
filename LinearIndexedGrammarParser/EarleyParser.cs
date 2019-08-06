@@ -339,15 +339,7 @@ namespace LinearIndexedGrammarParser
         {
             while (col.ActionableDeletedStates.Count > 0)
             {
-                var kvp = col.ActionableDeletedStates.First();
-                var deletedStatesStackKey = kvp.Key;
-                var deletedStatesStack = kvp.Value;
-
-                var state = deletedStatesStack.Pop();
-
-                if (deletedStatesStack.Count == 0)
-                    col.ActionableDeletedStates.Remove(deletedStatesStackKey);
-
+                var state = col.ActionableDeletedStates.Pop();
                 state.EndColumn.MarkStateDeleted(state, _grammar, statesRemovedInLastReparse);
             }
         }
@@ -484,15 +476,7 @@ namespace LinearIndexedGrammarParser
             var anyCompleted = col.ActionableCompleteStates.Count > 0;
             while (col.ActionableCompleteStates.Count > 0)
             {
-                var kvp = col.ActionableCompleteStates.First();
-                var completedStatesQueueKey = kvp.Key;
-                var completedStatesQueue = kvp.Value;
-
-                var state = completedStatesQueue.Dequeue();
-
-                if (completedStatesQueue.Count == 0)
-                    col.ActionableCompleteStates.Remove(completedStatesQueueKey);
-
+                var state = col.ActionableCompleteStates.Dequeue();
                 Complete(col, state);
             }
 

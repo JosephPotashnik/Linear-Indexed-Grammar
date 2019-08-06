@@ -11,7 +11,7 @@ namespace LinearIndexedGrammarParserTests
 {
     public class ParserTests
     {
-       /*
+       
         public ParserTests(ITestOutputHelper output)
         {
             this.output = output;
@@ -25,7 +25,10 @@ namespace LinearIndexedGrammarParserTests
             var n = GrammarFileReader.ParseSentenceAccordingToGrammar("CFGLeftRecursion.txt", "Vocabulary.json", 
                 "John a the a the a the cried");
             var settings = new JsonSerializerSettings
-                {Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore};
+            {
+                Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
             var actual = JsonConvert.SerializeObject(n, settings);
             var expected = File.ReadAllText(@"ExpectedCFGLeftRecursion.json");
             Assert.Equal(expected, actual);
@@ -52,14 +55,17 @@ namespace LinearIndexedGrammarParserTests
             var n = GrammarFileReader.ParseSentenceAccordingToGrammar("CFG.txt", "Vocabulary.json",
                 "David knows the man kissed the woman a girl");
             var settings = new JsonSerializerSettings
-                {Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore};
+            {
+                Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
             var actual = JsonConvert.SerializeObject(n, settings);
             var expected = File.ReadAllText(@"ExpectedCFG.json");
             Assert.Equal(expected, actual);
 
             
         }
-
+        /*
         [Fact]
         public void LIGMovementFromDirectObjectTest()
         {
@@ -189,13 +195,15 @@ namespace LinearIndexedGrammarParserTests
             //    output.WriteLine(item);
             //}
         }
-
+        */
         [Fact]
         public void GenerateCFGGrammarSentencesTest()
         {
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(@"Vocabulary.json");
+            var pos = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
+
             var (nodeList, grammar) = GrammarFileReader.GenerateSentenceAccordingToGrammar("SimpleCFG.txt", "Vocabulary.json",10);
-            var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary, 1, false);
+            var (data, dataVocabulary) = GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary, 1, pos, false);
             var sentences = data.Select(x => string.Join(" ", x));
 
             var settings = new JsonSerializerSettings
@@ -220,7 +228,7 @@ namespace LinearIndexedGrammarParserTests
             //    output.WriteLine(string.Join(" ", item));
             //}
         }
-
+        /*
         [Fact]
         public void GenerateLIGMovementPPSentencesTest()
         {
