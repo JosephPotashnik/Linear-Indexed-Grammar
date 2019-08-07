@@ -122,7 +122,10 @@ namespace LinearIndexedGrammarLearner
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
 
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
+            {
+                Console.WriteLine("ContainsCyclicUnitProduction in ReparseWithAddition ");
                 return false;
+            }
 
             var rs = currentCFHypothesis.Rules.Where(x => x.NumberOfGeneratingRule == numberOfGeneratingRule).ToList();
 
@@ -169,7 +172,10 @@ namespace LinearIndexedGrammarLearner
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
 
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
+            {
+                Console.WriteLine("ContainsCyclicUnitProduction in ReparseWithDeletion ");
                 return false;
+            }
 
             Dictionary<DerivedCategory, List<Rule>> rulesExceptDeletedRule =
                 new Dictionary<DerivedCategory, List<Rule>>();
