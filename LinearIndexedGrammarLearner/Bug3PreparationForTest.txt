@@ -1,0 +1,82 @@
+﻿				//bug 3
+                if (counter == 0)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 0,
+                        RHSIndex = 138
+                    };
+
+                    mutatedGrammar.StackConstantRules.Add(rc);
+
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"added {r}");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
+                else if (counter == 1)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 2,
+                        RHSIndex = 154
+                    };
+
+                    mutatedGrammar.StackConstantRules.Add(rc);
+
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"added {r}");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
+                else if (counter == 2)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        RuleType = RuleType.Push1Rules,
+                        LHSIndex = 1,
+                        RHSIndex = 131
+                    };
+
+
+                    mutatedGrammar.StackPush1Rules.Add(rc);
+                    mutatedGrammar.AddCorrespondingPopRule(rc);
+
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"added {r}");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
+                else if (counter == 3)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 1,
+                        RHSIndex = 157
+                    };
+
+                    mutatedGrammar.StackConstantRules.Add(rc);
+
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"added {r}");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
+                else if (counter == 4)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        RuleType = RuleType.Push1Rules,
+                        LHSIndex = 2,
+                        RHSIndex = 161
+                    };
+
+
+                    mutatedGrammar.StackPush1Rules.Add(rc);
+                    mutatedGrammar.AddCorrespondingPopRule(rc);
+
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"added {r}");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }

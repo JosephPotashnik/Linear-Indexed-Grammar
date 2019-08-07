@@ -44,7 +44,7 @@ namespace LinearIndexedGrammarParser
             foreach (var nt in nonTerminals)
             {
                 leftCorners[nt] = new LeftCornerInfo();
-                leftCorners[nt].LeftCornerRules = new HashSet<Rule>();
+                leftCorners[nt].LeftCornerRules = new HashSet<Rule>(new RuleValueEquals());
                 leftCorners[nt].NonTerminals = new HashSet<DerivedCategory>();
                 var visited = new HashSet<DerivedCategory>();
                 foreach (var r in rules[nt])

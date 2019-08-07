@@ -24,16 +24,27 @@ namespace LinearIndexedGrammarLearner
         {
             var l = new List<GrammarMutationData>();
 
-            l.Add(new GrammarMutationData("InsertStackConstantRule", CFGOperationWeight));
-            l.Add(new GrammarMutationData("DeleteStackConstantRule", CFGOperationWeight));
-            l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
-            l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
+            if (isCFGGrammar)
+            {
+                l.Add(new GrammarMutationData("InsertStackConstantRule", CFGOperationWeight));
+                l.Add(new GrammarMutationData("DeleteStackConstantRule", CFGOperationWeight));
+                l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
+                l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
+            }
+            else
+            {
+                l.Add(new GrammarMutationData("InsertStackConstantRule", CFGOperationWeight));
+                l.Add(new GrammarMutationData("DeleteStackConstantRule", CFGOperationWeight));
+                l.Add(new GrammarMutationData("InsertMovement", LIGOperationWeight));
+                l.Add(new GrammarMutationData("DeleteMovement", LIGOperationWeight));
 
-            var LIGWeight = isCFGGrammar ? 0 : LIGOperationWeight;
-            l.Add(new GrammarMutationData("InsertMovement", LIGWeight));
-            l.Add(new GrammarMutationData("DeleteMovement", LIGWeight));
-            //l.Add(new GrammarMutationData("ChangeLHSPush", LIGWeight));
-            //l.Add(new GrammarMutationData("ChangeRHSPush", LIGWeight));
+                //TODO at the moment, bugs when changeRHS/changeLHS, changeLHSPush, changeRHSPush
+                //when grammar is LIG. 
+                //l.Add(new GrammarMutationData("ChangeLHSPush", LIGWeight));
+                //l.Add(new GrammarMutationData("ChangeRHSPush", LIGWeight));
+                //l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
+                //l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
+            }
 
             var typeInfo = GetType().GetTypeInfo();
             _mutations = new Tuple<GrammarMutation, int>[l.Count];

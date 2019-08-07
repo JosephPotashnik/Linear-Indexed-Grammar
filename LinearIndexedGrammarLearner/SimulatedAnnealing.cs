@@ -129,56 +129,12 @@ namespace LinearIndexedGrammarLearner
 
                 currentTemp *= _params.CoolingFactor;
                 
+                //when debugging a specific scenario, uncomment the two following
+                //lines and comment the first two lines above in the while loop.
+
                 //var mutatedGrammar = new ContextSensitiveGrammar(currentGrammar);
                 //_learner.SetOriginalGrammarBeforePermutation();
-
-                //bug 2
-                //if (counter == 0)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 5,
-                //        RHSIndex = 91
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Add(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 1)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 0,
-                //        RHSIndex = 154
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Add(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 2)//forever)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 0,
-                //        RHSIndex = 154
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Remove(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"removed {r}");
-                //    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //bug 1
+                
                 //if (counter == 0)
                 //{
                 //    counter++;
@@ -373,7 +329,7 @@ namespace LinearIndexedGrammarLearner
                 //cooling factor 0.999 from temp 10 to temp 0.3 takes 3500 iterations
                 //350 rejections consecutively (10% of total)- give up, reheat system.
 
-                //if (rejectCounter > 350) break;
+                if (rejectCounter > 350) break;
             }
 
             _learner.RefreshParses();
