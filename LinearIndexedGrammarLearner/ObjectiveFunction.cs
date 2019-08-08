@@ -16,6 +16,7 @@ namespace LinearIndexedGrammarLearner
 
     public class GrammarFitnessObjectiveFunction : IObjectiveFunction
     {
+        private bool decreaseExpectedEvidence;
         public const double Tolerance = 0.000001;
         private static readonly double[] exponential =
         {
@@ -80,9 +81,10 @@ namespace LinearIndexedGrammarLearner
         private static double maxVal;
         private readonly Learner _learner;
 
-        public GrammarFitnessObjectiveFunction(Learner l)
+        public GrammarFitnessObjectiveFunction(Learner l, bool _decreaseExpectedEvidence)
         {
             _learner = l;
+            this.decreaseExpectedEvidence = _decreaseExpectedEvidence;
         }
 
 
@@ -150,7 +152,6 @@ namespace LinearIndexedGrammarLearner
 
             }
             int minLength = 1;
-
             var dataTreesPerLength = new Dictionary<int, int>();
             foreach (var length in treesDic.Keys)
             {
@@ -172,11 +173,7 @@ namespace LinearIndexedGrammarLearner
                     dataTreesPerLength.TryGetValue(length, out var dataTreesInLength);
                     var allGrammarTreesInLength = grammarTreesPerLength[length];
 
-                    //assuming that the expected grammar trees heard decreases harmonically (power law / zipf law).                    
-                    //var expectedGrammarTreesInLength = allGrammarTreesInLength / (length - minLength + 1);
-
-                    //assuming the source is complete and you will hear every possible grammar tree of length i:
-                    var expectedGrammarTreesInLength = allGrammarTreesInLength;
+                    var expectedGrammarTreesInLength = decreaseExpectedEvidence ? allGrammarTreesInLength / (length - minLength + 1) : allGrammarTreesInLength;
 
                     var diff = expectedGrammarTreesInLength - dataTreesInLength;
                     if (diff > 0)

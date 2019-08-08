@@ -5,44 +5,48 @@
       "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,
       "GrammarFileName": "NoNPNoV3.txt",
-      "DataFileName": null
+      "DataFileName": null,
+      "DecreaseExpectedEvidence": false
     },
     {
       "IsCFG": true,
       "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,
       "GrammarFileName": "NoNPWithV3.txt",
-      "DataFileName": null
-
+      "DataFileName": null,
+      "DecreaseExpectedEvidence": false
     },
     {
       "IsCFG": true,
       "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,
       "GrammarFileName": "YesNPNoV3.txt",
-      "DataFileName": null
-
+      "DataFileName": null,
+      "DecreaseExpectedEvidence": false
     },
     {
       "IsCFG": true,
       "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,
       "GrammarFileName": "YesNPNoV3WithADJ.txt",
-      "DataFileName": null
+      "DataFileName": null,
+      "DecreaseExpectedEvidence": false
     },
     {
       "IsCFG": true,
       "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,
       "GrammarFileName": "YesNPYesV3.txt",
-      "DataFileName": null
+      "DataFileName": null,
+      "DecreaseExpectedEvidence": false
     },
     {
       "IsCFG": true,
       "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,
       "GrammarFileName": "YesNPYesV3WithADJ.txt",
-      "DataFileName": null
+      "DataFileName": null,
+      "DecreaseExpectedEvidence": false
     },
     /*{
       "IsCFG": true,
@@ -63,21 +67,24 @@
       "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,
       "GrammarFileName": "MoveNP.txt",
-      "DataFileName": null
+      "DataFileName": null,
+      "DecreaseExpectedEvidence": false
     },
     {
       "IsCFG": false,
       "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,
       "GrammarFileName": "MoveNPWithADJ.txt",
-      "DataFileName": null
+      "DataFileName": null,
+      "DecreaseExpectedEvidence": false
     },
     {
       "IsCFG": false,
       "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,
       "GrammarFileName": "MoveNPPP.txt",
-      "DataFileName": null
+      "DataFileName": null,
+      "DecreaseExpectedEvidence": false
     }
   ]
 }

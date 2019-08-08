@@ -27,6 +27,8 @@ namespace LinearIndexedGrammar
         [JsonProperty] public string VocabularyFileName { get; set; }
         [JsonProperty] public string DataFileName { get; set; }
         [JsonProperty] public bool IsCFG { get; set; }
+        [JsonProperty] public bool DecreaseExpectedEvidence { get; set; }
+
     }
 
     public class Program
@@ -143,12 +145,12 @@ namespace LinearIndexedGrammar
         }
 
         private static bool ValidateTargetGrammar(List<Rule> grammarRules, string[][] data,
-            Vocabulary universalVocabulary)
+            Vocabulary universalVocabulary, bool decreaseExpectedEvidence)
         {
             var maxWordsInSentence = data.Max(x => x.Length);
             var minWordsInSentences = data.Min(x => x.Length);
 
-            PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentences, maxWordsInSentence,
+            PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentences, maxWordsInSentence, decreaseExpectedEvidence, 
                 out var objectiveFunction);
             var partOfSpeechCategories = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
             ContextFreeGrammar.RenameVariables(grammarRules, partOfSpeechCategories);
@@ -205,7 +207,7 @@ namespace LinearIndexedGrammar
 
             //var grammarRulesTest = GrammarFileReader.ReadRulesFromFile("CorwinIdealGrammarLearned.txt");
 
-            if (!ValidateTargetGrammar(grammarRules, data, dataVocabulary))
+            if (!ValidateTargetGrammar(grammarRules, data, dataVocabulary, programParams.DecreaseExpectedEvidence))
                 return;
 
             var s = "------------------------------------------------------------\r\n" +
@@ -220,7 +222,7 @@ namespace LinearIndexedGrammar
             {
                 LogManager.GetCurrentClassLogger().Info($"Run {i + 1}:");
 
-                var (bestHypothesis, bestValue) = LearnGrammarFromData(data, dataVocabulary, programParams.IsCFG);
+                var (bestHypothesis, bestValue) = LearnGrammarFromData(data, dataVocabulary, programParams.IsCFG, programParams.DecreaseExpectedEvidence);
                 probs.Add(bestValue);
 
                 s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";
@@ -236,7 +238,7 @@ namespace LinearIndexedGrammar
         }
 
         public static (ContextSensitiveGrammar bestGrammar, double bestValue) LearnGrammarFromDataUpToLengthN(
-            string[][] data, Vocabulary universalVocabulary, int n, int minWordsInSentence, bool isCFGGrammar,
+            string[][] data, Vocabulary universalVocabulary, int n, int minWordsInSentence, bool isCFGGrammar, bool decreaseExpectedEvidence, 
             ContextSensitiveGrammar initialGrammar)
         {
             IEnumerable<Rule> rules = null;
@@ -245,7 +247,7 @@ namespace LinearIndexedGrammar
                 rules = ContextFreeGrammar.ExtractRules(initialGrammar);
 
             //2. prepare new rule space
-            var learner = PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentence, n,
+            var learner = PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentence, n, decreaseExpectedEvidence,
                 out var objectiveFunction);
 
             //3. re-place rule list inside new rule space (the coordinates of the old rules need not be the same
@@ -268,7 +270,7 @@ namespace LinearIndexedGrammar
         }
 
         private static Learner PrepareLearningUpToSentenceLengthN(string[][] data, Vocabulary universalVocabulary,
-            int minWords, int maxWords,
+            int minWords, int maxWords, bool decreaseExpectedEvidence, 
             out IObjectiveFunction objectiveFunction)
         {
             //1. get sentences up to length n and the relevant POS categories in them.
@@ -280,7 +282,7 @@ namespace LinearIndexedGrammar
 
             //3. prepare the learner
             var learner = new Learner(sentences, minWords, maxWords, posInText, universalVocabulary);
-            objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
+            objectiveFunction = new GrammarFitnessObjectiveFunction(learner, decreaseExpectedEvidence);
             return learner;
         }
 
@@ -296,7 +298,7 @@ namespace LinearIndexedGrammar
 
 
         public static (ContextSensitiveGrammar bestGrammar, double bestValue) LearnGrammarFromData(string[][] data,
-            Vocabulary universalVocabulary, bool isCFGGrammar)
+            Vocabulary universalVocabulary, bool isCFGGrammar, bool decreaseExpectedEvidence)
         {
             // initialWordLength is the sentence length from which you would like to start learning
             //it does not have to be the length of the shortest sentences
@@ -318,7 +320,7 @@ namespace LinearIndexedGrammar
                 LogManager.GetCurrentClassLogger().Info($"learning word length  {currentWordLength}");
 
                 (currentGrammar, currentValue) = LearnGrammarFromDataUpToLengthN(data, universalVocabulary,
-                    currentWordLength, minWordsInSentences, isCFGGrammar, initialGrammars[currentWordLength]);
+                    currentWordLength, minWordsInSentences, isCFGGrammar, decreaseExpectedEvidence, initialGrammars[currentWordLength]);
                 //SEFI
                 //LogManager.GetCurrentClassLogger().Info($"End of learning word Length { currentWordLength}, \r\n Current Grammar {currentGrammar} \r\n CurrentValue { currentValue}");
 

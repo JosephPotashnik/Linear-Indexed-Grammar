@@ -5,7 +5,8 @@
       "VocabularyFileName": "UniversalVocabulary.json",
       "NumberOfRuns": 1,
       "GrammarFileName": "CorwinIdealGrammar.txt",
-      "DataFileName": "David Copperfield.txt"
+      "DataFileName": "David Copperfield.txt",
+      "DecreaseExpectedEvidence":  true 
     }
   ]
 }
