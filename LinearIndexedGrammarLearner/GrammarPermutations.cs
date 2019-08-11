@@ -8,7 +8,6 @@ using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarLearner
 {
-
     public class GrammarPermutations
     {
         public delegate (ContextSensitiveGrammar mutatedGrammar, bool reparsed)
@@ -64,7 +63,7 @@ namespace LinearIndexedGrammarLearner
 
         public static GrammarMutation GetWeightedRandomMutation()
         {
-            int r = Pseudorandom.NextInt(_totalWeights);
+            var r = Pseudorandom.NextInt(_totalWeights);
 
             var sum = 0;
             foreach (var mutation in _mutations)
@@ -76,9 +75,10 @@ namespace LinearIndexedGrammarLearner
 
             return null;
         }
+
         public RuleCoordinates GetRandomRule(List<RuleCoordinates> rules)
         {
-            int r = Pseudorandom.NextInt(rules.Count);
+            var r = Pseudorandom.NextInt(rules.Count);
             return rules[r];
         }
 
@@ -100,7 +100,7 @@ namespace LinearIndexedGrammarLearner
             var r = ContextSensitiveGrammar.RuleSpace[rc];
 
             //Console.WriteLine($"added {r}");
-            bool reparsed = learner.ReparseWithAddition(grammar, r.NumberOfGeneratingRule);
+            var reparsed = learner.ReparseWithAddition(grammar, r.NumberOfGeneratingRule);
 
             return (grammar, reparsed);
         }
@@ -129,20 +129,19 @@ namespace LinearIndexedGrammarLearner
             var r = ContextSensitiveGrammar.RuleSpace[rc];
             //Console.WriteLine($"removed {r}");
 
-            bool reparsed = learner.ReparseWithDeletion(grammar, r.NumberOfGeneratingRule);
+            var reparsed = learner.ReparseWithDeletion(grammar, r.NumberOfGeneratingRule);
             return (grammar, reparsed);
         }
+
         public (ContextSensitiveGrammar mutatedGrammar, bool reparsed)
             ChangeLHS(ContextSensitiveGrammar grammar, Learner learner)
         {
-
-
             bool reparsed1, reparsed2;
 
             var rcOld = GetRandomRule(grammar.StackConstantRules);
             if (rcOld.RHSIndex == 0) return (null, false); //do not change LHS for rules of the form START -> Xi
 
-            var rcNew = new RuleCoordinates()
+            var rcNew = new RuleCoordinates
             {
                 RHSIndex = rcOld.RHSIndex,
                 LHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex(),
@@ -165,15 +164,15 @@ namespace LinearIndexedGrammarLearner
             bool reparsed1, reparsed2;
 
             var rcOld = GetRandomRule(grammar.StackConstantRules);
-            var rcNew = new RuleCoordinates()
+            var rcNew = new RuleCoordinates
             {
                 RHSIndex = ContextSensitiveGrammar.RuleSpace.GetRandomRHSIndex(RuleType.CFGRules),
                 LHSIndex = rcOld.LHSIndex,
                 RuleType = rcOld.RuleType
             };
-            
 
-            if (grammar.ContainsRuleWithSameRHS(rcNew, grammar.StackConstantRules)) return (null,false);
+
+            if (grammar.ContainsRuleWithSameRHS(rcNew, grammar.StackConstantRules)) return (null, false);
             //Console.WriteLine($"in rhs change part1");
 
             (grammar, reparsed1) = InnerDeleteStackConstantRule(grammar, learner, rcOld);
@@ -227,7 +226,7 @@ namespace LinearIndexedGrammarLearner
 
             var r = ContextSensitiveGrammar.RuleSpace[rc];
 
-            bool reparsed = learner.ReparseWithDeletion(grammar, r.NumberOfGeneratingRule);
+            var reparsed = learner.ReparseWithDeletion(grammar, r.NumberOfGeneratingRule);
 
             return (grammar, reparsed);
         }
@@ -244,9 +243,8 @@ namespace LinearIndexedGrammarLearner
             var r = ContextSensitiveGrammar.RuleSpace[rc];
 
             //Console.WriteLine($"added {r}");
-            bool reparsed = learner.ReparseWithAddition(grammar, r.NumberOfGeneratingRule);
+            var reparsed = learner.ReparseWithAddition(grammar, r.NumberOfGeneratingRule);
             return (grammar, reparsed);
-
         }
 
         [JsonObject(MemberSerialization.OptIn)]

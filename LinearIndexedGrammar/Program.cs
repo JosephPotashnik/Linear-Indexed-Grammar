@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using LinearIndexedGrammarLearner;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
@@ -45,7 +44,7 @@ namespace LinearIndexedGrammar
 
         private static void Main(string[] args)
         {
-            bool nightRun = false;
+            var nightRun = false;
             if (args.Length > 0)
             {
                 if (args[0] != "-NightRun" || args.Length > 1)
@@ -94,7 +93,7 @@ namespace LinearIndexedGrammar
 
             var cfGrammar = new ContextFreeGrammar(grammarRules);
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
-            var statesList = generator.ParseSentence(null,  maxWords);
+            var statesList = generator.ParseSentence(null, maxWords);
             return GrammarFileReader.GetSentencesOfGenerator(statesList, universalVocabulary, numberOfSentencesPerTree,
                 pos);
         }
@@ -151,12 +150,12 @@ namespace LinearIndexedGrammar
             var maxWordsInSentence = data.Max(x => x.Length);
             var minWordsInSentences = data.Min(x => x.Length);
 
-            PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentences, maxWordsInSentence, decreaseExpectedEvidence, 
+            PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentences, maxWordsInSentence,
+                decreaseExpectedEvidence,
                 out var objectiveFunction);
             var partOfSpeechCategories = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
             ContextFreeGrammar.RenameVariables(grammarRules, partOfSpeechCategories);
             var targetGrammar = new ContextSensitiveGrammar(grammarRules);
-
 
 
             objectiveFunction.GetLearner().ParseAllSentencesFromScratch(targetGrammar);
@@ -248,7 +247,8 @@ namespace LinearIndexedGrammar
                 rules = ContextFreeGrammar.ExtractRules(initialGrammar);
 
             //2. prepare new rule space
-            var learner = PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentence, n, progParams.DecreaseExpectedEvidence,
+            var learner = PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentence, n,
+                progParams.DecreaseExpectedEvidence,
                 out var objectiveFunction);
 
             //3. re-place rule list inside new rule space (the coordinates of the old rules need not be the same
@@ -271,7 +271,7 @@ namespace LinearIndexedGrammar
         }
 
         private static Learner PrepareLearningUpToSentenceLengthN(string[][] data, Vocabulary universalVocabulary,
-            int minWords, int maxWords, bool decreaseExpectedEvidence, 
+            int minWords, int maxWords, bool decreaseExpectedEvidence,
             out IObjectiveFunction objectiveFunction)
         {
             //1. get sentences up to length n and the relevant POS categories in them.

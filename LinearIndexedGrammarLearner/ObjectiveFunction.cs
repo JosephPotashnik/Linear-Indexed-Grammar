@@ -16,8 +16,8 @@ namespace LinearIndexedGrammarLearner
 
     public class GrammarFitnessObjectiveFunction : IObjectiveFunction
     {
-        private bool decreaseExpectedEvidence;
         public const double Tolerance = 0.000001;
+
         private static readonly double[] exponential =
         {
             Math.Pow(2, 0),
@@ -61,30 +61,31 @@ namespace LinearIndexedGrammarLearner
         private static readonly double[] harmonic =
         {
             1,
-            1/2f,
-            1/3f,
-            1/4f,
-            1/5f,
-            1/6f,
-            1/7f,
-            1/8f,
-            1/9f,
-            1/10f,
-            1/11f,
-            1/12f,
-            1/13f,
-            1/14f,
-            1/15f,
-            1/16f
+            1 / 2f,
+            1 / 3f,
+            1 / 4f,
+            1 / 5f,
+            1 / 6f,
+            1 / 7f,
+            1 / 8f,
+            1 / 9f,
+            1 / 10f,
+            1 / 11f,
+            1 / 12f,
+            1 / 13f,
+            1 / 14f,
+            1 / 15f,
+            1 / 16f
         };
 
         private static double maxVal;
         private readonly Learner _learner;
+        private readonly bool decreaseExpectedEvidence;
 
         public GrammarFitnessObjectiveFunction(Learner l, bool _decreaseExpectedEvidence)
         {
             _learner = l;
-            this.decreaseExpectedEvidence = _decreaseExpectedEvidence;
+            decreaseExpectedEvidence = _decreaseExpectedEvidence;
         }
 
 
@@ -109,7 +110,7 @@ namespace LinearIndexedGrammarLearner
             //bigger temperature => higher probability
             var exponent = 100 * (Math.Log(newValue) - Math.Log(oldValue)) / temperature;
             var prob = Math.Exp(exponent);
-            double randomThrow = Pseudorandom.NextDouble();
+            var randomThrow = Pseudorandom.NextDouble();
 
             return randomThrow < prob;
         }
@@ -122,7 +123,7 @@ namespace LinearIndexedGrammarLearner
 
         public double Compute(ContextSensitiveGrammar currentHypothesis)
         {
-            double[] probabilityMassOfLength = uniform;
+            var probabilityMassOfLength = uniform;
 
             if (currentHypothesis == null) return 0;
 
@@ -130,9 +131,8 @@ namespace LinearIndexedGrammarLearner
 
             //checking in ReparseWith Addition/ ReparseWithDeletion / ParseFromScratch
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
-            {
-                throw new Exception("Cyclic Unit Production Encountered at unexpected place, in preparation to remove the check for cyclic");
-            }
+                throw new Exception(
+                    "Cyclic Unit Production Encountered at unexpected place, in preparation to remove the check for cyclic");
 
             double prob = 0;
             var allParses = _learner.Parses;
@@ -149,9 +149,9 @@ namespace LinearIndexedGrammarLearner
 
                 for (var j = 0; j < allParses[i].GammaStates.Count; j++)
                     set.Add(allParses[i].GammaStates[j].BracketedTreeRepresentation);
-
             }
-            int minLength = 1;
+
+            var minLength = 1;
             var dataTreesPerLength = new Dictionary<int, int>();
             foreach (var length in treesDic.Keys)
             {
@@ -173,13 +173,16 @@ namespace LinearIndexedGrammarLearner
                     dataTreesPerLength.TryGetValue(length, out var dataTreesInLength);
                     var allGrammarTreesInLength = grammarTreesPerLength[length];
 
-                    var expectedGrammarTreesInLength = decreaseExpectedEvidence ? allGrammarTreesInLength / (length - minLength + 1) : allGrammarTreesInLength;
+                    var expectedGrammarTreesInLength = decreaseExpectedEvidence
+                        ? allGrammarTreesInLength / (length - minLength + 1)
+                        : allGrammarTreesInLength;
 
                     var diff = expectedGrammarTreesInLength - dataTreesInLength;
                     if (diff > 0)
-                        prob -= diff / (double)expectedGrammarTreesInLength * probabilityMassOfLength[length] /
+                        prob -= diff / (double) expectedGrammarTreesInLength * probabilityMassOfLength[length] /
                                 totalProbabilityOfGrammarTrees;
                 }
+
                 if (prob > 1)
                 {
                     return 0;
@@ -192,7 +195,6 @@ namespace LinearIndexedGrammarLearner
                     //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
                     //right now: it is depth = maxWords+3. change?
                 }
-
                 var numberOfSentenceUnParsed = allParses.Count(x => x.GammaStates.Count == 0);
                 var unexplainedSentences = numberOfSentenceUnParsed / (double) allParses.Length;
 

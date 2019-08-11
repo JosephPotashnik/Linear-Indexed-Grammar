@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using LinearIndexedGrammarParser;
 
@@ -116,7 +115,6 @@ namespace LinearIndexedGrammarLearner
         }
 
 
-
         public bool ReparseWithAddition(ContextSensitiveGrammar currentHypothesis, int numberOfGeneratingRule)
         {
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
@@ -141,7 +139,6 @@ namespace LinearIndexedGrammarLearner
 
             try
             {
-
                 //for (int i = 0; i < Parses.Length; i++)
                 //{
                 //    var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
@@ -177,10 +174,10 @@ namespace LinearIndexedGrammarLearner
                 return false;
             }
 
-            Dictionary<DerivedCategory, List<Rule>> rulesExceptDeletedRule =
+            var rulesExceptDeletedRule =
                 new Dictionary<DerivedCategory, List<Rule>>();
 
-            List<Rule> deletedRule = new List<Rule>();
+            var deletedRule = new List<Rule>();
             foreach (var kvp in _sentencesParser[0]._grammar.StaticRules)
             {
                 rulesExceptDeletedRule[kvp.Key] = new List<Rule>();
@@ -193,7 +190,7 @@ namespace LinearIndexedGrammarLearner
                         rulesExceptDeletedRule[kvp.Key].Add(r);
                 }
             }
-              
+
             var leftCorner = new LeftCorner();
             var predictionSet = leftCorner.ComputeLeftCorner(rulesExceptDeletedRule);
 

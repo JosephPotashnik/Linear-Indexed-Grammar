@@ -296,10 +296,8 @@ namespace LinearIndexedGrammarParser
             if (Predicted.TryGetValue(r, out var list))
             {
                 if (list.Count > 1)
-                {
-                    int x = 1;
                     throw new Exception("list of predicted should be at this stage 1 item only.");
-                }
+
                 foreach (var state in list)
                     state.EndColumn.MarkStateDeleted(state, grammar, statesRemovedInLastReparse);
             }

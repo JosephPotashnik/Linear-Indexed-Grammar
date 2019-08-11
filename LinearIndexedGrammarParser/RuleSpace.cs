@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
-    
     public class RuleType
     {
         public static int CFGRules = 0;
@@ -22,11 +20,6 @@ namespace LinearIndexedGrammarParser
 
         private readonly Rule[][][] _ruleSpace;
 
-        public int RowsCount(int ruleTypeCount)
-        {
-            return _ruleSpace[ruleTypeCount].Length;
-
-        }
         public RuleSpace(HashSet<string> partsOfSpeechCategories, HashSet<(string rhs1, string rhs2)> bigrams,
             int maxNonTerminals)
         {
@@ -186,15 +179,20 @@ namespace LinearIndexedGrammarParser
 
         public Rule this[RuleCoordinates rc] => _ruleSpace[rc.RuleType][rc.LHSIndex][rc.RHSIndex];
 
+        public int RowsCount(int ruleTypeCount)
+        {
+            return _ruleSpace[ruleTypeCount].Length;
+        }
+
         public int GetRandomRHSIndex(int ruleType)
         {
-            int r = Pseudorandom.NextInt(_allowedRHSIndices[ruleType].Count);
+            var r = Pseudorandom.NextInt(_allowedRHSIndices[ruleType].Count);
             return _allowedRHSIndices[ruleType][r];
         }
 
         public int GetRandomLHSIndex()
         {
-            int r = Pseudorandom.NextInt(_ruleSpace[0].Length);
+            var r = Pseudorandom.NextInt(_ruleSpace[0].Length);
             return r; //same LHS indices for all rule type tables.
         }
 

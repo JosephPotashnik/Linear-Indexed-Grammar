@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
 using NLog;
@@ -40,19 +39,19 @@ namespace LinearIndexedGrammarLearner
                 foundImprovement = false;
                 var rules = bestGrammar.StackConstantRules;
 
-                int rowsCount = ContextSensitiveGrammar.RuleSpace.RowsCount(RuleType.CFGRules);
-                
+                var rowsCount = ContextSensitiveGrammar.RuleSpace.RowsCount(RuleType.CFGRules);
+
                 foreach (var coord in rules)
                 {
-                    RuleCoordinates bestCoord = null; 
+                    RuleCoordinates bestCoord = null;
                     var originalGrammar = new ContextSensitiveGrammar(bestGrammar);
-                    
-                    for (int i = 0; i < rowsCount; i++)
+
+                    for (var i = 0; i < rowsCount; i++)
                     {
                         if (coord.LHSIndex == i) continue;
 
                         var newGrammar = new ContextSensitiveGrammar(originalGrammar);
-                        var newCoord = new RuleCoordinates()
+                        var newCoord = new RuleCoordinates
                         {
                             LHSIndex = i,
                             RHSIndex = coord.RHSIndex,
@@ -72,14 +71,13 @@ namespace LinearIndexedGrammarLearner
                             bestGrammar = newGrammar;
                             bestValue = newValue;
                             foundImprovement = true;
-
                         }
+
                         _learner.RejectChanges();
 
                         //for debugging purposes only.
                         //var currentCFHypothesis = new ContextFreeGrammar(originalGrammar);
                         //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
-
                     }
 
 
@@ -94,7 +92,6 @@ namespace LinearIndexedGrammarLearner
                         //for debugging purposes only
                         //var currentCFHypothesis = new ContextFreeGrammar(bestGrammar);
                         //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
-
                     }
                 }
             }
@@ -102,7 +99,8 @@ namespace LinearIndexedGrammarLearner
             return (bestGrammar, bestValue);
         }
 
-        private void ChangeRHSCoordinates(ContextSensitiveGrammar newGrammar, RuleCoordinates coord, RuleCoordinates newCoord)
+        private void ChangeRHSCoordinates(ContextSensitiveGrammar newGrammar, RuleCoordinates coord,
+            RuleCoordinates newCoord)
         {
             newGrammar.StackConstantRules.Remove(coord);
             _learner.ReparseWithDeletion(newGrammar,
@@ -128,13 +126,13 @@ namespace LinearIndexedGrammarLearner
                 if (mutatedGrammar == null || !reparsed) continue;
 
                 currentTemp *= _params.CoolingFactor;
-                
+
                 //when debugging a specific scenario, uncomment the two following
                 //lines and comment the first two lines above in the while loop.
 
                 //var mutatedGrammar = new ContextSensitiveGrammar(currentGrammar);
                 //_learner.SetOriginalGrammarBeforePermutation();
-                
+
                 //if (counter == 0)
                 //{
                 //    counter++;

@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace LinearIndexedGrammarParser
 {
-    public class MaxHeap 
+    public class MaxHeap
     {
         public readonly List<int> elements = new List<int>();
 
         public int Count => elements.Count;
 
         public int Max => elements[0];
-        
+
         public void Add(int item)
         {
             elements.Add(item);
@@ -22,7 +21,7 @@ namespace LinearIndexedGrammarParser
         {
             if (elements.Count > 0)
             {
-                int item = elements[0];
+                var item = elements[0];
                 elements[0] = elements[elements.Count - 1];
                 elements.RemoveAt(elements.Count - 1);
 

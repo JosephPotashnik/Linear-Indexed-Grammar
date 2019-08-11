@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
@@ -12,11 +11,13 @@ namespace LinearIndexedGrammarParser
         //the set of nonterminals contained in the transitive left corner of the key.
         public HashSet<DerivedCategory> NonTerminals { get; set; }
     }
+
     public class LeftCorner
     {
         private Dictionary<DerivedCategory, LeftCornerInfo> leftCorners;
 
-        private void DFS(DerivedCategory root, DerivedCategory cat, HashSet<DerivedCategory> visited, Dictionary<DerivedCategory, List<Rule>> rules)
+        private void DFS(DerivedCategory root, DerivedCategory cat, HashSet<DerivedCategory> visited,
+            Dictionary<DerivedCategory, List<Rule>> rules)
         {
             visited.Add(cat);
             leftCorners[root].NonTerminals.Add(cat);
@@ -32,9 +33,10 @@ namespace LinearIndexedGrammarParser
                         DFS(root, r.RightHandSide[0], visited, rules);
                 }
             }
-
         }
-        public Dictionary<DerivedCategory, LeftCornerInfo> ComputeLeftCorner(Dictionary<DerivedCategory, List<Rule>> rules)
+
+        public Dictionary<DerivedCategory, LeftCornerInfo> ComputeLeftCorner(
+            Dictionary<DerivedCategory, List<Rule>> rules)
         {
             //key - nonterminal, value - see above
             leftCorners = new Dictionary<DerivedCategory, LeftCornerInfo>();

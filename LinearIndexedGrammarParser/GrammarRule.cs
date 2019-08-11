@@ -23,11 +23,11 @@ namespace LinearIndexedGrammarParser
         public bool Equals(Rule x, Rule y)
         {
             if (x.NumberOfGeneratingRule != y.NumberOfGeneratingRule
-                         ||
-                         !x.LeftHandSide.Equals(y.LeftHandSide)
-                         ||
-                         x.RightHandSide.Length != y.RightHandSide.Length)
-            return false;
+                ||
+                !x.LeftHandSide.Equals(y.LeftHandSide)
+                ||
+                x.RightHandSide.Length != y.RightHandSide.Length)
+                return false;
 
             for (var i = 0; i < x.RightHandSide.Length; i++)
                 if (!x.RightHandSide[i].Equals(y.RightHandSide[i]))
