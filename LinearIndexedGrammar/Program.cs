@@ -28,8 +28,9 @@ namespace LinearIndexedGrammar
         [JsonProperty] public string DataFileName { get; set; }
         [JsonProperty] public bool IsCFG { get; set; }
         [JsonProperty] public bool DecreaseExpectedEvidence { get; set; }
-
+        [JsonProperty] public float CoolingFactor { get; set; }
     }
+
 
     public class Program
     {
@@ -222,7 +223,7 @@ namespace LinearIndexedGrammar
             {
                 LogManager.GetCurrentClassLogger().Info($"Run {i + 1}:");
 
-                var (bestHypothesis, bestValue) = LearnGrammarFromData(data, dataVocabulary, programParams.IsCFG, programParams.DecreaseExpectedEvidence);
+                var (bestHypothesis, bestValue) = LearnGrammarFromData(data, dataVocabulary, programParams);
                 probs.Add(bestValue);
 
                 s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";
@@ -238,7 +239,7 @@ namespace LinearIndexedGrammar
         }
 
         public static (ContextSensitiveGrammar bestGrammar, double bestValue) LearnGrammarFromDataUpToLengthN(
-            string[][] data, Vocabulary universalVocabulary, int n, int minWordsInSentence, bool isCFGGrammar, bool decreaseExpectedEvidence, 
+            string[][] data, Vocabulary universalVocabulary, int n, int minWordsInSentence, ProgramParams progParams,
             ContextSensitiveGrammar initialGrammar)
         {
             IEnumerable<Rule> rules = null;
@@ -247,7 +248,7 @@ namespace LinearIndexedGrammar
                 rules = ContextFreeGrammar.ExtractRules(initialGrammar);
 
             //2. prepare new rule space
-            var learner = PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentence, n, decreaseExpectedEvidence,
+            var learner = PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentence, n, progParams.DecreaseExpectedEvidence,
                 out var objectiveFunction);
 
             //3. re-place rule list inside new rule space (the coordinates of the old rules need not be the same
@@ -258,14 +259,14 @@ namespace LinearIndexedGrammar
 
             var parameters = new SimulatedAnnealingParameters
             {
-                CoolingFactor = 0.999,
+                CoolingFactor = progParams.CoolingFactor,
                 InitialTemperature = 10,
                 NumberOfIterations = 1400
             };
 
             //run
             var algorithm = new SimulatedAnnealing(learner, parameters, objectiveFunction);
-            var (bestHypothesis, bestValue) = algorithm.Run(isCFGGrammar, initialGrammar);
+            var (bestHypothesis, bestValue) = algorithm.Run(progParams.IsCFG, initialGrammar);
             return (bestHypothesis, bestValue);
         }
 
@@ -298,7 +299,7 @@ namespace LinearIndexedGrammar
 
 
         public static (ContextSensitiveGrammar bestGrammar, double bestValue) LearnGrammarFromData(string[][] data,
-            Vocabulary universalVocabulary, bool isCFGGrammar, bool decreaseExpectedEvidence)
+            Vocabulary universalVocabulary, ProgramParams progParams)
         {
             // initialWordLength is the sentence length from which you would like to start learning
             //it does not have to be the length of the shortest sentences
@@ -320,7 +321,7 @@ namespace LinearIndexedGrammar
                 LogManager.GetCurrentClassLogger().Info($"learning word length  {currentWordLength}");
 
                 (currentGrammar, currentValue) = LearnGrammarFromDataUpToLengthN(data, universalVocabulary,
-                    currentWordLength, minWordsInSentences, isCFGGrammar, decreaseExpectedEvidence, initialGrammars[currentWordLength]);
+                    currentWordLength, minWordsInSentences, progParams, initialGrammars[currentWordLength]);
                 //SEFI
                 //LogManager.GetCurrentClassLogger().Info($"End of learning word Length { currentWordLength}, \r\n Current Grammar {currentGrammar} \r\n CurrentValue { currentValue}");
 

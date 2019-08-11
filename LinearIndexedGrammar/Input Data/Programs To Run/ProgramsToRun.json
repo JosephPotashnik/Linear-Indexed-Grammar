@@ -6,7 +6,8 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "CorwinIdealGrammar.txt",
       "DataFileName": "David Copperfield.txt",
-      "DecreaseExpectedEvidence":  true 
+      "DecreaseExpectedEvidence": true,
+      "CoolingFactor" :  0.995 
     }
   ]
 }
