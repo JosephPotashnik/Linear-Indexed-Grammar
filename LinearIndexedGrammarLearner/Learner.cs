@@ -86,7 +86,7 @@ namespace LinearIndexedGrammarLearner
                     (sentenceItem, loopState, i) =>
                     {
                         var n = _sentencesParser[i].ParseSentence(sentenceItem.Sentence);
-                        Parses[i].GammaStates = n;
+                        Parses[i].BracketedTreeRepresentations = n;
                     });
             }
             catch (OperationCanceledException)
@@ -105,7 +105,7 @@ namespace LinearIndexedGrammarLearner
         public void RefreshParses()
         {
             for (var i = 0; i < Parses.Length; i++)
-                Parses[i].GammaStates = _sentencesParser[i].GetGammaStates();
+                Parses[i].BracketedTreeRepresentations = _sentencesParser[i].GetGammaBracketedRepresentation();
         }
 
         public void SetOriginalGrammarBeforePermutation()
@@ -148,7 +148,7 @@ namespace LinearIndexedGrammarLearner
                     (sentenceItem, loopState, i) =>
                     {
                         var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
-                        Parses[i].GammaStates = n;
+                        Parses[i].BracketedTreeRepresentations = n;
                     });
             }
             catch (OperationCanceledException)
@@ -201,7 +201,7 @@ namespace LinearIndexedGrammarLearner
                     {
                         var n = _sentencesParser[i]
                             .ReParseSentenceWithRuleDeletion(currentCFHypothesis, deletedRule, predictionSet);
-                        Parses[i].GammaStates = n;
+                        Parses[i].BracketedTreeRepresentations = n;
                     });
             }
             catch (OperationCanceledException)
@@ -242,7 +242,7 @@ namespace LinearIndexedGrammarLearner
                     (sentenceItem, loopState, i) =>
                     {
                         var n = parsers[i].ParseSentence(sentenceItem.Sentence);
-                        sentencesWithCounts[i].GammaStates = n;
+                        sentencesWithCounts[i].BracketedTreeRepresentations = n;
                     });
 
 
@@ -282,7 +282,7 @@ namespace LinearIndexedGrammarLearner
                             new EarleyParser(currentHypothesis, _voc,
                                 false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
                         var n = parser.ParseSentence(sentenceItem.Sentence);
-                        Parses[i].GammaStates = n;
+                        Parses[i].BracketedTreeRepresentations = n;
                     });
             }
             catch (OperationCanceledException)
@@ -316,9 +316,11 @@ namespace LinearIndexedGrammarLearner
 
             if (Parses != null)
             {
-                foreach (var sentenceParsingResult in Parses)
-                foreach (var gammaState in sentenceParsingResult.GammaStates)
-                    CollectRuleUsages(gammaState, usagesDic, sentenceParsingResult.Count);
+                for (int i = 0; i < Parses.Length; i++)
+                {
+                    foreach (var gammaState in _sentencesParser[i].GetGammaStates())
+                        CollectRuleUsages(gammaState, usagesDic, Parses[i].Count);
+                }
 
                 return usagesDic;
             }

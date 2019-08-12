@@ -142,7 +142,17 @@ namespace LinearIndexedGrammarParser
             return gammaStates;
         }
 
-        public List<EarleyState> ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs)
+        public List<string> GetGammaBracketedRepresentation()
+        {
+            var states = GetGammaStates();
+            var strings = new List<string>();
+            foreach (var t in states)
+                strings.Add(t.BracketedTreeRepresentation);
+
+            return strings;
+        }
+
+        public List<string> ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs)
         {
             _grammar = g;
 
@@ -191,10 +201,10 @@ namespace LinearIndexedGrammarParser
 
             }
 
-            return GetGammaStates();
+            return GetGammaBracketedRepresentation();
         }
 
-        public List<EarleyState> ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, List<Rule> rs,
+        public List<string> ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, List<Rule> rs,
             Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
         {
             foreach (var col in _table)
@@ -217,7 +227,7 @@ namespace LinearIndexedGrammarParser
             }
 
             _grammar = g;
-            return GetGammaStates();
+            return GetGammaBracketedRepresentation();
         }
 
         private void TraversePredictedStatesToDelete(EarleyColumn col,
@@ -343,8 +353,7 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-
-        public List<EarleyState> ParseSentence(string[] text, int maxWords = 0)
+        public List<EarleyState> GenerateSentence(string[] text, int maxWords = 0)
         {
             _text = text;
             (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
@@ -393,6 +402,57 @@ namespace LinearIndexedGrammarParser
             }
 
             return GetGammaStates();
+        }
+
+        public List<string> ParseSentence(string[] text, int maxWords = 0)
+        {
+            _text = text;
+            (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
+            PrepareScannedStates();
+
+            //assumption: GenerateAllStaticRulesFromDynamicRules has been called before parsing
+            //and added the GammaRule
+            var startRule = _grammar.StaticRules[new DerivedCategory(ContextFreeGrammar.GammaRule)][0];
+
+            var startState = new EarleyState(startRule, 0, _table[0]);
+            _table[0].AddState(startState, _grammar);
+            try
+            {
+                foreach (var col in _table)
+                {
+                    var exhaustedCompletion = false;
+                    var anyCompleted = false;
+                    var anyPredicted = false;
+                    while (!exhaustedCompletion)
+                    {
+                        //1. complete
+                        anyCompleted = TraverseCompletedStates(col);
+
+                        //2. predict after complete:
+                        anyPredicted = TraversePredictableStates(col);
+
+                        //prediction of epsilon transitions can lead to completed states.
+                        //hence we might need to complete those states.
+                        exhaustedCompletion = col.ActionableCompleteStates.Count == 0;
+                    }
+
+                    //3. scan after predict -- not necessary if the grammar is non lexicalized,
+                    //i.e if terminals are not mentioned in the grammar rules.
+                    //we then can prepare all scanned states in advance (PrepareScannedStates)
+                    //if you uncomment the following line make sure to uncomment the 
+                    //ActionableNonCompleteStates enqueuing in Column.AddState()
+                    //var anyScanned = TraverseScannableStates(_table, col);
+
+                    //if (!anyCompleted && !anyPredicted /*&& !anyScanned*/) break;
+                }
+            }
+            catch (Exception e)
+            {
+                var s = e.ToString();
+                LogManager.GetCurrentClassLogger().Info(s);
+            }
+
+            return GetGammaBracketedRepresentation();
         }
 
         protected virtual (EarleyColumn[], int[]) PrepareEarleyTable(string[] text, int maxWord)

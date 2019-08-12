@@ -93,7 +93,7 @@ namespace LinearIndexedGrammar
 
             var cfGrammar = new ContextFreeGrammar(grammarRules);
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
-            var statesList = generator.ParseSentence(null, maxWords);
+            var statesList = generator.GenerateSentence(null, maxWords);
             return GrammarFileReader.GetSentencesOfGenerator(statesList, universalVocabulary, numberOfSentencesPerTree,
                 pos);
         }
@@ -135,7 +135,7 @@ namespace LinearIndexedGrammar
             var filteredSen = new List<string[]>();
 
             var allParses = learner.ParseAllSentences(cfGrammar);
-            var parsableData = allParses.Where(x => x.GammaStates.Count > 0);
+            var parsableData = allParses.Where(x => x.BracketedTreeRepresentations.Count > 0);
 
             foreach (var sen in parsableData)
                 for (var i = 0; i < sen.Count; i++)

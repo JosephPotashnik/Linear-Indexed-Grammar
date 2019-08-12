@@ -92,25 +92,25 @@ namespace LinearIndexedGrammarParser
 
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
 
-            var statesList = generator.ParseSentence(null, maxWords);
+            var statesList = generator.GenerateSentence(null, maxWords);
             return (statesList, rules);
         }
 
-        public static List<EarleyState> ParseSentenceAccordingToGrammar(string filename, string vocabularyFilename,
-            string sentence)
-        {
-            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(vocabularyFilename);
-            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys
-                .Select(x => new SyntacticCategory(x)).ToHashSet();
+        //public static List<EarleyState> ParseSentenceAccordingToGrammar(string filename, string vocabularyFilename,
+        //    string sentence)
+        //{
+        //    var universalVocabulary = Vocabulary.ReadVocabularyFromFile(vocabularyFilename);
+        //    ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys
+        //        .Select(x => new SyntacticCategory(x)).ToHashSet();
 
-            var rules = ReadRulesFromFile(filename);
-            var cfGrammar = new ContextFreeGrammar(rules);
+        //    var rules = ReadRulesFromFile(filename);
+        //    var cfGrammar = new ContextFreeGrammar(rules);
 
-            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+        //    var parser = new EarleyParser(cfGrammar, universalVocabulary);
 
-            var n = parser.ParseSentence(sentence.Split());
-            return n;
-        }
+        //    var n = parser.ParseSentence(sentence.Split());
+        //    return n;
+        //}
 
 
         private static DerivedCategory CreateDerivedCategory(string s)

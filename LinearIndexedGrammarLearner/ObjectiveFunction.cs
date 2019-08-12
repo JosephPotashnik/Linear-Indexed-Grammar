@@ -147,8 +147,8 @@ namespace LinearIndexedGrammarLearner
                     treesDic.Add(allParses[i].Length, set);
                 }
 
-                for (var j = 0; j < allParses[i].GammaStates.Count; j++)
-                    set.Add(allParses[i].GammaStates[j].BracketedTreeRepresentation);
+                for (var j = 0; j < allParses[i].BracketedTreeRepresentations.Count; j++)
+                    set.Add(allParses[i].BracketedTreeRepresentations[j]);
             }
 
             var minLength = 1;
@@ -195,7 +195,7 @@ namespace LinearIndexedGrammarLearner
                     //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
                     //right now: it is depth = maxWords+3. change?
                 }
-                var numberOfSentenceUnParsed = allParses.Count(x => x.GammaStates.Count == 0);
+                var numberOfSentenceUnParsed = allParses.Count(x => x.BracketedTreeRepresentations.Count == 0);
                 var unexplainedSentences = numberOfSentenceUnParsed / (double) allParses.Length;
 
                 prob *= 1 - unexplainedSentences;

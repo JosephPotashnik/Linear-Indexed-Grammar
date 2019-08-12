@@ -155,6 +155,8 @@ namespace LinearIndexedGrammarLearner
             //Console.WriteLine($"in lhs change part2");
 
             (grammar, reparsed2) = InnerInsertStackConstantRule(grammar, learner, rcNew);
+            if (reparsed2 == false)
+                throw new Exception("changeLHS aborted half-way! WRONG");
             return (grammar, reparsed2);
         }
 
@@ -180,6 +182,8 @@ namespace LinearIndexedGrammarLearner
             //Console.WriteLine($"in rhs change part2");
 
             (grammar, reparsed2) = InnerInsertStackConstantRule(grammar, learner, rcNew);
+            if (reparsed2 == false)
+                throw new Exception("changeRHS aborted half-way! WRONG");
             return (grammar, reparsed2);
         }
 
