@@ -19,6 +19,7 @@ namespace LinearIndexedGrammarParser
         private readonly HashSet<EarleyState> statesRemovedInLastReparse = new HashSet<EarleyState>();
         protected Vocabulary Voc;
 
+
         public EarleyParser(ContextFreeGrammar g, Vocabulary v, bool checkUnitProductionCycles = true)
         {
             Voc = v;
@@ -26,12 +27,32 @@ namespace LinearIndexedGrammarParser
             _checkForCyclicUnitProductions = checkUnitProductionCycles;
         }
         
-        private void Predict(EarleyColumn col, List<Rule> ruleList, DerivedCategory nextTerm)
+        private void Predict(EarleyColumn col, List<Rule> ruleList, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
         {
             foreach (var rule in ruleList)
             {
-                var newState = new EarleyState(rule, 0, col);
-                col.AddState(newState, _grammar);
+                //a rule may already be predicted when we examine a non-terminal LHS
+                //that part of its rules LHS -> Xi were already predicted,
+                //but now a the grammar has a new rule that consitutes a new left corner derivation
+                //so we need to add this new rule on top of existing ones. do not re-predict the existing.
+                if (col.Predicted.ContainsKey(rule)) continue;
+
+                var leftCornerNonTerminal = rule.RightHandSide[0];
+                bool foundLeftCornerPath = false;
+                foreach (var reductor in col.Reductors.Keys)
+                {
+                    if (predictionSet.ContainsKey(leftCornerNonTerminal) && predictionSet[leftCornerNonTerminal].NonTerminals.Contains(reductor))
+                    {
+                        foundLeftCornerPath = true;
+                        break;
+                    }
+                }
+
+                if (foundLeftCornerPath)
+                {
+                    var newState = new EarleyState(rule, 0, col);
+                    col.AddState(newState, _grammar);
+                }
             }
         }
 
@@ -152,7 +173,7 @@ namespace LinearIndexedGrammarParser
             return strings;
         }
 
-        public List<string> ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs)
+        public List<string> ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
         {
             _grammar = g;
 
@@ -160,26 +181,76 @@ namespace LinearIndexedGrammarParser
             {
                 for (var i = 0; i < rs.Count; i++)
                 {
-                    //seed the new rule in the column
-                    //think about categories if this would be context sensitive grammar.
-                    if (col.Predecessors.TryGetValue(rs[i].LeftHandSide, out var predecessorsWithKey))
-                    {
-                        foreach (var predecessor in predecessorsWithKey)
-                        {
-                            if (!predecessor.Removed)
-                            {
-                                if (!col.ActionableNonTerminalsToPredict.Contains(rs[i].LeftHandSide))
-                                {
-                                    var newState = new EarleyState(rs[i], 0, col);
-                                    col.AddState(newState, _grammar);
-                                }
 
-                                break;
+                    var leftCornerNonTerminal = rs[i].RightHandSide[0];
+                    bool foundLeftCornerPath = false;
+                    foreach (var reductor in col.Reductors.Keys)
+                    {
+                        if (predictionSet.ContainsKey(leftCornerNonTerminal) && predictionSet[leftCornerNonTerminal].NonTerminals.Contains(reductor))
+                        {
+                            foundLeftCornerPath = true;
+                            break;
+                        }
+                    }
+
+                    if (foundLeftCornerPath)
+                    {
+                        var lhs = rs[i].LeftHandSide;
+                        HashSet<DerivedCategory> candidates = new HashSet<DerivedCategory>();
+                        //seed the new rule in the column
+                        //think about categories if this would be context sensitive grammar.
+                        bool foundDirectPredecessor = false;
+                        if (col.Predecessors.TryGetValue(lhs, out var predecessorsWithKey))
+                        {
+                            foreach (var predecessor in predecessorsWithKey)
+                            {
+                                if (!predecessor.Removed)
+                                {
+                                    if (!col.ActionableNonTerminalsToPredict.Contains(rs[i].LeftHandSide))
+                                    {
+                                        var newState = new EarleyState(rs[i], 0, col);
+                                        col.AddState(newState, _grammar);
+                                    }
+
+                                    foundDirectPredecessor = true;
+                                    break;
+                                }
                             }
+                        }
+
+                        if (!foundDirectPredecessor)
+                        {
+                            foreach (var predecessorKey in col.Predecessors.Keys)
+                            {
+
+
+                                if (predictionSet.ContainsKey(predecessorKey) && predictionSet[predecessorKey].NonTerminals.Contains(lhs))
+                                {
+                                    foreach (var predecessor in col.Predecessors[predecessorKey])
+                                    {
+                                        if (!predecessor.Removed)
+                                        {
+                                            if (!col.ActionableNonTerminalsToPredict.Contains(rs[i].LeftHandSide))
+                                                candidates.Add(predecessorKey);
+
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            while (col.ActionableNonTerminalsToPredict.Any())
+                            {
+                                var nt = col.ActionableNonTerminalsToPredict.Dequeue();
+                                candidates.Add(nt);
+                            }
+
+                            candidates = ComputeLeavesNonTerminals(col, candidates, predictionSet);
+                            foreach (var candidate in candidates)
+                                col.ActionableNonTerminalsToPredict.Enqueue(candidate);
                         }
                     }
                 }
-
 
                 var exhaustedCompletion = false;
                 while (!exhaustedCompletion)
@@ -188,7 +259,7 @@ namespace LinearIndexedGrammarParser
                     TraverseCompletedStates(col);
 
                     //2. predict after complete:
-                    TraversePredictableStates(col);
+                    TraversePredictableStates(col, predictionSet);
                     exhaustedCompletion = col.ActionableCompleteStates.Count == 0;
                 }
 
@@ -239,7 +310,7 @@ namespace LinearIndexedGrammarParser
                 //1. Choose the topmost (root) nonterminal to consider for unprediction
                 //based on left corner relations graph.
                 //if there is no topmost nonterminal, i.e. a loop, return all nonterminals in the loop.
-                var (topmostNonTerminal, nonTerminalsToConsider) = ComputeRootNonTerminalsToUnpredict(col, predictionSet);
+                var (topmostNonTerminal, nonTerminalsToConsider) = ComputeRootNonTerminals(col, col.NonTerminalsCandidatesToUnpredict, predictionSet);
 
                 //check the nonterminals to consider if any of them has undeleted predecessor
                 bool foundUndeletedPredecessor = FindUndeletedPredecessor(col, predictionSet,
@@ -265,7 +336,8 @@ namespace LinearIndexedGrammarParser
                     //avoid examining nonterminals that we already verified whether they should be predicted or not.
                     foreach (var nt in transitiveLeftCornerNonTerminals)
                     {
-                        if (!col.visitedCategoriesInUnprediction.Contains(nt))
+                        if (_grammar.StaticRules.ContainsKey(nt) &&
+                        !col.visitedCategoriesInUnprediction.Contains(nt))
                         {
                             col.NonTerminalsCandidatesToUnpredict.Add(nt);
                             col.visitedCategoriesInUnprediction.Add(nt);
@@ -309,21 +381,50 @@ namespace LinearIndexedGrammarParser
                     if (foundNonDeletedPredecessor)
                         break;
                 }
-                else
-                {
-                    throw new Exception("FindUndeletedPredecessor: show me a nonterminal without predecessors.");
-                }
             }
 
             return foundNonDeletedPredecessor;
         }
 
-        private static (DerivedCategory topmost, List<DerivedCategory> nonTerminalsToConsider) ComputeRootNonTerminalsToUnpredict(EarleyColumn col, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
+        private static HashSet<DerivedCategory> ComputeLeavesNonTerminals(EarleyColumn col, HashSet<DerivedCategory> candidates, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
+        {
+            var l = candidates.ToList();
+            for (int i = 0; i < l.Count-1; i++)
+            {
+                if (!candidates.Contains(l[i])) continue;
+                
+                for (int j = i+1; j < l.Count; j++)
+                {
+                    if (predictionSet[l[i]].NonTerminals.Contains(l[j]) &&
+                        !predictionSet[l[j]].NonTerminals.Contains(l[i]))
+                    {
+                        //surely not a leaf!
+                        candidates.Remove(l[i]);
+                        break;
+                    }
+                    if (predictionSet[l[j]].NonTerminals.Contains(l[i]) &&
+                        !predictionSet[l[i]].NonTerminals.Contains(l[j]))
+                    {
+                        //surely not a leaf!
+                        candidates.Remove(l[j]);
+                    }
+
+                }
+
+            }
+
+            //after removing all vertices that have entering edge but not exiting edges, 
+            //we necessarily remain with a group of leaves,
+            //note: possibly some of these leaves are in a closed loop among themselves.
+            return candidates;
+        }
+
+        private static (DerivedCategory topmost, List<DerivedCategory> nonTerminalsToConsider) ComputeRootNonTerminals(EarleyColumn col, HashSet<DerivedCategory> candidates, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
         {
             var nonTerminalsToConsider = new List<DerivedCategory>();
 
-            var topmostCandidate = col.NonTerminalsCandidatesToUnpredict.First();
-            foreach (var nonterminal in col.NonTerminalsCandidatesToUnpredict)
+            var topmostCandidate = candidates.First();
+            foreach (var nonterminal in candidates)
             {
                 if (predictionSet[nonterminal].NonTerminals.Contains(topmostCandidate))
                     topmostCandidate = nonterminal;
@@ -333,7 +434,7 @@ namespace LinearIndexedGrammarParser
             {
                 //for every non terminal in the left corner that contains the topmost candidate,
                 //then it is in a closed loop with the topmost candidate and must be considered.
-                if (predictionSet[nonterminal].NonTerminals.Contains(topmostCandidate))
+                if (predictionSet.ContainsKey(nonterminal) && predictionSet[nonterminal].NonTerminals.Contains(topmostCandidate))
                     nonTerminalsToConsider.Add(nonterminal);
             }
 
@@ -353,7 +454,7 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        public List<EarleyState> GenerateSentence(string[] text, int maxWords = 0)
+        public List<EarleyState> GenerateSentence(string[] text, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet, int maxWords = 0)
         {
             _text = text;
             (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
@@ -378,7 +479,7 @@ namespace LinearIndexedGrammarParser
                         anyCompleted = TraverseCompletedStates(col);
 
                         //2. predict after complete:
-                        anyPredicted = TraversePredictableStates(col);
+                        anyPredicted = TraversePredictableStates(col, predictionSet);
 
                         //prediction of epsilon transitions can lead to completed states.
                         //hence we might need to complete those states.
@@ -404,7 +505,7 @@ namespace LinearIndexedGrammarParser
             return GetGammaStates();
         }
 
-        public List<string> ParseSentence(string[] text, int maxWords = 0)
+        public List<string> ParseSentence(string[] text, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet, int maxWords = 0)
         {
             _text = text;
             (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
@@ -429,7 +530,7 @@ namespace LinearIndexedGrammarParser
                         anyCompleted = TraverseCompletedStates(col);
 
                         //2. predict after complete:
-                        anyPredicted = TraversePredictableStates(col);
+                        anyPredicted = TraversePredictableStates(col, predictionSet);
 
                         //prediction of epsilon transitions can lead to completed states.
                         //hence we might need to complete those states.
@@ -490,6 +591,8 @@ namespace LinearIndexedGrammarParser
             }
         }
 
+
+
         private bool TraverseScannableStates(EarleyColumn[] table, EarleyColumn col)
         {
             var anyScanned = col.ActionableNonCompleteStates.Count > 0;
@@ -517,14 +620,14 @@ namespace LinearIndexedGrammarParser
             return anyScanned;
         }
 
-        private bool TraversePredictableStates(EarleyColumn col)
+        private bool TraversePredictableStates(EarleyColumn col, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
         {
             var anyPredicted = col.ActionableNonTerminalsToPredict.Count > 0;
             while (col.ActionableNonTerminalsToPredict.Count > 0)
             {
                 var nextTerm = col.ActionableNonTerminalsToPredict.Dequeue();
                 var ruleList = _grammar.StaticRules[nextTerm];
-                Predict(col, ruleList, nextTerm);
+                Predict(col, ruleList, predictionSet);
             }
 
             return anyPredicted;

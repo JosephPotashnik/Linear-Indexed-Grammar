@@ -90,10 +90,11 @@ namespace LinearIndexedGrammar
         {
             var numberOfSentencesPerTree = 10;
             var pos = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
-
+            LeftCorner.SetPOS(pos);
             var cfGrammar = new ContextFreeGrammar(grammarRules);
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
-            var statesList = generator.GenerateSentence(null, maxWords);
+            var leftCorners = new LeftCorner(cfGrammar.StaticRules);
+            var statesList = generator.GenerateSentence(null, leftCorners.LeftCorners, maxWords);
             return GrammarFileReader.GetSentencesOfGenerator(statesList, universalVocabulary, numberOfSentencesPerTree,
                 pos);
         }

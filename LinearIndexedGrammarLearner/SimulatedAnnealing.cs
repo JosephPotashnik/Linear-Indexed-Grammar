@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
 using NLog;
@@ -118,81 +119,97 @@ namespace LinearIndexedGrammarLearner
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
             var rejectCounter = 0;
-            //bool reparsed = false;
-            //int counter = 0;
+            bool reparsed = false;
+            int counter = 0;
             while (currentTemp > 0.3)
             {
-                var (mutatedGrammar, reparsed) = _learner.GetNeighborAndReparse(currentGrammar);
-                if (mutatedGrammar == null || !reparsed) continue;
+                //var (mutatedGrammar, reparsed) = _learner.GetNeighborAndReparse(currentGrammar);
+                //if (mutatedGrammar == null || !reparsed) continue;
 
                 currentTemp *= _params.CoolingFactor;
 
                 //when debugging a specific scenario, uncomment the two following
                 //lines and comment the first two lines above in the while loop.
 
-                //var mutatedGrammar = new ContextSensitiveGrammar(currentGrammar);
-                //_learner.SetOriginalGrammarBeforePermutation();
+                var mutatedGrammar = new ContextSensitiveGrammar(currentGrammar);
+                _learner.SetOriginalGrammarBeforePermutation();
 
-                //if (counter == 0)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 4,
-                //        RHSIndex = 107
-                //    };
 
-                //    mutatedGrammar.StackConstantRules.Add(rc);
+                if (counter == 0)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 0,
+                        RHSIndex = 97
+                    };
 
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 1)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 3,
-                //        RHSIndex = 98
-                //    };
+                    mutatedGrammar.StackConstantRules.Add(rc);
 
-                //    mutatedGrammar.StackConstantRules.Add(rc);
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"added {r}");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
+                else if (counter == 1)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 0,
+                        RHSIndex = 59
+                    };
 
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 2)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 1,
-                //        RHSIndex = 94
-                //    };
+                    mutatedGrammar.StackConstantRules.Add(rc);
 
-                //    mutatedGrammar.StackConstantRules.Add(rc);
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"added {r}");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
+                else if (counter == 2)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 0,
+                        RHSIndex = 153
+                    };
 
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 3)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 5,
-                //        RHSIndex = 143
-                //    };
+                    mutatedGrammar.StackConstantRules.Add(rc);
 
-                //    mutatedGrammar.StackConstantRules.Add(rc);
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"added {r}");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
+                else if (counter == 3)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 1,
+                        RHSIndex = 125
+                    };
 
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
+                    mutatedGrammar.StackConstantRules.Add(rc);
+
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"added {r}");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
+                else if (counter == 4)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 3,
+                        RHSIndex = 88
+                    };
+
+                    mutatedGrammar.StackConstantRules.Add(rc);
+
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"added {r}");
+                    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
                 //else if (counter == 4)
                 //{
                 //    counter++;
@@ -285,21 +302,36 @@ namespace LinearIndexedGrammarLearner
                 //    Console.WriteLine($"added {r}");
                 //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
                 //}
-                //else if (counter == 10)//forever)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 0,
-                //        RHSIndex = 50
-                //    };
+                else if (counter == 5)//forever)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 0,
+                        RHSIndex = 73
+                    };
 
-                //    mutatedGrammar.StackConstantRules.Remove(rc);
+                    mutatedGrammar.StackConstantRules.Remove(rc);
 
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"removed {r}");
-                //    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"removed {r}");
+                    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
+                else if (counter == 6)//forever)
+                {
+                    counter++;
+                    var rc = new RuleCoordinates()
+                    {
+                        LHSIndex = 0,
+                        RHSIndex = 66
+                    };
+
+                    mutatedGrammar.StackConstantRules.Remove(rc);
+
+                    var r = ContextSensitiveGrammar.RuleSpace[rc];
+                    Console.WriteLine($"removed {r}");
+                    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
+                }
 
                 var newValue = _objectiveFunction.Compute(mutatedGrammar);
 
@@ -307,7 +339,7 @@ namespace LinearIndexedGrammarLearner
                 if (accept)
                 {
                     rejectCounter = 0;
-                    //Console.WriteLine("accepted");
+                    Console.WriteLine("accepted");
                     currentValue = newValue;
                     currentGrammar = mutatedGrammar;
                     _learner.AcceptChanges();
@@ -316,13 +348,13 @@ namespace LinearIndexedGrammarLearner
                 else
                 {
                     rejectCounter++;
-                    //Console.WriteLine("rejected");
+                    Console.WriteLine("rejected");
                     _learner.RejectChanges();
                 }
 
                 //uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
-                //var currentCFHypothesis = new ContextFreeGrammar(currentGrammar);
-                //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
+                var currentCFHypothesis = new ContextFreeGrammar(currentGrammar);
+                var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
 
                 //cooling factor 0.999 from temp 10 to temp 0.3 takes 3500 iterations
                 //350 rejections consecutively (10% of total)- give up, reheat system.

@@ -91,8 +91,8 @@ namespace LinearIndexedGrammarParser
             var cfGrammar = new ContextFreeGrammar(rules);
 
             var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
-
-            var statesList = generator.GenerateSentence(null, maxWords);
+            var leftCorner = new LeftCorner(cfGrammar.StaticRules);
+            var statesList = generator.GenerateSentence(null, leftCorner.LeftCorners, maxWords);
             return (statesList, rules);
         }
 

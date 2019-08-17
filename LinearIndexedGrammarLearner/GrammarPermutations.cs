@@ -27,8 +27,8 @@ namespace LinearIndexedGrammarLearner
             {
                 l.Add(new GrammarMutationData("InsertStackConstantRule", CFGOperationWeight));
                 l.Add(new GrammarMutationData("DeleteStackConstantRule", CFGOperationWeight));
-                l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
-                l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
+                //l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
+                //l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
             }
             else
             {
@@ -99,7 +99,7 @@ namespace LinearIndexedGrammarLearner
 
             var r = ContextSensitiveGrammar.RuleSpace[rc];
 
-            //Console.WriteLine($"added {r}");
+            Console.WriteLine($"added {r}");
             var reparsed = learner.ReparseWithAddition(grammar, r.NumberOfGeneratingRule);
 
             return (grammar, reparsed);
@@ -127,7 +127,7 @@ namespace LinearIndexedGrammarLearner
         {
             grammar.StackConstantRules.Remove(rc);
             var r = ContextSensitiveGrammar.RuleSpace[rc];
-            //Console.WriteLine($"removed {r}");
+            Console.WriteLine($"removed {r}");
 
             var reparsed = learner.ReparseWithDeletion(grammar, r.NumberOfGeneratingRule);
             return (grammar, reparsed);

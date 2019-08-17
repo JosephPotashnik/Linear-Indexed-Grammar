@@ -80,14 +80,21 @@ namespace LinearIndexedGrammarLearner
                     new EarleyParser(currentCFHypothesis, _voc,
                         false); //parser does not check for cyclic unit productions
 
+            var leftCorner = new LeftCorner(currentCFHypothesis.StaticRules);
+
             try
             {
-                Parallel.ForEach(Parses,
-                    (sentenceItem, loopState, i) =>
-                    {
-                        var n = _sentencesParser[i].ParseSentence(sentenceItem.Sentence);
-                        Parses[i].BracketedTreeRepresentations = n;
-                    });
+                for (int i = 0; i < Parses.Length; i++)
+                {
+                            var n = _sentencesParser[i].ParseSentence(Parses[i].Sentence, leftCorner.LeftCorners);
+                            Parses[i].BracketedTreeRepresentations = n;  
+                }
+                //Parallel.ForEach(Parses,
+                //    (sentenceItem, loopState, i) =>
+                //    {
+                //        var n = _sentencesParser[i].ParseSentence(sentenceItem.Sentence, leftCorner.LeftCorners);
+                //        Parses[i].BracketedTreeRepresentations = n;
+                //    });
             }
             catch (OperationCanceledException)
             {
@@ -137,19 +144,21 @@ namespace LinearIndexedGrammarLearner
                 return true;
             }
 
+            var leftCorner = new LeftCorner(currentCFHypothesis.StaticRules);
+
             try
             {
-                //for (int i = 0; i < Parses.Length; i++)
-                //{
-                //    var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
-                //    Parses[i].GammaStates = n;
-                //}
-                Parallel.ForEach(Parses,
-                    (sentenceItem, loopState, i) =>
-                    {
-                        var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
-                        Parses[i].BracketedTreeRepresentations = n;
-                    });
+                for (int i = 0; i < Parses.Length; i++)
+                {
+                    var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs, leftCorner.LeftCorners);
+                    Parses[i].BracketedTreeRepresentations = n;
+                }
+                //Parallel.ForEach(Parses,
+                //    (sentenceItem, loopState, i) =>
+                //    {
+                //        var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs, leftCorner.LeftCorners);
+                //        Parses[i].BracketedTreeRepresentations = n;
+                //    });
             }
             catch (OperationCanceledException)
             {
@@ -177,6 +186,10 @@ namespace LinearIndexedGrammarLearner
             var rulesExceptDeletedRule =
                 new Dictionary<DerivedCategory, List<Rule>>();
 
+            //since currentCFHypothesis.StaticRules will not include
+            //all non-reachable rules, we need the following code
+            //to get all non reachanble rules, based on the existing grammar 
+            //(in _sentenceParser[i]).
             var deletedRule = new List<Rule>();
             foreach (var kvp in _sentencesParser[0]._grammar.StaticRules)
             {
@@ -191,18 +204,25 @@ namespace LinearIndexedGrammarLearner
                 }
             }
 
-            var leftCorner = new LeftCorner();
-            var predictionSet = leftCorner.ComputeLeftCorner(rulesExceptDeletedRule);
+            var leftCorner = new LeftCorner(rulesExceptDeletedRule);
 
             try
             {
-                Parallel.ForEach(Parses,
-                    (sentenceItem, loopState, i) =>
-                    {
-                        var n = _sentencesParser[i]
-                            .ReParseSentenceWithRuleDeletion(currentCFHypothesis, deletedRule, predictionSet);
-                        Parses[i].BracketedTreeRepresentations = n;
-                    });
+
+                for (int i = 0; i < Parses.Length; i++)
+                {
+                    var n = _sentencesParser[i]
+                        .ReParseSentenceWithRuleDeletion(currentCFHypothesis, deletedRule, leftCorner.LeftCorners);
+                    Parses[i].BracketedTreeRepresentations = n;
+                }
+
+                //Parallel.ForEach(Parses,
+                //    (sentenceItem, loopState, i) =>
+                //    {
+                //        var n = _sentencesParser[i]
+                //            .ReParseSentenceWithRuleDeletion(currentCFHypothesis, deletedRule, leftCorner.LeftCorners);
+                //        Parses[i].BracketedTreeRepresentations = n;
+                //    });
             }
             catch (OperationCanceledException)
             {
@@ -236,12 +256,13 @@ namespace LinearIndexedGrammarLearner
                     new EarleyParser(currentHypothesis, _voc,
                         false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
 
+            var leftCorner = new LeftCorner(currentHypothesis.StaticRules);
             try
             {
                 Parallel.ForEach(sentencesWithCounts,
                     (sentenceItem, loopState, i) =>
                     {
-                        var n = parsers[i].ParseSentence(sentenceItem.Sentence);
+                        var n = parsers[i].ParseSentence(sentenceItem.Sentence, leftCorner.LeftCorners);
                         sentencesWithCounts[i].BracketedTreeRepresentations = n;
                     });
 
@@ -273,6 +294,7 @@ namespace LinearIndexedGrammarLearner
 
         public SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis)
         {
+            var leftCorner = new LeftCorner(currentHypothesis.StaticRules);
             try
             {
                 Parallel.ForEach(Parses,
@@ -281,7 +303,7 @@ namespace LinearIndexedGrammarLearner
                         var parser =
                             new EarleyParser(currentHypothesis, _voc,
                                 false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
-                        var n = parser.ParseSentence(sentenceItem.Sentence);
+                        var n = parser.ParseSentence(sentenceItem.Sentence, leftCorner.LeftCorners);
                         Parses[i].BracketedTreeRepresentations = n;
                     });
             }
