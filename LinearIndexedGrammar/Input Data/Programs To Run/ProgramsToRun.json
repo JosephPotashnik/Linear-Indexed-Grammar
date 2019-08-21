@@ -7,7 +7,7 @@
       "GrammarFileName": "CorwinIdealGrammar.txt",
       "DataFileName": "David Copperfield.txt",
       "DecreaseExpectedEvidence": true,
-      "CoolingFactor": 0.995
+      "CoolingFactor": 0.999
     }
   ]
 }
