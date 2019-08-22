@@ -33,10 +33,12 @@ namespace LinearIndexedGrammar
 
     public class Program
     {
-        private static void Learn(bool nightRun = true)
+        private static int maxNonTerminals = 6;
+        private static void Learn(bool nightRun = true, int _maxNonTerminals = 6)
         {
             var fileName = nightRun ? @"NightRunFull.json" : @"ProgramsToRun.json";
 
+            maxNonTerminals = _maxNonTerminals;
             var programParamsList = ReadProgramParamsFromFile(fileName);
             foreach (var programParams in programParamsList.ProgramsToRun)
                 RunProgram(programParams);
@@ -45,15 +47,33 @@ namespace LinearIndexedGrammar
         private static void Main(string[] args)
         {
             var nightRun = false;
-            if (args.Length > 0)
+            var maxNonTerminals = 6;
+            for (int i = 0; i < args.Length/2; i++)
             {
-                if (args[0] != "-NightRun" || args.Length > 1)
-                    throw new Exception("the single (optional) argument expected is \"-NightRun\"");
-                nightRun = true;
+                switch (args[i*2])
+                {
+                    case @"NightRun:":
+                    {
+                        if (args[i * 2 + 1] == @"True")
+                        {
+                            nightRun = true;
+                        }
+
+                        break;
+                    }
+                    case @"MaxNonTerminals:":
+                    {
+                        maxNonTerminals = Int16.Parse(args[i * 2 + 1]);
+                        break;
+                    }
+                    default:
+                        throw new Exception("unrecognized argument. Please use the following format: NightRun: True/False MaxNonTerminals: some integer (try 6)");
+                        break;
+                }
             }
 
             ConfigureLogger();
-            Learn(nightRun);
+            Learn(nightRun, maxNonTerminals);
         }
 
         private static void ConfigureLogger()
@@ -291,7 +311,7 @@ namespace LinearIndexedGrammar
             string[][] sentences)
         {
             //int numberOfAllowedNonTerminals = posInText.Count + 1;
-            var numberOfAllowedNonTerminals = 6;
+            var numberOfAllowedNonTerminals = Program.maxNonTerminals;
 
             var bigrams = ContextFreeGrammar.GetBigramsOfData(sentences, universalVocabulary);
             ContextSensitiveGrammar.RuleSpace = new RuleSpace(posInText, bigrams, numberOfAllowedNonTerminals);
