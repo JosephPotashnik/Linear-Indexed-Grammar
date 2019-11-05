@@ -70,8 +70,6 @@ namespace LinearIndexedGrammarParser
         public void MarkStateDeleted(EarleyState oldState, ContextFreeGrammar grammar,
             HashSet<EarleyState> statesRemovedInLastReparse)
         {
-            if (oldState.Removed) return;
-            oldState.Removed = true;
             statesRemovedInLastReparse.Add(oldState);
 
             if (!oldState.IsCompleted)
@@ -94,7 +92,13 @@ namespace LinearIndexedGrammarParser
             }
 
             foreach (var parent in oldState.Parents)
-                parent.EndColumn.ActionableDeletedStates.Push(parent);
+            {
+                if (!parent.Removed)
+                {
+                    parent.Removed = true;
+                    parent.EndColumn.ActionableDeletedStates.Push(parent);
+                }
+            }
         }
 
         public void DeleteState(EarleyState oldState, HashSet<EarleyState> statesRemovedInLastReparse)
@@ -299,7 +303,13 @@ namespace LinearIndexedGrammarParser
                     throw new Exception("list of predicted should be at this stage 1 item only.");
 
                 foreach (var state in list)
-                    state.EndColumn.MarkStateDeleted(state, grammar, statesRemovedInLastReparse);
+                {
+                    if (!state.Removed)
+                    {
+                        state.Removed = true;
+                        state.EndColumn.MarkStateDeleted(state, grammar, statesRemovedInLastReparse);
+                    }
+                }
             }
             
         }

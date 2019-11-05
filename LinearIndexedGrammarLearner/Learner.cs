@@ -121,7 +121,7 @@ namespace LinearIndexedGrammarLearner
 
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
             {
-                Console.WriteLine("ContainsCyclicUnitProduction in ReparseWithAddition ");
+                //Console.WriteLine("ContainsCyclicUnitProduction in ReparseWithAddition ");
                 return false;
             }
 
@@ -170,7 +170,7 @@ namespace LinearIndexedGrammarLearner
 
             if (currentCFHypothesis.ContainsCyclicUnitProduction())
             {
-                Console.WriteLine("ContainsCyclicUnitProduction in ReparseWithDeletion ");
+                //Console.WriteLine("ContainsCyclicUnitProduction in ReparseWithDeletion ");
                 return false;
             }
 
