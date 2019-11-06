@@ -5,6 +5,10 @@ namespace LinearIndexedGrammarParser
     public class DeletedStatesHeap
     {
         private readonly MaxHeap indicesHeap = new MaxHeap();
+        //the node's value of the heap is stack and not queue - purely from performance consideration
+        //stack is slightly faster than queue (we could implement it as queue like CompletedStatesHEap if we wanted,
+        //because deletion uses lazy evaulation, so either queue or stack order guarantees visiting
+        //all items to be deleted).
         private readonly Dictionary<int, Stack<EarleyState>> items = new Dictionary<int, Stack<EarleyState>>();
 
         public int Count => indicesHeap.Count;
