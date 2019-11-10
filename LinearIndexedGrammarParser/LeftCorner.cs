@@ -5,8 +5,6 @@ namespace LinearIndexedGrammarParser
     //This class is used to store the data required for the dictionary of left corner.
     public class LeftCornerInfo
     {
-        //the rules contained in the transitive closure of left corner of the key.
-        public HashSet<Rule> LeftCornerRules { get; set; }
 
         //the set of nonterminals contained in the transitive left corner of the key.
         public HashSet<DerivedCategory> NonTerminals { get; set; }
@@ -24,9 +22,6 @@ namespace LinearIndexedGrammarParser
 
             if (rules.TryGetValue(cat, out var rulesOfCat))
             {
-                foreach (var r in rulesOfCat)
-                    leftCorners[root].LeftCornerRules.Add(r);
-
                 foreach (var r in rulesOfCat)
                 {
                     if (rules.ContainsKey(r.RightHandSide[0]) && !visited.Contains(r.RightHandSide[0]))
@@ -46,13 +41,10 @@ namespace LinearIndexedGrammarParser
             foreach (var nt in nonTerminals)
             {
                 leftCorners[nt] = new LeftCornerInfo();
-                leftCorners[nt].LeftCornerRules = new HashSet<Rule>(new RuleValueEquals());
                 leftCorners[nt].NonTerminals = new HashSet<DerivedCategory>();
                 var visited = new HashSet<DerivedCategory>();
                 foreach (var r in rules[nt])
                 {
-                    leftCorners[nt].LeftCornerRules.Add(r);
-
                     if (rules.ContainsKey(r.RightHandSide[0]) && !visited.Contains(r.RightHandSide[0]))
                         DFS(nt, r.RightHandSide[0], visited, rules);
                 }

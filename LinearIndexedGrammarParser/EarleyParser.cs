@@ -280,6 +280,10 @@ namespace LinearIndexedGrammarParser
 
                 }
             }
+
+            //clear visited categories since they may be revisited in next loop 
+            //from prediction to completion.
+            col.visitedCategoriesInUnprediction.Clear();
         }
 
         private static bool FindUndeletedPredecessor(EarleyColumn col, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet,
@@ -292,13 +296,14 @@ namespace LinearIndexedGrammarParser
                 {
                     foreach (var predecessor in predecessors)
                     {
-                        if (!statesRemovedInLastReparse.Contains(predecessor))
+                        if (!predecessor.Removed)
                         {
                             //when have we found a predecessor state which will not be deleted by removing all rules with nonTerminalToConsider as LHS?
                             //either when the predecessor is not predicted itself,
                             //or if it is predicted and also not in the prediction set of rules of the transitive left corner of nonTerminalToConsider.
                             if (predecessor.DotIndex != 0 ||
-                                !predictionSet[nonTerminalToConsider].LeftCornerRules.Contains(predecessor.Rule))
+
+                                !predictionSet[nonTerminalToConsider].NonTerminals.Contains(predecessor.Rule.LeftHandSide))
                             {
                                 foundNonDeletedPredecessor = true;
                                 break;
