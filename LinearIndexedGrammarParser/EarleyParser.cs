@@ -234,6 +234,7 @@ namespace LinearIndexedGrammarParser
             Dictionary<DerivedCategory, LeftCornerInfo> predictionSet, HashSet<EarleyState> statesRemovedInLastReparse)
         {
 
+            //var visitedDeletedNonterminals = new HashSet<DerivedCategory>();
             while (col.NonTerminalsCandidatesToUnpredict.Count > 0)
             {
                 //1. Choose the topmost (root) nonterminal to consider for unprediction
@@ -246,11 +247,13 @@ namespace LinearIndexedGrammarParser
                     statesRemovedInLastReparse, nonTerminalsToConsider);
 
                 var transitiveLeftCornerNonTerminals = predictionSet[topmostNonTerminal].NonTerminals;
-                col.NonTerminalsCandidatesToUnpredict.Remove(topmostNonTerminal);
-                col.visitedCategoriesInUnprediction.Add(topmostNonTerminal);
+
 
                 if (foundUndeletedPredecessor)
                 {
+                    col.NonTerminalsCandidatesToUnpredict.Remove(topmostNonTerminal);
+                    col.visitedCategoriesInUnprediction.Add(topmostNonTerminal);
+
                     //remove from candidate and all its transitive left corner
                     //from non terminals to unprediction candidates
                     foreach (var nt in transitiveLeftCornerNonTerminals)
@@ -261,6 +264,22 @@ namespace LinearIndexedGrammarParser
                 }
                 else
                 {
+                    foreach (var nt in nonTerminalsToConsider)
+                    {
+                        //visitedDeletedNonterminals.Add(nt);
+                        col.NonTerminalsCandidatesToUnpredict.Remove(nt);
+                        col.visitedCategoriesInUnprediction.Add(nt);
+                    }
+
+                    foreach (var nt in nonTerminalsToConsider)
+                    {
+                        //unpredict the relevant nonterminal(s):
+                        if (_grammar.StaticRules.TryGetValue(nt, out var ruleList))
+                            foreach (var rule in ruleList)
+                                col.Unpredict(rule, _grammar, statesRemovedInLastReparse, predictionSet);
+                    }
+
+
                     //insert all transitive left corner nonterminals to check if they need unprediction too.
                     //avoid examining nonterminals that we already verified whether they should be predicted or not.
                     foreach (var nt in transitiveLeftCornerNonTerminals)
@@ -271,13 +290,6 @@ namespace LinearIndexedGrammarParser
                             col.visitedCategoriesInUnprediction.Add(nt);
                         }
                     }
-
-                    //unpredict the relevant nonterminal:
-                    if (_grammar.StaticRules.TryGetValue(topmostNonTerminal, out var ruleList))
-                        foreach (var rule in ruleList)
-                            col.Unpredict(rule, _grammar, statesRemovedInLastReparse, predictionSet);
-
-
                 }
             }
 
