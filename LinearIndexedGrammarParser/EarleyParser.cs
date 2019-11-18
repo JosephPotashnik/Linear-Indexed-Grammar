@@ -248,7 +248,6 @@ namespace LinearIndexedGrammarParser
 
                 var transitiveLeftCornerNonTerminals = predictionSet[topmostNonTerminal].NonTerminals;
 
-
                 if (foundUndeletedPredecessor)
                 {
                     col.NonTerminalsCandidatesToUnpredict.Remove(topmostNonTerminal);
@@ -271,15 +270,6 @@ namespace LinearIndexedGrammarParser
                         col.visitedCategoriesInUnprediction.Add(nt);
                     }
 
-                    foreach (var nt in nonTerminalsToConsider)
-                    {
-                        //unpredict the relevant nonterminal(s):
-                        if (_grammar.StaticRules.TryGetValue(nt, out var ruleList))
-                            foreach (var rule in ruleList)
-                                col.Unpredict(rule, _grammar, statesRemovedInLastReparse, predictionSet);
-                    }
-
-
                     //insert all transitive left corner nonterminals to check if they need unprediction too.
                     //avoid examining nonterminals that we already verified whether they should be predicted or not.
                     foreach (var nt in transitiveLeftCornerNonTerminals)
@@ -290,6 +280,15 @@ namespace LinearIndexedGrammarParser
                             col.visitedCategoriesInUnprediction.Add(nt);
                         }
                     }
+
+                    foreach (var nt in nonTerminalsToConsider)
+                    {
+                        //unpredict the relevant nonterminal(s):
+                        if (_grammar.StaticRules.TryGetValue(nt, out var ruleList))
+                            foreach (var rule in ruleList)
+                                col.Unpredict(rule, _grammar, statesRemovedInLastReparse, predictionSet);
+                    }
+
                 }
             }
 
@@ -345,18 +344,16 @@ namespace LinearIndexedGrammarParser
                 if (predictionSet[nonterminal].NonTerminals.Contains(topmostCandidate))
                     topmostCandidate = nonterminal;
             }
+            nonTerminalsToConsider.Add(topmostCandidate);
 
             foreach (var nonterminal in predictionSet[topmostCandidate].NonTerminals)
             {
                 //for every non terminal in the left corner that contains the topmost candidate,
                 //then it is in a closed loop with the topmost candidate and must be considered.
-                if (predictionSet[nonterminal].NonTerminals.Contains(topmostCandidate))
+                if (predictionSet[nonterminal].NonTerminals.Contains(topmostCandidate) && !nonterminal.Equals(topmostCandidate))
                     nonTerminalsToConsider.Add(nonterminal);
             }
 
-            if (nonTerminalsToConsider.Count == 0)
-                // consider only the topmost candidate if there is no loop with it:
-                nonTerminalsToConsider.Add(topmostCandidate);
             
             return (topmostCandidate, nonTerminalsToConsider);
         }
