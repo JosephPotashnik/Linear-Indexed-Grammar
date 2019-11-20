@@ -130,9 +130,9 @@ namespace LinearIndexedGrammarLearner
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
 
             //checking in ReparseWith Addition/ ReparseWithDeletion / ParseFromScratch
-            if (currentCFHypothesis.ContainsCyclicUnitProduction())
-                throw new Exception(
-                    "Cyclic Unit Production Encountered at unexpected place, in preparation to remove the check for cyclic");
+            //if (currentCFHypothesis.ContainsCyclicUnitProduction())
+            //    throw new Exception(
+            //        "Cyclic Unit Production Encountered at unexpected place, in preparation to remove the check for cyclic");
 
             double prob = 0;
             var allParses = _learner.Parses;
