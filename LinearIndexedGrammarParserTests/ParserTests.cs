@@ -199,8 +199,14 @@ namespace LinearIndexedGrammarParserTests
 
             var (nodeList, grammar) =
                 GrammarFileReader.GenerateSentenceAccordingToGrammar("SimpleCFG.txt", "Vocabulary.json", 10);
-            var (data, dataVocabulary) =
-                GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary, 1, pos, false);
+            
+            //var (data, dataVocabulary) =
+            //    GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary, pos, false);
+            //replace with new DrawSamples()
+
+            string[][] data = null;
+            Vocabulary dataVocabulary = null;
+
             var sentences = data.Select(x => string.Join(" ", x));
 
             var settings = new JsonSerializerSettings

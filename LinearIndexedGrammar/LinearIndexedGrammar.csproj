@@ -6,12 +6,27 @@
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
-
+  
   <ItemGroup>
-
-    <ContentWithTargetPath Include="Input Data\Programs To Run\NightRunFull.json">
+    <ContentWithTargetPath Include="Input Data\Programs To Run\NightRunFullAllCFGDists.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <TargetPath>NightRunFull.json</TargetPath>
+      <TargetPath>NightRunFullAllCFGDists.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Input Data\Programs To Run\NightRunFullHardCFGDists.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>NightRunFullHardCFGDists.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Input Data\Programs To Run\NightRunFullUniform.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>NightRunFullUniform.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Input Data\Programs To Run\NightRunFullNormal.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>NightRunFullNormal.json</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Input Data\Programs To Run\NightRunFullPowerLaw.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>NightRunFullPowerLaw.json</TargetPath>
     </ContentWithTargetPath>
     <ContentWithTargetPath Include="Input Data\Programs To Run\NightRunonly CFG.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -54,6 +69,10 @@
     <ContentWithTargetPath Include="Input Data\Context Free Grammars\YesNPYesV3WithADJ.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>YesNPYesV3WithADJ.txt</TargetPath>
+    </ContentWithTargetPath>
+    <ContentWithTargetPath Include="Input Data\Context Free Grammars\YesNPYesV3WithADJAmbiguous.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>YesNPYesV3WithADJAmbiguous.txt</TargetPath>
     </ContentWithTargetPath>
     <ContentWithTargetPath Include="Input Data\Context Free Grammars\CorwinIdealGrammar.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

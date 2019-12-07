@@ -2,7 +2,7 @@
   "profiles": {
     "LinearIndexedGrammar": {
       "commandName": "Project",
-      "commandLineArgs": "NightRun: True"
+      "commandLineArgs": "FileName: \"NightRunFullHardCFGDists.json\""
     }
   }
 }

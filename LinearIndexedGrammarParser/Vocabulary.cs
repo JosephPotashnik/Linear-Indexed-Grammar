@@ -50,6 +50,11 @@ namespace LinearIndexedGrammarParser
             return WordWithPossiblePOS.ContainsKey(word);
         }
 
+        public bool ContainsPOS(string pos)
+        {
+            return POSWithPossibleWords.ContainsKey(pos);
+        }
+
         public void AddWordsToPOSCategory(string posCat, string[] words)
         {
             foreach (var word in words)
