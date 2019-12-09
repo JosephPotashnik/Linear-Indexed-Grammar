@@ -165,6 +165,10 @@ namespace LinearIndexedGrammarLearner
                 prob = 1;
                 var grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis);
 
+                double totalProbabilityOfGrammarTrees = 0;
+                foreach (var length in grammarTreesPerLength.Keys)
+                    totalProbabilityOfGrammarTrees += probabilityMassOfLength[length];
+
                 //double growth = _learner.GetGrammarGrowth(grammarTreesPerLength);
                 //double growth = 0.1;
 
@@ -189,7 +193,8 @@ namespace LinearIndexedGrammarLearner
 
                     var diff = allGrammarTreesInLength - dataTreesInLength;
                     if (diff > 0)
-                        prob -= diff / (double)allGrammarTreesInLength * 0.1;
+                        prob -= diff / (double)allGrammarTreesInLength * probabilityMassOfLength[length] /
+                                totalProbabilityOfGrammarTrees; 
 
                 }
 
