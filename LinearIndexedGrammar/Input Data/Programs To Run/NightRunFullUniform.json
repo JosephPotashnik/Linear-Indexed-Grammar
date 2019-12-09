@@ -6,7 +6,7 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "NoNPNoV3.txt",
       "DataFileName": null,
-      "DecreaseExpectedEvidence": false,
+      "DistributionType": "Uniform",
       "CoolingFactor": 0.999
     },
     {
@@ -15,7 +15,7 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "NoNPWithV3.txt",
       "DataFileName": null,
-      "DecreaseExpectedEvidence": false,
+      "DistributionType": "Uniform",
       "CoolingFactor": 0.999
     },
     {
@@ -24,7 +24,7 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "YesNPNoV3.txt",
       "DataFileName": null,
-      "DecreaseExpectedEvidence": false,
+      "DistributionType": "Uniform",
       "CoolingFactor": 0.999
     },
     {
@@ -33,7 +33,7 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "YesNPNoV3WithADJ.txt",
       "DataFileName": null,
-      "DecreaseExpectedEvidence": false,
+      "DistributionType": "Uniform",
       "CoolingFactor": 0.999
     },
     {
@@ -42,7 +42,7 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "YesNPYesV3.txt",
       "DataFileName": null,
-      "DecreaseExpectedEvidence": false,
+      "DistributionType": "Uniform",
       "CoolingFactor": 0.999
     },
     {
@@ -51,7 +51,7 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "YesNPYesV3WithADJ.txt",
       "DataFileName": null,
-      "DecreaseExpectedEvidence": false,
+      "DistributionType": "Uniform",
       "CoolingFactor": 0.999
     },
     /*{
@@ -60,7 +60,7 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "PalindromeCFGNoTD.txt",
       "DataFileName": null,
-      "DecreaseExpectedEvidence": false,
+      "DistributionType": "Uniform",
       "CoolingFactor": 0.999
     },
     {
@@ -69,7 +69,7 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "PalindromeCFGWithTD.txt",
       "DataFileName": null,
-      "DecreaseExpectedEvidence": false,
+      "DistributionType": "Uniform",
       "CoolingFactor": 0.999
     },*/
     {
@@ -78,7 +78,7 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "MoveNP.txt",
       "DataFileName": null,
-      "DecreaseExpectedEvidence": false,
+      "DistributionType": "Uniform",
       "CoolingFactor": 0.999
     },
     {
@@ -87,7 +87,7 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "MoveNPWithADJ.txt",
       "DataFileName": null,
-      "DecreaseExpectedEvidence": false,
+      "DistributionType": "Uniform",
       "CoolingFactor": 0.999
     },
     {
@@ -96,7 +96,7 @@
       "NumberOfRuns": 1,
       "GrammarFileName": "MoveNPPP.txt",
       "DataFileName": null,
-      "DecreaseExpectedEvidence": false,
+      "DistributionType": "Uniform",
       "CoolingFactor": 0.999
     }
   ]

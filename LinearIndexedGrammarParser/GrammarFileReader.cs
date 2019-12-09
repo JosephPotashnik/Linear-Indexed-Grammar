@@ -8,13 +8,9 @@ namespace LinearIndexedGrammarParser
 {
     public class GrammarFileReader
     {
-        private static List<string> GetSentencesNonTerminals(List<EarleyState> n, HashSet<string> pos)
-        {
-            return n.Select(x => x.GetNonTerminalStringUnderNode(pos)).ToList();
-        }
-
+        /* old version
         public static (string[][] sentences, HashSet<string> POSCategoriesInData) GetSentencesInWordLengthRange(
-            string[][] allData, Vocabulary universalVocabulary, int minWords, int maxWords)
+          string[][] allData, Vocabulary dataVocabulary, int minWords, int maxWords)
         {
             var sentences = new List<string[]>();
             var posCategories = new HashSet<string>();
@@ -26,7 +22,7 @@ namespace LinearIndexedGrammarParser
                 var sentence = new string[arr.Length];
                 for (var i = 0; i < sentence.Length; i++)
                 {
-                    var possiblePOS = universalVocabulary.WordWithPossiblePOS[arr[i]];
+                    var possiblePOS = dataVocabulary.WordWithPossiblePOS[arr[i]];
                     foreach (var pos in possiblePOS)
                         posCategories.Add(pos);
                 }
@@ -36,48 +32,21 @@ namespace LinearIndexedGrammarParser
 
             return (sentences.ToArray(), posCategories);
         }
-
-        public static (string[][] sentences, Vocabulary textVocabulary) GetSentencesOfGenerator(List<EarleyState> n,
-            Vocabulary universalVocabulary, int numberOfSentencesPerTree, HashSet<string> pos, bool isRandom = true)
+        */
+        public static string[][] GetSentencesInWordLengthRange(
+            string[][] allData, int minWords, int maxWords)
         {
-            var textVocabulary = new Vocabulary();
-            var nonTerminalSentences = GetSentencesNonTerminals(n, pos);
             var sentences = new List<string[]>();
-            var rand = new Random();
-            var posCategories = new HashSet<string>();
 
-            foreach (var item in nonTerminalSentences)
+            foreach (var arr in allData)
             {
-                var arr = item.Split();
+                if (arr.Length > maxWords || arr.Length < minWords) continue;
 
-                for (var k = 0; k < numberOfSentencesPerTree; k++)
-                {
-                    var sentence = new string[arr.Length];
-
-                    for (var i = 0; i < sentence.Length; i++)
-                    {
-                        var posCat = arr[i];
-
-                        var possibleWords = universalVocabulary.POSWithPossibleWords[posCat].ToArray();
-                        string randomWord;
-                        if (isRandom)
-                            randomWord = possibleWords[rand.Next(possibleWords.Length)];
-                        else
-                            randomWord = possibleWords[0];
-
-                        sentence[i] = randomWord;
-                        posCategories.Add(posCat);
-                    }
-
-                    sentences.Add(sentence);
-                }
+                var sentence = new string[arr.Length];
+                sentences.Add(arr);
             }
 
-            foreach (var category in posCategories)
-                textVocabulary.AddWordsToPOSCategory(category,
-                    universalVocabulary.POSWithPossibleWords[category].ToArray());
-
-            return (sentences.ToArray(), textVocabulary);
+            return sentences.ToArray();
         }
 
         public static (List<EarleyState> nodeList, List<Rule> grammarRules) GenerateSentenceAccordingToGrammar(

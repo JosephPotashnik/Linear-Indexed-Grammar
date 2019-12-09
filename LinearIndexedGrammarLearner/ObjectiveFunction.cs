@@ -80,12 +80,10 @@ namespace LinearIndexedGrammarLearner
 
         private static double maxVal;
         private readonly Learner _learner;
-        private readonly bool decreaseExpectedEvidence;
 
-        public GrammarFitnessObjectiveFunction(Learner l, bool _decreaseExpectedEvidence)
+        public GrammarFitnessObjectiveFunction(Learner l)
         {
             _learner = l;
-            decreaseExpectedEvidence = _decreaseExpectedEvidence;
         }
 
 
@@ -152,35 +150,52 @@ namespace LinearIndexedGrammarLearner
             }
 
             var minLength = 1;
+            //int alldataCount = 0;
             var dataTreesPerLength = new Dictionary<int, int>();
             foreach (var length in treesDic.Keys)
             {
                 dataTreesPerLength[length] = treesDic[length].Count;
                 if (length < minLength)
                     minLength = length;
+                //alldataCount += treesDic[length].Count;
             }
 
             if (treesDic.Count > 0)
             {
                 prob = 1;
                 var grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis);
+
                 double totalProbabilityOfGrammarTrees = 0;
                 foreach (var length in grammarTreesPerLength.Keys)
                     totalProbabilityOfGrammarTrees += probabilityMassOfLength[length];
+
+                //double growth = _learner.GetGrammarGrowth(grammarTreesPerLength);
+                //double growth = 0.1;
+
+                //double totalProbabilityOfGrammarTrees = 0;
+                //int previousLength = 0;
+                //foreach (var length in grammarTreesPerLength.Keys)
+                //{
+                //    probabilityMassOfLength[length] = 1 - Math.Exp(-growth * length) - totalProbabilityOfGrammarTrees;
+                //    totalProbabilityOfGrammarTrees += probabilityMassOfLength[length];
+                //    previousLength = length;
+                //    if (length < previousLength)
+                //    {
+                //        throw new Exception("keys should be in ascending order.");
+                //    }
+                //}
+
 
                 foreach (var length in grammarTreesPerLength.Keys)
                 {
                     dataTreesPerLength.TryGetValue(length, out var dataTreesInLength);
                     var allGrammarTreesInLength = grammarTreesPerLength[length];
 
-                    var expectedGrammarTreesInLength = decreaseExpectedEvidence
-                        ? allGrammarTreesInLength / (length - minLength + 1)
-                        : allGrammarTreesInLength;
-
-                    var diff = expectedGrammarTreesInLength - dataTreesInLength;
+                    var diff = allGrammarTreesInLength - dataTreesInLength;
                     if (diff > 0)
-                        prob -= diff / (double) expectedGrammarTreesInLength * probabilityMassOfLength[length] /
-                                totalProbabilityOfGrammarTrees;
+                        prob -= diff / (double)allGrammarTreesInLength * probabilityMassOfLength[length] /
+                                totalProbabilityOfGrammarTrees; 
+
                 }
 
                 if (prob > 1)

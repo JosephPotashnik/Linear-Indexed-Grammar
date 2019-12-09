@@ -19,11 +19,11 @@ namespace LinearIndexedGrammarLearner
         private GrammarPermutations _gp;
         public GrammarTreeCountsCalculator _grammarTreesCalculator;
 
-        public Learner(string[][] sentences, int minWordsInSentence, int maxWordsInSentence, HashSet<string> posInText,
-            Vocabulary universalVocabulary)
+        public Learner(string[][] sentences, int minWordsInSentence, int maxWordsInSentence, 
+            Vocabulary dataVocabulary)
         {
-            _voc = universalVocabulary;
-            _posInText = posInText;
+            _voc = dataVocabulary;
+            _posInText = dataVocabulary.POSWithPossibleWords.Keys.ToHashSet();
             _maxWordsInSentence = maxWordsInSentence;
             _minWordsInSentence = minWordsInSentence;
 
@@ -66,6 +66,19 @@ namespace LinearIndexedGrammarLearner
 
             var originalGrammar = new ContextSensitiveGrammar(rules);
             return originalGrammar;
+        }
+
+        public double GetGrammarGrowth(Dictionary<int, int> grammarTreesPerLength)
+        {
+            int sumTrees = 0;
+            int maxLength = 0;
+            foreach (var length in grammarTreesPerLength.Keys)
+            {
+                sumTrees += grammarTreesPerLength[length];
+                if (length > maxLength) maxLength = length;
+            }
+
+            return Math.Pow(sumTrees, (1 / (double)maxLength));
         }
 
         public void ParseAllSentencesFromScratch(ContextSensitiveGrammar currentHypothesis)
