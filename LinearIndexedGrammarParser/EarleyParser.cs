@@ -1,10 +1,8 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using NLog;
 
 namespace LinearIndexedGrammarParser
 {
@@ -25,7 +23,7 @@ namespace LinearIndexedGrammarParser
             _grammar = g;
             _checkForCyclicUnitProductions = checkUnitProductionCycles;
         }
-        
+
         private void Predict(EarleyColumn col, List<Rule> ruleList, DerivedCategory nextTerm)
         {
             foreach (var rule in ruleList)
@@ -41,10 +39,10 @@ namespace LinearIndexedGrammarParser
         {
             if (!startColumn.Reductors.TryGetValue(term, out var stateList))
             {
-                var scannedStateRule = new Rule(term.ToString(), new[] {token});
+                var scannedStateRule = new Rule(term.ToString(), new[] { token });
                 var scannedState = new EarleyState(scannedStateRule, 1, startColumn);
                 scannedState.EndColumn = nextCol;
-                stateList = new HashSet<EarleyState> {scannedState};
+                stateList = new HashSet<EarleyState> { scannedState };
                 startColumn.Reductors.Add(term, stateList);
             }
 
@@ -354,7 +352,7 @@ namespace LinearIndexedGrammarParser
                     nonTerminalsToConsider.Add(nonterminal);
             }
 
-            
+
             return (topmostCandidate, nonTerminalsToConsider);
         }
 
@@ -477,7 +475,7 @@ namespace LinearIndexedGrammarParser
                 table[i] = new EarleyColumn(i, text[i - 1]);
 
             table[0] = new EarleyColumn(0, "");
-            return (table, new[] {table.Length - 1});
+            return (table, new[] { table.Length - 1 });
         }
 
         protected virtual HashSet<string> GetPossibleSyntacticCategoriesForToken(string nextScannableTerm)
@@ -487,7 +485,7 @@ namespace LinearIndexedGrammarParser
 
         private void PrepareScannedStates()
         {
-            for (int i = 0; i < _table.Length-1; i++)
+            for (int i = 0; i < _table.Length - 1; i++)
             {
                 var nextScannableTerm = _table[i + 1].Token;
                 var possibleNonTerminals = GetPossibleSyntacticCategoriesForToken(nextScannableTerm);
@@ -496,9 +494,9 @@ namespace LinearIndexedGrammarParser
                 {
                     var currentCategory = new DerivedCategory(nonTerminal);
 
-                    var scannedStateRule = new Rule(nonTerminal, new[] { _table[i+1].Token });
+                    var scannedStateRule = new Rule(nonTerminal, new[] { _table[i + 1].Token });
                     var scannedState = new EarleyState(scannedStateRule, 1, _table[i]);
-                    scannedState.EndColumn = _table[i+1];
+                    scannedState.EndColumn = _table[i + 1];
                     _table[i].Reductors[currentCategory] = new HashSet<EarleyState> { scannedState };
                 }
             }

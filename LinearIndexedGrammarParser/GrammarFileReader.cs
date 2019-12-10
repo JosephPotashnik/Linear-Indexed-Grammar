@@ -131,9 +131,9 @@ namespace LinearIndexedGrammarParser
 
             if (nonTerminals.Length == 1)
             {
-                var epsilonCat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol) {StackSymbolsCount = -1};
+                var epsilonCat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol) { StackSymbolsCount = -1 };
                 //moveable = new SyntacticCategory(leftHandCat);
-                return new Rule(leftHandCat, new[] {epsilonCat});
+                return new Rule(leftHandCat, new[] { epsilonCat });
 
                 //key = MoveableOperationsKey.Pop1;
                 //return new StackChangingRule(baseRule, key, moveable);

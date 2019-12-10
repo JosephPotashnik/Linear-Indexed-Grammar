@@ -1,7 +1,7 @@
-﻿using System.Linq;
-using LinearIndexedGrammarParser;
+﻿using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
 using NLog;
+using System.Linq;
 
 namespace LinearIndexedGrammarLearner
 {
@@ -16,11 +16,11 @@ namespace LinearIndexedGrammarLearner
     public class SimulatedAnnealing
     {
         private readonly Learner _learner;
-        private readonly IObjectiveFunction _objectiveFunction;
+        private readonly GrammarFitnessObjectiveFunction _objectiveFunction;
         private readonly SimulatedAnnealingParameters _params;
 
         public SimulatedAnnealing(Learner l, SimulatedAnnealingParameters parameters,
-            IObjectiveFunction objectiveFunction)
+            GrammarFitnessObjectiveFunction objectiveFunction)
         {
             _learner = l;
             _params = parameters;
@@ -63,7 +63,7 @@ namespace LinearIndexedGrammarLearner
 
                         ChangeRHSCoordinates(newGrammar, coord, newCoord);
 
-                        var newValue = _objectiveFunction.Compute(newGrammar);
+                        (var newValue, var feasible) = _objectiveFunction.Compute(newGrammar);
 
                         if (newValue > bestValue)
                         {
@@ -111,13 +111,15 @@ namespace LinearIndexedGrammarLearner
                 ContextSensitiveGrammar.RuleSpace[newCoord].NumberOfGeneratingRule);
         }
 
-        private (ContextSensitiveGrammar bestGrammar, double bestValue) RunSingleIteration(
+        private (ContextSensitiveGrammar bestGrammar, double bestValue, bool feasible) RunSingleIteration(
             ContextSensitiveGrammar initialGrammar, double initialValue)
         {
             var currentTemp = _params.InitialTemperature;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
             var rejectCounter = 0;
+            bool feasible = false;
+            double newValue = 0.0;
             //bool reparsed = false;
             //int counter = 0;
             while (currentTemp > 0.3)
@@ -126,182 +128,7 @@ namespace LinearIndexedGrammarLearner
                 if (mutatedGrammar == null || !reparsed) continue;
 
                 currentTemp *= _params.CoolingFactor;
-
-                //when debugging a specific scenario, uncomment the two following
-                //lines and comment the first two lines above in the while loop.
-
-                //var mutatedGrammar = new ContextSensitiveGrammar(currentGrammar);
-                //_learner.SetOriginalGrammarBeforePermutation();
-
-                //if (counter == 0)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 4,
-                //        RHSIndex = 107
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Add(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 1)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 3,
-                //        RHSIndex = 98
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Add(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 2)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 1,
-                //        RHSIndex = 94
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Add(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 3)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 5,
-                //        RHSIndex = 143
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Add(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 4)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 3,
-                //        RHSIndex = 119
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Add(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 5)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 3,
-                //        RHSIndex = 138
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Add(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 6)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 1,
-                //        RHSIndex = 117
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Add(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-
-
-                //else if (counter == 7)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 5,
-                //        RHSIndex = 112
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Add(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 8)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 3,
-                //        RHSIndex = 146
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Add(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 9)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 0,
-                //        RHSIndex = 50
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Add(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"added {r}");
-                //    reparsed = _learner.ReparseWithAddition(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-                //else if (counter == 10)//forever)
-                //{
-                //    counter++;
-                //    var rc = new RuleCoordinates()
-                //    {
-                //        LHSIndex = 0,
-                //        RHSIndex = 50
-                //    };
-
-                //    mutatedGrammar.StackConstantRules.Remove(rc);
-
-                //    var r = ContextSensitiveGrammar.RuleSpace[rc];
-                //    Console.WriteLine($"removed {r}");
-                //    reparsed = _learner.ReparseWithDeletion(mutatedGrammar, r.NumberOfGeneratingRule);
-                //}
-
-                var newValue = _objectiveFunction.Compute(mutatedGrammar);
+                (newValue, feasible) = _objectiveFunction.Compute(mutatedGrammar);
 
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
                 if (accept)
@@ -311,7 +138,9 @@ namespace LinearIndexedGrammarLearner
                     currentValue = newValue;
                     currentGrammar = mutatedGrammar;
                     _learner.AcceptChanges();
-                    if (_objectiveFunction.IsMaximalValue(currentValue)) break;
+                    if (_objectiveFunction.IsMaximalValue(currentValue))
+                            break;
+                    
                 }
                 else
                 {
@@ -347,7 +176,7 @@ namespace LinearIndexedGrammarLearner
                 }
 
             }
-            return (currentGrammar, currentValue);
+            return (currentGrammar, currentValue, feasible);
         }
 
         private void PruneUnusedRules(ContextSensitiveGrammar currentGrammar)
@@ -369,11 +198,11 @@ namespace LinearIndexedGrammarLearner
             //set the parsers to the initial grammar.
             _learner.ParseAllSentencesFromScratch(currentGrammar);
 
-            var currentValue = _objectiveFunction.Compute(currentGrammar);
+            (var currentValue, var feasible) = _objectiveFunction.Compute(currentGrammar);
 
             //if current grammar is already optimal on data, no need to learn anything,
             //return immediately.
-            if (_objectiveFunction.IsMaximalValue(currentValue))
+            if (feasible && _objectiveFunction.IsMaximalValue(currentValue))
                 return (currentGrammar, currentValue);
 
             var bestGrammars = new PriorityQueue<double, ContextSensitiveGrammar>();
@@ -383,25 +212,33 @@ namespace LinearIndexedGrammarLearner
 
             var smallestBestValue = bestGrammars.PeekFirstKey();
             var noImprovemetCounter = 0;
-
+            int randomPastBestGrammar = 0;
             while (currentIteration++ < _params.NumberOfIterations)
             {
                 LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, probability {currentValue}");
-                (currentGrammar, currentValue) = RunSingleIteration(currentGrammar, currentValue);
+                (currentGrammar, currentValue, feasible) = RunSingleIteration(currentGrammar, currentValue);
 
                 if (_objectiveFunction.IsMaximalValue(currentValue))
                 {
-                    //SEFI
-                    //LogManager.GetCurrentClassLogger().Info($"Best Grammar so far {currentGrammar}\r\n, probability {currentValue}");
-                    bestGrammars.Enqueue(currentValue, currentGrammar);
-                    break;
+                    if (feasible)
+                    {
+                        _objectiveFunction.PenaltyCoefficient = 1;
+                        //LogManager.GetCurrentClassLogger().Info($"Best Grammar so far {currentGrammar}\r\n, probability {currentValue}");
+                        bestGrammars.Enqueue(currentValue, new ContextSensitiveGrammar(currentGrammar));
+                        break;
+                    }
+                    else
+                        _objectiveFunction.PenaltyCoefficient += 1;
+
                 }
 
                 if (smallestBestValue < currentValue)
                 {
                     noImprovemetCounter = 0;
+                    //LogManager.GetCurrentClassLogger().Info($"Enqueuing to best grammars {currentGrammar}\r\n, probability {currentValue}");
+
                     bestGrammars.Dequeue();
-                    bestGrammars.Enqueue(currentValue, currentGrammar);
+                    bestGrammars.Enqueue(currentValue, new ContextSensitiveGrammar(currentGrammar));
                     smallestBestValue = bestGrammars.PeekFirstKey();
                 }
                 else
@@ -409,18 +246,22 @@ namespace LinearIndexedGrammarLearner
                     noImprovemetCounter++;
                 }
 
-                //TODO: doesn't work, find out why.
-                //if (noImprovemetCounter == 20)
-                //{
-                //    var rand = new Random();
-                //    var randomPastBestGrammar = rand.Next(numberOfBestGrammarsToKeep);
-                //    var candidates = bestGrammars.KeyValuePairs.ToArray();
-                //    noImprovemetCounter = 0;
-                //    currentValue = candidates[randomPastBestGrammar].Item1;
-                //    currentGrammar = candidates[randomPastBestGrammar].Item2;
-                //    LogManager.GetCurrentClassLogger()
-                //        .Info($"reverting to random previous best grammar that has probability {currentValue}");
-                //}
+                if (noImprovemetCounter == 20)
+                { 
+                    randomPastBestGrammar = Pseudorandom.NextInt(numberOfBestGrammarsToKeep);
+                    var candidates = bestGrammars.KeyValuePairs.ToArray();
+                    noImprovemetCounter = 0;
+                    currentValue = candidates[randomPastBestGrammar].Item1;
+                    currentGrammar = candidates[randomPastBestGrammar].Item2;
+                    _objectiveFunction.PenaltyCoefficient = 1;
+                    //LogManager.GetCurrentClassLogger()
+                    //    .Info($"reverting to random previous best grammar");
+                    //LogManager.GetCurrentClassLogger().Info($"grammar reverted is: {currentGrammar}\r\n, probability {currentValue}");
+
+                    //refresh parse forest from scratch, because we moved to an arbitrarily far away point
+                    //in the hypotheses space.
+                    _learner.ParseAllSentencesFromScratch(currentGrammar);
+                }
             }
 
             currentValue = bestGrammars.Last().Key;

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using LinearIndexedGrammarParser;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LinearIndexedGrammarParser;
 
 namespace LinearIndexedGrammarLearner
 {
@@ -19,7 +19,7 @@ namespace LinearIndexedGrammarLearner
         private GrammarPermutations _gp;
         public GrammarTreeCountsCalculator _grammarTreesCalculator;
 
-        public Learner(string[][] sentences, int minWordsInSentence, int maxWordsInSentence, 
+        public Learner(string[][] sentences, int minWordsInSentence, int maxWordsInSentence,
             Vocabulary dataVocabulary)
         {
             _voc = dataVocabulary;
@@ -58,11 +58,11 @@ namespace LinearIndexedGrammarLearner
             foreach (var pos in _posInText)
             {
                 //rules.Add(new Rule("X1", new[] { "X1", pos }));
-                rules.Add(new Rule("X1", new[] {pos, "X1"}));
-                rules.Add(new Rule("X1", new[] {pos}));
+                rules.Add(new Rule("X1", new[] { pos, "X1" }));
+                rules.Add(new Rule("X1", new[] { pos }));
             }
 
-            rules.Add(new Rule(ContextFreeGrammar.StartSymbol, new[] {"X1"}));
+            rules.Add(new Rule(ContextFreeGrammar.StartSymbol, new[] { "X1" }));
 
             var originalGrammar = new ContextSensitiveGrammar(rules);
             return originalGrammar;

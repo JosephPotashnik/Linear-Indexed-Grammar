@@ -1,9 +1,8 @@
-using System.IO;
-using System.Linq;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
+using System.IO;
+using System.Linq;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace LinearIndexedGrammarParserTests
 {
@@ -199,18 +198,18 @@ namespace LinearIndexedGrammarParserTests
 
             var (nodeList, grammar) =
                 GrammarFileReader.GenerateSentenceAccordingToGrammar("SimpleCFG.txt", "Vocabulary.json", 10);
-            
+
             //var (data, dataVocabulary) =
             //    GrammarFileReader.GetSentencesOfGenerator(nodeList, universalVocabulary, pos, false);
             //replace with new DrawSamples()
 
             string[][] data = null;
-            Vocabulary dataVocabulary = null;
+            //Vocabulary dataVocabulary = null;
 
             var sentences = data.Select(x => string.Join(" ", x));
 
             var settings = new JsonSerializerSettings
-                {Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore};
+            { Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore };
             var actual = JsonConvert.SerializeObject(sentences, settings);
             var expected = File.ReadAllText(@"GenerateCFGGrammarSentences.json");
             Assert.Equal(expected, actual);

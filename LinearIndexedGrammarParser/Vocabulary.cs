@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
 
 namespace LinearIndexedGrammarParser
 {
@@ -38,7 +38,7 @@ namespace LinearIndexedGrammarParser
             using (var file = File.OpenText(jsonFileName))
             {
                 var serializer = new JsonSerializer();
-                voc = (Vocabulary) serializer.Deserialize(file, typeof(Vocabulary));
+                voc = (Vocabulary)serializer.Deserialize(file, typeof(Vocabulary));
             }
 
             voc.PopulateDependentJsonPropertys();
@@ -102,7 +102,7 @@ namespace LinearIndexedGrammarParser
                 var unableToResolveWord = false;
 
                 //split to words
-                var sentenceWords = sentence.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+                var sentenceWords = sentence.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 var newWords = new Dictionary<string, List<string>>
                 {
                     ["N"] = new List<string>(),

@@ -14,8 +14,8 @@ namespace LinearIndexedGrammarLearner
             get
             {
                 var q = from i in list
-                    from j in i.Value
-                    select (i.Key, j);
+                        from j in i.Value
+                        select (i.Key, j);
 
                 return q;
             }

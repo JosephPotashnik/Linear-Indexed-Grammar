@@ -60,17 +60,17 @@ namespace LinearIndexedGrammarParser
             _ruleSpace[RuleType.PopRules][0] = new Rule[1];
 
             //START -> Xi rule in CFG Rule table.
-            _ruleSpace[RuleType.CFGRules][0][0] = new Rule(startCategory, new[] {currentCategory});
+            _ruleSpace[RuleType.CFGRules][0][0] = new Rule(startCategory, new[] { currentCategory });
             _allowedRHSIndices[RuleType.CFGRules].Add(0);
 
             //START -> Xi rule in Push Rule table. (unused).
-            _ruleSpace[RuleType.Push1Rules][0][0] = new Rule(startCategory, new[] {currentCategory});
+            _ruleSpace[RuleType.Push1Rules][0][0] = new Rule(startCategory, new[] { currentCategory });
 
             //Xi[Xi] -> epsilon Pop in Pop Rule table. 
             var epsilonCat = new DerivedCategory(ContextFreeGrammar.EpsilonSymbol);
             epsilonCat.StackSymbolsCount = -1;
             var currentCatWithCurrenCatStack = new DerivedCategory("X1", "X1");
-            _ruleSpace[RuleType.PopRules][0][0] = new Rule(currentCatWithCurrenCatStack, new[] {epsilonCat});
+            _ruleSpace[RuleType.PopRules][0][0] = new Rule(currentCatWithCurrenCatStack, new[] { epsilonCat });
 
             for (var i = length; i < numberOfPossibleRHS; i++)
             {
@@ -86,11 +86,11 @@ namespace LinearIndexedGrammarParser
                     else
                         rhs1Cat = new DerivedCategory(rhs1, ContextFreeGrammar.StarSymbol);
 
-                    _ruleSpace[RuleType.CFGRules][0][currentIndex] = new Rule(currentCategory, new[] {rhs1Cat});
+                    _ruleSpace[RuleType.CFGRules][0][currentIndex] = new Rule(currentCategory, new[] { rhs1Cat });
 
                     //Xi -> RHS in Push Rules (unused)
                     rhs1Cat.StackSymbolsCount = 1;
-                    _ruleSpace[RuleType.Push1Rules][0][currentIndex] = new Rule(currentCategory, new[] {rhs1Cat});
+                    _ruleSpace[RuleType.Push1Rules][0][currentIndex] = new Rule(currentCategory, new[] { rhs1Cat });
 
                     //unit production rules Xi -> Xj are excluded from CFG Rules
                     //unit production either Xi -> Xj or Xi -> POS are excluded from Push rules.
@@ -112,13 +112,13 @@ namespace LinearIndexedGrammarParser
                         rhs2Cat = new DerivedCategory(rhs2, ContextFreeGrammar.StarSymbol);
 
                     _ruleSpace[RuleType.CFGRules][0][currentIndex] =
-                        new Rule(currentCategory, new[] {rhs1Cat, rhs2Cat});
+                        new Rule(currentCategory, new[] { rhs1Cat, rhs2Cat });
 
                     //Xi -> RHS1 RHS2[*RHS1] in Push Rules
                     var rhs2CatForPushRule = new DerivedCategory(rhs2, ContextFreeGrammar.StarSymbol + rhs1);
                     rhs2CatForPushRule.StackSymbolsCount = 1;
                     _ruleSpace[RuleType.Push1Rules][0][currentIndex] =
-                        new Rule(currentCategory, new[] {rhs1Cat, rhs2CatForPushRule});
+                        new Rule(currentCategory, new[] { rhs1Cat, rhs2CatForPushRule });
 
 
                     if (partsOfSpeechCategories.Contains(rhs1) && partsOfSpeechCategories.Contains(rhs2))
@@ -151,24 +151,24 @@ namespace LinearIndexedGrammarParser
                 //copy column 0 to column i in CFG Rules, change the current LHS Nonterminal
                 _ruleSpace[RuleType.CFGRules][i] = _ruleSpace[RuleType.CFGRules][0]
                     .Select(x => new Rule(currentCategory, x.RightHandSide)).ToArray();
-                _ruleSpace[RuleType.CFGRules][i][0] = new Rule(startCategory, new[] {currentCategory});
+                _ruleSpace[RuleType.CFGRules][i][0] = new Rule(startCategory, new[] { currentCategory });
 
                 //copy column 0 to column i in Push Rules, change the current LHS Nonterminal
                 _ruleSpace[RuleType.Push1Rules][i] = _ruleSpace[RuleType.Push1Rules][0]
                     .Select(x => new Rule(currentCategory, x.RightHandSide)).ToArray();
-                _ruleSpace[RuleType.Push1Rules][i][0] = new Rule(startCategory, new[] {currentCategory});
+                _ruleSpace[RuleType.Push1Rules][i][0] = new Rule(startCategory, new[] { currentCategory });
 
                 //copy column 0 to column in Pop Rules. change the current nonterminal
                 currentCatWithCurrenCatStack = new DerivedCategory(currentLHSNonterminal, currentLHSNonterminal);
                 _ruleSpace[RuleType.PopRules][i] = new Rule[1];
-                _ruleSpace[RuleType.PopRules][i][0] = new Rule(currentCatWithCurrenCatStack, new[] {epsilonCat});
+                _ruleSpace[RuleType.PopRules][i][0] = new Rule(currentCatWithCurrenCatStack, new[] { epsilonCat });
             }
 
             var counter = 1;
             for (var k = 0; k < RuleType.RuleTypeCount; k++)
-            for (var j = 0; j < _ruleSpace[k].Length; j++)
-            for (var i = 0; i < _ruleSpace[k][j].Length; i++)
-                _ruleSpace[k][j][i].NumberOfGeneratingRule = counter++;
+                for (var j = 0; j < _ruleSpace[k].Length; j++)
+                    for (var i = 0; i < _ruleSpace[k][j].Length; i++)
+                        _ruleSpace[k][j][i].NumberOfGeneratingRule = counter++;
 
             //for (var j = 0; j < _ruleSpace[0].Length; j++)
             //{
@@ -198,7 +198,7 @@ namespace LinearIndexedGrammarParser
 
         public RuleCoordinates FindRule(Rule r)
         {
-            var rc = new RuleCoordinates {RuleType = RuleType.CFGRules};
+            var rc = new RuleCoordinates { RuleType = RuleType.CFGRules };
 
             var lhs = new SyntacticCategory(r.LeftHandSide);
 

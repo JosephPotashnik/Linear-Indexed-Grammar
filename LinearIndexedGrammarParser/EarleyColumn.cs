@@ -147,7 +147,7 @@ namespace LinearIndexedGrammarParser
                     oldState.StartColumn.Reductors.Remove(oldState.Rule.LeftHandSide);
             }
         }
-        
+
 
 
         //The responsibility not to add a state that already exists in the column
@@ -207,10 +207,10 @@ namespace LinearIndexedGrammarParser
                 if (term.ToString() == ContextFreeGrammar.EpsilonSymbol)
                     if (!Reductors.TryGetValue(term, out var reductors1))
                     {
-                        var epsilon = new Rule(term.ToString(), new[] {""});
+                        var epsilon = new Rule(term.ToString(), new[] { "" });
                         var epsilonState = new EarleyState(epsilon, 1, this);
                         epsilonState.EndColumn = this;
-                        reductors1 = new HashSet<EarleyState> {epsilonState};
+                        reductors1 = new HashSet<EarleyState> { epsilonState };
                         Reductors.Add(term, reductors1);
                     }
 
@@ -270,7 +270,7 @@ namespace LinearIndexedGrammarParser
                     {
                         state.EndColumn.Predicted[state.Rule].Remove(state);
                         if (state.EndColumn.Predicted[state.Rule].Count == 0)
-                            state.EndColumn.Predicted.Remove(state.Rule); 
+                            state.EndColumn.Predicted.Remove(state.Rule);
                     }
 
                 }
@@ -311,7 +311,7 @@ namespace LinearIndexedGrammarParser
                     }
                 }
             }
-            
+
         }
     }
 }

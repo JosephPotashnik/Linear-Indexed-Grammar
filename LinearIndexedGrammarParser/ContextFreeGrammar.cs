@@ -166,7 +166,7 @@ namespace LinearIndexedGrammarParser
 
         public void GenerateAllStaticRulesFromDynamicRules(Dictionary<SyntacticCategory, List<Rule>> dynamicRules)
         {
-            var gammaGrammarRule = new Rule(GammaRule, new[] {StartSymbol});
+            var gammaGrammarRule = new Rule(GammaRule, new[] { StartSymbol });
             AddStaticRule(gammaGrammarRule);
 
             //DO a BFS
@@ -218,7 +218,7 @@ namespace LinearIndexedGrammarParser
             foreach (var originalVariable in originalVariables)
                 if (replaceVariables.Contains(originalVariable))
                     throw new Exception("renaming variables failed. Please do not use X1,X2,X3 nonterminals");
-            var replaceDic = originalVariables.Zip(replaceVariables, (x, y) => new {key = x, value = y})
+            var replaceDic = originalVariables.Zip(replaceVariables, (x, y) => new { key = x, value = y })
                 .ToDictionary(x => x.key, x => x.value);
 
             var startRenamedVariable = replaceDic[StartSymbol];
@@ -247,7 +247,7 @@ namespace LinearIndexedGrammarParser
             {
                 replaceDic[StartSymbol] = startRenamedVariable;
                 ReplaceVariables(replaceDic, startRulesToReplace);
-                var newStartRule = new Rule(StartSymbol, new[] {startRenamedVariable});
+                var newStartRule = new Rule(StartSymbol, new[] { startRenamedVariable });
                 rules.Add(newStartRule);
             }
         }
@@ -279,8 +279,8 @@ namespace LinearIndexedGrammarParser
                     var possiblePOSforrhs2 = universalVocabulary.WordWithPossiblePOS[rhs2].ToArray();
 
                     foreach (var pos1 in possiblePOSforrhs1)
-                    foreach (var pos2 in possiblePOSforrhs2)
-                        bigrams.Add((pos1, pos2));
+                        foreach (var pos2 in possiblePOSforrhs2)
+                            bigrams.Add((pos1, pos2));
                 }
 
             return bigrams;

@@ -1,7 +1,7 @@
-﻿using System;
+﻿using LinearIndexedGrammarParser;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using LinearIndexedGrammarParser;
 
 
 namespace LinearIndexedGrammar
@@ -81,7 +81,7 @@ namespace LinearIndexedGrammar
             //|H| = 2^VCDimension.
 
 
-                return bounds;
+            return bounds;
         }
 
         static private double F(float x, float mean, float var)
@@ -92,14 +92,14 @@ namespace LinearIndexedGrammar
         static int[] PreparePowerLawDistribution(int numberOfStates, int startVal, int minTreesToHear)
         {
             int[] powerlaw = new int[numberOfStates];
-            if (startVal < 1) 
+            if (startVal < 1)
                 startVal = 1;
 
             for (int i = 0; i < numberOfStates; i++)
             {
                 powerlaw[i] = startVal / (i + 1);   //if  i > startVal, powerlaw[i] = 0.
                 //also: always hear the first minTreesToHear trees in non-zero probability.
-                if (i < minTreesToHear && powerlaw[i] == 0)  
+                if (i < minTreesToHear && powerlaw[i] == 0)
                     powerlaw[i] = 1;
             }
             return powerlaw;
@@ -114,7 +114,7 @@ namespace LinearIndexedGrammar
             float var = stddev * stddev;
 
             for (int i = 0; i < numberOfStates; i++)
-                normal[i] = (int)(100 *F(i, mean, var));
+                normal[i] = (int)(100 * F(i, mean, var));
 
             return normal;
         }

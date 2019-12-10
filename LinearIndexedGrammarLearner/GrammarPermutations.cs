@@ -1,8 +1,8 @@
-﻿using System;
+﻿using LinearIndexedGrammarParser;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
-using LinearIndexedGrammarParser;
-using Newtonsoft.Json;
 
 #pragma warning disable 649
 
@@ -52,7 +52,7 @@ namespace LinearIndexedGrammarLearner
             for (var i = 0; i < l.Count; i++)
                 foreach (var method in typeInfo.GetDeclaredMethods(l[i].Mutation))
                 {
-                    var m = (GrammarMutation) method.CreateDelegate(typeof(GrammarMutation), this);
+                    var m = (GrammarMutation)method.CreateDelegate(typeof(GrammarMutation), this);
                     _mutations[i] = new Tuple<GrammarMutation, int>(m, l[i].MutationWeight);
                 }
 

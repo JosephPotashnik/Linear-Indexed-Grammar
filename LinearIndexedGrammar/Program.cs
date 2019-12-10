@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using LinearIndexedGrammarLearner;
+﻿using LinearIndexedGrammarLearner;
 using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 
 namespace LinearIndexedGrammar
 {
@@ -34,7 +34,7 @@ namespace LinearIndexedGrammar
         [JsonProperty] public string VocabularyFileName { get; set; }
         [JsonProperty] public string DataFileName { get; set; }
         [JsonProperty] public bool IsCFG { get; set; }
-        [JsonProperty] public DistributionType  DistributionType { get; set; }
+        [JsonProperty] public DistributionType DistributionType { get; set; }
         [JsonProperty] public float CoolingFactor { get; set; }
     }
 
@@ -52,26 +52,24 @@ namespace LinearIndexedGrammar
 
         private static void Main(string[] args)
         {
-            var nightRun = false;
             var maxNonTerminals = 6;
             string fileName = null;
-            for (int i = 0; i < args.Length/2; i++)
+            for (int i = 0; i < args.Length / 2; i++)
             {
-                switch (args[i*2])
+                switch (args[i * 2])
                 {
                     case @"FileName:":
-                    {
+                        {
                             fileName = args[i * 2 + 1];
                             break;
-                    }
+                        }
                     case @"MaxNonTerminals:":
-                    {
-                        maxNonTerminals = Int16.Parse(args[i * 2 + 1]);
-                        break;
-                    }
+                        {
+                            maxNonTerminals = Int16.Parse(args[i * 2 + 1]);
+                            break;
+                        }
                     default:
                         throw new Exception("unrecognized argument. Please use the following format: NightRun: True/False MaxNonTerminals: some integer (try 6)");
-                        break;
                 }
             }
 
@@ -83,7 +81,7 @@ namespace LinearIndexedGrammar
         {
             var config = new LoggingConfiguration();
 
-            var logfile = new FileTarget("logfile") {FileName = "SessionReport.txt"};
+            var logfile = new FileTarget("logfile") { FileName = "SessionReport.txt" };
             var logConsole = new ConsoleTarget("logConsole");
 
             config.AddRule(LogLevel.Info, LogLevel.Fatal, logConsole);
@@ -168,7 +166,7 @@ namespace LinearIndexedGrammar
 
 
             objectiveFunction.GetLearner().ParseAllSentencesFromScratch(targetGrammar);
-            var targetProb = objectiveFunction.Compute(targetGrammar);
+            (var targetProb, var feasible) = objectiveFunction.Compute(targetGrammar);
 
 
             //trying to learn data from incomplete source leads to p < 1
@@ -224,7 +222,7 @@ namespace LinearIndexedGrammar
                     $"runs: {programParams.NumberOfRuns}, grammar file name: {programParams.GrammarFileName}, vocabulary file name: {programParams.VocabularyFileName}";
             if (programParams.DataFileName == null)
                 s += $", Distribution: {programParams.DistributionType}";
-             s += "\r\n";
+            s += "\r\n";
             LogManager.GetCurrentClassLogger().Info(s);
 
             var stopWatch = StartWatch();
@@ -281,7 +279,7 @@ namespace LinearIndexedGrammar
         }
 
         private static Learner PrepareLearningUpToSentenceLengthN(string[][] data, Vocabulary dataVocabulary,
-            int minWords, int maxWords, out IObjectiveFunction objectiveFunction)
+            int minWords, int maxWords, out GrammarFitnessObjectiveFunction objectiveFunction)
         {
             //1. get sentences up to length n and the relevant POS categories in them.
             var sentences =
@@ -319,7 +317,7 @@ namespace LinearIndexedGrammar
             var minWordsInSentences = data.Min(x => x.Length);
 
             LogManager.GetCurrentClassLogger().Info($"Data samples:");
-            for (int i = minWordsInSentences; i < maxSentenceLength+1; i++)
+            for (int i = minWordsInSentences; i < maxSentenceLength + 1; i++)
             {
                 int count = data.Where(x => x.Length == i).Count();
                 if (count > 0)
@@ -376,7 +374,7 @@ namespace LinearIndexedGrammar
             using (var file = File.OpenText(fileName))
             {
                 var serializer = new JsonSerializer();
-                programParamsList = (ProgramParamsList) serializer.Deserialize(file, typeof(ProgramParamsList));
+                programParamsList = (ProgramParamsList)serializer.Deserialize(file, typeof(ProgramParamsList));
             }
 
             return programParamsList;
