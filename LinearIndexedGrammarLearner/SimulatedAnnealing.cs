@@ -206,7 +206,7 @@ namespace LinearIndexedGrammarLearner
                 return (currentGrammar, currentValue);
 
             var bestGrammars = new PriorityQueue<double, ContextSensitiveGrammar>();
-            var numberOfBestGrammarsToKeep = 10;
+            var numberOfBestGrammarsToKeep = 20;
             for (var i = 0; i < numberOfBestGrammarsToKeep; i++)
                 bestGrammars.Enqueue(currentValue, new ContextSensitiveGrammar(currentGrammar));
 

@@ -1,0 +1,342 @@
+2019-12-10 16:05:51.7104|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
+Stack Constant Rules:
+235. X1* -> X4 X2*
+326. X2* -> V0
+357. X2* -> V1 X4*
+373. X2* -> V2 X3*
+388. X2* -> V3 X1*
+698. X3* -> P X4*
+823. X4* -> D N
+940. X4* -> PN
+836. X4* -> D X5*
+1262. X5* -> A X5*
+1249. X5* -> A N
+1055. X4* -> X4 X3*
+475. X2* -> X2 X3*
+1. START* -> X1*
+Stack Changing Rules:
+
+. Verifying probability of target grammar given the data: 0.9291179370442371 
+
+2019-12-10 16:05:51.7711|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
+Session 12/10/2019 4:05 PM
+runs: 1, grammar file name: YesNPYesV3WithADJAmbiguous.txt, vocabulary file name: Vocabulary.json, Distribution: Uniform
+
+2019-12-10 16:05:51.7711|INFO|LinearIndexedGrammar.Program|Run 1:
+2019-12-10 16:05:51.7904|INFO|LinearIndexedGrammar.Program|Data samples:
+2019-12-10 16:05:51.7904|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
+2019-12-10 16:05:51.8032|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
+2019-12-10 16:05:51.8032|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
+2019-12-10 16:05:51.8165|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
+2019-12-10 16:05:51.8165|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
+2019-12-10 16:05:51.8346|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
+2019-12-10 16:05:51.8346|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
+2019-12-10 16:05:51.8536|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
+2019-12-10 16:05:51.8667|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
+2019-12-10 16:05:51.8667|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
+2019-12-10 16:05:51.8829|INFO|LinearIndexedGrammar.Program|learning word length  6
+2019-12-10 16:05:52.6127|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, probability 0.003295568087520462
+2019-12-10 16:07:18.4132|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, probability 0.2910505836575875
+2019-12-10 16:08:50.6420|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, probability 0.445136186770428
+2019-12-10 16:10:28.9695|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, probability 0.5599221789883269
+2019-12-10 16:12:16.4304|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, probability 0.46459143968871597
+2019-12-10 16:13:50.2815|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, probability 0.31089494163424125
+2019-12-10 16:15:13.6950|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, probability 0.3770428015564202
+2019-12-10 16:16:21.5844|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 8, probability 0.30739299610894943
+2019-12-10 16:18:00.5985|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 9, probability 0.611284046692607
+2019-12-10 16:20:25.1122|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 10, probability 0.8058365758754864
+2019-12-10 16:23:51.5657|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 11, probability 0.8058365758754864
+2019-12-10 16:25:45.9828|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 12, probability 0.6272373540856031
+2019-12-10 16:27:43.2561|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 13, probability 0.6272373540856031
+2019-12-10 16:29:41.6968|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 14, probability 0.677431906614786
+2019-12-10 16:31:28.8187|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 15, probability 0.6272373540856031
+2019-12-10 16:33:53.9964|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 16, probability 0.8058365758754864
+2019-12-10 16:36:33.8801|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 17, probability 0.8058365758754864
+2019-12-10 16:38:36.7452|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 18, probability 0.677431906614786
+2019-12-10 16:40:24.4736|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 19, probability 0.611284046692607
+2019-12-10 16:42:26.4298|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 20, probability 0.8058365758754864
+2019-12-10 16:44:10.1293|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 21, probability 0.677431906614786
+2019-12-10 16:45:40.5631|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 22, probability 0.4330739299610895
+2019-12-10 16:47:14.4315|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 23, probability 0.5529182879377432
+2019-12-10 16:48:50.6922|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 24, probability 0.677431906614786
+2019-12-10 16:50:32.2597|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 25, probability 0.4330739299610895
+2019-12-10 16:52:28.5080|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 26, probability 0.8058365758754864
+2019-12-10 16:54:38.5757|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 27, probability 0.677431906614786
+2019-12-10 16:56:37.6559|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 28, probability 0.8058365758754864
+2019-12-10 16:58:46.3970|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 29, probability 0.677431906614786
+2019-12-10 17:00:57.5074|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 30, probability 0.8058365758754864
+2019-12-10 17:02:51.7780|INFO|LinearIndexedGrammar.Program|learning word length  7
+2019-12-10 17:02:52.5042|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, probability 0.8534603530400673
+2019-12-10 17:06:53.9474|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, probability 0.7696833847015971
+2019-12-10 17:10:45.6487|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, probability 0.7696833847015971
+2019-12-10 17:14:19.7080|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, probability 0.7696833847015971
+2019-12-10 17:18:01.7422|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, probability 0.6461193611655927
+2019-12-10 17:21:22.5896|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, probability 0.7091622303166153
+2019-12-10 17:25:03.5419|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, probability 0.7696833847015971
+2019-12-10 17:28:45.2894|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 8, probability 0.7696833847015971
+2019-12-10 17:32:11.5478|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 9, probability 0.7696833847015971
+2019-12-10 17:35:21.9984|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 10, probability 0.5501964068259569
+2019-12-10 17:39:09.1877|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 11, probability 0.6461193611655927
+2019-12-10 17:42:31.6212|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 12, probability 0.7696833847015971
+2019-12-10 17:45:43.0079|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 13, probability 0.7696833847015971
+2019-12-10 17:48:49.8173|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 14, probability 0.7696833847015971
+2019-12-10 17:51:21.9617|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 15, probability 0.38386102549733814
+2019-12-10 17:54:20.7661|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 16, probability 0.5004202857943402
+2019-12-10 17:58:01.4117|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 17, probability 0.5004202857943402
+2019-12-10 18:01:17.9040|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 18, probability 0.38386102549733814
+2019-12-10 18:03:55.6009|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 19, probability 0.7696833847015971
+2019-12-10 18:08:49.5489|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 20, probability 0.7696833847015971
+2019-12-10 18:12:12.7112|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 21, probability 0.8534603530400673
+2019-12-10 18:16:02.0442|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 22, probability 0.6581675539366769
+2019-12-10 18:19:32.0750|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 23, probability 0.6461193611655927
+2019-12-10 18:23:40.7528|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 24, probability 0.7696833847015971
+2019-12-10 18:27:59.1327|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 25, probability 0.7696833847015971
+2019-12-10 18:31:15.2912|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 26, probability 0.7696833847015971
+2019-12-10 18:34:17.7788|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 27, probability 0.6461193611655927
+2019-12-10 18:37:31.7767|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 28, probability 0.6461193611655927
+2019-12-10 18:40:56.0721|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 29, probability 0.6461193611655927
+2019-12-10 18:44:59.1241|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 30, probability 0.7696833847015971
+2019-12-10 18:48:54.8630|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 31, probability 0.7696833847015971
+2019-12-10 18:52:29.6542|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 32, probability 0.6461193611655927
+2019-12-10 18:56:12.1197|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 33, probability 0.48583375876882834
+2019-12-10 19:01:17.0739|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 34, probability 0.49119122614890026
+2019-12-10 19:04:44.4814|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 35, probability 0.5071448585037825
+2019-12-10 19:08:00.8323|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 36, probability 0.5071448585037825
+2019-12-10 19:10:58.7688|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 37, probability 0.7696833847015971
+2019-12-10 19:14:05.2231|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 38, probability 0.6461193611655927
+2019-12-10 19:17:08.1190|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 39, probability 0.7696833847015971
+2019-12-10 19:21:10.7520|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 40, probability 0.7696833847015971
+2019-12-10 19:24:46.0840|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 41, probability 0.8534603530400673
+2019-12-10 19:28:42.4216|INFO|LinearIndexedGrammar.Program|learning word length  8
+2019-12-10 19:28:43.3200|INFO|LinearIndexedGrammar.Program|learning word length  9
+2019-12-10 19:28:44.4878|INFO|LinearIndexedGrammar.Program|learning word length  10
+2019-12-10 19:28:45.6859|INFO|LinearIndexedGrammar.Program|learning word length  11
+2019-12-10 19:28:47.0447|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+1206. START* -> X6*
+1377. X6* -> X2 X1*
+243. X2* -> PN
+77. X1* -> V1 X2*
+832. X4* -> P X2*
+129. X1* -> V3 X6*
+18. X1* -> V0
+455. X2* -> X5 N
+416. X2* -> X2 X4*
+998. X5* -> D
+1180. X5* -> X5 A
+159. X1* -> X1 X4*
+143. X1* -> V2 X4*
+Stack Changing Rules:
+ 
+ with probability 0.9291179370442371
+2019-12-10 19:28:47.0781|INFO|LinearIndexedGrammar.Program|Average probability is: 0.9291179370442371
+Achieved Probability=1 in 0 times out of 1 runs
+2019-12-10 19:28:47.1011|INFO|LinearIndexedGrammar.Program|Overall session RunTime 03:22:55.32
+2019-12-10 19:28:48.3449|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
+Stack Constant Rules:
+235. X1* -> X4 X2*
+326. X2* -> V0
+357. X2* -> V1 X4*
+373. X2* -> V2 X3*
+388. X2* -> V3 X1*
+698. X3* -> P X4*
+823. X4* -> D N
+940. X4* -> PN
+1. START* -> X1*
+Stack Changing Rules:
+
+. Verifying probability of target grammar given the data: 0.846416439485493 
+
+2019-12-10 19:28:48.3554|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
+Session 12/10/2019 7:28 PM
+runs: 1, grammar file name: YesNPYesV3.txt, vocabulary file name: Vocabulary.json, Distribution: PowerLaw
+
+2019-12-10 19:28:48.3888|INFO|LinearIndexedGrammar.Program|Run 1:
+2019-12-10 19:28:48.4090|INFO|LinearIndexedGrammar.Program|Data samples:
+2019-12-10 19:28:48.4190|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
+2019-12-10 19:28:48.4402|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
+2019-12-10 19:28:48.4639|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
+2019-12-10 19:28:48.4776|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
+2019-12-10 19:28:48.5074|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
+2019-12-10 19:28:48.5314|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
+2019-12-10 19:28:48.5476|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
+2019-12-10 19:28:48.5824|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
+2019-12-10 19:28:48.5824|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
+2019-12-10 19:28:48.6333|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
+2019-12-10 19:28:48.6467|INFO|LinearIndexedGrammar.Program|learning word length  6
+2019-12-10 19:28:49.2810|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, probability 0.004135894775390558
+2019-12-10 19:31:55.4536|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, probability 0.3634417816582788
+2019-12-10 19:33:22.3830|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, probability 0.3511609907120743
+2019-12-10 19:35:58.3295|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, probability 0.42114385867810533
+2019-12-10 19:36:04.8867|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, probability 0.42114385867810533
+2019-12-10 19:36:13.0520|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, probability 0.42114385867810533
+2019-12-10 19:36:20.1535|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, probability 0.42114385867810533
+2019-12-10 19:36:26.6548|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 8, probability 0.42114385867810533
+2019-12-10 19:36:34.5574|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 9, probability 0.42114385867810533
+2019-12-10 19:36:41.8208|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 10, probability 0.42114385867810533
+2019-12-10 19:36:50.1783|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 11, probability 0.42114385867810533
+2019-12-10 19:36:56.8495|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 12, probability 0.42114385867810533
+2019-12-10 19:37:03.6273|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 13, probability 0.42114385867810533
+2019-12-10 19:37:10.3687|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 14, probability 0.42114385867810533
+2019-12-10 19:37:16.8371|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 15, probability 0.42114385867810533
+2019-12-10 19:37:23.3100|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 16, probability 0.42114385867810533
+2019-12-10 19:37:29.5422|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 17, probability 0.42114385867810533
+2019-12-10 19:37:35.9183|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 18, probability 0.42114385867810533
+2019-12-10 19:37:42.0330|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 19, probability 0.42114385867810533
+2019-12-10 19:37:49.1431|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 20, probability 0.42114385867810533
+2019-12-10 19:37:55.4422|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 21, probability 0.42114385867810533
+2019-12-10 19:38:02.0283|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 22, probability 0.42114385867810533
+2019-12-10 19:38:08.0418|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 23, probability 0.42114385867810533
+2019-12-10 19:38:13.9330|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 24, probability 0.42114385867810533
+2019-12-10 19:38:20.3761|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 25, probability 0.42114385867810533
+2019-12-10 19:38:27.7626|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 26, probability 0.42114385867810533
+2019-12-10 19:38:34.7151|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 27, probability 0.42114385867810533
+2019-12-10 19:38:41.5656|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 28, probability 0.42114385867810533
+2019-12-10 19:38:47.9925|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 29, probability 0.42114385867810533
+2019-12-10 19:38:54.8225|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 30, probability 0.42114385867810533
+2019-12-10 19:39:01.6727|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 31, probability 0.42114385867810533
+2019-12-10 19:39:08.0637|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 32, probability 0.42114385867810533
+2019-12-10 19:39:15.1823|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 33, probability 0.42114385867810533
+2019-12-10 19:39:21.8843|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 34, probability 0.42114385867810533
+2019-12-10 19:39:28.7575|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 35, probability 0.42114385867810533
+2019-12-10 19:39:34.7926|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 36, probability 0.42114385867810533
+2019-12-10 19:39:41.6149|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 37, probability 0.42114385867810533
+2019-12-10 19:39:48.5536|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 38, probability 0.42114385867810533
+2019-12-10 19:39:55.5359|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 39, probability 0.42114385867810533
+2019-12-10 19:40:02.3961|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 40, probability 0.42114385867810533
+2019-12-10 19:40:09.1799|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 41, probability 0.42114385867810533
+2019-12-10 19:40:16.0705|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 42, probability 0.42114385867810533
+2019-12-10 19:40:22.5136|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 43, probability 0.42114385867810533
+2019-12-10 19:40:30.0637|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 44, probability 0.42114385867810533
+2019-12-10 19:40:37.0862|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 45, probability 0.42114385867810533
+2019-12-10 19:40:43.7492|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 46, probability 0.42114385867810533
+2019-12-10 19:40:49.9225|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 47, probability 0.42114385867810533
+2019-12-10 19:40:56.9237|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 48, probability 0.42114385867810533
+2019-12-10 19:41:03.7954|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 49, probability 0.42114385867810533
+2019-12-10 19:41:10.8102|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 50, probability 0.42114385867810533
+2019-12-10 19:41:17.5592|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 51, probability 0.42114385867810533
+2019-12-10 19:41:23.9821|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 52, probability 0.42114385867810533
+2019-12-10 19:41:30.6188|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 53, probability 0.42114385867810533
+2019-12-10 19:41:37.0516|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 54, probability 0.42114385867810533
+2019-12-10 19:41:43.3718|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 55, probability 0.42114385867810533
+2019-12-10 19:41:50.0045|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 56, probability 0.42114385867810533
+2019-12-10 19:41:56.8542|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 57, probability 0.42114385867810533
+2019-12-10 19:42:03.5224|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 58, probability 0.42114385867810533
+2019-12-10 19:42:09.9755|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 59, probability 0.42114385867810533
+2019-12-10 19:42:16.4339|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 60, probability 0.42114385867810533
+2019-12-10 19:42:22.7709|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 61, probability 0.42114385867810533
+2019-12-10 19:42:29.0070|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 62, probability 0.42114385867810533
+2019-12-10 19:42:35.5402|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 63, probability 0.42114385867810533
+2019-12-10 19:42:42.1439|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 64, probability 0.42114385867810533
+2019-12-10 19:42:48.6063|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 65, probability 0.42114385867810533
+2019-12-10 19:42:55.5347|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 66, probability 0.42114385867810533
+2019-12-10 19:43:02.2142|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 67, probability 0.42114385867810533
+2019-12-10 19:43:08.6674|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 68, probability 0.42114385867810533
+2019-12-10 19:43:15.5745|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 69, probability 0.42114385867810533
+2019-12-10 19:43:22.7045|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 70, probability 0.42114385867810533
+2019-12-10 19:43:29.8638|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 71, probability 0.42114385867810533
+2019-12-10 19:43:36.6608|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 72, probability 0.42114385867810533
+2019-12-10 19:43:43.4213|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 73, probability 0.42114385867810533
+2019-12-10 19:43:49.5137|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 74, probability 0.42114385867810533
+2019-12-10 19:43:55.7508|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 75, probability 0.42114385867810533
+2019-12-10 19:44:02.4855|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 76, probability 0.42114385867810533
+2019-12-10 19:44:09.1108|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 77, probability 0.42114385867810533
+2019-12-10 19:44:15.9093|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 78, probability 0.42114385867810533
+2019-12-10 19:44:23.1092|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 79, probability 0.42114385867810533
+2019-12-10 19:44:29.6888|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 80, probability 0.42114385867810533
+2019-12-10 19:44:35.8128|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 81, probability 0.42114385867810533
+2019-12-10 19:44:42.8000|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 82, probability 0.42114385867810533
+2019-12-10 19:44:49.5746|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 83, probability 0.42114385867810533
+2019-12-10 19:44:56.3980|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 84, probability 0.42114385867810533
+2019-12-10 19:45:03.1971|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 85, probability 0.42114385867810533
+2019-12-10 19:45:09.8707|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 86, probability 0.42114385867810533
+2019-12-10 19:45:16.9261|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 87, probability 0.42114385867810533
+2019-12-10 19:45:23.9090|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 88, probability 0.42114385867810533
+2019-12-10 19:45:30.8581|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 89, probability 0.42114385867810533
+2019-12-10 19:45:37.8936|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 90, probability 0.42114385867810533
+2019-12-10 19:45:44.9731|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 91, probability 0.42114385867810533
+2019-12-10 19:45:51.7580|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 92, probability 0.42114385867810533
+2019-12-10 19:45:58.7170|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 93, probability 0.42114385867810533
+2019-12-10 19:46:05.5473|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 94, probability 0.42114385867810533
+2019-12-10 19:46:11.9430|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 95, probability 0.42114385867810533
+2019-12-10 19:46:18.5041|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 96, probability 0.42114385867810533
+2019-12-10 19:46:25.2757|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 97, probability 0.42114385867810533
+2019-12-10 19:46:31.9504|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 98, probability 0.42114385867810533
+2019-12-10 19:46:38.2787|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 99, probability 0.42114385867810533
+2019-12-10 19:46:44.7263|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 100, probability 0.42114385867810533
+2019-12-10 19:46:51.3815|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 101, probability 0.42114385867810533
+2019-12-10 19:46:57.7744|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 102, probability 0.42114385867810533
+2019-12-10 19:47:05.1463|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 103, probability 0.42114385867810533
+2019-12-10 19:47:11.6814|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 104, probability 0.42114385867810533
+2019-12-10 19:47:18.5213|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 105, probability 0.42114385867810533
+2019-12-10 19:47:25.2723|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 106, probability 0.42114385867810533
+2019-12-10 19:47:31.3686|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 107, probability 0.42114385867810533
+2019-12-10 19:47:38.2519|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 108, probability 0.42114385867810533
+2019-12-10 19:47:45.1195|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 109, probability 0.42114385867810533
+2019-12-10 19:47:51.7077|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 110, probability 0.42114385867810533
+2019-12-10 19:47:58.1028|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 111, probability 0.42114385867810533
+2019-12-10 19:48:04.5823|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 112, probability 0.42114385867810533
+2019-12-10 19:48:11.2387|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 113, probability 0.42114385867810533
+2019-12-10 19:48:18.1498|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 114, probability 0.42114385867810533
+2019-12-10 19:48:25.4028|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 115, probability 0.42114385867810533
+2019-12-10 19:48:32.1299|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 116, probability 0.42114385867810533
+2019-12-10 19:48:38.4340|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 117, probability 0.42114385867810533
+2019-12-10 19:48:44.8286|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 118, probability 0.42114385867810533
+2019-12-10 19:48:51.3755|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 119, probability 0.42114385867810533
+2019-12-10 19:48:57.9306|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 120, probability 0.42114385867810533
+2019-12-10 19:49:04.6317|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 121, probability 0.42114385867810533
+2019-12-10 19:49:10.9109|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 122, probability 0.42114385867810533
+2019-12-10 19:49:17.4447|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 123, probability 0.42114385867810533
+2019-12-10 19:49:23.6573|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 124, probability 0.42114385867810533
+2019-12-10 19:49:30.6342|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 125, probability 0.42114385867810533
+2019-12-10 19:49:37.0291|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 126, probability 0.42114385867810533
+2019-12-10 19:49:43.3740|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 127, probability 0.42114385867810533
+2019-12-10 19:49:50.1535|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 128, probability 0.42114385867810533
+2019-12-10 19:49:56.4109|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 129, probability 0.42114385867810533
+2019-12-10 19:50:02.8559|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 130, probability 0.42114385867810533
+2019-12-10 19:50:09.4393|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 131, probability 0.42114385867810533
+2019-12-10 19:50:16.3392|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 132, probability 0.42114385867810533
+2019-12-10 19:50:23.5587|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 133, probability 0.42114385867810533
+2019-12-10 19:50:30.4172|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 134, probability 0.42114385867810533
+2019-12-10 19:50:36.9755|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 135, probability 0.42114385867810533
+2019-12-10 19:50:43.7778|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 136, probability 0.42114385867810533
+2019-12-10 19:50:50.4849|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 137, probability 0.42114385867810533
+2019-12-10 19:50:57.3958|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 138, probability 0.42114385867810533
+2019-12-10 19:51:04.1997|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 139, probability 0.42114385867810533
+2019-12-10 19:51:10.9192|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 140, probability 0.42114385867810533
+2019-12-10 19:51:17.8620|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 141, probability 0.42114385867810533
+2019-12-10 19:51:24.7329|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 142, probability 0.42114385867810533
+2019-12-10 19:51:31.4751|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 143, probability 0.42114385867810533
+2019-12-10 19:51:38.2103|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 144, probability 0.42114385867810533
+2019-12-10 19:51:45.1522|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 145, probability 0.42114385867810533
+2019-12-10 19:51:51.9244|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 146, probability 0.42114385867810533
+2019-12-10 19:51:58.6987|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 147, probability 0.42114385867810533
+2019-12-10 19:52:05.3282|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 148, probability 0.42114385867810533
+2019-12-10 19:52:12.1054|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 149, probability 0.42114385867810533
+2019-12-10 19:54:28.3220|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 150, probability 0.180392068818764
+2019-12-10 19:56:32.6295|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 151, probability 0.6565296803652968
+2019-12-10 19:57:52.6831|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 152, probability 0.6565296803652968
+2019-12-10 19:59:17.0935|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 153, probability 0.6565296803652968
+2019-12-10 20:00:19.0444|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 154, probability 0.6926027397260275
+2019-12-10 20:00:30.1616|INFO|LinearIndexedGrammar.Program|learning word length  7
+2019-12-10 20:00:30.5388|INFO|LinearIndexedGrammar.Program|learning word length  8
+2019-12-10 20:00:31.0910|INFO|LinearIndexedGrammar.Program|learning word length  9
+2019-12-10 20:00:31.8789|INFO|LinearIndexedGrammar.Program|learning word length  10
+2019-12-10 20:00:32.8138|INFO|LinearIndexedGrammar.Program|learning word length  11
+2019-12-10 20:00:33.9020|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+1. START* -> X1*
+474. X3* -> D N
+154. X1* -> X3 V0
+424. X3* -> PN
+164. X1* -> X3 X4*
+749. X4* -> V3 X1*
+676. X4* -> V1 X3*
+781. X4* -> X2 X3*
+295. X2* -> V2 P
+Stack Changing Rules:
+ 
+ with probability 0.846416439485493
+2019-12-10 20:00:33.9387|INFO|LinearIndexedGrammar.Program|Average probability is: 0.846416439485493
+Achieved Probability=1 in 0 times out of 1 runs
+2019-12-10 20:00:33.9474|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:31:45.55

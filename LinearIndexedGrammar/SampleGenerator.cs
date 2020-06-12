@@ -83,7 +83,8 @@ namespace LinearIndexedGrammar
 
             return bounds;
         }
-
+        
+       
         static private double F(float x, float mean, float var)
         {
             return (Math.Exp(-(x - mean) * (x - mean) / (float)(2 * var)));
@@ -143,7 +144,7 @@ namespace LinearIndexedGrammar
                     else if (distType == DistributionType.PowerLaw)
                     {
                         //
-                        double percentOfObservedStatesForPowerLaw = 0.8;
+                        double percentOfObservedStatesForPowerLaw = 1.0;
                         int minimumNumberOfTreesToHear = 5;
                         distribution = PreparePowerLawDistribution(allGrammarStates[i].Count, (int)(allGrammarStates[i].Count * percentOfObservedStatesForPowerLaw), minimumNumberOfTreesToHear);
                     }
