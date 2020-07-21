@@ -10,6 +10,8 @@ namespace LinearIndexedGrammarLearner
     {
         public const double Tolerance = 0.000001;
         public int PenaltyCoefficient { get; set; }
+        public double NoiseTolerance { get; set; }
+
         private static readonly double[] exponential =
         {
             Math.Pow(2, 0),
@@ -73,9 +75,10 @@ namespace LinearIndexedGrammarLearner
         private static double maxVal;
         private readonly Learner _learner;
 
-        public GrammarFitnessObjectiveFunction(Learner l)
+        public GrammarFitnessObjectiveFunction(Learner l, double noiseTolerance)
         {
             PenaltyCoefficient = 1;
+            NoiseTolerance = noiseTolerance;
             _learner = l;
         }
 
@@ -211,7 +214,7 @@ namespace LinearIndexedGrammarLearner
                 if (prob < 0) prob = 0;
             }
 
-            return (prob, numberOfSentenceUnParsed == 0);
+            return (prob, numberOfSentenceUnParsed <= allParses.Length * NoiseTolerance);
         }
     }
 }

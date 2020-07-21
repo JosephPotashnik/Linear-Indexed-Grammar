@@ -172,6 +172,8 @@ namespace LinearIndexedGrammar
             //trying to learn data from incomplete source leads to p < 1
             //so set the maximum value to the target probability, which is the maximal support
             //given to the grammar from the data..
+
+
             objectiveFunction.SetMaximalValue(targetProb);
 
             var s =
@@ -290,7 +292,8 @@ namespace LinearIndexedGrammar
 
             //3. prepare the learner
             var learner = new Learner(sentences, minWords, maxWords, dataVocabulary);
-            objectiveFunction = new GrammarFitnessObjectiveFunction(learner);
+            double noiseTolerance = 0.0;
+            objectiveFunction = new GrammarFitnessObjectiveFunction(learner, noiseTolerance);
             return learner;
         }
 

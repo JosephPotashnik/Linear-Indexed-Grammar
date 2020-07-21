@@ -1,6 +1,7 @@
 ﻿using LinearIndexedGrammarParser;
 using Newtonsoft.Json;
 using NLog;
+using System;
 using System.Linq;
 
 namespace LinearIndexedGrammarLearner
@@ -27,12 +28,13 @@ namespace LinearIndexedGrammarLearner
             _objectiveFunction = objectiveFunction;
         }
 
-        private (ContextSensitiveGrammar bestGrammar, double bestValue) DownhillSlideWithGibbs(
+        private (ContextSensitiveGrammar bestGrammar, double bestValue, bool bestFeasible) DownhillSlideWithGibbs(
             ContextSensitiveGrammar initialGrammar, double initialValue)
         {
             var bestValue = initialValue;
             var bestGrammar = initialGrammar;
             var foundImprovement = true;
+            bool bestFeasible = false;
 
             while (foundImprovement)
             {
@@ -61,7 +63,7 @@ namespace LinearIndexedGrammarLearner
                         // change RHS of existing coordinate:
                         _learner.SetOriginalGrammarBeforePermutation();
 
-                        ChangeRHSCoordinates(newGrammar, coord, newCoord);
+                        ChangeLHSCoordinates(newGrammar, coord, newCoord);
 
                         (var newValue, var feasible) = _objectiveFunction.Compute(newGrammar);
 
@@ -70,6 +72,7 @@ namespace LinearIndexedGrammarLearner
                             bestCoord = newCoord;
                             bestGrammar = newGrammar;
                             bestValue = newValue;
+                            bestFeasible = feasible;
                             foundImprovement = true;
                         }
 
@@ -83,9 +86,11 @@ namespace LinearIndexedGrammarLearner
 
                     if (bestCoord != null)
                     {
+                        _learner.SetOriginalGrammarBeforePermutation();
+
                         //switch now to best grammar by accepting the changes of the best coordinate.
                         var newGrammar = new ContextSensitiveGrammar(originalGrammar);
-                        ChangeRHSCoordinates(newGrammar, coord, bestCoord);
+                        ChangeLHSCoordinates(newGrammar, coord, bestCoord);
                         _learner.AcceptChanges();
                         bestGrammar = newGrammar;
 
@@ -96,10 +101,10 @@ namespace LinearIndexedGrammarLearner
                 }
             }
 
-            return (bestGrammar, bestValue);
+            return (bestGrammar, bestValue, bestFeasible);
         }
 
-        private void ChangeRHSCoordinates(ContextSensitiveGrammar newGrammar, RuleCoordinates coord,
+        private void ChangeLHSCoordinates(ContextSensitiveGrammar newGrammar, RuleCoordinates coord,
             RuleCoordinates newCoord)
         {
             newGrammar.StackConstantRules.Remove(coord);
@@ -117,12 +122,17 @@ namespace LinearIndexedGrammarLearner
             var currentTemp = _params.InitialTemperature;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
+            var finalTemp = 0.3;
             var rejectCounter = 0;
             bool feasible = false;
             double newValue = 0.0;
+            double percentageOfConsecutiveRejectionsToGiveUp = 0.1;
+
+            var totalIterations = (int)((Math.Log(finalTemp) - Math.Log(_params.InitialTemperature)) / Math.Log(_params.CoolingFactor));
+            var numberOfConsecutiveRejectionsToGiveUp = (int)(percentageOfConsecutiveRejectionsToGiveUp * totalIterations);
             //bool reparsed = false;
             //int counter = 0;
-            while (currentTemp > 0.3)
+            while (currentTemp > finalTemp)
             {
                 var (mutatedGrammar, reparsed) = _learner.GetNeighborAndReparse(currentGrammar);
                 if (mutatedGrammar == null || !reparsed) continue;
@@ -153,23 +163,21 @@ namespace LinearIndexedGrammarLearner
                 //var currentCFHypothesis = new ContextFreeGrammar(currentGrammar);
                 //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
 
-                //cooling factor 0.999 from temp 10 to temp 0.3 takes 3500 iterations
-                //350 rejections consecutively (10% of total)- give up, reheat system.
-
-                if (rejectCounter > 350) break;
+                //after a certain number of consecutive rejections, give up, reheat system.
+                if (rejectCounter > numberOfConsecutiveRejectionsToGiveUp) break;
             }
 
             _learner.RefreshParses();
             PruneUnusedRules(currentGrammar);
 
-            var localSearchAfterAnnealing = false;
+            var localSearchAfterAnnealing = true;
             if (localSearchAfterAnnealing)
             {
 
-                // do a local search - downhill strictly
+                // do a local search - strictly downhill 
                 if (!_objectiveFunction.IsMaximalValue(currentValue))
                 {
-                    (currentGrammar, currentValue) = DownhillSlideWithGibbs(currentGrammar, currentValue);
+                    (currentGrammar, currentValue, feasible) = DownhillSlideWithGibbs(currentGrammar, currentValue);
 
                     _learner.RefreshParses();
                     PruneUnusedRules(currentGrammar);

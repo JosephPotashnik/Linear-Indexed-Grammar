@@ -4,51 +4,6 @@
       "IsCFG": true,
       "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,
-      "GrammarFileName": "YesNPYesV3.txt",
-      "DataFileName": null,
-      "DistributionType": "Uniform",
-      "CoolingFactor": 0.999
-    },
-    {
-      "IsCFG": true,
-      "VocabularyFileName": "Vocabulary.json",
-      "NumberOfRuns": 1,
-      "GrammarFileName": "YesNPYesV3WithADJ.txt",
-      "DataFileName": null,
-      "DistributionType": "Uniform",
-      "CoolingFactor": 0.999
-    },
-    {
-      "IsCFG": true,
-      "VocabularyFileName": "Vocabulary.json",
-      "NumberOfRuns": 1,
-      "GrammarFileName": "YesNPYesV3WithADJAmbiguous.txt",
-      "DataFileName": null,
-      "DistributionType": "Uniform",
-      "CoolingFactor": 0.999
-    },
-    {
-      "IsCFG": true,
-      "VocabularyFileName": "Vocabulary.json",
-      "NumberOfRuns": 1,
-      "GrammarFileName": "YesNPYesV3.txt",
-      "DataFileName": null,
-      "DistributionType": "PowerLaw",
-      "CoolingFactor": 0.999
-    },
-    {
-      "IsCFG": true,
-      "VocabularyFileName": "Vocabulary.json",
-      "NumberOfRuns": 1,
-      "GrammarFileName": "YesNPYesV3WithADJ.txt",
-      "DataFileName": null,
-      "DistributionType": "PowerLaw",
-      "CoolingFactor": 0.999
-    },
-    {
-      "IsCFG": true,
-      "VocabularyFileName": "Vocabulary.json",
-      "NumberOfRuns": 1,
       "GrammarFileName": "YesNPYesV3WithADJAmbiguous.txt",
       "DataFileName": null,
       "DistributionType": "PowerLaw",
