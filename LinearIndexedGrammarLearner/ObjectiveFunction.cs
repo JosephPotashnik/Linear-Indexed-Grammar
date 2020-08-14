@@ -111,7 +111,7 @@ namespace LinearIndexedGrammarLearner
 
         public bool IsMaximalValue(double val)
         {
-            if (val - maxVal > 0.001) return true;
+            if (val > maxVal) return true;
             return Math.Abs(val - maxVal) < Tolerance;
         }
 

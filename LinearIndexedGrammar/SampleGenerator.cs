@@ -222,8 +222,7 @@ namespace LinearIndexedGrammar
         {
             var pos = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
 
-            var cfGrammar = new ContextFreeGrammar(grammarRules);
-            var generator = new EarleyGenerator(cfGrammar, universalVocabulary);
+            var generator = new EarleyGenerator(new ContextFreeGrammar(grammarRules), universalVocabulary);
             var statesList = generator.GenerateSentence(null, maxWords);
 
             var allGrammarStates = new List<EarleyState>[maxWords + 1];

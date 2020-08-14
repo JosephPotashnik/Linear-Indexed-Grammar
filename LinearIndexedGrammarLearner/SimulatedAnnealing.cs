@@ -170,20 +170,24 @@ namespace LinearIndexedGrammarLearner
             _learner.RefreshParses();
             PruneUnusedRules(currentGrammar);
 
-            var localSearchAfterAnnealing = true;
-            if (localSearchAfterAnnealing)
-            {
+            //Downhill slide was found to slow convergence in practice.
+            //in the future: perhaps start using the slide only upon
+            //burn-in period or higher lagrangian multiplier.
+            //var localSearchAfterAnnealing = false;
+            //if (localSearchAfterAnnealing)
+            //{
 
-                // do a local search - strictly downhill 
-                if (!_objectiveFunction.IsMaximalValue(currentValue))
-                {
-                    (currentGrammar, currentValue, feasible) = DownhillSlideWithGibbs(currentGrammar, currentValue);
+            //    // do a local search - strictly downhill 
+            //    if (!_objectiveFunction.IsMaximalValue(currentValue))
+            //    {
+            //        (currentGrammar, currentValue, feasible) = DownhillSlideWithGibbs(currentGrammar, currentValue);
 
-                    _learner.RefreshParses();
-                    PruneUnusedRules(currentGrammar);
-                }
+            //        _learner.RefreshParses();
+            //        PruneUnusedRules(currentGrammar);
+            //    }
 
-            }
+            //}
+
             return (currentGrammar, currentValue, feasible);
         }
 

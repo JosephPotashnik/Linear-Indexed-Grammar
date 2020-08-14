@@ -190,6 +190,7 @@ namespace LinearIndexedGrammar
 
         private static void RunProgram(ProgramParams programParams)
         {
+            int maxWordsInSentence = 11;
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(programParams.VocabularyFileName);
             ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys
                 .Select(x => new SyntacticCategory(x)).ToHashSet();
@@ -200,7 +201,6 @@ namespace LinearIndexedGrammar
 
             if (programParams.DataFileName == null)
             {
-                var maxWordsInSentence = 11;
                 (data, dataVocabulary) =
                     SampleGenerator.PrepareDataFromTargetGrammar(grammarRules, universalVocabulary, maxWordsInSentence, programParams.DistributionType);
             }
@@ -208,13 +208,10 @@ namespace LinearIndexedGrammar
             {
                 //leave only sentences in range [minWordsInSentence,maxWordsInSentence]
                 var minWordsInSentence = 1;
-                var maxWordsInSentence = 10;
                 var sentences = FilterDataAccordingToTargetGrammar(grammarRules, programParams.DataFileName,
                     minWordsInSentence, maxWordsInSentence, universalVocabulary);
                 (data, dataVocabulary) = (sentences, universalVocabulary);
             }
-
-            //var grammarRulesTest = GrammarFileReader.ReadRulesFromFile("CorwinIdealGrammarLearned.txt");
 
             if (!ValidateTargetGrammar(grammarRules, data, universalVocabulary))
                 return;
@@ -239,6 +236,9 @@ namespace LinearIndexedGrammar
 
                 s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";
                 LogManager.GetCurrentClassLogger().Info(s);
+
+                Statistics(bestHypothesis, grammarRules, universalVocabulary, maxWordsInSentence);
+                
             }
 
             var numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < 0.00001);
@@ -247,6 +247,37 @@ namespace LinearIndexedGrammar
                 $"Achieved Probability=1 in {numTimesAchieveProb1} times out of {programParams.NumberOfRuns} runs";
             LogManager.GetCurrentClassLogger().Info(s);
             StopWatch(stopWatch);
+        }
+
+        private static void Statistics(ContextSensitiveGrammar bestHypothesis, List<Rule> grammarRules, Vocabulary universalVocabulary, int maxWords)
+        {
+            //get all sentences of target grammar:
+            var targetGrammar = new ContextFreeGrammar(grammarRules);
+            var targetSentences  = GetAllNonTerminalSentencesOfGrammar(targetGrammar, universalVocabulary, maxWords);
+
+            //get all sentences of best hypothesis
+            var learnedGrammar = new ContextFreeGrammar(bestHypothesis);
+            var learnedSentences = GetAllNonTerminalSentencesOfGrammar(learnedGrammar, universalVocabulary, maxWords);
+
+            var truePositives = targetSentences.Intersect(learnedSentences).Count();
+
+            var precision = truePositives / (double)(learnedSentences.Count());
+            var recall = truePositives / (double)(targetSentences.Count());
+            var f1_score = 2 * precision * recall / (precision + recall);
+            var s = $"Precision: {precision} Recall: {recall} F1-Score: {f1_score}";
+            LogManager.GetCurrentClassLogger().Info(s);
+        }
+
+        static private string[] GetAllNonTerminalSentencesOfGrammar(ContextFreeGrammar g, Vocabulary universalVocabulary, int maxWords)
+        {
+            var pos = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
+            var generator = new EarleyGenerator(g, universalVocabulary);
+            var statesList = generator.GenerateSentence(null, maxWords);
+            var nonterminalSentences = new string[statesList.Count];
+            for (int i = 0; i < statesList.Count; i++)
+                nonterminalSentences[i] = statesList[i].GetNonTerminalStringUnderNode(pos);
+
+            return nonterminalSentences;
         }
 
         public static (ContextSensitiveGrammar bestGrammar, double bestValue) LearnGrammarFromDataUpToLengthN(
