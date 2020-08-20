@@ -251,13 +251,18 @@ namespace LinearIndexedGrammar
 
         private static void Statistics(ContextSensitiveGrammar bestHypothesis, List<Rule> grammarRules, Vocabulary universalVocabulary, int maxWords)
         {
-            //get all sentences of target grammar:
+            //get all distinct sentences of target grammar:
             var targetGrammar = new ContextFreeGrammar(grammarRules);
-            var targetSentences  = GetAllNonTerminalSentencesOfGrammar(targetGrammar, universalVocabulary, maxWords);
+            var targetSentences  = GetAllNonTerminalSentencesOfGrammar(targetGrammar, universalVocabulary, maxWords).Distinct().ToArray();
 
-            //get all sentences of best hypothesis
+            //get all distinct sentences of best hypothesis
             var learnedGrammar = new ContextFreeGrammar(bestHypothesis);
-            var learnedSentences = GetAllNonTerminalSentencesOfGrammar(learnedGrammar, universalVocabulary, maxWords);
+            var learnedSentences = GetAllNonTerminalSentencesOfGrammar(learnedGrammar, universalVocabulary, maxWords).Distinct().ToArray();
+
+            //note : if we remove distinctness, then precision counts repetitions of sentences, thus ambiguous grammars
+            //may receive lower precision score. But since they generate the same set of sentences, it is not a-priori
+            //clear whether they should be punished for it (weakly equivalent).
+            //I choose here not to introduce bias for unambiguous grammars - the target grammar may itself be ambiguous.
 
             var truePositives = targetSentences.Intersect(learnedSentences).Count();
 

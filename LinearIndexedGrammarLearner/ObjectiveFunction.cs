@@ -8,7 +8,7 @@ namespace LinearIndexedGrammarLearner
 
     public class GrammarFitnessObjectiveFunction 
     {
-        public const double Tolerance = 0.000001;
+        public const double Tolerance = 0.0001;
         public int PenaltyCoefficient { get; set; }
         public double NoiseTolerance { get; set; }
 
@@ -111,7 +111,7 @@ namespace LinearIndexedGrammarLearner
 
         public bool IsMaximalValue(double val)
         {
-            if (val > maxVal) return true;
+            if (val >= maxVal) return true;
             return Math.Abs(val - maxVal) < Tolerance;
         }
 

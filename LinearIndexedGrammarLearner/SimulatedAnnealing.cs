@@ -201,7 +201,17 @@ namespace LinearIndexedGrammarLearner
             _learner.ParseAllSentencesFromScratch(currentGrammar);
         }
 
-        public (ContextSensitiveGrammar bestGrammar, double bestValue) Run(bool isCFGGrammar,
+        //(ContextSensitiveGrammar bestGrammar, double bestValue, bool feasible) Inject()
+        //{
+        //                var grammarRules = GrammarFileReader.ReadRulesFromFile("DebugGrammar.txt");
+        //var debugGrammar = new ContextSensitiveGrammar(grammarRules);
+        //_learner.ParseAllSentencesFromScratch(debugGrammar);
+        //                (var targetProb, var feasible) = _objectiveFunction.Compute(debugGrammar);
+        //                return (debugGrammar, targetProb, feasible);
+        // }
+
+
+    public (ContextSensitiveGrammar bestGrammar, double bestValue) Run(bool isCFGGrammar,
             ContextSensitiveGrammar initiaGrammar = null)
         {
             var currentIteration = 0;
@@ -228,6 +238,7 @@ namespace LinearIndexedGrammarLearner
             while (currentIteration++ < _params.NumberOfIterations)
             {
                 LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, probability {currentValue}");
+               
                 (currentGrammar, currentValue, feasible) = RunSingleIteration(currentGrammar, currentValue);
 
                 if (_objectiveFunction.IsMaximalValue(currentValue))
