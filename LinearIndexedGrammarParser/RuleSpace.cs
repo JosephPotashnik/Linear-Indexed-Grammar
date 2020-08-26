@@ -55,6 +55,8 @@ namespace LinearIndexedGrammarParser
             var numberOfPossibleRHS = length * length;
 
             //allocating the first column of CFG, push and pop rule tables.
+            //there are numberOfPossibleRHS - length + 1 unique combinations 
+            //(numberOfPossibleRHS includes counting twice POS1*POS1, POS2*POS2 etc)
             _ruleSpace[RuleType.CFGRules][0] = new Rule[numberOfPossibleRHS - length + 1];
             _ruleSpace[RuleType.Push1Rules][0] = new Rule[numberOfPossibleRHS - length + 1];
             _ruleSpace[RuleType.PopRules][0] = new Rule[1];

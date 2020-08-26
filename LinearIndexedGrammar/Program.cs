@@ -50,6 +50,34 @@ namespace LinearIndexedGrammar
                 RunProgram(programParams);
         }
 
+        private static void OldMain(string[] args)
+        {
+            var vocabularyFilename = "Vocabulary.json";
+            var grammarFileName = "CFG.txt";
+            var sentence = "David knows the man kissed the woman a girl";
+
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(vocabularyFilename);
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys
+                .Select(x => new SyntacticCategory(x)).ToHashSet();
+
+            var rules = GrammarFileReader.ReadRulesFromFile(grammarFileName);
+            var cfGrammar = new ContextFreeGrammar(rules);
+
+            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var b = parser.ParseSentence(sentence.Split());
+            var k = parser.SuggestRHSForCompletion();
+
+            var rule = new Rule("VP", k);
+            rules.Add(rule);
+            cfGrammar = new ContextFreeGrammar(rules);
+
+            parser = new EarleyParser(cfGrammar, universalVocabulary);
+            b = parser.ParseSentence(sentence.Split());
+            k = parser.SuggestRHSForCompletion();
+
+
+
+        }
         private static void Main(string[] args)
         {
             var maxNonTerminals = 6;
@@ -374,31 +402,6 @@ namespace LinearIndexedGrammar
 
                 (currentGrammar, currentValue) = LearnGrammarFromDataUpToLengthN(data, dataVocabulary,
                     currentWordLength, minWordsInSentences, progParams, initialGrammars[currentWordLength]);
-                //SEFI
-                //LogManager.GetCurrentClassLogger().Info($"End of learning word Length { currentWordLength}, \r\n Current Grammar {currentGrammar} \r\n CurrentValue { currentValue}");
-
-                /*
-                //what if you did not converge on a grammar that generates the data precisely?
-                if (currentValue < 1)
-                {
-                    //backtrack to initial word length and retry?
-                    if (successfulGrammars.Any())
-                    {
-                        LogManager.GetCurrentClassLogger().Info("retrying from previous successful grammar");
-                        currentGrammar = successfulGrammars.Dequeue();
-                        LogManager.GetCurrentClassLogger().Info($"the initial grammar is: {currentGrammar}");
-                        currentWordLength--;
-
-                    }
-                    else
-                    {
-                        LogManager.GetCurrentClassLogger().Info("retrying from scratch");
-                        currentWordLength = initialWordLength - 1;
-                    }
-                }
-                else
-                    successfulGrammars.Enqueue(currentGrammar);
-                */
                 currentWordLength++;
                 if (currentWordLength <= maxSentenceLength)
                     initialGrammars[currentWordLength] = currentGrammar;

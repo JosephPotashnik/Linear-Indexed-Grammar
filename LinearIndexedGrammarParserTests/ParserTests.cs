@@ -3,18 +3,19 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace LinearIndexedGrammarParserTests
 {
     public class ParserTests
     {
-        /*
-        public ParserTests(ITestOutputHelper output)
-        {
-            this.output = output;
-        }
+        
+        //public ParserTests(ITestOutputHelper output)
+        //{
+        //    this.output = output;
+        //}
 
-        private readonly ITestOutputHelper output;
+        //private readonly ITestOutputHelper output;
 
         [Fact]
         public void CFGLeftRecursionTest()
@@ -49,17 +50,20 @@ namespace LinearIndexedGrammarParserTests
         {
             var n = GrammarFileReader.ParseSentenceAccordingToGrammar("CFG.txt", "Vocabulary.json",
                 "David knows the man kissed the woman a girl");
+
+
             var settings = new JsonSerializerSettings
             {
-                Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore,
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                NullValueHandling = NullValueHandling.Ignore,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+
             };
-            var actual = JsonConvert.SerializeObject(n, settings);
+            var actual = JsonConvert.SerializeObject(n, Formatting.Indented, settings);
             var expected = File.ReadAllText(@"ExpectedCFG.json");
             Assert.Equal(expected, actual);
         }
 
-        
+        /*
         [Fact]
         public void LIGMovementFromDirectObjectTest()
         {

@@ -237,9 +237,8 @@ namespace LinearIndexedGrammarLearner
             int randomPastBestGrammar = 0;
             while (currentIteration++ < _params.NumberOfIterations)
             {
-                LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, probability {currentValue}");
-               
                 (currentGrammar, currentValue, feasible) = RunSingleIteration(currentGrammar, currentValue);
+                LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, probability {currentValue} (feasible: {feasible})");
 
                 if (_objectiveFunction.IsMaximalValue(currentValue))
                 {

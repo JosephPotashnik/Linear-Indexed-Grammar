@@ -655,6 +655,61 @@ namespace LinearIndexedGrammarParser
             _oldGrammar = null;
         }
 
+        //Suggest RHS for a rule that would complete currently unparsed sequence.
+        public string[] SuggestRHSForCompletion()
+        {
+            //1. find completion that is closest to the end of the table
+            int furthestCompletedColumn = -1;
+
+            //we go back from penultimate column.
+            for (int i = _table.Length - 2; i >= 0; i--)
+            {
+                if (_table[i].Reductors.Count > 0)
+                {
+                    foreach (var reductor in _table[i].Reductors)
+                    {
+                        var isPOS = !_grammar.StaticRules.ContainsKey(reductor.Key);
+                        if (isPOS) continue;
+
+                        foreach (var item in reductor.Value)
+                        {
+                            if (item.EndColumn.Index > furthestCompletedColumn)
+                                furthestCompletedColumn = item.EndColumn.Index;
+                        }
+                    }
+                }
+            }
+
+            if (furthestCompletedColumn < 0 || furthestCompletedColumn == _table.Length - 1) return null;
+
+            //2. randomly choose a reductor with the same end column
+            List<EarleyState> candidates = new List<EarleyState>();
+
+            for (int i = _table.Length - 2; i >= 0; i--)
+            {
+                if (_table[i].Reductors.Count > 0)
+                {
+                    foreach (var reductor in _table[i].Reductors)
+                    {
+                        var isPOS = !_grammar.StaticRules.ContainsKey(reductor.Key);
+                        if (isPOS) continue;
+
+                        foreach (var item in reductor.Value)
+                        {
+                            if (item.EndColumn.Index == furthestCompletedColumn &&
+                                item.Rule.LeftHandSide.ToString() != ContextFreeGrammar.StartSymbol)
+                                    candidates.Add(item);
+                        }
+                    }
+                }
+            }
+            var furthestUnparsedToken = _table[furthestCompletedColumn + 1].Token;
+            var possibleNonTerminals = GetPossibleSyntacticCategoriesForToken(furthestUnparsedToken);
+
+            var r = Pseudorandom.NextInt(candidates.Count);
+            return new[] { candidates[r].Rule.LeftHandSide.ToString(), possibleNonTerminals.First() };
+        }
+
         public class CategoryCompare : IComparer<DerivedCategory>
         {
             public int Compare(DerivedCategory x, DerivedCategory y)

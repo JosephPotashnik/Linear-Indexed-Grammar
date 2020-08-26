@@ -13,7 +13,7 @@ namespace LinearIndexedGrammarLearner
         public delegate (ContextSensitiveGrammar mutatedGrammar, bool reparsed)
             GrammarMutation(ContextSensitiveGrammar grammar, Learner learner);
 
-        public const int CFGOperationWeight = 20;
+        public const int CFGOperationWeight = 22;
         public const int LIGOperationWeight = 5;
 
         private static Tuple<GrammarMutation, int>[] _mutations;
@@ -29,11 +29,14 @@ namespace LinearIndexedGrammarLearner
                 l.Add(new GrammarMutationData("DeleteStackConstantRule", CFGOperationWeight));
                 l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
                 l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
+                l.Add(new GrammarMutationData("InsertPrefixExtendingStackConstantRule", CFGOperationWeight / 2));
             }
             else
             {
                 l.Add(new GrammarMutationData("InsertStackConstantRule", CFGOperationWeight));
                 l.Add(new GrammarMutationData("DeleteStackConstantRule", CFGOperationWeight));
+                l.Add(new GrammarMutationData("InsertPrefixExtendingStackConstantRule", CFGOperationWeight / 2));
+
                 //l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
                 //l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
                 l.Add(new GrammarMutationData("InsertMovement", LIGOperationWeight));
@@ -88,6 +91,40 @@ namespace LinearIndexedGrammarLearner
         {
             var rc = CreateRandomRule(RuleType.CFGRules);
             return InnerInsertStackConstantRule(grammar, learner, rc);
+        }
+
+        public (ContextSensitiveGrammar mutatedGrammar, bool reparsed) InsertPrefixExtendingStackConstantRule(
+            ContextSensitiveGrammar grammar, Learner learner)
+        {
+
+            for (int i = 0; i < learner._sentencesParser.Length; i++)
+            {
+                if (learner._sentencesParser[i].GetGammaBracketedRepresentation().Count == 0)
+                {
+                    var rhs = learner._sentencesParser[i].SuggestRHSForCompletion();
+                    if (rhs == null)
+                        return (null, false);
+                    var lhs = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex();
+
+                    //Console.WriteLine($"Suggestion based on extending prefix with lhs {lhs} and rhs {rhs[0]} {rhs[1]}");
+
+                    var rc = new RuleCoordinates
+                    {
+                        RuleType = RuleType.CFGRules,
+                        LHSIndex = lhs,
+                        RHSIndex = ContextSensitiveGrammar.RuleSpace.FindRHSIndex(rhs)
+                    };
+
+                    var res =  InnerInsertStackConstantRule(grammar, learner, rc);
+                    //if (res.mutatedGrammar == null)
+                    //    Console.WriteLine("rejected suggestion, rhs exists");
+                    //else
+                    //    Console.WriteLine("accepted suggestion");
+                    return res;
+                }
+            }
+
+            return (null, false);
         }
 
         private static (ContextSensitiveGrammar mutatedGrammar, bool reparsed) InnerInsertStackConstantRule(
