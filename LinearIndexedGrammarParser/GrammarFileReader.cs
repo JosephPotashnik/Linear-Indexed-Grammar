@@ -8,31 +8,7 @@ namespace LinearIndexedGrammarParser
 {
     public class GrammarFileReader
     {
-        /* old version
-        public static (string[][] sentences, HashSet<string> POSCategoriesInData) GetSentencesInWordLengthRange(
-          string[][] allData, Vocabulary dataVocabulary, int minWords, int maxWords)
-        {
-            var sentences = new List<string[]>();
-            var posCategories = new HashSet<string>();
-
-            foreach (var arr in allData)
-            {
-                if (arr.Length > maxWords || arr.Length < minWords) continue;
-
-                var sentence = new string[arr.Length];
-                for (var i = 0; i < sentence.Length; i++)
-                {
-                    var possiblePOS = dataVocabulary.WordWithPossiblePOS[arr[i]];
-                    foreach (var pos in possiblePOS)
-                        posCategories.Add(pos);
-                }
-
-                sentences.Add(arr);
-            }
-
-            return (sentences.ToArray(), posCategories);
-        }
-        */
+       
         public static string[][] GetSentencesInWordLengthRange(
             string[][] allData, int minWords, int maxWords)
         {
@@ -65,21 +41,22 @@ namespace LinearIndexedGrammarParser
             return (statesList, rules);
         }
 
-        //public static List<EarleyState> ParseSentenceAccordingToGrammar(string filename, string vocabularyFilename,
-        //    string sentence)
-        //{
-        //    var universalVocabulary = Vocabulary.ReadVocabularyFromFile(vocabularyFilename);
-        //    ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys
-        //        .Select(x => new SyntacticCategory(x)).ToHashSet();
+        public static List<EarleyState> ParseSentenceAccordingToGrammar(string filename, string vocabularyFilename,
+            string sentence)
+        {
+            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(vocabularyFilename);
+            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys
+                .Select(x => new SyntacticCategory(x)).ToHashSet();
 
-        //    var rules = ReadRulesFromFile(filename);
-        //    var cfGrammar = new ContextFreeGrammar(rules);
+            var rules = ReadRulesFromFile(filename);
+            var cfGrammar = new ContextFreeGrammar(rules);
 
-        //    var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var parser = new EarleyParser(cfGrammar, universalVocabulary);
 
-        //    var n = parser.ParseSentence(sentence.Split());
-        //    return n;
-        //}
+            var n = parser.ParseSentence(sentence.Split());
+
+            return parser.GetGammaStates();
+        }
 
 
         private static DerivedCategory CreateDerivedCategory(string s)
