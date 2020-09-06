@@ -218,6 +218,14 @@ namespace LinearIndexedGrammar
 
         private static void RunProgram(ProgramParams programParams)
         {
+            var s = "------------------------------------------------------------\r\n" +
+                    $"Session {DateTime.Now:MM/dd/yyyy h:mm tt}\r\n" +
+                    $"runs: {programParams.NumberOfRuns}, grammar file name: {programParams.GrammarFileName}, vocabulary file name: {programParams.VocabularyFileName}";
+            if (programParams.DataFileName == null)
+                s += $", Distribution: {programParams.DistributionType}";
+            LogManager.GetCurrentClassLogger().Info(s);
+
+
             int maxWordsInSentence = 11;
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(programParams.VocabularyFileName);
             ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys
@@ -244,14 +252,7 @@ namespace LinearIndexedGrammar
             if (!ValidateTargetGrammar(grammarRules, data, universalVocabulary))
                 return;
 
-            var s = "------------------------------------------------------------\r\n" +
-                    $"Session {DateTime.Now:MM/dd/yyyy h:mm tt}\r\n" +
-                    $"runs: {programParams.NumberOfRuns}, grammar file name: {programParams.GrammarFileName}, vocabulary file name: {programParams.VocabularyFileName}";
-            if (programParams.DataFileName == null)
-                s += $", Distribution: {programParams.DistributionType}";
-            s += "\r\n";
-            LogManager.GetCurrentClassLogger().Info(s);
-
+            
             var stopWatch = StartWatch();
 
             var probs = new List<double>();
@@ -404,7 +405,7 @@ namespace LinearIndexedGrammar
                     currentWordLength, minWordsInSentences, progParams, initialGrammars[currentWordLength]);
                 currentWordLength++;
                 if (currentWordLength <= maxSentenceLength)
-                    initialGrammars[currentWordLength] = currentGrammar;
+                    initialGrammars[currentWordLength] = new ContextSensitiveGrammar(currentGrammar);
             }
 
             return (currentGrammar, currentValue);
