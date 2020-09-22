@@ -205,7 +205,7 @@ namespace LinearIndexedGrammar
             objectiveFunction.SetMaximalValue(targetProb);
 
             var s =
-                $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying probability of target grammar given the data: {targetProb} \r\n";
+                $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying objective function value of target grammar given the data: {targetProb} \r\n";
             LogManager.GetCurrentClassLogger().Info(s);
             if (!objectiveFunction.IsMaximalValue(targetProb))
             {
@@ -239,6 +239,10 @@ namespace LinearIndexedGrammar
             {
                 (data, dataVocabulary) =
                     SampleGenerator.PrepareDataFromTargetGrammar(grammarRules, universalVocabulary, maxWordsInSentence, programParams.DistributionType);
+
+                LogManager.GetCurrentClassLogger().Info($"POS contained in data: {string.Join(" ", dataVocabulary.POSWithPossibleWords.Keys)}");
+
+
             }
             else
             {
@@ -263,7 +267,7 @@ namespace LinearIndexedGrammar
                 var (bestHypothesis, bestValue) = LearnGrammarFromData(data, dataVocabulary, programParams);
                 probs.Add(bestValue);
 
-                s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with probability {bestValue}";
+                s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with objective function value {bestValue}";
                 LogManager.GetCurrentClassLogger().Info(s);
 
                 Statistics(bestHypothesis, grammarRules, universalVocabulary, maxWordsInSentence);
@@ -272,8 +276,8 @@ namespace LinearIndexedGrammar
 
             var numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < 0.00001);
             var averageProb = probs.Average();
-            s = $"Average probability is: {averageProb}\r\n" +
-                $"Achieved Probability=1 in {numTimesAchieveProb1} times out of {programParams.NumberOfRuns} runs";
+            s = $"Average objective function value is: {averageProb}\r\n" +
+                $"Achieved objective function value=1 in {numTimesAchieveProb1} times out of {programParams.NumberOfRuns} runs";
             LogManager.GetCurrentClassLogger().Info(s);
             StopWatch(stopWatch);
         }

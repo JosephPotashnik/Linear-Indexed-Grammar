@@ -633,7 +633,7 @@ namespace LinearIndexedGrammarParser
 
             foreach (var col in _table)
                 col.OldGammaStates?.Clear();
-
+               
             statesRemovedInLastReparse?.Clear();
 
             _oldGrammar = null;

@@ -17,8 +17,6 @@ namespace LinearIndexedGrammarParser
             foreach (var arr in allData)
             {
                 if (arr.Length > maxWords || arr.Length < minWords) continue;
-
-                var sentence = new string[arr.Length];
                 sentences.Add(arr);
             }
 

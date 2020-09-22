@@ -230,7 +230,7 @@ namespace LinearIndexedGrammarLearner
             return true;
         }
 
-        public SentenceParsingResults[] ParseAllSentencesWithDebuggingAssertion(ContextFreeGrammar currentHypothesis,
+        public SentenceParsingResults[] ParseAllSentencesWithDebuggingAssertion(ContextFreeGrammar currentHypothesis, ContextFreeGrammar previousHypothesis,
             EarleyParser[] diffparsers = null)
         {
             var sentencesWithCounts = new SentenceParsingResults[Parses.Length];
@@ -267,6 +267,12 @@ namespace LinearIndexedGrammarLearner
                         if (actual != expected)
                         {
                             var grammar = parsers[i]._grammar.ToString();
+                            NLog.LogManager.GetCurrentClassLogger().Info($"Actual: {actual}");
+                            NLog.LogManager.GetCurrentClassLogger().Info($"Expected: {expected}");
+                            NLog.LogManager.GetCurrentClassLogger().Info($"Grammar in parser: {grammar}");
+                            NLog.LogManager.GetCurrentClassLogger().Info($"Grammar in currentHypothesis: {currentHypothesis}");
+                            NLog.LogManager.GetCurrentClassLogger().Info($"Grammar in currentHypothesis: {previousHypothesis}");
+
                             throw new Exception("actual parse differs from expected parse");
                         }
                     }

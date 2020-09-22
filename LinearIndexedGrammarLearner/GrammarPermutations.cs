@@ -27,9 +27,9 @@ namespace LinearIndexedGrammarLearner
             {
                 l.Add(new GrammarMutationData("InsertStackConstantRule", CFGOperationWeight ));
                 l.Add(new GrammarMutationData("DeleteStackConstantRule", CFGOperationWeight));
-                l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
-                l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
-                l.Add(new GrammarMutationData("InsertPrefixExtendingStackConstantRule", CFGOperationWeight / 2));
+                l.Add(new GrammarMutationData("ChangeLHS", 0));
+                l.Add(new GrammarMutationData("ChangeRHS", 0));
+                l.Add(new GrammarMutationData("InsertPrefixExtendingStackConstantRule", 0 ));
             }
             else
             {
@@ -69,6 +69,12 @@ namespace LinearIndexedGrammarLearner
             var r = Pseudorandom.NextInt(_totalWeights);
 
             var sum = 0;
+            for (int i = 0; i < _mutations.Length; i++)
+            {
+                if (sum + _mutations[i].Item2 > r)
+                    return _mutations[i].Item1;
+                sum += mutation.Item2;
+            }
             foreach (var mutation in _mutations)
             {
                 if (sum + mutation.Item2 > r)
@@ -96,7 +102,7 @@ namespace LinearIndexedGrammarLearner
         public (ContextSensitiveGrammar mutatedGrammar, bool reparsed) InsertPrefixExtendingStackConstantRule(
             ContextSensitiveGrammar grammar, Learner learner)
         {
-
+            /*
             for (int i = 0; i < learner._sentencesParser.Length; i++)
             {
                 if (learner._sentencesParser[i].GetGammaBracketedRepresentation().Count == 0)
@@ -122,7 +128,7 @@ namespace LinearIndexedGrammarLearner
                     //    Console.WriteLine("accepted suggestion");
                     return res;
                 }
-            }
+            }*/
 
             return (null, false);
         }
@@ -173,6 +179,7 @@ namespace LinearIndexedGrammarLearner
         public (ContextSensitiveGrammar mutatedGrammar, bool reparsed)
             ChangeLHS(ContextSensitiveGrammar grammar, Learner learner)
         {
+            throw new Exception("should not be here");
             bool reparsed1, reparsed2;
 
             var rcOld = GetRandomRule(grammar.StackConstantRules);
@@ -201,6 +208,7 @@ namespace LinearIndexedGrammarLearner
             ChangeRHS(ContextSensitiveGrammar grammar, Learner learner)
         {
             bool reparsed1, reparsed2;
+            throw new Exception("should not be here");
 
             var rcOld = GetRandomRule(grammar.StackConstantRules);
             var rcNew = new RuleCoordinates
