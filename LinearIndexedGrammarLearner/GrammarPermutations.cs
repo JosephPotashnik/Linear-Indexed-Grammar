@@ -69,12 +69,6 @@ namespace LinearIndexedGrammarLearner
             var r = Pseudorandom.NextInt(_totalWeights);
 
             var sum = 0;
-            for (int i = 0; i < _mutations.Length; i++)
-            {
-                if (sum + _mutations[i].Item2 > r)
-                    return _mutations[i].Item1;
-                sum += mutation.Item2;
-            }
             foreach (var mutation in _mutations)
             {
                 if (sum + mutation.Item2 > r)
