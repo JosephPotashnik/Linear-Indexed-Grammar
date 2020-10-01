@@ -83,8 +83,8 @@ namespace LinearIndexedGrammar
 
             return bounds;
         }
-        
-       
+
+
         static private double F(float x, float mean, float var)
         {
             return (Math.Exp(-(x - mean) * (x - mean) / (float)(2 * var)));

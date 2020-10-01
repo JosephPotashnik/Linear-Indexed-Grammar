@@ -50,7 +50,7 @@ namespace LinearIndexedGrammar
                 RunProgram(programParams);
         }
 
-        
+
         private static void Main(string[] args)
         {
             var maxNonTerminals = 6;
@@ -145,15 +145,14 @@ namespace LinearIndexedGrammar
             var filteredSen = new List<string[]>();
 
             learner.ParseAllSentencesFromScratch(new ContextSensitiveGrammar(grammarRules));
-            //not working - fix it!
-            
-            List<SentenceParsingResults> parsableData = new List<SentenceParsingResults>();
-            //for (int i = 0; i < learner._sentencesParser.Length; i++)
-            //{
-            //    if (learner._sentencesParser[i].BracketedRepresentations.Count > 0)
-            //        parsableData.Add(allParses[i]);
 
-            //}
+            List<SentenceParsingResults> parsableData = new List<SentenceParsingResults>();
+            for (int i = 0; i < learner._sentencesParser.Length; i++)
+            {
+                if (learner._sentencesParser[i].BracketedRepresentations.Count > 0)
+                    parsableData.Add(learner.Parses[i]);
+
+            }
 
             foreach (var sen in parsableData)
                 for (var i = 0; i < sen.Count; i++)
@@ -237,7 +236,7 @@ namespace LinearIndexedGrammar
             if (!ValidateTargetGrammar(grammarRules, data, universalVocabulary))
                 return;
 
-            
+
             var stopWatch = StartWatch();
 
             var probs = new List<double>();
@@ -252,7 +251,7 @@ namespace LinearIndexedGrammar
                 LogManager.GetCurrentClassLogger().Info(s);
 
                 Statistics(bestHypothesis, grammarRules, universalVocabulary, maxWordsInSentence);
-                
+
             }
 
             var numTimesAchieveProb1 = probs.Count(x => Math.Abs(x - 1) < 0.00001);
@@ -267,7 +266,7 @@ namespace LinearIndexedGrammar
         {
             //get all distinct sentences of target grammar:
             var targetGrammar = new ContextFreeGrammar(grammarRules);
-            var targetSentences  = GetAllNonTerminalSentencesOfGrammar(targetGrammar, universalVocabulary, maxWords).Distinct().ToArray();
+            var targetSentences = GetAllNonTerminalSentencesOfGrammar(targetGrammar, universalVocabulary, maxWords).Distinct().ToArray();
 
             //get all distinct sentences of best hypothesis
             var learnedGrammar = new ContextFreeGrammar(bestHypothesis);

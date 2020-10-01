@@ -143,7 +143,7 @@ namespace LinearIndexedGrammarLearner
             //var rulesMutated = new List<Rule>[historySize];
             //var acceptance = new bool[historySize];
 
-           // int currentHistoryIndex = 0;
+            // int currentHistoryIndex = 0;
 
             //if generating:
             //historyOrig[currentHistoryIndex] = currentGrammar;
@@ -215,7 +215,7 @@ namespace LinearIndexedGrammarLearner
                         //var allParses12 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis2, previousHypothesis2, _learner._sentencesParser);
                         break;
                     }
-                    
+
 
                 }
                 else
@@ -286,7 +286,7 @@ namespace LinearIndexedGrammarLearner
                 }
             }
 
-           
+
 
             PruneUnusedRules(currentGrammar);
 
@@ -421,7 +421,7 @@ namespace LinearIndexedGrammarLearner
                         {
                             if (bestGrammars.Count > numberOfBestGrammarsToKeep)
                                 bestGrammars.Remove(bestGrammars.First().Key);
-                            
+
                             bestGrammars.Add(currentKey, new ContextSensitiveGrammar(currentGrammar));
                             smallestBestValue = new BestGrammarsKey(bestGrammars.First().Key);
                             //LogManager.GetCurrentClassLogger().Info($"Enqueued MAXIMAL feasible value to best grammars, size of bestGrammars: {bestGrammars.Count}, smallest Value is {smallestBestValue.Key}");

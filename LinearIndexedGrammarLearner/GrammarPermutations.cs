@@ -25,7 +25,7 @@ namespace LinearIndexedGrammarLearner
 
             if (isCFGGrammar)
             {
-                l.Add(new GrammarMutationData("InsertStackConstantRule",  CFGOperationWeight));
+                l.Add(new GrammarMutationData("InsertStackConstantRule", CFGOperationWeight));
                 l.Add(new GrammarMutationData("DeleteStackConstantRule", CFGOperationWeight));
                 l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
                 l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
@@ -96,7 +96,7 @@ namespace LinearIndexedGrammarLearner
         public (ContextSensitiveGrammar mutatedGrammar, bool reparsed) InsertPrefixExtendingStackConstantRule(
             ContextSensitiveGrammar grammar, Learner learner)
         {
-            
+
             for (int i = 0; i < learner._sentencesParser.Length; i++)
             {
                 if (learner._sentencesParser[i].BracketedRepresentations.Count == 0)
@@ -115,7 +115,7 @@ namespace LinearIndexedGrammarLearner
                         RHSIndex = ContextSensitiveGrammar.RuleSpace.FindRHSIndex(rhs)
                     };
 
-                    var res =  InnerInsertStackConstantRule(grammar, learner, rc);
+                    var res = InnerInsertStackConstantRule(grammar, learner, rc);
                     //if (res.mutatedGrammar == null)
                     //    Console.WriteLine("rejected suggestion, rhs exists");
                     //else

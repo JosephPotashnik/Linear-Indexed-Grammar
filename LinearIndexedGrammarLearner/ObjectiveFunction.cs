@@ -1,12 +1,11 @@
 ﻿using LinearIndexedGrammarParser;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LinearIndexedGrammarLearner
 {
 
-    public class GrammarFitnessObjectiveFunction 
+    public class GrammarFitnessObjectiveFunction
     {
         public const double Tolerance = 0.0001;
         public int PenaltyCoefficient { get; set; }
@@ -129,7 +128,7 @@ namespace LinearIndexedGrammarLearner
             //        "Cyclic Unit Production Encountered at unexpected place, in preparation to remove the check for cyclic");
 
             double prob = 0;
-            
+
             var allParses = _learner.Parses;
             int numberOfSentenceUnParsed = 0;
             //var trees = new HashSet<(int, string)>();
@@ -144,14 +143,14 @@ namespace LinearIndexedGrammarLearner
 
                 set.UnionWith(_learner._sentencesParser[i].BracketedRepresentations);
                 //for (var j = 0; j < _learner._sentencesParser[i].BracketedRepresentations.Count; j++)
-                 //   set.Add(_learner._sentencesParser[i].BracketedRepresentations[j]);
+                //   set.Add(_learner._sentencesParser[i].BracketedRepresentations[j]);
 
                 if (_learner._sentencesParser[i].BracketedRepresentations.Count == 0)
                     numberOfSentenceUnParsed++;
             }
 
             var minLength = 1;
-           
+
             //int alldataCount = 0;
             var dataTreesPerLength = new Dictionary<int, int>();
             foreach (var length in treesDic.Keys)
@@ -202,7 +201,7 @@ namespace LinearIndexedGrammarLearner
                 //    if (_learner._sentencesParser[i].BracketedRepresentations.Count == 0)
                 //        numberOfSentenceUnParsed++;
                 //}
-                
+
                 var unexplainedSentences = PenaltyCoefficient * numberOfSentenceUnParsed / (double)allParses.Length;
 
                 prob *= 1 - unexplainedSentences;

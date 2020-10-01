@@ -8,7 +8,7 @@ namespace LinearIndexedGrammarParser
 {
     public class GrammarFileReader
     {
-       
+
         public static string[][] GetSentencesInWordLengthRange(
             string[][] allData, int minWords, int maxWords)
         {

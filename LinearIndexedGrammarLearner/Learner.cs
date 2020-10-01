@@ -100,7 +100,7 @@ namespace LinearIndexedGrammarLearner
                 Parallel.ForEach(Parses,
                     (sentenceItem, loopState, i) =>
                     {
-                         _sentencesParser[i].ParseSentence(sentenceItem.Sentence);
+                        _sentencesParser[i].ParseSentence(sentenceItem.Sentence);
                     });
             }
             catch (OperationCanceledException)

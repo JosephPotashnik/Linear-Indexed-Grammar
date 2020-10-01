@@ -3,13 +3,12 @@ using Newtonsoft.Json;
 using System.IO;
 using System.Linq;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace LinearIndexedGrammarParserTests
 {
     public class ParserTests
     {
-        
+
         //public ParserTests(ITestOutputHelper output)
         //{
         //    this.output = output;
@@ -24,7 +23,8 @@ namespace LinearIndexedGrammarParserTests
                 "John a the a the a the cried");
             var settings = new JsonSerializerSettings
             {
-                Formatting = Formatting.Indented, NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented,
+                NullValueHandling = NullValueHandling.Ignore,
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
             var actual = JsonConvert.SerializeObject(n, settings);

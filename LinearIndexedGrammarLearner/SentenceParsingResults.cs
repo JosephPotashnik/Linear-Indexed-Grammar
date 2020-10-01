@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace LinearIndexedGrammarLearner
+﻿namespace LinearIndexedGrammarLearner
 {
     public class SentenceParsingResults
     {
