@@ -51,7 +51,7 @@ namespace LinearIndexedGrammarParser
 
             var parser = new EarleyParser(cfGrammar, universalVocabulary);
 
-            var n = parser.ParseSentence(sentence.Split());
+            parser.ParseSentence(sentence.Split());
 
             return parser.GetGammaStates();
         }

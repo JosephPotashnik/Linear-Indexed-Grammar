@@ -4,6 +4,7 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+//using System.IO;
 
 namespace LinearIndexedGrammarLearner
 {
@@ -135,24 +136,68 @@ namespace LinearIndexedGrammarLearner
             var numberOfConsecutiveRejectionsToGiveUp = (int)(percentageOfConsecutiveRejectionsToGiveUp * totalIterations);
             //bool reparsed = false;
             //int counter = 0;
-            int historySize = 10;
-            var historyOrig = new ContextSensitiveGrammar[historySize];
-            var historyMutated = new ContextSensitiveGrammar[historySize];
+            //int historySize = 10;
+            //var historyOrig = new ContextSensitiveGrammar[historySize];
+            //var historyMutated = new ContextSensitiveGrammar[historySize];
+            //var rulesOrig = new List<Rule>[historySize];
+            //var rulesMutated = new List<Rule>[historySize];
+            //var acceptance = new bool[historySize];
 
-            int currentHistoryIndex = 0;
-            historyOrig[currentHistoryIndex] = currentGrammar;
+           // int currentHistoryIndex = 0;
+
+            //if generating:
+            //historyOrig[currentHistoryIndex] = currentGrammar;
+
+
+            //if reproducing:
+            //read original grammars
+            //ReadHistoryGrammarsFile(historySize, historyOrig, historyMutated, acceptance);
+            //currentGrammar = historyOrig[8];
+            //_learner.ParseAllSentencesFromScratch(currentGrammar);
+            //(newValue, feasible) = _objectiveFunction.Compute(currentGrammar);
+
+            //int i = 8;
+            //ContextSensitiveGrammar mutatedGrammar = null;
+            //bool reparsed = false;
+            //bool accept = false;
 
             while (currentTemp > finalTemp)
             {
+                //var rulesOnlyInOrig = historyOrig[i].StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]).Except(historyMutated[i].StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]));
+                //var rulesOnlyInMutated = historyMutated[i].StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]).Except(historyOrig[i].StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]));
+
+                //if (rulesOnlyInMutated.Count() > 0)
+                //{
+                //    var rc = ContextSensitiveGrammar.RuleSpace.FindRule(rulesOnlyInMutated.First());
+                //    var newGrammar = new ContextSensitiveGrammar(currentGrammar);
+                //    _learner.SetOriginalGrammarBeforePermutation();
+                //    //mutate the grammar.
+                //    (mutatedGrammar, reparsed) = GrammarPermutations.InnerInsertStackConstantRule(newGrammar, _learner, rc);
+                //}
+                //else
+                //{
+                //    var rc = ContextSensitiveGrammar.RuleSpace.FindRule(rulesOnlyInOrig.First());
+                //    var newGrammar = new ContextSensitiveGrammar(currentGrammar);
+                //    _learner.SetOriginalGrammarBeforePermutation();
+                //    //mutate the grammar.
+                //    (mutatedGrammar, reparsed) = GrammarPermutations.InnerDeleteStackConstantRule(newGrammar, _learner, rc);
+                //}
+
                 var previousGrammar = currentGrammar;
                 var (mutatedGrammar, reparsed) = _learner.GetNeighborAndReparse(currentGrammar);
                 if (mutatedGrammar == null || !reparsed) continue;
 
-                historyMutated[currentHistoryIndex] = mutatedGrammar;
+                //historyMutated[currentHistoryIndex] = mutatedGrammar;
 
                 currentTemp *= _params.CoolingFactor;
                 (newValue, feasible) = _objectiveFunction.Compute(mutatedGrammar);
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
+                //if (i < historySize - 1)
+                //    accept = acceptance[i];
+                //else
+                //    accept = true; //manually read from sessionReport for the grammar that generated the problem.
+                //i++;
+
                 if (accept)
                 {
                     rejectCounter = 0;
@@ -162,9 +207,9 @@ namespace LinearIndexedGrammarLearner
                     _learner.AcceptChanges();
                     if (_objectiveFunction.IsMaximalValue(currentValue))
                     {
-                        currentHistoryIndex++;
-                        if (currentHistoryIndex == historySize)
-                            currentHistoryIndex = 0;
+                        //currentHistoryIndex++;
+                        //if (currentHistoryIndex == historySize)
+                        //    currentHistoryIndex = 0;
                         //var currentCFHypothesis2 = new ContextFreeGrammar(currentGrammar);
                         //var previousHypothesis2 = new ContextFreeGrammar(previousGrammar);
                         //var allParses12 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis2, previousHypothesis2, _learner._sentencesParser);
@@ -178,13 +223,34 @@ namespace LinearIndexedGrammarLearner
                     rejectCounter++;
                     //Console.WriteLine("rejected");
                     _learner.RejectChanges();
+                    //int numberOfSentenceUnParsedDiff = 0;
+                    //for (int k = 0; k < _learner._sentencesParser.Length; k++)
+                    //{
+                    //    if (_learner._sentencesParser[k].BracketedRepresentations.Count == 0)
+                    //        numberOfSentenceUnParsedDiff++;
+                    //}
+                    //bool newfeasible = false;
+                    //double newnewValue = 0;
+                    //(newnewValue, newfeasible) = _objectiveFunction.Compute(currentGrammar);
+
+                    //_learner.ParseAllSentencesFromScratch(currentGrammar);
+                    //int numberOfSentenceUnParsedFromScratch = 0;
+                    //for (int k = 0; k < _learner._sentencesParser.Length; k++)
+                    //{
+                    //    if (_learner._sentencesParser[k].BracketedRepresentations.Count == 0)
+                    //        numberOfSentenceUnParsedFromScratch++;
+                    //}
+
+                    //(newnewValue, newfeasible) = _objectiveFunction.Compute(currentGrammar);
+
                 }
 
 
-                currentHistoryIndex++;
-                if (currentHistoryIndex == historySize)
-                    currentHistoryIndex = 0;
-                historyOrig[currentHistoryIndex] = currentGrammar;
+                //if generating:
+                //currentHistoryIndex++;
+                //if (currentHistoryIndex == historySize)
+                //    currentHistoryIndex = 0;
+                //historyOrig[currentHistoryIndex] = currentGrammar;
 
 
 
@@ -197,41 +263,33 @@ namespace LinearIndexedGrammarLearner
                 if (rejectCounter > numberOfConsecutiveRejectionsToGiveUp) break;
             }
 
-            _learner.RefreshParses();
-
             if (_objectiveFunction.IsMaximalValue(currentValue))
             {
-                LogManager.GetCurrentClassLogger().Info($"BEFORE PRUNING UNUSED RULES: Maximal grammar:  {currentGrammar}\r\n, probability {currentValue + 1.0}");
 
                 _learner.ParseAllSentencesFromScratch(currentGrammar);
                 bool newfeasible = false;
                 (newValue, newfeasible) = _objectiveFunction.Compute(currentGrammar);
-                LogManager.GetCurrentClassLogger().Info($"reparsing (debugger), value  {newValue} feasible {newfeasible}");
                 if (newValue != currentValue || newfeasible != feasible)
                 {
+                    LogManager.GetCurrentClassLogger().Info($"BEFORE PRUNING UNUSED RULES: Maximal grammar:  {currentGrammar}\r\n, probability {currentValue + 1.0}");
                     LogManager.GetCurrentClassLogger().Info($"reparsing (debugger), value  {newValue} feasible {newfeasible}");
-                    LogManager.GetCurrentClassLogger().Info($"HISTORY of last {historySize} grammars");
-                    for (int i = 0; i < historySize; i++)
-                    {
-                        LogManager.GetCurrentClassLogger().Info($"original grammar {i}:");
-                        LogManager.GetCurrentClassLogger().Info(historyOrig[(i+currentHistoryIndex) % historySize].ToString());
-                        LogManager.GetCurrentClassLogger().Info($"mutated grammar {i}:");
-                        LogManager.GetCurrentClassLogger().Info(historyMutated[(i+ currentHistoryIndex) % historySize].ToString());
-                    }
+                    //LogManager.GetCurrentClassLogger().Info($"HISTORY of last {historySize} grammars");
+                    //for (int i = 0; i < historySize; i++)
+                    //{
+                    //    LogManager.GetCurrentClassLogger().Info($"original grammar {i}:");
+                    //    LogManager.GetCurrentClassLogger().Info(historyOrig[(i+currentHistoryIndex) % historySize].ToString());
+                    //    LogManager.GetCurrentClassLogger().Info($"mutated grammar {i}:");
+                    //    LogManager.GetCurrentClassLogger().Info(historyMutated[(i+ currentHistoryIndex) % historySize].ToString());
+                    //}
 
                     throw new Exception("should not happen! means your differential parses are compromised");
                 }
             }
 
+           
+
             PruneUnusedRules(currentGrammar);
 
-            if (_objectiveFunction.IsMaximalValue(currentValue))
-            {
-                LogManager.GetCurrentClassLogger().Info($"AFTER PRUNING UNUSED RULES: Maximal grammar:  {currentGrammar}\r\n, probability {currentValue + 1.0}");
-
-
-
-            }
             //Downhill slide was found to slow convergence in practice.
             //in the future: perhaps start using the slide only upon
             //burn-in period or higher lagrangian multiplier.
@@ -253,6 +311,52 @@ namespace LinearIndexedGrammarLearner
             return (currentGrammar, currentValue, feasible);
         }
 
+        //private static void ReadHistoryGrammarsFile(int historySize, ContextSensitiveGrammar[] historyOrig, ContextSensitiveGrammar[] historyMutated, bool[] acceptance)
+        //{
+        //    string line;
+        //    var separator = '-';
+
+        //    var rules = new List<Rule>();
+        //    int i = 0;
+        //    using (var file = File.OpenText("HistoryGrammars.txt"))
+        //    {
+        //        while ((line = file.ReadLine()) != null)
+        //        {
+
+        //            if (line[0] == separator)
+        //            {
+        //                if (i % 2 == 0)
+        //                    historyOrig[i / 2] = new ContextSensitiveGrammar(rules);
+        //                else
+        //                    historyMutated[i / 2] = new ContextSensitiveGrammar(rules);
+
+        //                rules = new List<Rule>();
+        //                i++;
+        //            }
+        //            var r = GrammarFileReader.CreateRule(line);
+        //            if (r != null)
+        //                rules.Add(r);
+        //        }
+        //    }
+        //    for (i = 0; i < historySize; i++)
+        //    {
+        //        var rulesOnlyInOrig = historyOrig[i].StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]).Except(historyMutated[i].StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]));
+        //        var rulesOnlyInMutated = historyMutated[i].StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]).Except(historyOrig[i].StackConstantRules.Select(x => ContextSensitiveGrammar.RuleSpace[x]));
+        //        if (rulesOnlyInMutated.Count() > 1 || rulesOnlyInOrig.Count() > 1)
+        //        {
+        //            throw new Exception("should not occur. Assumption: Only 2 CFG mutations are Addition and Subtraction");
+        //        }
+        //    }
+
+        //    for (i = 0; i < historySize - 1; i++)
+        //    {
+        //        if (!historyOrig[i + 1].Equals(historyOrig[i]) && !historyOrig[i + 1].Equals(historyMutated[i]))
+        //        {
+        //            throw new Exception("should not happen");
+        //        }
+        //        acceptance[i] = historyOrig[i + 1].Equals(historyMutated[i]);
+        //    }
+        //}
         private void PruneUnusedRules(ContextSensitiveGrammar currentGrammar)
         {
             var ruleDistribution = _learner.CollectUsages();
@@ -312,7 +416,7 @@ namespace LinearIndexedGrammarLearner
                     if (feasible)
                     {
                         _objectiveFunction.PenaltyCoefficient = 1;
-                        LogManager.GetCurrentClassLogger().Info($"Best Grammar so far {currentGrammar}\r\n, probability {currentValue + 1.0}");
+                        //LogManager.GetCurrentClassLogger().Info($"Best Grammar so far {currentGrammar}\r\n, probability {currentValue + 1.0}");
                         if (!bestGrammars.ContainsKey(currentKey))
                         {
                             if (bestGrammars.Count > numberOfBestGrammarsToKeep)
@@ -320,7 +424,7 @@ namespace LinearIndexedGrammarLearner
                             
                             bestGrammars.Add(currentKey, new ContextSensitiveGrammar(currentGrammar));
                             smallestBestValue = new BestGrammarsKey(bestGrammars.First().Key);
-                            LogManager.GetCurrentClassLogger().Info($"Enqueued MAXIMAL feasible value to best grammars, size of bestGrammars: {bestGrammars.Count}, smallest Value is {smallestBestValue.Key}");
+                            //LogManager.GetCurrentClassLogger().Info($"Enqueued MAXIMAL feasible value to best grammars, size of bestGrammars: {bestGrammars.Count}, smallest Value is {smallestBestValue.Key}");
 
                         }
                         peakValue = currentKey.Key;
@@ -342,7 +446,7 @@ namespace LinearIndexedGrammarLearner
                         bestGrammars.Add(currentKey, new ContextSensitiveGrammar(currentGrammar));
                         smallestBestValue = new BestGrammarsKey(bestGrammars.First().Key);
 
-                        LogManager.GetCurrentClassLogger().Info($"Enqueued currently Best (NOT MAXIMAL) to best grammars, size of bestGrammars: {bestGrammars.Count}, smallest Value is {smallestBestValue.Key}");
+                        //LogManager.GetCurrentClassLogger().Info($"Enqueued currently Best (NOT MAXIMAL) to best grammars, size of bestGrammars: {bestGrammars.Count}, smallest Value is {smallestBestValue.Key}");
 
                     }
                     else
@@ -351,7 +455,7 @@ namespace LinearIndexedGrammarLearner
                 else
                     noImprovementCounter++;
 
-                if (noImprovementCounter >= 25)
+                if (noImprovementCounter >= 20)
                 {
 
                     noImprovementCounter = 0;
@@ -364,9 +468,8 @@ namespace LinearIndexedGrammarLearner
                     currentValue = candidates[randomPastBestGrammar].Key.objectiveFunctionValue;
                     currentGrammar = new ContextSensitiveGrammar(candidates[randomPastBestGrammar].Value);
                     _objectiveFunction.PenaltyCoefficient = 1;
-                    LogManager.GetCurrentClassLogger()
-                        .Info($"reverting to random previous best grammar");
-                    LogManager.GetCurrentClassLogger().Info($"grammar reverted is: {currentGrammar}\r\n, probability {currentValue}");
+                    //LogManager.GetCurrentClassLogger().Info($"reverting to random previous best grammar");
+                    //LogManager.GetCurrentClassLogger().Info($"grammar reverted is: {currentGrammar}\r\n, probability {currentValue}");
 
                     //refresh parse forest from scratch, because we moved to an arbitrarily far away point
                     //in the hypotheses space.
@@ -377,7 +480,7 @@ namespace LinearIndexedGrammarLearner
             }
 
             currentValue = bestGrammars.Last().Key.objectiveFunctionValue;
-            LogManager.GetCurrentClassLogger().Info($"Value of the objective function of the last key in best grammars: {currentValue} and its feasibility { bestGrammars.Last().Key.feasible} ");
+            //LogManager.GetCurrentClassLogger().Info($"Value of the objective function of the last key in best grammars: {currentValue} and its feasibility { bestGrammars.Last().Key.feasible} ");
 
             if (peakValue > 1.0)
             {

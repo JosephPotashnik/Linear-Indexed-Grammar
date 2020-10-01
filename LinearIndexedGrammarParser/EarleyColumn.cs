@@ -33,6 +33,7 @@ namespace LinearIndexedGrammarParser
             Reductors = new Dictionary<DerivedCategory, HashSet<EarleyState>>();
             Predicted = new Dictionary<Rule, List<EarleyState>>(new RuleValueEquals());
             GammaStates = new List<EarleyState>();
+            BracketedRepresentations = new HashSet<string>();
             OldGammaStates = new List<EarleyState>();
             ActionableNonTerminalsToPredict = new Queue<DerivedCategory>();
         }
@@ -42,6 +43,8 @@ namespace LinearIndexedGrammarParser
 
         internal Queue<EarleyState> ActionableNonCompleteStates { get; set; }
 
+        //bracketed representation of gamma states
+        public HashSet<string> BracketedRepresentations { get; set; }
 
         public List<EarleyState> GammaStates { get; set; }
         public List<EarleyState> OldGammaStates { get; set; }
@@ -84,8 +87,8 @@ namespace LinearIndexedGrammarParser
             {
                 if (oldState.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
                 {
-                    var gammaStates = oldState.EndColumn.GammaStates;
-                    gammaStates.Remove(oldState);
+                    oldState.EndColumn.GammaStates.Remove(oldState);
+                    oldState.EndColumn.BracketedRepresentations.Remove(oldState.BracketedRepresentation);
                     OldGammaStates.Add(oldState);
                     return;
                 }
@@ -249,8 +252,9 @@ namespace LinearIndexedGrammarParser
                 {
                     if (state.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
                     {
-                        var gammaStates = state.EndColumn.GammaStates;
-                        gammaStates.Remove(state);
+                        state.EndColumn.GammaStates.Remove(state);
+                        state.EndColumn.BracketedRepresentations.Remove(state.BracketedRepresentation);
+
                     }
                     else
                     {
@@ -289,6 +293,7 @@ namespace LinearIndexedGrammarParser
             foreach (var state in OldGammaStates.ToList())
             {
                 GammaStates.Add(state);
+                BracketedRepresentations.Add(state.BracketedRepresentation);
                 OldGammaStates.Remove(state);
             }
 

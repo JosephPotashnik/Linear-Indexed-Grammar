@@ -50,34 +50,7 @@ namespace LinearIndexedGrammar
                 RunProgram(programParams);
         }
 
-        private static void OldMain(string[] args)
-        {
-            var vocabularyFilename = "Vocabulary.json";
-            var grammarFileName = "CFG.txt";
-            var sentence = "David knows the man kissed the woman a girl";
-
-            var universalVocabulary = Vocabulary.ReadVocabularyFromFile(vocabularyFilename);
-            ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys
-                .Select(x => new SyntacticCategory(x)).ToHashSet();
-
-            var rules = GrammarFileReader.ReadRulesFromFile(grammarFileName);
-            var cfGrammar = new ContextFreeGrammar(rules);
-
-            var parser = new EarleyParser(cfGrammar, universalVocabulary);
-            var b = parser.ParseSentence(sentence.Split());
-            var k = parser.SuggestRHSForCompletion();
-
-            var rule = new Rule("VP", k);
-            rules.Add(rule);
-            cfGrammar = new ContextFreeGrammar(rules);
-
-            parser = new EarleyParser(cfGrammar, universalVocabulary);
-            b = parser.ParseSentence(sentence.Split());
-            k = parser.SuggestRHSForCompletion();
-
-
-
-        }
+        
         private static void Main(string[] args)
         {
             var maxNonTerminals = 6;
@@ -171,8 +144,16 @@ namespace LinearIndexedGrammar
             //if no oracle is supplied, try to learn the entire input. 
             var filteredSen = new List<string[]>();
 
-            var allParses = learner.ParseAllSentences(cfGrammar);
-            var parsableData = allParses.Where(x => x.BracketedTreeRepresentations.Count > 0);
+            learner.ParseAllSentencesFromScratch(new ContextSensitiveGrammar(grammarRules));
+            //not working - fix it!
+            
+            List<SentenceParsingResults> parsableData = new List<SentenceParsingResults>();
+            //for (int i = 0; i < learner._sentencesParser.Length; i++)
+            //{
+            //    if (learner._sentencesParser[i].BracketedRepresentations.Count > 0)
+            //        parsableData.Add(allParses[i]);
+
+            //}
 
             foreach (var sen in parsableData)
                 for (var i = 0; i < sen.Count; i++)

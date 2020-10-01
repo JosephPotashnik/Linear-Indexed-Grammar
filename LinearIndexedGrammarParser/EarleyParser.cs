@@ -16,6 +16,7 @@ namespace LinearIndexedGrammarParser
         private string[] _text;
         private readonly HashSet<EarleyState> statesRemovedInLastReparse = new HashSet<EarleyState>();
         protected Vocabulary Voc;
+        public HashSet<string> BracketedRepresentations;
 
         public EarleyParser(ContextFreeGrammar g, Vocabulary v, bool checkUnitProductionCycles = true)
         {
@@ -60,9 +61,9 @@ namespace LinearIndexedGrammarParser
             {
                 var sb = new StringBuilder();
                 reductorState.Reductor.CreateBracketedRepresentation(sb, _grammar);
-                reductorState.BracketedTreeRepresentation = sb.ToString();
+                reductorState.BracketedRepresentation = sb.ToString();
                 col.GammaStates.Add(reductorState);
-
+                col.BracketedRepresentations.Add(reductorState.BracketedRepresentation);
                 return;
             }
 
@@ -140,17 +141,7 @@ namespace LinearIndexedGrammarParser
             return gammaStates;
         }
 
-        public List<string> GetGammaBracketedRepresentation()
-        {
-            var states = GetGammaStates();
-            var strings = new List<string>();
-            foreach (var t in states)
-                strings.Add(t.BracketedTreeRepresentation);
-
-            return strings;
-        }
-
-        public List<string> ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs)
+        public void ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs)
         {
             _grammar = g;
 
@@ -198,11 +189,9 @@ namespace LinearIndexedGrammarParser
                 //TraverseScannableStates(_table, col);
 
             }
-
-            return GetGammaBracketedRepresentation();
         }
 
-        public List<string> ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, List<Rule> rs,
+        public void ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, List<Rule> rs,
             Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
         {
             foreach (var col in _table)
@@ -225,7 +214,6 @@ namespace LinearIndexedGrammarParser
             }
 
             _grammar = g;
-            return GetGammaBracketedRepresentation();
         }
 
         private void TraversePredictedStatesToDelete(EarleyColumn col,
@@ -416,10 +404,11 @@ namespace LinearIndexedGrammarParser
             return GetGammaStates();
         }
 
-        public List<string> ParseSentence(string[] text, int maxWords = 0)
+        public void ParseSentence(string[] text, int maxWords = 0)
         {
             _text = text;
             (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
+            BracketedRepresentations = _table[_table.Length - 1].BracketedRepresentations;
             PrepareScannedStates();
 
             //assumption: GenerateAllStaticRulesFromDynamicRules has been called before parsing
@@ -464,7 +453,6 @@ namespace LinearIndexedGrammarParser
                 LogManager.GetCurrentClassLogger().Info(s);
             }
 
-            return GetGammaBracketedRepresentation();
         }
 
         protected virtual (EarleyColumn[], int[]) PrepareEarleyTable(string[] text, int maxWord)
@@ -653,6 +641,7 @@ namespace LinearIndexedGrammarParser
             statesRemovedInLastReparse.Clear();
             _grammar = _oldGrammar;
             _oldGrammar = null;
+
         }
 
         //Suggest RHS for a rule that would complete currently unparsed sequence.

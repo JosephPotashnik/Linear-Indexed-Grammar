@@ -81,6 +81,8 @@ namespace LinearIndexedGrammarLearner
             return Math.Pow(sumTrees, (1 / (double)maxLength));
         }
 
+        //the difference between ParseAllSentencesFromScratch and ParseAllSentence is that the
+        //in the former we keep using the _sentencesParser parsers.
         public void ParseAllSentencesFromScratch(ContextSensitiveGrammar currentHypothesis)
         {
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
@@ -98,8 +100,7 @@ namespace LinearIndexedGrammarLearner
                 Parallel.ForEach(Parses,
                     (sentenceItem, loopState, i) =>
                     {
-                        var n = _sentencesParser[i].ParseSentence(sentenceItem.Sentence);
-                        Parses[i].BracketedTreeRepresentations = n;
+                         _sentencesParser[i].ParseSentence(sentenceItem.Sentence);
                     });
             }
             catch (OperationCanceledException)
@@ -115,11 +116,7 @@ namespace LinearIndexedGrammarLearner
             AcceptChanges();
         }
 
-        public void RefreshParses()
-        {
-            for (var i = 0; i < Parses.Length; i++)
-                Parses[i].BracketedTreeRepresentations = _sentencesParser[i].GetGammaBracketedRepresentation();
-        }
+
 
         public void SetOriginalGrammarBeforePermutation()
         {
@@ -160,8 +157,7 @@ namespace LinearIndexedGrammarLearner
                 Parallel.ForEach(Parses,
                     (sentenceItem, loopState, i) =>
                     {
-                        var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
-                        Parses[i].BracketedTreeRepresentations = n;
+                        _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
                     });
             }
             catch (OperationCanceledException)
@@ -212,9 +208,8 @@ namespace LinearIndexedGrammarLearner
                 Parallel.ForEach(Parses,
                     (sentenceItem, loopState, i) =>
                     {
-                        var n = _sentencesParser[i]
+                        _sentencesParser[i]
                             .ReParseSentenceWithRuleDeletion(currentCFHypothesis, deletedRule, predictionSet);
-                        Parses[i].BracketedTreeRepresentations = n;
                     });
             }
             catch (OperationCanceledException)
@@ -254,8 +249,7 @@ namespace LinearIndexedGrammarLearner
                 Parallel.ForEach(sentencesWithCounts,
                     (sentenceItem, loopState, i) =>
                     {
-                        var n = parsers[i].ParseSentence(sentenceItem.Sentence);
-                        sentencesWithCounts[i].BracketedTreeRepresentations = n;
+                        parsers[i].ParseSentence(sentenceItem.Sentence);
                     });
 
 
@@ -288,33 +282,6 @@ namespace LinearIndexedGrammarLearner
             }
 
             return sentencesWithCounts;
-        }
-
-        public SentenceParsingResults[] ParseAllSentences(ContextFreeGrammar currentHypothesis)
-        {
-            try
-            {
-                Parallel.ForEach(Parses,
-                    (sentenceItem, loopState, i) =>
-                    {
-                        var parser =
-                            new EarleyParser(currentHypothesis, _voc,
-                                false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
-                        var n = parser.ParseSentence(sentenceItem.Sentence);
-                        Parses[i].BracketedTreeRepresentations = n;
-                    });
-            }
-            catch (OperationCanceledException)
-            {
-                //parse tree too long to parse
-                //the grammar is too recursive,
-                //decision - discard it and continue.
-                //string s = "parsing took too long, for the grammar:\r\n" + currentHypothesis.ToString();
-                //NLog.LogManager.GetCurrentClassLogger().Info(s);
-                return null; //parsing failed.
-            }
-
-            return Parses;
         }
 
         public Dictionary<int, int> GetGrammarTrees(ContextFreeGrammar hypothesis)

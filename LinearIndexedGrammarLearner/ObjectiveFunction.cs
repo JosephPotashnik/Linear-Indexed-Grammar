@@ -129,8 +129,9 @@ namespace LinearIndexedGrammarLearner
             //        "Cyclic Unit Production Encountered at unexpected place, in preparation to remove the check for cyclic");
 
             double prob = 0;
+            
             var allParses = _learner.Parses;
-
+            int numberOfSentenceUnParsed = 0;
             //var trees = new HashSet<(int, string)>();
             var treesDic = new Dictionary<int, HashSet<string>>();
             for (var i = 0; i < allParses.Length; i++)
@@ -141,12 +142,16 @@ namespace LinearIndexedGrammarLearner
                     treesDic.Add(allParses[i].Length, set);
                 }
 
-                for (var j = 0; j < allParses[i].BracketedTreeRepresentations.Count; j++)
-                    set.Add(allParses[i].BracketedTreeRepresentations[j]);
+                set.UnionWith(_learner._sentencesParser[i].BracketedRepresentations);
+                //for (var j = 0; j < _learner._sentencesParser[i].BracketedRepresentations.Count; j++)
+                 //   set.Add(_learner._sentencesParser[i].BracketedRepresentations[j]);
+
+                if (_learner._sentencesParser[i].BracketedRepresentations.Count == 0)
+                    numberOfSentenceUnParsed++;
             }
 
             var minLength = 1;
-            int numberOfSentenceUnParsed = 0;
+           
             //int alldataCount = 0;
             var dataTreesPerLength = new Dictionary<int, int>();
             foreach (var length in treesDic.Keys)
@@ -165,23 +170,6 @@ namespace LinearIndexedGrammarLearner
                 double totalProbabilityOfGrammarTrees = 0;
                 foreach (var length in grammarTreesPerLength.Keys)
                     totalProbabilityOfGrammarTrees += probabilityMassOfLength[length];
-
-                //double growth = _learner.GetGrammarGrowth(grammarTreesPerLength);
-                //double growth = 0.1;
-
-                //double totalProbabilityOfGrammarTrees = 0;
-                //int previousLength = 0;
-                //foreach (var length in grammarTreesPerLength.Keys)
-                //{
-                //    probabilityMassOfLength[length] = 1 - Math.Exp(-growth * length) - totalProbabilityOfGrammarTrees;
-                //    totalProbabilityOfGrammarTrees += probabilityMassOfLength[length];
-                //    previousLength = length;
-                //    if (length < previousLength)
-                //    {
-                //        throw new Exception("keys should be in ascending order.");
-                //    }
-                //}
-
 
                 foreach (var length in grammarTreesPerLength.Keys)
                 {
@@ -207,7 +195,14 @@ namespace LinearIndexedGrammarLearner
                     //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
                     //right now: it is depth = maxWords+3. change?
                 }
-                numberOfSentenceUnParsed = allParses.Count(x => x.BracketedTreeRepresentations.Count == 0);
+
+
+                //for (int i = 0; i < allParses.Length; i++)
+                //{
+                //    if (_learner._sentencesParser[i].BracketedRepresentations.Count == 0)
+                //        numberOfSentenceUnParsed++;
+                //}
+                
                 var unexplainedSentences = PenaltyCoefficient * numberOfSentenceUnParsed / (double)allParses.Length;
 
                 prob *= 1 - unexplainedSentences;

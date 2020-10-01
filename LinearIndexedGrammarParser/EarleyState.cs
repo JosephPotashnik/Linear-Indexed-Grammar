@@ -6,7 +6,7 @@ namespace LinearIndexedGrammarParser
 {
     public class EarleyState : IEquatable<EarleyState>
     {
-        public string BracketedTreeRepresentation;
+        public string BracketedRepresentation;
         public HashSet<EarleyState> Parents = new HashSet<EarleyState>();
 
         public EarleyState(Rule r, int dotIndex, EarleyColumn c)

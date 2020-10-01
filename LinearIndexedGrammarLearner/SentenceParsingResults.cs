@@ -7,8 +7,6 @@ namespace LinearIndexedGrammarLearner
         //the sentence being parsed
         public string[] Sentence { get; set; }
 
-        public List<string> BracketedTreeRepresentations { get; set; }
-
         //the number of times the sentence was encountered in the corpus.
         public int Count { get; set; }
 
