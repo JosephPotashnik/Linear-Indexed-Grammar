@@ -142,23 +142,17 @@ namespace LinearIndexedGrammarLearner
                 }
 
                 set.UnionWith(_learner._sentencesParser[i].BracketedRepresentations);
-                //for (var j = 0; j < _learner._sentencesParser[i].BracketedRepresentations.Count; j++)
-                //   set.Add(_learner._sentencesParser[i].BracketedRepresentations[j]);
-
                 if (_learner._sentencesParser[i].BracketedRepresentations.Count == 0)
                     numberOfSentenceUnParsed++;
             }
 
             var minLength = 1;
-
-            //int alldataCount = 0;
             var dataTreesPerLength = new Dictionary<int, int>();
             foreach (var length in treesDic.Keys)
             {
                 dataTreesPerLength[length] = treesDic[length].Count;
                 if (length < minLength)
                     minLength = length;
-                //alldataCount += treesDic[length].Count;
             }
 
             if (treesDic.Count > 0)
@@ -194,13 +188,6 @@ namespace LinearIndexedGrammarLearner
                     //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
                     //right now: it is depth = maxWords+3. change?
                 }
-
-
-                //for (int i = 0; i < allParses.Length; i++)
-                //{
-                //    if (_learner._sentencesParser[i].BracketedRepresentations.Count == 0)
-                //        numberOfSentenceUnParsed++;
-                //}
 
                 var unexplainedSentences = PenaltyCoefficient * numberOfSentenceUnParsed / (double)allParses.Length;
 

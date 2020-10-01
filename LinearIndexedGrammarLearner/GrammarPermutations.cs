@@ -13,7 +13,7 @@ namespace LinearIndexedGrammarLearner
         public delegate (ContextSensitiveGrammar mutatedGrammar, bool reparsed)
             GrammarMutation(ContextSensitiveGrammar grammar, Learner learner);
 
-        public const int CFGOperationWeight = 22;
+        public const int CFGOperationWeight = 24;
         public const int LIGOperationWeight = 5;
 
         private static Tuple<GrammarMutation, int>[] _mutations;
@@ -29,7 +29,7 @@ namespace LinearIndexedGrammarLearner
                 l.Add(new GrammarMutationData("DeleteStackConstantRule", CFGOperationWeight));
                 l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
                 l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
-                l.Add(new GrammarMutationData("InsertPrefixExtendingStackConstantRule", 0));
+                l.Add(new GrammarMutationData("InsertPrefixExtendingStackConstantRule", CFGOperationWeight / 4));
             }
             else
             {
