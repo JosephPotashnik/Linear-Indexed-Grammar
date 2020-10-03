@@ -1,6 +1,7 @@
 ﻿using LinearIndexedGrammarParser;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LinearIndexedGrammarLearner
 {
@@ -113,6 +114,28 @@ namespace LinearIndexedGrammarLearner
             if (val >= maxVal) return true;
             return Math.Abs(val - maxVal) < Tolerance;
         }
+        private (Dictionary<int, int>, int) ComputeDataTrees(SentenceParsingResults[] allParses)
+        {
+            int numberOfSentenceUnParsed = 0;
+            var treesDic = new Dictionary<int, HashSet<string>>();
+            for (var i = 0; i < allParses.Length; i++)
+            {
+                if (!treesDic.TryGetValue(allParses[i].Length, out var set))
+                {
+                    set = new HashSet<string>();
+                    treesDic.Add(allParses[i].Length, set);
+                }
+
+                set.UnionWith(_learner._sentencesParser[i].BracketedRepresentations);
+                if (_learner._sentencesParser[i].BracketedRepresentations.Count == 0)
+                    numberOfSentenceUnParsed++;
+            }
+
+            var dataTreesPerLength = new Dictionary<int, int>();
+            foreach (var length in treesDic.Keys)
+                dataTreesPerLength[length] = treesDic[length].Count;
+            return (dataTreesPerLength, numberOfSentenceUnParsed);
+        }
 
         public (double val, bool feasible) Compute(ContextSensitiveGrammar currentHypothesis)
         {
@@ -131,34 +154,17 @@ namespace LinearIndexedGrammarLearner
 
             var allParses = _learner.Parses;
             int numberOfSentenceUnParsed = 0;
-            //var trees = new HashSet<(int, string)>();
-            var treesDic = new Dictionary<int, HashSet<string>>();
-            for (var i = 0; i < allParses.Length; i++)
-            {
-                if (!treesDic.TryGetValue(allParses[i].Length, out var set))
-                {
-                    set = new HashSet<string>();
-                    treesDic.Add(allParses[i].Length, set);
-                }
+            Dictionary<int, int> grammarTreesPerLength = null ;
+            Dictionary<int, int> dataTreesPerLength = null;
+            Parallel.Invoke(
+                () => { (dataTreesPerLength, numberOfSentenceUnParsed)  = ComputeDataTrees(allParses); },
+                () => { grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis); } 
+                );
+            
 
-                set.UnionWith(_learner._sentencesParser[i].BracketedRepresentations);
-                if (_learner._sentencesParser[i].BracketedRepresentations.Count == 0)
-                    numberOfSentenceUnParsed++;
-            }
-
-            var minLength = 1;
-            var dataTreesPerLength = new Dictionary<int, int>();
-            foreach (var length in treesDic.Keys)
-            {
-                dataTreesPerLength[length] = treesDic[length].Count;
-                if (length < minLength)
-                    minLength = length;
-            }
-
-            if (treesDic.Count > 0)
+            if (dataTreesPerLength.Count > 0)
             {
                 prob = 1;
-                var grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis);
 
                 double totalProbabilityOfGrammarTrees = 0;
                 foreach (var length in grammarTreesPerLength.Keys)

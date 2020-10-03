@@ -75,6 +75,8 @@ namespace LinearIndexedGrammar
             }
 
             ConfigureLogger();
+            Process p = Process.GetCurrentProcess();
+            p.PriorityClass = ProcessPriorityClass.High;
             Learn(fileName, maxNonTerminals);
         }
 
