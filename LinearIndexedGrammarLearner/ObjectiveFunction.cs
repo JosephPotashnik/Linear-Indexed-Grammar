@@ -80,6 +80,7 @@ namespace LinearIndexedGrammarLearner
             PenaltyCoefficient = 1;
             NoiseTolerance = noiseTolerance;
             _learner = l;
+            maxVal = 1.0;
         }
 
 

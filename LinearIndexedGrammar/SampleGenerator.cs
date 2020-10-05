@@ -9,22 +9,22 @@ namespace LinearIndexedGrammar
     class SampleGenerator
     {
 
-        static int[] GetMinimumNumberOfSamples(double precision, double confidence, int maxWords)
+        static int[] GetMinimumNumberOfSamples()
         {
             int[] bounds =
 {
                 0,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
                 1100,
             };
 
@@ -232,7 +232,7 @@ namespace LinearIndexedGrammar
             foreach (var state in statesList)
                 allGrammarStates[state.EndColumn.Index].Add(state);
 
-            var bounds = GetMinimumNumberOfSamples(0.05, 0.95, maxWords);
+            var bounds = GetMinimumNumberOfSamples();
 
             return DrawSamples(allGrammarStates, bounds, pos, universalVocabulary, distType);
         }

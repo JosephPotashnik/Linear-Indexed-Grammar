@@ -1,14 +1,29 @@
 ﻿{
   "ProgramsToRun": [
     {
-      "IsCFG": true,
-      "VocabularyFileName": "Vocabulary.json",
-      "NumberOfRuns": 1,
-      "GrammarFileName": "NoNPNoV3.txt",
-      "DataFileName": null,
-      "DistributionType": "Normal",
-      "CoolingFactor": 0.999
-    },
+      "InputParams": {
+        "IsCFG": true,
+        "VocabularyFileName": "Vocabulary.json",
+        "GrammarFileName": "NoNPNoV3.txt",
+        "DataFileName": null,
+        "DistributionType": "Normal",
+        "MaxSentenceLength": 11 //MaxSentenceLength is at least 6
+      },
+      "SearchSpaceParams": {
+        "NumberOfRuns": 1,
+        "MinNumberOfNonTerminals": 4,
+        "MaxNumberOfNonTerminals": 8,
+        "MinNoise": 0.0,
+        "MaxNoise": 0.2,
+        "NoiseStepSize": 0.1
+      },
+      "SimulatedAnnealingParams": {
+        "CoolingFactor": 0.999,
+        "NumberOfIterations": 100,
+        "InitialTemperature":  10
+      }
+    }
+    /*,
     {
       "IsCFG": true,
       "VocabularyFileName": "Vocabulary.json",
@@ -191,7 +206,7 @@
       "DistributionType": "PowerLaw",
       "CoolingFactor": 0.999
     }
-    /*{
+    {
       "IsCFG": true,
       "VocabularyFileName": "Vocabulary.json",
       "NumberOfRuns": 1,

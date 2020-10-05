@@ -7,23 +7,21 @@ using System.Linq;
 
 namespace LinearIndexedGrammarLearner
 {
-
-
-    [JsonObject(MemberSerialization.OptIn)]
-    public class SimulatedAnnealingParameters
+    public class SimulatedAnnealingParams
     {
-        [JsonProperty] public int NumberOfIterations { get; set; }
-        [JsonProperty] public double InitialTemperature { get; set; }
-        [JsonProperty] public double CoolingFactor { get; set; }
+        public int NumberOfIterations { get; set; }
+        public double InitialTemperature { get; set; }
+        public double CoolingFactor { get; set; }
     }
+
 
     public class SimulatedAnnealing
     {
         private readonly Learner _learner;
         private readonly GrammarFitnessObjectiveFunction _objectiveFunction;
-        private readonly SimulatedAnnealingParameters _params;
+        private readonly SimulatedAnnealingParams _params;
 
-        public SimulatedAnnealing(Learner l, SimulatedAnnealingParameters parameters,
+        public SimulatedAnnealing(Learner l, SimulatedAnnealingParams parameters,
             GrammarFitnessObjectiveFunction objectiveFunction)
         {
             _learner = l;
@@ -263,7 +261,7 @@ namespace LinearIndexedGrammarLearner
 
             var noImprovementCounter = 0;
             int randomPastBestGrammar = 0;
-            double peakValue = 0;
+
             while (currentIteration++ < _params.NumberOfIterations)
             {
                 //Inject(); //inject debug grammar to study certain grammars behavior for analysis. uncommented only during development.
@@ -288,7 +286,6 @@ namespace LinearIndexedGrammarLearner
                             //LogManager.GetCurrentClassLogger().Info($"Enqueued MAXIMAL feasible value to best grammars, size of bestGrammars: {bestGrammars.Count}, smallest Value is {smallestBestValue.Key}");
 
                         }
-                        peakValue = currentKey.Key;
                         break;
                     }
                     else
@@ -342,14 +339,6 @@ namespace LinearIndexedGrammarLearner
 
             currentValue = bestGrammars.Last().Key.objectiveFunctionValue;
             //LogManager.GetCurrentClassLogger().Info($"Value of the objective function of the last key in best grammars: {currentValue} and its feasibility { bestGrammars.Last().Key.feasible} ");
-
-            if (peakValue > 1.0)
-            {
-                if (peakValue != currentValue + 1.0)
-                {
-                    throw new Exception($"should not happen, current value is { currentValue } and peak value is {peakValue}");
-                }
-            }
             currentGrammar = new ContextSensitiveGrammar(bestGrammars[bestGrammars.Last().Key]);
 
             return (currentGrammar, currentValue);
