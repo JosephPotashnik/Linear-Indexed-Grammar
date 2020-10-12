@@ -8,7 +8,7 @@ namespace LinearIndexedGrammarLearner
 
     public class GrammarFitnessObjectiveFunction
     {
-        public const double Tolerance = 0.0001;
+        public const double RoundingErrorTolerance = 0.0001;
         public int PenaltyCoefficient { get; set; }
         public double NoiseTolerance { get; set; }
 
@@ -113,7 +113,7 @@ namespace LinearIndexedGrammarLearner
         public bool IsMaximalValue(double val)
         {
             if (val >= maxVal) return true;
-            return Math.Abs(val - maxVal) < Tolerance;
+            return Math.Abs(val - maxVal) < RoundingErrorTolerance;
         }
         private (Dictionary<int, int>, int) ComputeDataTrees(SentenceParsingResults[] allParses)
         {
@@ -133,15 +133,21 @@ namespace LinearIndexedGrammarLearner
             }
 
             var dataTreesPerLength = new Dictionary<int, int>();
+            int sum = 0;
             foreach (var length in treesDic.Keys)
+            {
                 dataTreesPerLength[length] = treesDic[length].Count;
+                sum+= treesDic[length].Count; 
+            }
+            if (sum == 0) dataTreesPerLength = null;
+
             return (dataTreesPerLength, numberOfSentenceUnParsed);
         }
 
         public (double val, bool feasible) Compute(ContextSensitiveGrammar currentHypothesis)
         {
             var probabilityMassOfLength = uniform;
-
+            double unparsedSentencesRatio = 0, unexplainedSentenceRatio = 0;
             if (currentHypothesis == null) return (0, false);
 
             var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
@@ -163,46 +169,49 @@ namespace LinearIndexedGrammarLearner
                 );
             
 
-            if (dataTreesPerLength.Count > 0)
+            if (dataTreesPerLength != null)
             {
-                prob = 1;
 
-                double totalProbabilityOfGrammarTrees = 0;
-                foreach (var length in grammarTreesPerLength.Keys)
-                    totalProbabilityOfGrammarTrees += probabilityMassOfLength[length];
+                    prob = 1;
+                    double totalProbabilityOfGrammarTrees = 0;
+                    foreach (var length in grammarTreesPerLength.Keys)
+                        totalProbabilityOfGrammarTrees += probabilityMassOfLength[length];
 
-                foreach (var length in grammarTreesPerLength.Keys)
-                {
-                    dataTreesPerLength.TryGetValue(length, out var dataTreesInLength);
-                    var allGrammarTreesInLength = grammarTreesPerLength[length];
+                    foreach (var length in grammarTreesPerLength.Keys)
+                    {
+                        dataTreesPerLength.TryGetValue(length, out var dataTreesInLength);
+                        var allGrammarTreesInLength = grammarTreesPerLength[length];
 
-                    var diff = allGrammarTreesInLength - dataTreesInLength;
-                    if (diff > 0)
-                        prob -= diff / (double)allGrammarTreesInLength * probabilityMassOfLength[length] /
-                                totalProbabilityOfGrammarTrees;
+                        var diff = allGrammarTreesInLength - dataTreesInLength;
+                        if (diff > 0)
+                            prob -= diff / (double)allGrammarTreesInLength * probabilityMassOfLength[length] /
+                                    totalProbabilityOfGrammarTrees;
 
+                    }
+
+                    if (prob > 1)
+                    {
+                        return (0, false);
+                        //the case where probabilityOfInputGivenGrammar > 1 arises when
+                        //totalTreesCountofData > totalTreesCountofGrammar, which can happen because totalTreesCountofGrammar
+                        //is computed only up to a certain depth of the tree.
+                        //so it's possible that the input data is parsed in a tree whose depth exceeds the depth we have allowed above.
+
+                        //assumption: we will reject grammars with data parsed too deep.
+                        //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
+                        //right now: it is depth = maxWords+3. change?
+                    
                 }
 
-                if (prob > 1)
-                {
-                    return (0, false);
-                    //the case where probabilityOfInputGivenGrammar > 1 arises when
-                    //totalTreesCountofData > totalTreesCountofGrammar, which can happen because totalTreesCountofGrammar
-                    //is computed only up to a certain depth of the tree.
-                    //so it's possible that the input data is parsed in a tree whose depth exceeds the depth we have allowed above.
+                unparsedSentencesRatio = numberOfSentenceUnParsed / (double)allParses.Length;
 
-                    //assumption: we will reject grammars with data parsed too deep.
-                    //discuss: what is the upper bound of tree depth as a function of the number of words in the sentence?
-                    //right now: it is depth = maxWords+3. change?
-                }
+                unexplainedSentenceRatio = unparsedSentencesRatio - NoiseTolerance > RoundingErrorTolerance ? unparsedSentencesRatio - NoiseTolerance : 0;
 
-                var unexplainedSentences = PenaltyCoefficient * numberOfSentenceUnParsed / (double)allParses.Length;
-
-                prob *= 1 - unexplainedSentences;
+                prob *= 1 - unexplainedSentenceRatio;
                 if (prob < 0) prob = 0;
             }
 
-            return (prob, numberOfSentenceUnParsed <= allParses.Length * NoiseTolerance);
+            return (prob, unexplainedSentenceRatio == 0);
         }
     }
 }

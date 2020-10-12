@@ -236,10 +236,14 @@ namespace LinearIndexedGrammarLearner
         }
 
 
-        public (ContextSensitiveGrammar bestGrammar, double bestValue) Run(bool isCFGGrammar,
+        public (ContextSensitiveGrammar bestGrammar, double bestValue, bool feasible) Run(bool isCFGGrammar,
             ContextSensitiveGrammar initiaGrammar = null)
         {
             var currentIteration = 0;
+
+            if (_learner._gp == null)
+                _learner._gp = new GrammarPermutations(isCFGGrammar);
+
             var currentGrammar = initiaGrammar ?? _learner.CreateInitialGrammar(isCFGGrammar);
 
             //set the parsers to the initial grammar.
@@ -252,7 +256,7 @@ namespace LinearIndexedGrammarLearner
             //if current grammar is already optimal on data, no need to learn anything,
             //return immediately.
             if (feasible && _objectiveFunction.IsMaximalValue(currentValue))
-                return (currentGrammar, currentValue);
+                return (currentGrammar, currentValue, feasible);
 
             var bestGrammars = new SortedDictionary<BestGrammarsKey, ContextSensitiveGrammar>();
             var numberOfBestGrammarsToKeep = 20;
@@ -264,10 +268,9 @@ namespace LinearIndexedGrammarLearner
 
             while (currentIteration++ < _params.NumberOfIterations)
             {
-                //Inject(); //inject debug grammar to study certain grammars behavior for analysis. uncommented only during development.
 
                 (currentGrammar, currentValue, feasible) = RunSingleIteration(currentGrammar, currentValue);
-                LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, objective function value {currentValue} (feasible: {feasible})");
+                //LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, objective function value {currentValue} (feasible: {feasible})");
                 currentKey = new BestGrammarsKey(currentValue, feasible);
 
                 if (_objectiveFunction.IsMaximalValue(currentValue))
@@ -338,10 +341,12 @@ namespace LinearIndexedGrammarLearner
             }
 
             currentValue = bestGrammars.Last().Key.objectiveFunctionValue;
+            feasible = bestGrammars.Last().Key.feasible;
+
             //LogManager.GetCurrentClassLogger().Info($"Value of the objective function of the last key in best grammars: {currentValue} and its feasibility { bestGrammars.Last().Key.feasible} ");
             currentGrammar = new ContextSensitiveGrammar(bestGrammars[bestGrammars.Last().Key]);
 
-            return (currentGrammar, currentValue);
+            return (currentGrammar, currentValue, feasible);
         }
     }
 }

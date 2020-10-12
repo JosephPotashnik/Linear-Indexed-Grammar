@@ -14,18 +14,18 @@ namespace LinearIndexedGrammar
             int[] bounds =
 {
                 0,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                1100,
+                1000,
+                1000,
+                1000,
+                1000,
+                1000,
+                1000,
+                1000,
+                1000,
+                1000,
+                1000,
+                1000,
+                1000,
             };
 
             return bounds;
@@ -165,11 +165,32 @@ namespace LinearIndexedGrammar
                                 universalVocabulary.POSWithPossibleWords[category].ToArray());
                         }
                     }
+
+                    //AddNoise(sentences, textVocabulary, i, sentencesOfLength);
                 }
             }
 
             return (sentences.ToArray(), textVocabulary);
         }
+
+        private static void AddNoise(List<string[]> sentences, Vocabulary textVocabulary, int i, string[][] sentencesOfLength, double noiseSentencesRatio = 0.1)
+        {
+            //add noise
+            var allWords = textVocabulary.WordWithPossiblePOS.Keys.ToArray();
+            
+            int noiseSentencesCount = (int)(sentencesOfLength.Length * noiseSentencesRatio);
+            for (int j = 0; j < noiseSentencesCount; j++)
+            {
+                var sentence = new string[i];
+                for (int k = 0; k < i; k++)
+                {
+                    var wordIndex = Pseudorandom.NextInt(textVocabulary.WordWithPossiblePOS.Keys.Count);
+                    sentence[k] = allWords[wordIndex];
+                }
+                sentences.Add(sentence);
+            }
+        }
+
         static (string[][] sentences, HashSet<string> posCategories) DrawSampleFromStatesWithLengthK(List<EarleyState> states, int[] distributionOverStates, int numberOfSamples, HashSet<string> pos, Vocabulary universalVocabulary)
         {
             var rand = new Random();

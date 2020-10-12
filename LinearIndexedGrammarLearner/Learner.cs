@@ -16,7 +16,7 @@ namespace LinearIndexedGrammarLearner
         private readonly Vocabulary _voc;
 
         // ReSharper disable once NotAccessedField.Local
-        private GrammarPermutations _gp;
+        public GrammarPermutations _gp;
         public GrammarTreeCountsCalculator _grammarTreesCalculator;
 
         public Learner(string[][] sentences, int minWordsInSentence, int maxWordsInSentence,
@@ -52,8 +52,6 @@ namespace LinearIndexedGrammarLearner
         ////We create the "promiscuous grammar" as initial grammar.
         public ContextSensitiveGrammar CreateInitialGrammar(bool isCFGGrammar)
         {
-            _gp = new GrammarPermutations(isCFGGrammar);
-
             var rules = new List<Rule>();
             foreach (var pos in _posInText)
             {

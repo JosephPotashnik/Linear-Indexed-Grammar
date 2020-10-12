@@ -186,29 +186,12 @@ namespace LinearIndexedGrammarParser
                 throw new Exception("wrong value of moveable references");
         }
 
-        //warning: used only for debugging, not intended to be called normally!
-        //public override bool Equals(object obj)
-        //{
-        //    var other = (ContextSensitiveGrammar)obj;
-        //    bool found = false;
-        //    if (StackConstantRules.Count != other.StackConstantRules.Count) return false;
+        public int NumberOfLHSNonterminals()
+        {
+            var lhses = StackConstantRules.Select(x => RuleSpace[x]).Select(x => x.LeftHandSide.ToString());
+            return lhses.Distinct().Count() - 1; //do not count "START" symbol.
+        }
 
-        //    foreach (var rule in StackConstantRules)
-        //    {
-        //        found = false;
-        //        foreach (var otherRule in other.StackConstantRules)
-        //        {
-        //            if (rule.LHSIndex == otherRule.LHSIndex && rule.RHSIndex == otherRule.RHSIndex && rule.RuleType == otherRule.RuleType)
-        //            {
-        //                found = true;
-        //                break;
-        //            }
-        //        }
-        //        if (!found) return false;
-
-        //    }
-        //    return true;
-        //}
     }
 
 
