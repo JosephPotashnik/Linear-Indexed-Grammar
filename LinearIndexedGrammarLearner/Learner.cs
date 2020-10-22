@@ -50,7 +50,7 @@ namespace LinearIndexedGrammarLearner
         public SentenceParsingResults[] Parses { get; }
 
         ////We create the "promiscuous grammar" as initial grammar.
-        public ContextSensitiveGrammar CreateInitialGrammar(bool isCFGGrammar)
+        public ContextSensitiveGrammar CreatePromiscuousGrammar(bool isCFGGrammar)
         {
             var rules = new List<Rule>();
             foreach (var pos in _posInText)

@@ -29,7 +29,7 @@ namespace LinearIndexedGrammarLearner
                 l.Add(new GrammarMutationData("DeleteStackConstantRule", CFGOperationWeight));
                 l.Add(new GrammarMutationData("ChangeLHS", CFGOperationWeight));
                 l.Add(new GrammarMutationData("ChangeRHS", CFGOperationWeight));
-                l.Add(new GrammarMutationData("InsertPrefixExtendingStackConstantRule", CFGOperationWeight / 4));
+                l.Add(new GrammarMutationData("InsertPrefixExtendingStackConstantRule", 0));
             }
             else
             {

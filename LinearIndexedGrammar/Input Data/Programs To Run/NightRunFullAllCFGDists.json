@@ -4,23 +4,24 @@
       "InputParams": {
         "IsCFG": true,
         "VocabularyFileName": "Vocabulary.json",
-        "GrammarFileName": "NoNPNoV3.txt",
+        "GrammarFileName": "YesNPYesV3WithADJ.txt",
         "DataFileName": null,
         "DistributionType": "Normal",
-        "MaxSentenceLength": 11 //MaxSentenceLength is at least 6
+        "MaxSentenceLength": 8 //MaxSentenceLength is at least 6
       },
       "SearchSpaceParams": {
         "NumberOfRuns": 1,
-        "MinNumberOfNonTerminals": 4,
-        "MaxNumberOfNonTerminals": 8,
+        "MinNumberOfNonTerminals": 5,
+        "MaxNumberOfNonTerminals": 6,
         "MinNoise": 0.0,
-        "MaxNoise": 0.2,
+        "MaxNoise": 0.1,
         "NoiseStepSize": 0.1
       },
       "SimulatedAnnealingParams": {
         "CoolingFactor": 0.999,
-        "NumberOfIterations": 100,
-        "InitialTemperature":  10
+        "NumberOfRestarts": 6,  
+        "NumberOfNonImprovingIterationsBeforeRestart": 30,
+        "InitialTemperature": 10
       }
     }
     /*,

@@ -207,7 +207,7 @@ namespace LinearIndexedGrammarLearner
 
                 unexplainedSentenceRatio = unparsedSentencesRatio - NoiseTolerance > RoundingErrorTolerance ? unparsedSentencesRatio - NoiseTolerance : 0;
 
-                prob *= 1 - unexplainedSentenceRatio;
+                prob *= 1 - unexplainedSentenceRatio;// * PenaltyCoefficient;
                 if (prob < 0) prob = 0;
             }
 

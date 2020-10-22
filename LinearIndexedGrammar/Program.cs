@@ -40,7 +40,8 @@ namespace LinearIndexedGrammar
     [JsonObject(MemberSerialization.OptIn)]
     public class SimulatedAnnealingParams
     {
-        [JsonProperty] public int NumberOfIterations { get; set; }
+        [JsonProperty] public int NumberOfNonImprovingIterationsBeforeRestart { get; set; }
+        [JsonProperty] public int NumberOfRestarts { get; set; }
         [JsonProperty] public double InitialTemperature { get; set; }
         [JsonProperty] public double CoolingFactor { get; set; }
     }
@@ -277,7 +278,8 @@ namespace LinearIndexedGrammar
 
                 var saParams = new LinearIndexedGrammarLearner.SimulatedAnnealingParams
                 {
-                    NumberOfIterations = programParams.SimulatedAnnealingParams.NumberOfIterations,
+                    NumberOfNonImprovingIterationsBeforeRestart = programParams.SimulatedAnnealingParams.NumberOfNonImprovingIterationsBeforeRestart,
+                    NumberOfRestarts = programParams.SimulatedAnnealingParams.NumberOfRestarts,
                     CoolingFactor = programParams.SimulatedAnnealingParams.CoolingFactor,
                     InitialTemperature = programParams.SimulatedAnnealingParams.InitialTemperature
                 };
@@ -315,6 +317,7 @@ namespace LinearIndexedGrammar
                 for (int numberOfNonTerminals = programParams.SearchSpaceParams.MinNumberOfNonTerminals; numberOfNonTerminals <= programParams.SearchSpaceParams.MaxNumberOfNonTerminals; numberOfNonTerminals++)
                 {
                     int j = 0;
+                    bool continueSearching = false;
                     for (double noiseTolerance = programParams.SearchSpaceParams.MaxNoise; noiseTolerance >= (programParams.SearchSpaceParams.MinNoise - roundingError); noiseTolerance -= programParams.SearchSpaceParams.NoiseStepSize)
                     {
                         s = $"\t\t\t\tHyper-parameters : NumberOfNonTerminals: {numberOfNonTerminals} NoiseTolerance: {noiseTolerance:0.00}\r\n";
@@ -338,21 +341,50 @@ namespace LinearIndexedGrammar
 
                         var (bestHypothesis, bestValue, feasible) = LearnGrammarFromData(data, dataVocabulary, saParams, programParams.InputParams.IsCFG, numberOfNonTerminals, noiseTolerance, initialGrammar);
 
-                        s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with objective function value {bestValue}";
+                        s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with objective function value {bestValue:0.000}";
                         LogManager.GetCurrentClassLogger().Info(s);
 
-                        Statistics(bestHypothesis, grammarRules, universalVocabulary, maxWordsInSentence);
+                        var f1_score = Statistics(bestHypothesis, grammarRules, universalVocabulary, maxWordsInSentence);
                         results[i, j] = Tuple.Create(bestHypothesis, bestValue, feasible);
                         j++;
-                    }
-                    if (i > 0)
-                    {
-                        if (results[i - 1, noiseToleranceSpaceSize - 1].Item2 >= results[i, noiseToleranceSpaceSize - 1].Item2)
+                        continueSearching = true;
+                        if (f1_score > 0.95)
                         {
-                            LogManager.GetCurrentClassLogger().Info($"Solution with minimal noise tolerance and {numberOfNonTerminals} nonterminals is equal or worse to solution with {numberOfNonTerminals - 1} nonterminals with same noise tolerance. Conclusion is that optimal solution already reached before. Terminating search.");
+                            continueSearching = false;
                             break;
                         }
+
+
                     }
+                    if (!continueSearching)
+                    {
+                        LogManager.GetCurrentClassLogger().Info($"f1_score sufficiently high for latest hypothesis.");
+                        break;
+                    }
+                    continueSearching = false;
+
+                    if (i > 0)
+                    {
+                        for (int p = 0; p < noiseToleranceSpaceSize; p++)
+                        {
+                            if (results[i - 1, p].Item2 < results[i, p].Item2)
+                            {
+                                //var numberOfNonterminalInHypothesis = results[i, p].Item1.NumberOfLHSNonterminals();
+                                //if (numberOfNonterminalInHypothesis < numberOfNonTerminals)
+                                //{
+                                //    LogManager.GetCurrentClassLogger().Info($"Number of nonterminals of hypothesis is {numberOfNonterminalInHypothesis}, smaller than allowed number, terminating search");
+                                //    break;
+
+                                //}
+
+                                continueSearching = true;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                        continueSearching = true;
+
                     //if a maximal solution found, return.
                     if (results[i, noiseToleranceSpaceSize - 1].Item2 == 1)
                     {
@@ -360,13 +392,13 @@ namespace LinearIndexedGrammar
                         break;
                     }
 
-                    var numberOfNonterminalInHypothesis = results[i, noiseToleranceSpaceSize - 1].Item1.NumberOfLHSNonterminals();
-                    if (numberOfNonterminalInHypothesis < numberOfNonTerminals)
-                    {
-                        LogManager.GetCurrentClassLogger().Info($"Number of nonterminals of hypothesis is {numberOfNonterminalInHypothesis}, smaller than allowed number, terminating search");
-                        break;
 
+                    if (!continueSearching)
+                    {
+                        LogManager.GetCurrentClassLogger().Info($"Solutions with {numberOfNonTerminals} nonterminals for all noise levels are equal or worse to solutions with {numberOfNonTerminals - 1} nonterminals with same noise levels. Conclusion is that optimal solution already reached before. Terminating search.");
+                        break;
                     }
+
                     i++;
                 }
 
@@ -376,7 +408,7 @@ namespace LinearIndexedGrammar
             StopWatch(stopWatch);
         }
 
-        private static void Statistics(ContextSensitiveGrammar bestHypothesis, List<Rule> grammarRules, Vocabulary universalVocabulary, int maxWords)
+        private static double Statistics(ContextSensitiveGrammar bestHypothesis, List<Rule> grammarRules, Vocabulary universalVocabulary, int maxWords)
         {
             //get all distinct sentences of target grammar:
             var targetGrammar = new ContextFreeGrammar(grammarRules);
@@ -396,8 +428,10 @@ namespace LinearIndexedGrammar
             var precision = truePositives / (double)(learnedSentences.Count());
             var recall = truePositives / (double)(targetSentences.Count());
             var f1_score = 2 * precision * recall / (precision + recall);
-            var s = $"Precision: {precision} Recall: {recall} F1-Score: {f1_score}";
+            var s = $"Precision: {precision:0.0000} Recall: {recall:0.0000} F1-Score: {f1_score:0.0000}";
             LogManager.GetCurrentClassLogger().Info(s);
+
+            return f1_score;
         }
 
         static private string[] GetAllNonTerminalSentencesOfGrammar(ContextFreeGrammar g, Vocabulary universalVocabulary, int maxWords)

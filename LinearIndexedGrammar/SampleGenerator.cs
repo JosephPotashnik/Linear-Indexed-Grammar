@@ -14,18 +14,18 @@ namespace LinearIndexedGrammar
             int[] bounds =
 {
                 0,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
-                1000,
+                200,
+                200,
+                200,
+                200,
+                200,
+                200,
+                200,
+                200,
+                200,
+                200,
+                200,
+                200,
             };
 
             return bounds;
@@ -166,7 +166,7 @@ namespace LinearIndexedGrammar
                         }
                     }
 
-                    //AddNoise(sentences, textVocabulary, i, sentencesOfLength);
+                    AddNoise(sentences, textVocabulary, i, sentencesOfLength);
                 }
             }
 
