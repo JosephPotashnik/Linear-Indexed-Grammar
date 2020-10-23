@@ -166,7 +166,7 @@ namespace LinearIndexedGrammar
                         }
                     }
 
-                    AddNoise(sentences, textVocabulary, i, sentencesOfLength);
+                    //AddNoise(sentences, textVocabulary, i, sentencesOfLength);
                 }
             }
 

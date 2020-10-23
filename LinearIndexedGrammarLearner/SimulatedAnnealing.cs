@@ -30,7 +30,7 @@ namespace LinearIndexedGrammarLearner
             _objectiveFunction = objectiveFunction;
         }
 
-        private (ContextSensitiveGrammar bestGrammar, double bestValue, bool bestFeasible) DownhillSlideWithGibbs(
+        private (ContextSensitiveGrammar bestGrammar, double bestValue, bool bestFeasible) DownhillSlide(
             ContextSensitiveGrammar initialGrammar, double initialValue)
         {
             var bestValue = initialValue;
@@ -119,15 +119,16 @@ namespace LinearIndexedGrammarLearner
         }
 
         private (ContextSensitiveGrammar bestGrammar, double bestValue, bool feasible) RunSingleIteration(
-            ContextSensitiveGrammar initialGrammar, double initialValue)
+            ContextSensitiveGrammar initialGrammar, double initialValue, bool initialFeasible)
         {
             var currentTemp = _params.InitialTemperature;
             var currentValue = initialValue;
             var currentGrammar = initialGrammar;
+            var currentFeasible = initialFeasible;
             var finalTemp = 0.3;
             var rejectCounter = 0;
-            bool feasible = false;
             double newValue = 0.0;
+            bool newFeasible = false;
             double percentageOfConsecutiveRejectionsToGiveUp = 0.1;
 
             var totalIterations = (int)((Math.Log(finalTemp) - Math.Log(_params.InitialTemperature)) / Math.Log(_params.CoolingFactor));
@@ -140,7 +141,7 @@ namespace LinearIndexedGrammarLearner
                 if (mutatedGrammar == null || !reparsed) continue;
 
                 currentTemp *= _params.CoolingFactor;
-                (newValue, feasible) = _objectiveFunction.Compute(mutatedGrammar);
+                (newValue, newFeasible) = _objectiveFunction.Compute(mutatedGrammar);
                 var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
 
                 if (accept)
@@ -149,6 +150,8 @@ namespace LinearIndexedGrammarLearner
                     //Console.WriteLine("accepted");
                     currentValue = newValue;
                     currentGrammar = mutatedGrammar;
+                    currentFeasible = newFeasible;
+
                     _learner.AcceptChanges();
                     if (_objectiveFunction.IsMaximalValue(currentValue))
                     {
@@ -178,43 +181,25 @@ namespace LinearIndexedGrammarLearner
                 if (rejectCounter > numberOfConsecutiveRejectionsToGiveUp) break;
             }
 
-            if (_objectiveFunction.IsMaximalValue(currentValue))
-            {
-
-                _learner.ParseAllSentencesFromScratch(currentGrammar);
-                bool newfeasible = false;
-                (newValue, newfeasible) = _objectiveFunction.Compute(currentGrammar);
-                if (newValue != currentValue || newfeasible != feasible)
-                {
-                    LogManager.GetCurrentClassLogger().Info($"BEFORE PRUNING UNUSED RULES: Maximal grammar:  {currentGrammar}\r\n, probability {currentValue + 1.0}");
-                    LogManager.GetCurrentClassLogger().Info($"reparsing (debugger), value  {newValue} feasible {newfeasible}");
-                    throw new Exception("should not happen! means your differential parses are compromised");
-                }
-            }
+            //sanity check at the end (in DEBUG) 
+            //_learner.ParseAllSentencesFromScratch(currentGrammar);
+            //bool newfeasible = false;
+            //(newValue, newfeasible) = _objectiveFunction.Compute(currentGrammar);
+            //if (newValue != currentValue || newfeasible != currentFeasible)
+            //{
+            //    LogManager.GetCurrentClassLogger().Info($"incremental value: {currentValue} feasible {currentFeasible}");
+            //    LogManager.GetCurrentClassLogger().Info($"reparsing value  {newValue} feasible {newfeasible}");
+            //    throw new Exception("should not happen! means your differential parses are compromised");
+            //}
+            
 
 
 
             PruneUnusedRules(currentGrammar);
 
-            //Downhill slide was found to slow convergence in practice.
-            //in the future: perhaps start using the slide only upon
-            //burn-in period or higher lagrangian multiplier.
-            //var localSearchAfterAnnealing = false;
-            //if (localSearchAfterAnnealing)
-            //{
 
-            //    // do a local search - strictly downhill 
-            //    if (!_objectiveFunction.IsMaximalValue(currentValue))
-            //    {
-            //        (currentGrammar, currentValue, feasible) = DownhillSlideWithGibbs(currentGrammar, currentValue);
 
-            //        _learner.RefreshParses();
-            //        PruneUnusedRules(currentGrammar);
-            //    }
-
-            //}
-
-            return (currentGrammar, currentValue, feasible);
+            return (currentGrammar, currentValue, currentFeasible);
         }
 
         private void PruneUnusedRules(ContextSensitiveGrammar currentGrammar)
@@ -289,7 +274,7 @@ namespace LinearIndexedGrammarLearner
             while (restartCounter < _params.NumberOfRestarts)
             {
 
-                (currentGrammar, currentValue, feasible) = RunSingleIteration(currentGrammar, currentValue);
+                (currentGrammar, currentValue, feasible) = RunSingleIteration(currentGrammar, currentValue, feasible);
                 //LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, objective function value {currentValue} (feasible: {feasible})");
                 var currentKey = new BestGrammarsKey(currentValue, feasible);
 

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LinearIndexedGrammar
 {
@@ -311,7 +312,6 @@ namespace LinearIndexedGrammar
                     var grammarRules1 = GrammarFileReader.ReadRulesFromFile("InitialGrammar.txt");
                     var partOfSpeechCategories = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
                     initialGrammar = new ContextSensitiveGrammar(grammarRules1);
-
                 }
 
                 for (int numberOfNonTerminals = programParams.SearchSpaceParams.MinNumberOfNonTerminals; numberOfNonTerminals <= programParams.SearchSpaceParams.MaxNumberOfNonTerminals; numberOfNonTerminals++)
@@ -344,9 +344,18 @@ namespace LinearIndexedGrammar
                         s = $"Best Hypothesis:\r\n{bestHypothesis} \r\n with objective function value {bestValue:0.000}";
                         LogManager.GetCurrentClassLogger().Info(s);
 
-                        var f1_score = Statistics(bestHypothesis, grammarRules, universalVocabulary, maxWordsInSentence);
                         results[i, j] = Tuple.Create(bestHypothesis, bestValue, feasible);
                         j++;
+
+
+                        var task = Task.Run(() => Statistics(bestHypothesis, grammarRules, universalVocabulary, maxWordsInSentence));
+                        TimeSpan ts = TimeSpan.FromSeconds(10);
+                        double f1_score = 0;
+                        if (!task.Wait(ts))
+                            LogManager.GetCurrentClassLogger().Info("Statistics were not computed, hypothesis grammar underfits poorly, generating intractable number of sentences (POS sequences)");
+                        else
+                            f1_score = task.Result;
+
                         continueSearching = true;
                         if (f1_score > 0.95)
                         {
@@ -361,44 +370,6 @@ namespace LinearIndexedGrammar
                         LogManager.GetCurrentClassLogger().Info($"f1_score sufficiently high for latest hypothesis.");
                         break;
                     }
-                    continueSearching = false;
-
-                    if (i > 0)
-                    {
-                        for (int p = 0; p < noiseToleranceSpaceSize; p++)
-                        {
-                            if (results[i - 1, p].Item2 < results[i, p].Item2)
-                            {
-                                //var numberOfNonterminalInHypothesis = results[i, p].Item1.NumberOfLHSNonterminals();
-                                //if (numberOfNonterminalInHypothesis < numberOfNonTerminals)
-                                //{
-                                //    LogManager.GetCurrentClassLogger().Info($"Number of nonterminals of hypothesis is {numberOfNonterminalInHypothesis}, smaller than allowed number, terminating search");
-                                //    break;
-
-                                //}
-
-                                continueSearching = true;
-                                break;
-                            }
-                        }
-                    }
-                    else
-                        continueSearching = true;
-
-                    //if a maximal solution found, return.
-                    if (results[i, noiseToleranceSpaceSize - 1].Item2 == 1)
-                    {
-                        LogManager.GetCurrentClassLogger().Info("Optimal solution found with minimal noise");
-                        break;
-                    }
-
-
-                    if (!continueSearching)
-                    {
-                        LogManager.GetCurrentClassLogger().Info($"Solutions with {numberOfNonTerminals} nonterminals for all noise levels are equal or worse to solutions with {numberOfNonTerminals - 1} nonterminals with same noise levels. Conclusion is that optimal solution already reached before. Terminating search.");
-                        break;
-                    }
-
                     i++;
                 }
 
