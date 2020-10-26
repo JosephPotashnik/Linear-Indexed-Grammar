@@ -21,6 +21,7 @@ namespace LinearIndexedGrammarLearner
         private readonly Learner _learner;
         private readonly GrammarFitnessObjectiveFunction _objectiveFunction;
         private readonly SimulatedAnnealingParams _params;
+        private const int numberOfBestGrammarsTokeep = 20;
 
         public SimulatedAnnealing(Learner l, SimulatedAnnealingParams parameters,
             GrammarFitnessObjectiveFunction objectiveFunction)
@@ -225,7 +226,6 @@ namespace LinearIndexedGrammarLearner
         public (ContextSensitiveGrammar bestGrammar, double bestValue, bool feasible) Run(bool isCFGGrammar,
             ContextSensitiveGrammar initiaGrammar = null)
         {
-            var restartCounter = 0;
             double currentValue = 0.0;
             bool feasible = false;
             ContextSensitiveGrammar currentGrammar = null;
@@ -238,19 +238,14 @@ namespace LinearIndexedGrammarLearner
             _learner.ParseAllSentencesFromScratch(promiscuousGrammar);
             (var promiscuousValue, var promiscuousFeasible) = _objectiveFunction.Compute(promiscuousGrammar);
             BestGrammarsKey promiscuousKey = new BestGrammarsKey(promiscuousValue, promiscuousFeasible);
-            bestGrammars.Insert((promiscuousKey, new ContextSensitiveGrammar(promiscuousGrammar)));
-
+         
             if (initiaGrammar != null)
             {
                 currentGrammar = initiaGrammar;
                 _learner.ParseAllSentencesFromScratch(currentGrammar);
                 (currentValue, feasible) = _objectiveFunction.Compute(currentGrammar);
-                if (feasible)
-                {
-                    BestGrammarsKey currentKey = new BestGrammarsKey(currentValue, feasible);
-                    bestGrammars.Insert((currentKey, new ContextSensitiveGrammar(currentGrammar)));
-                }
-   
+                BestGrammarsKey currentKey = new BestGrammarsKey(currentValue, feasible);
+                bestGrammars.Insert((currentKey, new ContextSensitiveGrammar(currentGrammar)));
             }
             else
             {
@@ -267,81 +262,92 @@ namespace LinearIndexedGrammarLearner
             if (feasible && _objectiveFunction.IsMaximalValue(currentValue))
                 return (currentGrammar, currentValue, feasible);
 
-            var numberOfBestGrammarsToKeep = 20;
-
             var noImprovementCounter = 0;
 
-            while (restartCounter < _params.NumberOfRestarts)
+            bool foundMaxSolution = false;
+            for (int i = 0; i < _params.NumberOfRestarts; i++)
             {
-
-                (currentGrammar, currentValue, feasible) = RunSingleIteration(currentGrammar, currentValue, feasible);
-                //LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, objective function value {currentValue} (feasible: {feasible})");
-                var currentKey = new BestGrammarsKey(currentValue, feasible);
-
-                if (_objectiveFunction.IsMaximalValue(currentValue))
+                noImprovementCounter = 0;
+                var maxKey = new BestGrammarsKey(0.0, false);
+                ContextSensitiveGrammar maxGrammar = null;
+                while (noImprovementCounter < _params.NumberOfNonImprovingIterationsBeforeRestart)
                 {
-                    LogManager.GetCurrentClassLogger().Info($"Maximual value reached");
-
-                    if (feasible)
+                    (currentGrammar, currentValue, feasible) = RunSingleIteration(currentGrammar, currentValue, feasible);
+                    //LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, objective function value {currentValue} (feasible: {feasible})");
+                    var currentKey = new BestGrammarsKey(currentValue, feasible);
+                    if (maxKey.Key < currentKey.Key)
                     {
-                        _objectiveFunction.PenaltyCoefficient = 1;
-                        //LogManager.GetCurrentClassLogger().Info($"Best Grammar so far {currentGrammar}\r\n, probability {currentValue + 1.0}");
-                        if (!bestGrammars.ContainsKey(currentKey))
-                        {
-                            if (bestGrammars.Count > numberOfBestGrammarsToKeep)
-                                bestGrammars.RemoveMin();
-
-                            bestGrammars.Insert((currentKey, new ContextSensitiveGrammar(currentGrammar)));
-                            //LogManager.GetCurrentClassLogger().Info($"Enqueued MAXIMAL feasible value to best grammars, with key {currentKey}");
-
-                        }
-                        break;
-                    }
-                    else
-                        _objectiveFunction.PenaltyCoefficient += 1;
-                }
-
-                var smallestBestValue = bestGrammars.FindMinKey();
-                if (smallestBestValue.Key < currentKey.Key)
-                {
-                    if (!bestGrammars.ContainsKey(currentKey))
-                    {
+                        maxKey = currentKey;
+                        maxGrammar = new ContextSensitiveGrammar(currentGrammar);
                         noImprovementCounter = 0;
-
-                        if (bestGrammars.Count > numberOfBestGrammarsToKeep)
-                            bestGrammars.RemoveMin();
-
-                        bestGrammars.Insert((currentKey, new ContextSensitiveGrammar(currentGrammar)));
-                        //LogManager.GetCurrentClassLogger().Info($"Enqueued currently Best (NOT MAXIMAL) to best grammars, with key {currentKey}");
-
                     }
                     else
                         noImprovementCounter++;
+
+                    if (_objectiveFunction.IsMaximalValue(currentValue))
+                    {
+                        foundMaxSolution = true;
+                        bestGrammars.Insert((currentKey, new ContextSensitiveGrammar(currentGrammar)));
+                        if (feasible)
+                        {
+                            _objectiveFunction.PenaltyCoefficient = 1;
+                            break;
+                        }
+                        else
+                        {
+                            throw new Exception("maximal value that is infeasible. contradiction by definition");
+                            _objectiveFunction.PenaltyCoefficient += 1;
+                        }
+                    }
+                }
+
+                
+                if (!bestGrammars.ContainsKey(maxKey))
+                {
+                    
+                    var smallestBestValue = bestGrammars.FindMinKey();
+                    if (smallestBestValue.Key < maxKey.Key)
+                        bestGrammars.Insert((maxKey, maxGrammar));
+                    else
+                        bestGrammars.Insert((promiscuousKey, new ContextSensitiveGrammar(promiscuousGrammar)));
                 }
                 else
-                    noImprovementCounter++;
+                    bestGrammars.Insert((promiscuousKey, new ContextSensitiveGrammar(promiscuousGrammar)));
 
-                if (noImprovementCounter >= _params.NumberOfNonImprovingIterationsBeforeRestart)
-                {
-                    restartCounter++;
-                    noImprovementCounter = 0;
-                    var item = bestGrammars.Next();
-                    currentGrammar = new ContextSensitiveGrammar(item.Item2);
-                    currentValue = item.Item1.objectiveFunctionValue;
-                    _objectiveFunction.PenaltyCoefficient = 1;
+                if (bestGrammars.Count > numberOfBestGrammarsTokeep)
+                    bestGrammars.RemoveMin();
 
-                    //LogManager.GetCurrentClassLogger().Info($"reverting to random previous best grammar");
-                    //LogManager.GetCurrentClassLogger().Info($"grammar reverted is: {currentGrammar}\r\n, probability {currentValue}");
+                var item = bestGrammars.Next();
+                currentGrammar = new ContextSensitiveGrammar(item.Item2);
+                currentValue = item.Item1.objectiveFunctionValue;
+                _objectiveFunction.PenaltyCoefficient = 1;
 
-                    //refresh parse forest from scratch, because we moved to an arbitrarily far away point
-                    //in the hypotheses space.
+                //refresh parse forest from scratch, because we moved to an arbitrarily far away point
+                //in the hypotheses space.
+                _learner.ParseAllSentencesFromScratch(currentGrammar);
+                //PruneUnusedRules(currentGrammar);
 
-                    _learner.ParseAllSentencesFromScratch(currentGrammar);
-                    //PruneUnusedRules(currentGrammar);
-                }
+                if (foundMaxSolution)
+                    break;
+
             }
 
             var max = bestGrammars.FindMax();
+            //the loop can occur if the max is the feasible promiscuous grammar,
+            //(having a very low objective function value).
+            //every feasible grammar is ranked higher than non-feasible ones (that might have higher objective function value)
+            while (max.Item1.objectiveFunctionValue < 0.1)
+            {
+                if (bestGrammars.Count > 1)
+                {
+                    bestGrammars.RemoveMax();
+                    max = bestGrammars.FindMax();
+                }
+                else
+                    break;
+            }
+            
+
             currentValue = max.Item1.objectiveFunctionValue;
             feasible = max.Item1.feasible;
 

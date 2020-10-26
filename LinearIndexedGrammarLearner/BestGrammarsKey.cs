@@ -36,6 +36,8 @@ namespace LinearIndexedGrammarLearner
 
         public BestGrammarsKey FindMinKey()
         {
+            if (list.Count == 0)
+                return new BestGrammarsKey(0, false);
             return FindMin().Item1;
         }
 
@@ -45,7 +47,22 @@ namespace LinearIndexedGrammarLearner
             {
                 var min = FindMin();
                 list.Remove(min);
+                currentIndex--;
+
             }
+        }
+
+        public (BestGrammarsKey, ContextSensitiveGrammar) RemoveMax()
+        {
+            if (list.Count > 0)
+            {
+                var max = FindMax();
+                list.Remove(max);
+                currentIndex--;
+                return max;
+
+            }
+            return (new BestGrammarsKey(0, false), null);
         }
 
         public void Insert((BestGrammarsKey, ContextSensitiveGrammar) item)
@@ -70,6 +87,9 @@ namespace LinearIndexedGrammarLearner
 
         public (BestGrammarsKey, ContextSensitiveGrammar) Next()
         {
+            if (list.Count == 0)
+                throw new Exception("empty best grammars queue");
+
             if (currentIndex == list.Count) currentIndex = 0;
             return list[currentIndex++]; 
         }
