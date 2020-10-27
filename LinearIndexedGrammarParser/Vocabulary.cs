@@ -17,7 +17,7 @@ namespace LinearIndexedGrammarParser
         // key = word, value = possible POS
         public Dictionary<string, HashSet<string>> WordWithPossiblePOS { get; set; }
 
-        // key = POS, value = words.
+        // key = POS, value = words having the same POS.
         [JsonProperty] public Dictionary<string, HashSet<string>> POSWithPossibleWords { get; set; }
 
         public HashSet<string> this[string word]

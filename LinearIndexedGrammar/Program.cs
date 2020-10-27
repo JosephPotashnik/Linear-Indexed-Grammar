@@ -6,14 +6,71 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace LinearIndexedGrammar
 {
+    class StringArrayCompare : IEqualityComparer<string[]>
+    {
+        public bool Equals(string[] x, string[] y)
+        {
+            return Enumerable.SequenceEqual(x, y);
+        }
+
+        public int GetHashCode(string[] obj)
+        {
+            unchecked
+            {
+                if (obj == null)
+                {
+                    return 0;
+                }
+                int hash = 17;
+                foreach (var element in obj)
+                {
+                    hash = hash * 31 + element.GetHashCode();
+                }
+                return hash;
+            }
+        }
+    }
+
+    class ListStringArrayCompare : IEqualityComparer<List<string[]>>
+    {
+        public bool Equals(List<string[]> x, List<string[]> y)
+        {
+            if (x.Count != y.Count) return false;
+
+            var comparer = new StringArrayCompare();
+
+            return (Enumerable.Intersect(x, y, comparer).Count() == x.Count);
+        }
+
+        public int GetHashCode(List<string[]> obj)
+        {
+            unchecked
+            {
+                if (obj == null)
+                {
+                    return 0;
+                }
+                int hash = 17;
+                foreach (var element in obj)
+                {
+                    hash = hash * 31 + element.GetHashCode();
+                }
+                return hash;
+            }
+        }
+    }
+    
+
     [JsonObject(MemberSerialization.OptIn)]
     public class ProgramParamsList
     {
@@ -225,6 +282,30 @@ namespace LinearIndexedGrammar
 
             return true;
         }
+        private static List<string[]> POSSequencesOfSentences(Span<string> sentence, Vocabulary voc)
+        {
+            if (sentence.Length == 0)
+                return new List<string[]> { new string[] { string.Empty } };
+
+            var l = new List<string[]>();
+
+            var firstWord = sentence[0];
+            var poses = voc.WordWithPossiblePOS[firstWord];
+            var restOfSentencePOSSequences = POSSequencesOfSentences(sentence.Slice(1), voc);
+
+            foreach (var pos in poses)
+            {
+                foreach (var sequence in restOfSentencePOSSequences)
+                {
+                    var posSequences = new string[sentence.Length];
+                    posSequences[0] = pos;
+                    sequence.CopyTo(posSequences, 1);
+                    l.Add(posSequences);
+                }
+            }
+            return l;
+        }
+
 
         private static void RunProgram(ProgramParams programParams)
         {
@@ -263,10 +344,7 @@ namespace LinearIndexedGrammar
                 (data, dataVocabulary) = (sentences, universalVocabulary);
             }
 
-
-            //if (!ValidateTargetGrammar(grammarRules, data, universalVocabulary))
-            //    return;
-
+            //data = ReduceDataToUniquePOSTypes(data, dataVocabulary);
 
             var stopWatch = StartWatch();
 
@@ -274,7 +352,7 @@ namespace LinearIndexedGrammar
             {
                 LogManager.GetCurrentClassLogger().Info($"Run {k + 1}:");
                 int nonTerminalsSpaceSize = programParams.SearchSpaceParams.MaxNumberOfNonTerminals - programParams.SearchSpaceParams.MinNumberOfNonTerminals + 1;
-                int noiseToleranceSpaceSize = (int) (Math.Round((programParams.SearchSpaceParams.MaxNoise - programParams.SearchSpaceParams.MinNoise) / programParams.SearchSpaceParams.NoiseStepSize)) + 1;
+                int noiseToleranceSpaceSize = (int)(Math.Round((programParams.SearchSpaceParams.MaxNoise - programParams.SearchSpaceParams.MinNoise) / programParams.SearchSpaceParams.NoiseStepSize)) + 1;
                 var results = new Tuple<ContextSensitiveGrammar, double, bool>[nonTerminalsSpaceSize, noiseToleranceSpaceSize];
 
                 var saParams = new LinearIndexedGrammarLearner.SimulatedAnnealingParams
@@ -328,15 +406,15 @@ namespace LinearIndexedGrammar
                             initialGrammar = results[i, j - 1].Item1;
                         else if (i > 0)
                         {
-                            for (int p = noiseToleranceSpaceSize-1; p >= 0; p--)
+                            for (int p = noiseToleranceSpaceSize - 1; p >= 0; p--)
                             {
-                                if (results[i-1, p] != null)
+                                if (results[i - 1, p] != null)
                                 {
                                     initialGrammar = results[i - 1, p].Item1;
                                     break;
                                 }
                             }
-                            
+
                         }
 
                         var (bestHypothesis, bestValue, feasible) = LearnGrammarFromData(data, dataVocabulary, saParams, programParams.InputParams.IsCFG, numberOfNonTerminals, noiseTolerance, initialGrammar);
@@ -377,6 +455,27 @@ namespace LinearIndexedGrammar
 
             LogManager.GetCurrentClassLogger().Info(s);
             StopWatch(stopWatch);
+        }
+
+        private static string[][] ReduceDataToUniquePOSTypes(string[][] data, Vocabulary dataVocabulary)
+        {
+            List<string[]> uniqueData = new List<string[]>();
+            //Leave in data only unique sets of sequences of POS
+            HashSet<List<string[]>> uniquePOSSequences = new HashSet<List<string[]>>(new ListStringArrayCompare());
+
+            foreach (var sentence in data)
+            {
+                var posSequence = POSSequencesOfSentences(sentence, dataVocabulary);
+
+                if (!uniquePOSSequences.Contains(posSequence))
+                {
+                    uniquePOSSequences.Add(posSequence);
+                    uniqueData.Add(sentence);
+                }
+            }
+
+            data = uniqueData.ToArray();
+            return data;
         }
 
         private static double Statistics(ContextSensitiveGrammar bestHypothesis, List<Rule> grammarRules, Vocabulary universalVocabulary, int maxWords)

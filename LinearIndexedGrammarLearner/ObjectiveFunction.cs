@@ -9,28 +9,10 @@ namespace LinearIndexedGrammarLearner
     public class GrammarFitnessObjectiveFunction
     {
         public const double RoundingErrorTolerance = 0.0001;
+
+        //currently PenaltyCoefficient (augemented lagrangian) is not used.
         public int PenaltyCoefficient { get; set; }
         public double NoiseTolerance { get; set; }
-
-        private static readonly double[] exponential =
-        {
-            Math.Pow(2, 0),
-            Math.Pow(2, -1),
-            Math.Pow(2, -2),
-            Math.Pow(2, -3),
-            Math.Pow(2, -4),
-            Math.Pow(2, -5),
-            Math.Pow(2, -6),
-            Math.Pow(2, -7),
-            Math.Pow(2, -8),
-            Math.Pow(2, -9),
-            Math.Pow(2, -10),
-            Math.Pow(2, -11),
-            Math.Pow(2, -12),
-            Math.Pow(2, -13),
-            Math.Pow(2, -14),
-            Math.Pow(2, -15)
-        };
 
         private static readonly double[] uniform =
         {
@@ -52,26 +34,6 @@ namespace LinearIndexedGrammarLearner
             1
         };
 
-        private static readonly double[] harmonic =
-        {
-            1,
-            1 / 2f,
-            1 / 3f,
-            1 / 4f,
-            1 / 5f,
-            1 / 6f,
-            1 / 7f,
-            1 / 8f,
-            1 / 9f,
-            1 / 10f,
-            1 / 11f,
-            1 / 12f,
-            1 / 13f,
-            1 / 14f,
-            1 / 15f,
-            1 / 16f
-        };
-
         private static double maxVal;
         private readonly Learner _learner;
 
@@ -83,17 +45,8 @@ namespace LinearIndexedGrammarLearner
             maxVal = 1.0;
         }
 
-
-        public Learner GetLearner()
-        {
-            return _learner;
-        }
-
-        public void SetMaximalValue(double val)
-        {
-            maxVal = val;
-        }
-
+        public Learner GetLearner() => _learner;
+        public void SetMaximalValue(double val) => maxVal = val;
 
         public bool AcceptNewValue(double newValue, double oldValue, double temperature)
         {

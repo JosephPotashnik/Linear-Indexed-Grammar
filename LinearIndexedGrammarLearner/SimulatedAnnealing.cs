@@ -296,7 +296,7 @@ namespace LinearIndexedGrammarLearner
                         else
                         {
                             throw new Exception("maximal value that is infeasible. contradiction by definition");
-                            _objectiveFunction.PenaltyCoefficient += 1;
+                            //_objectiveFunction.PenaltyCoefficient += 1;
                         }
                     }
                 }
