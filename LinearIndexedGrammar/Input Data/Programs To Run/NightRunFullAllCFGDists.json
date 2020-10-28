@@ -1,6 +1,6 @@
 ﻿{
   "ProgramsToRun": [
-    /*{
+    {
       "InputParams": {
         "IsCFG": true,
         "VocabularyFileName": "Vocabulary.json",
@@ -71,7 +71,7 @@
         "NumberOfNonImprovingIterationsBeforeRestart": 30,
         "InitialTemperature": 10
       }
-    },*/
+    },
     {
       "InputParams": {
         "IsCFG": true,
