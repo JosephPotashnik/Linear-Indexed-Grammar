@@ -52,7 +52,7 @@ namespace LinearIndexedGrammar
             return (Enumerable.Intersect(x, y, comparer).Count() == x.Count);
         }
 
-        public int GetHashCode(List<string[]> obj)
+        private static int GetInnerHashCode(string[] obj)
         {
             unchecked
             {
@@ -64,6 +64,22 @@ namespace LinearIndexedGrammar
                 foreach (var element in obj)
                 {
                     hash = hash * 31 + element.GetHashCode();
+                }
+                return hash;
+            }
+        }
+        public int GetHashCode(List<string[]> obj)
+        {
+            unchecked
+            {
+                if (obj == null)
+                {
+                    return 0;
+                }
+                int hash = 17;
+                foreach (var element in obj)
+                {
+                    hash = hash * 31 + GetInnerHashCode(element);
                 }
                 return hash;
             }
@@ -285,7 +301,7 @@ namespace LinearIndexedGrammar
         private static List<string[]> POSSequencesOfSentences(Span<string> sentence, Vocabulary voc)
         {
             if (sentence.Length == 0)
-                return new List<string[]> { new string[] { string.Empty } };
+                return new List<string[]> { new string[] { } };
 
             var l = new List<string[]>();
 
@@ -299,7 +315,8 @@ namespace LinearIndexedGrammar
                 {
                     var posSequences = new string[sentence.Length];
                     posSequences[0] = pos;
-                    sequence.CopyTo(posSequences, 1);
+                    if (sequence.Length > 0)
+                        sequence.CopyTo(posSequences, 1);
                     l.Add(posSequences);
                 }
             }
@@ -344,8 +361,28 @@ namespace LinearIndexedGrammar
                 (data, dataVocabulary) = (sentences, universalVocabulary);
             }
 
-            //data = ReduceDataToUniquePOSTypes(data, dataVocabulary);
+            var initialWordLength = 6;
+            var currentWordLength = initialWordLength;
+            var maxSentenceLength = data.Max(x => x.Length);
+            var minWordsInSentences = data.Min(x => x.Length);
 
+            LogManager.GetCurrentClassLogger().Info($"Data samples:");
+            for (int p = minWordsInSentences; p < maxSentenceLength + 1; p++)
+            {
+                int count = data.Where(x => x.Length == p).Count();
+                if (count > 0)
+                    LogManager.GetCurrentClassLogger().Info($"{count} sentences of length {p}");
+            }
+
+            data = ReduceDataToUniquePOSTypes(data, dataVocabulary);
+
+            LogManager.GetCurrentClassLogger().Info($"Unique sentences types (POS sequences) from data samples:");
+            for (int p = minWordsInSentences; p < maxSentenceLength + 1; p++)
+            {
+                int count = data.Where(x => x.Length == p).Count();
+                if (count > 0)
+                    LogManager.GetCurrentClassLogger().Info($"{count} unique sentences types of length {p}");
+            }
             var stopWatch = StartWatch();
 
             for (var k = 0; k < programParams.SearchSpaceParams.NumberOfRuns; k++)
@@ -367,18 +404,9 @@ namespace LinearIndexedGrammar
                 //it does not have to be the length of the shortest sentences
                 //for instance, you have sentences in range [1,12] words, and you start learning from initial word length 6,
                 //i.e, all sentences [1,6], then [1,7],... up to [1,12].
-                var initialWordLength = 6;
-                var currentWordLength = initialWordLength;
-                var maxSentenceLength = data.Max(x => x.Length);
-                var minWordsInSentences = data.Min(x => x.Length);
 
-                LogManager.GetCurrentClassLogger().Info($"Data samples:");
-                for (int p = minWordsInSentences; p < maxSentenceLength + 1; p++)
-                {
-                    int count = data.Where(x => x.Length == p).Count();
-                    if (count > 0)
-                        LogManager.GetCurrentClassLogger().Info($"{count} sentences of length {p}");
-                }
+
+               
 
                 int i = 0;
                 const double roundingError = 0.001;
