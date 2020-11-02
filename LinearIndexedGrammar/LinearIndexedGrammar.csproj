@@ -166,6 +166,21 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>David Copperfield.txt</TargetPath>
     </ContentWithTargetPath>
+
+    <ContentWithTargetPath Include="Input Data\Childes\childes.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>childes.csv</TargetPath>
+    </ContentWithTargetPath>
+
+    <ContentWithTargetPath Include="Input Data\Childes\childesVocabulary.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>childesVocabulary.csv</TargetPath>
+    </ContentWithTargetPath>
+
+    <ContentWithTargetPath Include="Input Data\Childes\ChildesVocabulary.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>ChildesVocabulary.json</TargetPath>
+    </ContentWithTargetPath>
   </ItemGroup>
 
   <ItemGroup>
@@ -176,6 +191,7 @@
     <ProjectReference Include="..\LinearIndexedGrammarLearner\LinearIndexedGrammarLearner.csproj" />
     <ProjectReference Include="..\LinearIndexedGrammarParser\LinearIndexedGrammarParser.csproj" />
   </ItemGroup>
+
 
 
 </Project>

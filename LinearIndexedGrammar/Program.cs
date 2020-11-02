@@ -151,9 +151,28 @@ namespace LinearIndexedGrammar
                 RunProgram(programParams);
         }
 
+        private static List<string[]> ReadChildesCSVFile(string filename)
+        {
+            var data = new List<string[]>();
+            string line;
+            using (var file = File.OpenText(filename))
+            {
+                while ((line = file.ReadLine()) != null)
+                {
+                    var row = line.Split(',');
+                    data.Add(row);
+
+                }
+            }
+
+            return data;
+        }
+
 
         private static void Main(string[] args)
         {
+
+
             var maxNonTerminals = 6;
             string fileName = null;
             for (int i = 0; i < args.Length / 2; i++)
@@ -179,6 +198,47 @@ namespace LinearIndexedGrammar
             Process p = Process.GetCurrentProcess();
             p.PriorityClass = ProcessPriorityClass.High;
             Learn(fileName, maxNonTerminals);
+        }
+
+        
+        //note - this method should be not be normally called. It is used only to generate the vocabulary file once.
+        //it can be called when wishing to re-generate the json file from scratch. see comments below.
+        private static void ReadChildesVocabulary()
+        {
+            var vocab = ReadChildesCSVFile("childesVocabulary.csv");
+            Vocabulary v = new Vocabulary();
+            for (int i = 0; i < vocab.Count(); i++)
+            {
+                var pos = vocab[i][1];
+                var word = vocab[i][0];
+                if (pos.Length > 0)
+                    v.AddWordsToPOSCategory(pos, new[] { word });
+            }
+
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.NullValueHandling = NullValueHandling.Ignore;
+            serializer.Formatting = Formatting.Indented;
+
+            using (StreamWriter sw = new StreamWriter(@"ChildesVocabulary.json"))
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                serializer.Serialize(writer, v);
+            }
+            //in the vocabulary read of the file , some parts-of-speech are either a mistake in transcribing or very peripherial
+            //etc,    "wplay": [    "sarbaby", "kitto" .. ] 
+            //    "meta": [      "take",      "spider",     "cranberry",      "no" .. ]
+            //    "bab": [      "na",      "ba",      "wowheel".. ]
+            //    "n:pt": [      "pliers",      "pants",      "clothes",      "measles" ] 
+            // "n:adj": [      "franks"    ],
+            // "v pro:per": [      "do you"    ],
+            // "adv:int mod": [      "why don't"    ],
+            //"part prep": [      "trying to"    ],
+            // "part inf": [      "trying to"    ],
+            // "coord mod": [      "and do"    ],
+            // "mod v": [      "don't know"    ],
+            //"neo": [      "turn_arounder",      "crayoned"       ]
+
+            //I manually removed such part-of-speech groups from the ChildesVocabulary.json .file
         }
 
         private static void ConfigureLogger()
@@ -338,22 +398,23 @@ namespace LinearIndexedGrammar
             var universalVocabulary = Vocabulary.ReadVocabularyFromFile(programParams.InputParams.VocabularyFileName);
             ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys
                 .Select(x => new SyntacticCategory(x)).ToHashSet();
-            var grammarRules = GrammarFileReader.ReadRulesFromFile(programParams.InputParams.GrammarFileName);
 
             string[][] data;
             Vocabulary dataVocabulary;
+            List<Rule> grammarRules = null;
 
             if (programParams.InputParams.DataFileName == null)
             {
+                grammarRules = GrammarFileReader.ReadRulesFromFile(programParams.InputParams.GrammarFileName);
                 (data, dataVocabulary) =
                     SampleGenerator.PrepareDataFromTargetGrammar(grammarRules, universalVocabulary, maxWordsInSentence, programParams.InputParams.DistributionType);
-
                 LogManager.GetCurrentClassLogger().Info($"POS contained in data: {string.Join(" ", dataVocabulary.POSWithPossibleWords.Keys)}");
-
-
             }
             else
             {
+                var dat1a = ReadChildesCSVFile("childes.csv");
+
+
                 //leave only sentences in range [minWordsInSentence,maxWordsInSentence]
                 var minWordsInSentence = 1;
                 var sentences = FilterDataAccordingToTargetGrammar(grammarRules, programParams.InputParams.DataFileName,
@@ -508,6 +569,9 @@ namespace LinearIndexedGrammar
 
         private static double Statistics(ContextSensitiveGrammar bestHypothesis, List<Rule> grammarRules, Vocabulary universalVocabulary, int maxWords)
         {
+
+            //note - in real data you don't have access to target hypothesis grammarRules (i.e. = null).
+
             //get all distinct sentences of target grammar:
             var targetGrammar = new ContextFreeGrammar(grammarRules);
             var targetSentences = GetAllNonTerminalSentencesOfGrammar(targetGrammar, universalVocabulary, maxWords).Distinct().ToArray();

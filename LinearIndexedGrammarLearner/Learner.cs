@@ -93,23 +93,11 @@ namespace LinearIndexedGrammarLearner
                     new EarleyParser(currentCFHypothesis, _voc,
                         false); //parser does not check for cyclic unit productions
 
-            try
-            {
-                Parallel.ForEach(Parses,
-                    (sentenceItem, loopState, i) =>
-                    {
-                        _sentencesParser[i].ParseSentence(sentenceItem.Sentence);
-                    });
-            }
-            catch (OperationCanceledException)
-            {
-                //parse tree too long to parse
-                //the grammar is too recursive,
-                //decision - discard it and continue.
-                //string s = "parsing took too long, for the grammar:\r\n" + currentHypothesis.ToString();
-                //NLog.LogManager.GetCurrentClassLogger().Info(s);
-                throw new Exception("initial grammar should parse quickly enough");
-            }
+            Parallel.ForEach(Parses,
+                (sentenceItem, loopState, i) =>
+                {
+                    _sentencesParser[i].ParseSentence(sentenceItem.Sentence);
+                });
 
             AcceptChanges();
         }
@@ -145,28 +133,13 @@ namespace LinearIndexedGrammarLearner
                 return true;
             }
 
-            try
-            {
-                //for (int i = 0; i < Parses.Length; i++)
-                //{
-                //    var n = _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
-                //    Parses[i].GammaStates = n;
-                //}
-                Parallel.ForEach(Parses,
-                    (sentenceItem, loopState, i) =>
-                    {
-                        _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
-                    });
-            }
-            catch (OperationCanceledException)
-            {
-                //parse tree too long to parse
-                //the grammar is too recursive,
-                //decision - discard it and continue.
-                //string s = "parsing took too long, for the grammar:\r\n" + currentHypothesis.ToString();
-                //NLog.LogManager.GetCurrentClassLogger().Info(s);
-                return false;
-            }
+
+            Parallel.ForEach(Parses,
+                (sentenceItem, loopState, i) =>
+                {
+                    _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
+                });
+
 
             return true;
         }
@@ -201,24 +174,13 @@ namespace LinearIndexedGrammarLearner
             var leftCorner = new LeftCorner();
             var predictionSet = leftCorner.ComputeLeftCorner(rulesExceptDeletedRule);
 
-            try
-            {
-                Parallel.ForEach(Parses,
-                    (sentenceItem, loopState, i) =>
-                    {
-                        _sentencesParser[i]
-                            .ReParseSentenceWithRuleDeletion(currentCFHypothesis, deletedRule, predictionSet);
-                    });
-            }
-            catch (OperationCanceledException)
-            {
-                //parse tree too long to parse
-                //the grammar is too recursive,
-                //decision - discard it and continue.
-                //string s = "parsing took too long, for the grammar:\r\n" + currentHypothesis.ToString();
-                //NLog.LogManager.GetCurrentClassLogger().Info(s);
-                return false;
-            }
+            Parallel.ForEach(Parses,  
+                (sentenceItem, loopState, i) =>
+                {
+                    _sentencesParser[i]
+                        .ReParseSentenceWithRuleDeletion(currentCFHypothesis, deletedRule, predictionSet);
+                });
+
 
             return true;
         }
@@ -242,8 +204,7 @@ namespace LinearIndexedGrammarLearner
                     new EarleyParser(currentHypothesis, _voc,
                         false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
 
-            try
-            {
+
                 Parallel.ForEach(sentencesWithCounts,
                     (sentenceItem, loopState, i) =>
                     {
@@ -268,16 +229,7 @@ namespace LinearIndexedGrammarLearner
                             throw new Exception("actual parse differs from expected parse");
                         }
                     }
-            }
-            catch (OperationCanceledException)
-            {
-                //parse tree too long to parse
-                //the grammar is too recursive,
-                //decision - discard it and continue.
-                //string s = "parsing took too long, for the grammar:\r\n" + currentHypothesis.ToString();
-                //NLog.LogManager.GetCurrentClassLogger().Info(s);
-                return null; //parsing failed.
-            }
+
 
             return sentencesWithCounts;
         }
