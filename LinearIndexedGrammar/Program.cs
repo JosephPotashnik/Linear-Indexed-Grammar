@@ -633,6 +633,8 @@ namespace LinearIndexedGrammar
 
             var algorithm = new SimulatedAnnealing(learner, saParams, objectiveFunction);
             var (bestHypothesis, bestValue, feasible) = algorithm.Run(isCFG, initialGrammar);
+
+            learner.Dispose();
             return (bestHypothesis, bestValue, feasible);
         }
 

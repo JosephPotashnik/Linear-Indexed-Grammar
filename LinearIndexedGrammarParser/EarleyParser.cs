@@ -18,11 +18,12 @@ namespace LinearIndexedGrammarParser
         protected Vocabulary Voc;
         public HashSet<string> BracketedRepresentations;
 
-        public EarleyParser(ContextFreeGrammar g, Vocabulary v, bool checkUnitProductionCycles = true)
+        public EarleyParser(ContextFreeGrammar g, Vocabulary v, string[] sentence, bool checkUnitProductionCycles = true)
         {
             Voc = v;
             _grammar = g;
             _checkForCyclicUnitProductions = checkUnitProductionCycles;
+            _text = sentence;
         }
 
         private void Predict(EarleyColumn col, List<Rule> ruleList, DerivedCategory nextTerm)
@@ -404,10 +405,9 @@ namespace LinearIndexedGrammarParser
             return GetGammaStates();
         }
 
-        public void ParseSentence(string[] text, int maxWords = 0)
+        public void ParseSentence(int maxWords = 0)
         {
-            _text = text;
-            (_table, _finalColumns) = PrepareEarleyTable(text, maxWords);
+            (_table, _finalColumns) = PrepareEarleyTable(_text, maxWords);
             BracketedRepresentations = _table[_table.Length - 1].BracketedRepresentations;
             PrepareScannedStates();
 

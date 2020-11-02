@@ -39,6 +39,7 @@ namespace LinearIndexedGrammarParser
             return (statesList, rules);
         }
 
+        //not in use.
         public static List<EarleyState> ParseSentenceAccordingToGrammar(string filename, string vocabularyFilename,
             string sentence)
         {
@@ -49,9 +50,9 @@ namespace LinearIndexedGrammarParser
             var rules = ReadRulesFromFile(filename);
             var cfGrammar = new ContextFreeGrammar(rules);
 
-            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var parser = new EarleyParser(cfGrammar, universalVocabulary, null);
 
-            parser.ParseSentence(sentence.Split());
+            parser.ParseSentence();
 
             return parser.GetGammaStates();
         }
