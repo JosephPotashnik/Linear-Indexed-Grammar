@@ -298,15 +298,20 @@ namespace LinearIndexedGrammarLearner
 
         public void AcceptChanges()
         {
-            for (var i = 0; i < _sentencesParser.Length; i++)
+             Parallel.ForEach(Parses,
+            (sentenceItem, loopState, i) =>
+            {
                 _sentencesParser[i].AcceptChanges();
+            });
         }
 
         public void RejectChanges()
         {
-            //consider switching to parallel later!
-            for (var i = 0; i < _sentencesParser.Length; i++)
-                _sentencesParser[i].RejectChanges();
+            Parallel.ForEach(Parses,
+           (sentenceItem, loopState, i) =>
+           {
+               _sentencesParser[i].RejectChanges();
+           });
         }
     }
 }
