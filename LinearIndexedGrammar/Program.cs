@@ -6,87 +6,14 @@ using NLog;
 using NLog.Config;
 using NLog.Targets;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace LinearIndexedGrammar
 {
-    class StringArrayCompare : IEqualityComparer<string[]>
-    {
-        public bool Equals(string[] x, string[] y)
-        {
-            return Enumerable.SequenceEqual(x, y);
-        }
-
-        public int GetHashCode(string[] obj)
-        {
-            unchecked
-            {
-                if (obj == null)
-                {
-                    return 0;
-                }
-                int hash = 17;
-                foreach (var element in obj)
-                {
-                    hash = hash * 31 + element.GetHashCode();
-                }
-                return hash;
-            }
-        }
-    }
-
-    class ListStringArrayCompare : IEqualityComparer<List<string[]>>
-    {
-        public bool Equals(List<string[]> x, List<string[]> y)
-        {
-            if (x.Count != y.Count) return false;
-
-            var comparer = new StringArrayCompare();
-
-            return (Enumerable.Intersect(x, y, comparer).Count() == x.Count);
-        }
-
-        private static int GetInnerHashCode(string[] obj)
-        {
-            unchecked
-            {
-                if (obj == null)
-                {
-                    return 0;
-                }
-                int hash = 17;
-                foreach (var element in obj)
-                {
-                    hash = hash * 31 + element.GetHashCode();
-                }
-                return hash;
-            }
-        }
-        public int GetHashCode(List<string[]> obj)
-        {
-            unchecked
-            {
-                if (obj == null)
-                {
-                    return 0;
-                }
-                int hash = 17;
-                foreach (var element in obj)
-                {
-                    hash = hash * 31 + GetInnerHashCode(element);
-                }
-                return hash;
-            }
-        }
-    }
-    
-
     [JsonObject(MemberSerialization.OptIn)]
     public class ProgramParamsList
     {
@@ -142,38 +69,33 @@ namespace LinearIndexedGrammar
 
     public class Program
     {
-        private static int maxNonTerminals = 6;
-        private static void Learn(string fileName, int _maxNonTerminals = 6)
+        private static void Learn(string fileName)
         {
-            maxNonTerminals = _maxNonTerminals;
             var programParamsList = ReadProgramParamsFromFile(fileName);
             foreach (var programParams in programParamsList.ProgramsToRun)
                 RunProgram(programParams);
         }
 
+/*
         private static List<string[]> ReadChildesCSVFile(string filename)
         {
             var data = new List<string[]>();
             string line;
-            using (var file = File.OpenText(filename))
+            using var file = File.OpenText(filename);
+            while ((line = file.ReadLine()) != null)
             {
-                while ((line = file.ReadLine()) != null)
-                {
-                    var row = line.Split(',');
-                    data.Add(row);
+                var row = line.Split(',');
+                data.Add(row);
 
-                }
             }
 
             return data;
         }
+*/
 
 
         private static void Main(string[] args)
         {
-
-
-            var maxNonTerminals = 6;
             string fileName = null;
             for (int i = 0; i < args.Length / 2; i++)
             {
@@ -184,11 +106,6 @@ namespace LinearIndexedGrammar
                             fileName = args[i * 2 + 1];
                             break;
                         }
-                    case @"MaxNonTerminals:":
-                        {
-                            maxNonTerminals = Int16.Parse(args[i * 2 + 1]);
-                            break;
-                        }
                     default:
                         throw new Exception("unrecognized argument. Please use the following format: NightRun: True/False MaxNonTerminals: some integer (try 6)");
                 }
@@ -197,12 +114,13 @@ namespace LinearIndexedGrammar
             ConfigureLogger();
             Process p = Process.GetCurrentProcess();
             p.PriorityClass = ProcessPriorityClass.High;
-            Learn(fileName, maxNonTerminals);
+            Learn(fileName);
         }
 
         
         //note - this method should be not be normally called. It is used only to generate the vocabulary file once.
         //it can be called when wishing to re-generate the json file from scratch. see comments below.
+/*
         private static void ReadChildesVocabulary()
         {
             var vocab = ReadChildesCSVFile("childesVocabulary.csv");
@@ -240,6 +158,7 @@ namespace LinearIndexedGrammar
 
             //I manually removed such part-of-speech groups from the ChildesVocabulary.json .file
         }
+*/
 
         private static void ConfigureLogger()
         {
@@ -288,7 +207,6 @@ namespace LinearIndexedGrammar
         private static string[][] FilterDataAccordingToTargetGrammar(List<Rule> grammarRules, string dataFileName,
             int minWords, int maxWords, Vocabulary universalVocabulary)
         {
-            var cfGrammar = new ContextFreeGrammar(grammarRules);
 
             //1. get sentences from file
             var allData = GetSentenceFromDataFile(dataFileName);
@@ -310,9 +228,9 @@ namespace LinearIndexedGrammar
             learner.ParseAllSentencesFromScratch(new ContextSensitiveGrammar(grammarRules));
 
             List<SentenceParsingResults> parsableData = new List<SentenceParsingResults>();
-            for (int i = 0; i < learner._sentencesParser.Length; i++)
+            for (int i = 0; i < learner.SentencesParser.Length; i++)
             {
-                if (learner._sentencesParser[i].BracketedRepresentations.Count > 0)
+                if (learner.SentencesParser[i].BracketedRepresentations.Count > 0)
                     parsableData.Add(learner.Parses[i]);
 
             }
@@ -324,40 +242,6 @@ namespace LinearIndexedGrammar
             return filteredSen.ToArray();
         }
 
-        private static bool ValidateTargetGrammar(List<Rule> grammarRules, string[][] data,
-            Vocabulary universalVocabulary)
-        {
-            var maxWordsInSentence = data.Max(x => x.Length);
-            var minWordsInSentences = data.Min(x => x.Length);
-
-            PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentences, maxWordsInSentence, 6, 0.0, out var objectiveFunction);
-            var partOfSpeechCategories = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
-            ContextFreeGrammar.RenameVariables(grammarRules, partOfSpeechCategories);
-            var targetGrammar = new ContextSensitiveGrammar(grammarRules);
-
-
-            objectiveFunction.GetLearner().ParseAllSentencesFromScratch(targetGrammar);
-            (var targetProb, var feasible) = objectiveFunction.Compute(targetGrammar);
-
-
-            //trying to learn data from incomplete source leads to p < 1
-            //so set the maximum value to the target probability, which is the maximal support
-            //given to the grammar from the data..
-
-
-            objectiveFunction.SetMaximalValue(targetProb);
-
-            var s =
-                $"Target Hypothesis:\r\n{targetGrammar}\r\n. Verifying objective function value of target grammar given the data: {targetProb} \r\n";
-            LogManager.GetCurrentClassLogger().Info(s);
-            if (!objectiveFunction.IsMaximalValue(targetProb))
-            {
-                LogManager.GetCurrentClassLogger().Fatal("probablity incorrect. exit!");
-                return false;
-            }
-
-            return true;
-        }
         private static List<string[]> POSSequencesOfSentences(Span<string> sentence, Vocabulary voc)
         {
             if (sentence.Length == 0)
@@ -412,18 +296,16 @@ namespace LinearIndexedGrammar
             }
             else
             {
-                var dat1a = ReadChildesCSVFile("childes.csv");
+                //var data1 = ReadChildesCSVFile("childes.csv");
 
 
                 //leave only sentences in range [minWordsInSentence,maxWordsInSentence]
                 var minWordsInSentence = 1;
-                var sentences = FilterDataAccordingToTargetGrammar(grammarRules, programParams.InputParams.DataFileName,
+                var sentences = FilterDataAccordingToTargetGrammar(null, programParams.InputParams.DataFileName,
                     minWordsInSentence, maxWordsInSentence, universalVocabulary);
                 (data, dataVocabulary) = (sentences, universalVocabulary);
             }
 
-            var initialWordLength = 6;
-            var currentWordLength = initialWordLength;
             var maxSentenceLength = data.Max(x => x.Length);
             var minWordsInSentences = data.Min(x => x.Length);
 
@@ -472,14 +354,14 @@ namespace LinearIndexedGrammar
                 int i = 0;
                 const double roundingError = 0.001;
                 ContextSensitiveGrammar initialGrammar = null;
-                var injectInitial = false;
-                if (injectInitial)
-                {
-                    PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentences, maxWordsInSentence, 5, 0.0, out var objectiveFunction);
-                    var grammarRules1 = GrammarFileReader.ReadRulesFromFile("InitialGrammar.txt");
-                    var partOfSpeechCategories = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
-                    initialGrammar = new ContextSensitiveGrammar(grammarRules1);
-                }
+                //var injectInitial = false;
+                //if (injectInitial)
+                //{
+                //    PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentences, maxWordsInSentence, 5, 0.0, out var objectiveFunction);
+                //    var grammarRules1 = GrammarFileReader.ReadRulesFromFile("InitialGrammar.txt");
+                //    var partOfSpeechCategories = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
+                //    initialGrammar = new ContextSensitiveGrammar(grammarRules1);
+                //}
 
                 for (int numberOfNonTerminals = programParams.SearchSpaceParams.MinNumberOfNonTerminals; numberOfNonTerminals <= programParams.SearchSpaceParams.MaxNumberOfNonTerminals; numberOfNonTerminals++)
                 {
@@ -517,14 +399,14 @@ namespace LinearIndexedGrammar
 
                         var task = Task.Run(() => Statistics(bestHypothesis, grammarRules, universalVocabulary, maxWordsInSentence));
                         TimeSpan ts = TimeSpan.FromSeconds(10);
-                        double f1_score = 0;
+                        double f1Score = 0;
                         if (!task.Wait(ts))
                             LogManager.GetCurrentClassLogger().Info("Statistics were not computed, hypothesis grammar underfits poorly, generating intractable number of sentences (POS sequences)");
                         else
-                            f1_score = task.Result;
+                            f1Score = task.Result;
 
                         continueSearching = true;
-                        if (f1_score > 0.95)
+                        if (f1Score > 0.95)
                         {
                             continueSearching = false;
                             break;
@@ -589,11 +471,11 @@ namespace LinearIndexedGrammar
 
             var precision = truePositives / (double)(learnedSentences.Count());
             var recall = truePositives / (double)(targetSentences.Count());
-            var f1_score = 2 * precision * recall / (precision + recall);
-            var s = $"Precision: {precision:0.0000} Recall: {recall:0.0000} F1-Score: {f1_score:0.0000}";
+            var f1Score = 2 * precision * recall / (precision + recall);
+            var s = $"Precision: {precision:0.0000} Recall: {recall:0.0000} F1-Score: {f1Score:0.0000}";
             LogManager.GetCurrentClassLogger().Info(s);
 
-            return f1_score;
+            return f1Score;
         }
 
         static private string[] GetAllNonTerminalSentencesOfGrammar(ContextFreeGrammar g, Vocabulary universalVocabulary, int maxWords)

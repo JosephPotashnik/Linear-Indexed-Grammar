@@ -5,25 +5,25 @@ namespace LinearIndexedGrammarParser
 {
     public class MaxHeap
     {
-        public readonly List<int> elements = new List<int>();
+        public readonly List<int> Elements = new List<int>();
 
-        public int Count => elements.Count;
+        public int Count => Elements.Count;
 
-        public int Max => elements[0];
+        public int Max => Elements[0];
 
         public void Add(int item)
         {
-            elements.Add(item);
-            HeapifyUp(elements.Count - 1);
+            Elements.Add(item);
+            HeapifyUp(Elements.Count - 1);
         }
 
         public int PopMax()
         {
-            if (elements.Count > 0)
+            if (Elements.Count > 0)
             {
-                var item = elements[0];
-                elements[0] = elements[elements.Count - 1];
-                elements.RemoveAt(elements.Count - 1);
+                var item = Elements[0];
+                Elements[0] = Elements[Elements.Count - 1];
+                Elements.RemoveAt(Elements.Count - 1);
 
                 HeapifyDown(0);
                 return item;
@@ -36,11 +36,11 @@ namespace LinearIndexedGrammarParser
         {
             var parent = index <= 0 ? -1 : (index - 1) / 2;
 
-            if (parent >= 0 && elements[index] > elements[parent])
+            if (parent >= 0 && Elements[index] > Elements[parent])
             {
-                var temp = elements[index];
-                elements[index] = elements[parent];
-                elements[parent] = temp;
+                var temp = Elements[index];
+                Elements[index] = Elements[parent];
+                Elements[parent] = temp;
 
                 HeapifyUp(parent);
             }
@@ -53,17 +53,17 @@ namespace LinearIndexedGrammarParser
             var left = 2 * index + 1;
             var right = 2 * index + 2;
 
-            if (left < Count && elements[left] > elements[index])
+            if (left < Count && Elements[left] > Elements[index])
                 largest = left;
 
-            if (right < Count && elements[right] > elements[largest])
+            if (right < Count && Elements[right] > Elements[largest])
                 largest = right;
 
             if (largest != index)
             {
-                var temp = elements[index];
-                elements[index] = elements[largest];
-                elements[largest] = temp;
+                var temp = Elements[index];
+                Elements[index] = Elements[largest];
+                Elements[largest] = temp;
 
                 HeapifyDown(largest);
             }

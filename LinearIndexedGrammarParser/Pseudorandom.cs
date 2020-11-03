@@ -6,7 +6,7 @@ namespace LinearIndexedGrammarParser
 {
     public static class Pseudorandom
     {
-        private static readonly ThreadLocal<Random> prng = new ThreadLocal<Random>(() =>
+        private static readonly ThreadLocal<Random> Prng = new ThreadLocal<Random>(() =>
             new Random(NextSeed()));
 
         private static int NextSeed()
@@ -18,17 +18,17 @@ namespace LinearIndexedGrammarParser
 
         public static int NextInt(int range)
         {
-            return prng.Value.Next(range);
+            return Prng.Value.Next(range);
         }
 
         public static int NextInt()
         {
-            return prng.Value.Next();
+            return Prng.Value.Next();
         }
 
         public static double NextDouble()
         {
-            return prng.Value.NextDouble();
+            return Prng.Value.NextDouble();
         }
     }
 }

@@ -32,10 +32,14 @@ namespace LinearIndexedGrammarParser
 
         public override int GetHashCode()
         {
+            int hashCode;
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
+            hashCode = RuleType;
             unchecked
             {
-                var hashCode = RuleType;
+                // ReSharper disable once NonReadonlyMemberInGetHashCode
                 hashCode = (hashCode * 397) ^ LHSIndex;
+                // ReSharper disable once NonReadonlyMemberInGetHashCode
                 hashCode = (hashCode * 397) ^ RHSIndex;
                 return hashCode;
             }
@@ -164,11 +168,11 @@ namespace LinearIndexedGrammarParser
 
             //assumption: moveable is first RHS, to be relaxed.
             var moveable = pushRule.RightHandSide[0].ToString();
-            var LHSIndex = RuleSpace.FindLHSIndex(moveable);
-            if (!MoveableReferences.ContainsKey(LHSIndex))
-                MoveableReferences[LHSIndex] = 0;
+            var lhsIndex = RuleSpace.FindLHSIndex(moveable);
+            if (!MoveableReferences.ContainsKey(lhsIndex))
+                MoveableReferences[lhsIndex] = 0;
 
-            MoveableReferences[LHSIndex]++;
+            MoveableReferences[lhsIndex]++;
         }
 
 
@@ -177,12 +181,12 @@ namespace LinearIndexedGrammarParser
             var pushRule = RuleSpace[rc];
             //assumption: moveable is first RHS, to be relaxed.
             var moveable = pushRule.RightHandSide[0].ToString();
-            var LHSIndex = RuleSpace.FindLHSIndex(moveable);
-            if (!MoveableReferences.ContainsKey(LHSIndex))
+            var lhsIndex = RuleSpace.FindLHSIndex(moveable);
+            if (!MoveableReferences.ContainsKey(lhsIndex))
                 throw new Exception("missing key");
 
-            MoveableReferences[LHSIndex]--;
-            if (MoveableReferences[LHSIndex] < 0)
+            MoveableReferences[lhsIndex]--;
+            if (MoveableReferences[lhsIndex] < 0)
                 throw new Exception("wrong value of moveable references");
         }
 

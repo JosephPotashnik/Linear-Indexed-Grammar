@@ -14,7 +14,7 @@ namespace LinearIndexedGrammarLearner
         public int PenaltyCoefficient { get; set; }
         public double NoiseTolerance { get; set; }
 
-        private static readonly double[] uniform =
+        private static readonly double[] Uniform =
         {
             1,
             1,
@@ -34,7 +34,7 @@ namespace LinearIndexedGrammarLearner
             1
         };
 
-        private static double maxVal;
+        private static double _maxVal;
         private readonly Learner _learner;
 
         public GrammarFitnessObjectiveFunction(Learner l, double noiseTolerance)
@@ -42,11 +42,11 @@ namespace LinearIndexedGrammarLearner
             PenaltyCoefficient = 1;
             NoiseTolerance = noiseTolerance;
             _learner = l;
-            maxVal = 1.0;
+            _maxVal = 1.0;
         }
 
         public Learner GetLearner() => _learner;
-        public void SetMaximalValue(double val) => maxVal = val;
+        public void SetMaximalValue(double val) => _maxVal = val;
 
         public bool AcceptNewValue(double newValue, double oldValue, double temperature)
         {
@@ -65,8 +65,8 @@ namespace LinearIndexedGrammarLearner
 
         public bool IsMaximalValue(double val)
         {
-            if (val >= maxVal) return true;
-            return Math.Abs(val - maxVal) < RoundingErrorTolerance;
+            if (val >= _maxVal) return true;
+            return Math.Abs(val - _maxVal) < RoundingErrorTolerance;
         }
         private (Dictionary<int, int>, int) ComputeDataTrees(SentenceParsingResults[] allParses)
         {
@@ -80,8 +80,8 @@ namespace LinearIndexedGrammarLearner
                     treesDic.Add(allParses[i].Length, set);
                 }
 
-                set.UnionWith(_learner._sentencesParser[i].BracketedRepresentations);
-                if (_learner._sentencesParser[i].BracketedRepresentations.Count == 0)
+                set.UnionWith(_learner.SentencesParser[i].BracketedRepresentations);
+                if (_learner.SentencesParser[i].BracketedRepresentations.Count == 0)
                     numberOfSentenceUnParsed++;
             }
 
@@ -99,11 +99,11 @@ namespace LinearIndexedGrammarLearner
 
         public (double val, bool feasible) Compute(ContextSensitiveGrammar currentHypothesis)
         {
-            var probabilityMassOfLength = uniform;
-            double unparsedSentencesRatio = 0, unexplainedSentenceRatio = 0;
+            var probabilityMassOfLength = Uniform;
+            double unparsedSentencesRatio, unexplainedSentenceRatio = 0;
             if (currentHypothesis == null) return (0, false);
 
-            var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
+            var currentCFGHypothesis = new ContextFreeGrammar(currentHypothesis);
 
             //checking in ReparseWith Addition/ ReparseWithDeletion / ParseFromScratch
             //if (currentCFHypothesis.ContainsCyclicUnitProduction())
@@ -118,7 +118,7 @@ namespace LinearIndexedGrammarLearner
             Dictionary<int, int> dataTreesPerLength = null;
             Parallel.Invoke(
                 () => { (dataTreesPerLength, numberOfSentenceUnParsed)  = ComputeDataTrees(allParses); },
-                () => { grammarTreesPerLength = _learner.GetGrammarTrees(currentCFHypothesis); } 
+                () => { grammarTreesPerLength = _learner.GetGrammarTrees(currentCFGHypothesis); } 
                 );
             
 

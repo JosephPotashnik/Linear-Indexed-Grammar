@@ -5,7 +5,7 @@ namespace LinearIndexedGrammarParser
 {
     public class EarleyGenerator : EarleyParser
     {
-        public EarleyGenerator(ContextFreeGrammar g, Vocabulary v) : base(g, v)
+        public EarleyGenerator(ContextFreeGrammar g, Vocabulary v) : base(g, v, null)
         {
         }
 

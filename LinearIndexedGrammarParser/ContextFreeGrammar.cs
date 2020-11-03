@@ -275,11 +275,11 @@ namespace LinearIndexedGrammarParser
                     var rhs1 = words[i];
                     var rhs2 = words[i + 1];
 
-                    var possiblePOSforrhs1 = universalVocabulary.WordWithPossiblePOS[rhs1].ToArray();
-                    var possiblePOSforrhs2 = universalVocabulary.WordWithPossiblePOS[rhs2].ToArray();
+                    var possiblePOSForRHS1 = universalVocabulary.WordWithPossiblePOS[rhs1].ToArray();
+                    var possiblePOSForRHS2 = universalVocabulary.WordWithPossiblePOS[rhs2].ToArray();
 
-                    foreach (var pos1 in possiblePOSforrhs1)
-                        foreach (var pos2 in possiblePOSforrhs2)
+                    foreach (var pos1 in possiblePOSForRHS1)
+                        foreach (var pos2 in possiblePOSForRHS2)
                             bigrams.Add((pos1, pos2));
                 }
 

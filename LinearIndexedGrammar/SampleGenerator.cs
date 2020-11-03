@@ -32,62 +32,9 @@ namespace LinearIndexedGrammar
         }
 
 
-        static int[] PACGetMinimumNumberOfSamples(double precision, double confidence, int maxWords)
-        {
-            //vc dimension is catalan number * bell number
-            long[] VCDimensionOld =
-            {
-                0,
-                1,
-                4,
-                25,
-                210,
-                2184,
-                26796,
-                376233,
-                5920200,
-                102816714,
-                1947916100,
-                39890416020,
-                876478739164
-            };
-
-            long[] VCDimension =
-{
-                0,
-                1,
-                4,
-                25,
-                50,
-                50,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100
-            };
-
-            int[] bounds = new int[maxWords + 1];
-
-            //the assumption here is that we know that the target grammar is drawn 
-            //from the class of CFG.
-            double delta = 1.0 - confidence;
-            double epsilon = precision;
-
-            for (int i = 1; i < bounds.Length; i++)
-                bounds[i] = (int)((1.0 / epsilon) * (VCDimension[i] + Math.Log(1.0 / delta)));
-            //|H| = 2^VCDimension.
-
-
-            return bounds;
-        }
-
-
         static private double F(float x, float mean, float var)
         {
-            return (Math.Exp(-(x - mean) * (x - mean) / (float)(2 * var)));
+            return (Math.Exp(-(x - mean) * (x - mean) / (2 * var)));
         }
 
         static int[] PreparePowerLawDistribution(int numberOfStates, int startVal, int minTreesToHear)
@@ -132,7 +79,7 @@ namespace LinearIndexedGrammar
         {
             var sentences = new List<string[]>();
             var textVocabulary = new Vocabulary();
-            int[] distribution = null;
+            int[] distribution;
             for (int i = 1; i < allGrammarStates.Length; i++)
             {
                 if (allGrammarStates[i].Count > 0)
@@ -173,6 +120,7 @@ namespace LinearIndexedGrammar
             return (sentences.ToArray(), textVocabulary);
         }
 
+/*
         private static void AddNoise(List<string[]> sentences, Vocabulary textVocabulary, int i, string[][] sentencesOfLength, double noiseSentencesRatio = 0.1)
         {
             //add noise
@@ -190,6 +138,7 @@ namespace LinearIndexedGrammar
                 sentences.Add(sentence);
             }
         }
+*/
 
         static (string[][] sentences, HashSet<string> posCategories) DrawSampleFromStatesWithLengthK(List<EarleyState> states, int[] distributionOverStates, int numberOfSamples, HashSet<string> pos, Vocabulary universalVocabulary)
         {

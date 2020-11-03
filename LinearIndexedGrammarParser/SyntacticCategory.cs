@@ -24,6 +24,7 @@ namespace LinearIndexedGrammarParser
 
         public override int GetHashCode()
         {
+            // ReSharper disable once NonReadonlyMemberInGetHashCode
             return Symbol.GetHashCode();
         }
 

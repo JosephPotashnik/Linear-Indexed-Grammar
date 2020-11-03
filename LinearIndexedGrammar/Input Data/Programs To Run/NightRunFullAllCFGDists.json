@@ -47,7 +47,7 @@
         "NumberOfNonImprovingIterationsBeforeRestart": 20,
         "InitialTemperature": 10
       }
-    }/*,
+    },
     {
       "InputParams": {
         "IsCFG": true,
@@ -62,7 +62,7 @@
         "MinNumberOfNonTerminals": 5,
         "MaxNumberOfNonTerminals": 6,
         "MinNoise": 0.0,
-        "MaxNoise": 0.2,
+        "MaxNoise": 0.0,
         "NoiseStepSize": 0.1
       },
       "SimulatedAnnealingParams": {
@@ -86,7 +86,7 @@
         "MinNumberOfNonTerminals": 5,
         "MaxNumberOfNonTerminals": 6,
         "MinNoise": 0.0,
-        "MaxNoise": 0.2,
+        "MaxNoise": 0.0,
         "NoiseStepSize": 0.1
       },
       "SimulatedAnnealingParams": {

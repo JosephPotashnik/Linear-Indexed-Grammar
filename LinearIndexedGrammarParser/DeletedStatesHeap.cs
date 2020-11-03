@@ -4,23 +4,23 @@ namespace LinearIndexedGrammarParser
 {
     public class DeletedStatesHeap
     {
-        private readonly MaxHeap indicesHeap = new MaxHeap();
+        private readonly MaxHeap _indicesHeap = new MaxHeap();
         //the node's value of the heap is stack and not queue - purely from performance consideration
         //stack is slightly faster than queue (we could implement it as queue like CompletedStatesHEap if we wanted,
         //because deletion uses lazy evaulation, so either queue or stack order guarantees visiting
         //all items to be deleted).
-        private readonly Dictionary<int, Stack<EarleyState>> items = new Dictionary<int, Stack<EarleyState>>();
+        private readonly Dictionary<int, Stack<EarleyState>> _items = new Dictionary<int, Stack<EarleyState>>();
 
-        public int Count => indicesHeap.Count;
+        public int Count => _indicesHeap.Count;
 
         public void Push(EarleyState state)
         {
             var index = state.StartColumn.Index;
-            if (!items.TryGetValue(index, out var queue))
+            if (!_items.TryGetValue(index, out var queue))
             {
-                indicesHeap.Add(index);
+                _indicesHeap.Add(index);
                 queue = new Stack<EarleyState>();
-                items.Add(index, queue);
+                _items.Add(index, queue);
             }
 
             queue.Push(state);
@@ -28,14 +28,14 @@ namespace LinearIndexedGrammarParser
 
         public EarleyState Pop()
         {
-            var index = indicesHeap.Max;
-            var queue = items[index];
+            var index = _indicesHeap.Max;
+            var queue = _items[index];
 
             var state = queue.Pop();
             if (queue.Count == 0)
             {
-                items.Remove(index);
-                indicesHeap.PopMax();
+                _items.Remove(index);
+                _indicesHeap.PopMax();
             }
 
             return state;

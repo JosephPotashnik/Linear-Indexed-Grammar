@@ -49,9 +49,9 @@ namespace LinearIndexedGrammarParser
             var rules = ReadRulesFromFile(filename);
             var cfGrammar = new ContextFreeGrammar(rules);
 
-            var parser = new EarleyParser(cfGrammar, universalVocabulary);
+            var parser = new EarleyParser(cfGrammar, universalVocabulary, sentence.Split());
 
-            parser.ParseSentence(sentence.Split());
+            parser.ParseSentence();
 
             return parser.GetGammaStates();
         }

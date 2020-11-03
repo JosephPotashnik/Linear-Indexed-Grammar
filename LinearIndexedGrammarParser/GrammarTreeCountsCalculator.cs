@@ -8,9 +8,9 @@ namespace LinearIndexedGrammarParser
 
         private readonly int _treeDepth;
         private SubTreeCountsCache _cache;
-        public ContextFreeGrammar _g;
+        public ContextFreeGrammar G;
 
-        public GrammarTreeCountsCalculator(HashSet<string> pos, int min, int max)
+        public GrammarTreeCountsCalculator(HashSet<string> pos, int max)
         {
             _pos = pos;
             _treeDepth = max + 3;
@@ -97,9 +97,9 @@ namespace LinearIndexedGrammarParser
             if (!IsEmpty(cachedCategoryCounts)) return cachedCategoryCounts;
 
             //from now on, not found cached category information.
-            if (_g.StaticRules.ContainsKey(cat))
+            if (G.StaticRules.ContainsKey(cat))
             {
-                var ruleList = _g.StaticRules[cat];
+                var ruleList = G.StaticRules[cat];
                 foreach (var rule in ruleList)
                 {
                     var ruleCounts = ParseTreesForRuleInDepth(rule, treeDepth);
@@ -138,7 +138,7 @@ namespace LinearIndexedGrammarParser
         public int[] Recalculate(ContextFreeGrammar grammar)
         {
             _cache = new SubTreeCountsCache(grammar, _treeDepth);
-            _g = grammar;
+            G = grammar;
 
             return NumberOfParseTreesPerWords();
         }

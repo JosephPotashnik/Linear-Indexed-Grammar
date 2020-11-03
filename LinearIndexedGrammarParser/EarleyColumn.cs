@@ -10,9 +10,9 @@ namespace LinearIndexedGrammarParser
         internal Dictionary<DerivedCategory, HashSet<EarleyState>> Predecessors;
         internal Dictionary<Rule, List<EarleyState>> Predicted;
         internal Dictionary<DerivedCategory, HashSet<EarleyState>> Reductors;
-        internal List<EarleyState> statesAddedInLastReparse = new List<EarleyState>();
+        internal List<EarleyState> StatesAddedInLastReparse = new List<EarleyState>();
 
-        internal HashSet<DerivedCategory> visitedCategoriesInUnprediction = new HashSet<DerivedCategory>();
+        internal HashSet<DerivedCategory> VisitedCategoriesInUnprediction = new HashSet<DerivedCategory>();
         internal HashSet<DerivedCategory> NonTerminalsCandidatesToUnpredict = new HashSet<DerivedCategory>();
 
         public EarleyColumn(int index, string token)
@@ -80,7 +80,7 @@ namespace LinearIndexedGrammarParser
                 var nextTerm = oldState.NextTerm;
                 var isPOS = !grammar.StaticRules.ContainsKey(nextTerm);
 
-                if (!isPOS && !visitedCategoriesInUnprediction.Contains(nextTerm))
+                if (!isPOS && !VisitedCategoriesInUnprediction.Contains(nextTerm))
                     NonTerminalsCandidatesToUnpredict.Add(nextTerm);
             }
             else
@@ -160,7 +160,7 @@ namespace LinearIndexedGrammarParser
         {
             newState.Added = true;
             newState.EndColumn = this;
-            statesAddedInLastReparse.Add(newState);
+            StatesAddedInLastReparse.Add(newState);
 
             if (!newState.IsCompleted)
             {
@@ -232,20 +232,20 @@ namespace LinearIndexedGrammarParser
 
         public void AcceptChanges()
         {
-            if (statesAddedInLastReparse != null)
+            if (StatesAddedInLastReparse != null)
             {
-                foreach (var state in statesAddedInLastReparse)
+                foreach (var state in StatesAddedInLastReparse)
                     state.Added = false;
-                statesAddedInLastReparse.Clear();
+                StatesAddedInLastReparse.Clear();
             }
 
             NonTerminalsCandidatesToUnpredict?.Clear();
-            visitedCategoriesInUnprediction?.Clear();
+            VisitedCategoriesInUnprediction?.Clear();
         }
 
         public void RejectChanges()
         {
-            foreach (var state in statesAddedInLastReparse)
+            foreach (var state in StatesAddedInLastReparse)
             {
 
                 if (state.IsCompleted)
@@ -297,7 +297,7 @@ namespace LinearIndexedGrammarParser
                 OldGammaStates.Remove(state);
             }
 
-            visitedCategoriesInUnprediction?.Clear();
+            VisitedCategoriesInUnprediction?.Clear();
         }
 
         public void Unpredict(Rule r, ContextFreeGrammar grammar, HashSet<EarleyState> statesRemovedInLastReparse, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)

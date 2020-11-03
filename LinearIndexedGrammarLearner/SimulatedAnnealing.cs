@@ -1,9 +1,6 @@
 ﻿using LinearIndexedGrammarParser;
-using Newtonsoft.Json;
-using NLog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+
 
 namespace LinearIndexedGrammarLearner
 {
@@ -21,7 +18,7 @@ namespace LinearIndexedGrammarLearner
         private readonly Learner _learner;
         private readonly GrammarFitnessObjectiveFunction _objectiveFunction;
         private readonly SimulatedAnnealingParams _params;
-        private const int numberOfBestGrammarsTokeep = 20;
+        private const int NumberOfBestGrammarsTokeep = 20;
 
         public SimulatedAnnealing(Learner l, SimulatedAnnealingParams parameters,
             GrammarFitnessObjectiveFunction objectiveFunction)
@@ -29,94 +26,6 @@ namespace LinearIndexedGrammarLearner
             _learner = l;
             _params = parameters;
             _objectiveFunction = objectiveFunction;
-        }
-
-        private (ContextSensitiveGrammar bestGrammar, double bestValue, bool bestFeasible) DownhillSlide(
-            ContextSensitiveGrammar initialGrammar, double initialValue)
-        {
-            var bestValue = initialValue;
-            var bestGrammar = initialGrammar;
-            var foundImprovement = true;
-            bool bestFeasible = false;
-
-            while (foundImprovement)
-            {
-                foundImprovement = false;
-                var rules = bestGrammar.StackConstantRules;
-
-                var rowsCount = ContextSensitiveGrammar.RuleSpace.RowsCount(RuleType.CFGRules);
-
-                foreach (var coord in rules)
-                {
-                    RuleCoordinates bestCoord = null;
-                    var originalGrammar = new ContextSensitiveGrammar(bestGrammar);
-
-                    for (var i = 0; i < rowsCount; i++)
-                    {
-                        if (coord.LHSIndex == i) continue;
-
-                        var newGrammar = new ContextSensitiveGrammar(originalGrammar);
-                        var newCoord = new RuleCoordinates
-                        {
-                            LHSIndex = i,
-                            RHSIndex = coord.RHSIndex,
-                            RuleType = coord.RuleType
-                        };
-
-                        // change RHS of existing coordinate:
-                        _learner.SetOriginalGrammarBeforePermutation();
-
-                        ChangeLHSCoordinates(newGrammar, coord, newCoord);
-
-                        (var newValue, var feasible) = _objectiveFunction.Compute(newGrammar);
-
-                        if (newValue > bestValue)
-                        {
-                            bestCoord = newCoord;
-                            bestGrammar = newGrammar;
-                            bestValue = newValue;
-                            bestFeasible = feasible;
-                            foundImprovement = true;
-                        }
-
-                        _learner.RejectChanges();
-
-                        //for debugging purposes only.
-                        //var currentCFHypothesis = new ContextFreeGrammar(originalGrammar);
-                        //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
-                    }
-
-
-                    if (bestCoord != null)
-                    {
-                        _learner.SetOriginalGrammarBeforePermutation();
-
-                        //switch now to best grammar by accepting the changes of the best coordinate.
-                        var newGrammar = new ContextSensitiveGrammar(originalGrammar);
-                        ChangeLHSCoordinates(newGrammar, coord, bestCoord);
-                        _learner.AcceptChanges();
-                        bestGrammar = newGrammar;
-
-                        //for debugging purposes only
-                        //var currentCFHypothesis = new ContextFreeGrammar(bestGrammar);
-                        //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, _learner._sentencesParser);
-                    }
-                }
-            }
-
-            return (bestGrammar, bestValue, bestFeasible);
-        }
-
-        private void ChangeLHSCoordinates(ContextSensitiveGrammar newGrammar, RuleCoordinates coord,
-            RuleCoordinates newCoord)
-        {
-            newGrammar.StackConstantRules.Remove(coord);
-            _learner.ReparseWithDeletion(newGrammar,
-                ContextSensitiveGrammar.RuleSpace[coord].NumberOfGeneratingRule);
-
-            newGrammar.StackConstantRules.Add(newCoord);
-            _learner.ReparseWithAddition(newGrammar,
-                ContextSensitiveGrammar.RuleSpace[newCoord].NumberOfGeneratingRule);
         }
 
         private (ContextSensitiveGrammar bestGrammar, double bestValue, bool feasible) RunSingleIteration(
@@ -128,8 +37,8 @@ namespace LinearIndexedGrammarLearner
             var currentFeasible = initialFeasible;
             var finalTemp = 0.3;
             var rejectCounter = 0;
-            double newValue = 0.0;
-            bool newFeasible = false;
+            double newValue;
+            bool newFeasible;
             double percentageOfConsecutiveRejectionsToGiveUp = 0.1;
 
             var totalIterations = (int)((Math.Log(finalTemp) - Math.Log(_params.InitialTemperature)) / Math.Log(_params.CoolingFactor));
@@ -137,7 +46,6 @@ namespace LinearIndexedGrammarLearner
 
             while (currentTemp > finalTemp)
             {
-                var previousGrammar = currentGrammar;
                 var (mutatedGrammar, reparsed) = _learner.GetNeighborAndReparse(currentGrammar);
                 if (mutatedGrammar == null || !reparsed) continue;
 
@@ -212,26 +120,15 @@ namespace LinearIndexedGrammarLearner
             //that are a part of partial, unsuccessful, derivation)
             _learner.ParseAllSentencesFromScratch(currentGrammar);
         }
-
-        (ContextSensitiveGrammar bestGrammar, double bestValue, bool feasible) Inject()
-        {
-            var grammarRules = GrammarFileReader.ReadRulesFromFile("DebugGrammar.txt");
-            var debugGrammar = new ContextSensitiveGrammar(grammarRules);
-            _learner.ParseAllSentencesFromScratch(debugGrammar);
-            (var targetProb, var feasible) = _objectiveFunction.Compute(debugGrammar);
-            return (debugGrammar, targetProb, feasible);
-        }
-
-
         public (ContextSensitiveGrammar bestGrammar, double bestValue, bool feasible) Run(bool isCFGGrammar,
             ContextSensitiveGrammar initiaGrammar = null)
         {
-            double currentValue = 0.0;
-            bool feasible = false;
-            ContextSensitiveGrammar currentGrammar = null;
+            double currentValue;
+            bool feasible;
+            ContextSensitiveGrammar currentGrammar;
 
-            if (_learner._gp == null)
-                _learner._gp = new GrammarPermutations(isCFGGrammar);
+            if (_learner.Gp == null)
+                _learner.Gp = new GrammarPermutations(isCFGGrammar);
             
             var bestGrammars = new BestGrammarsQueue();
             var promiscuousGrammar = _learner.CreatePromiscuousGrammar(isCFGGrammar);
@@ -260,9 +157,9 @@ namespace LinearIndexedGrammarLearner
             //if current grammar is already optimal on data, no need to learn anything,
             //return immediately.
             if (feasible && _objectiveFunction.IsMaximalValue(currentValue))
-                return (currentGrammar, currentValue, feasible);
+                return (currentGrammar, currentValue, true);
 
-            var noImprovementCounter = 0;
+            int noImprovementCounter;
 
             bool foundMaxSolution = false;
             for (int i = 0; i < _params.NumberOfRestarts; i++)
@@ -314,12 +211,12 @@ namespace LinearIndexedGrammarLearner
                 else
                     bestGrammars.Insert((promiscuousKey, new ContextSensitiveGrammar(promiscuousGrammar)));
 
-                if (bestGrammars.Count > numberOfBestGrammarsTokeep)
+                if (bestGrammars.Count > NumberOfBestGrammarsTokeep)
                     bestGrammars.RemoveMin();
 
                 var item = bestGrammars.Next();
                 currentGrammar = new ContextSensitiveGrammar(item.Item2);
-                currentValue = item.Item1.objectiveFunctionValue;
+                currentValue = item.Item1.ObjectiveFunctionValue;
                 _objectiveFunction.PenaltyCoefficient = 1;
 
                 //refresh parse forest from scratch, because we moved to an arbitrarily far away point
@@ -336,7 +233,7 @@ namespace LinearIndexedGrammarLearner
             //the loop can occur if the max is the feasible promiscuous grammar,
             //(having a very low objective function value).
             //every feasible grammar is ranked higher than non-feasible ones (that might have higher objective function value)
-            while (max.Item1.objectiveFunctionValue < 0.1)
+            while (max.Item1.ObjectiveFunctionValue < 0.1)
             {
                 if (bestGrammars.Count > 1)
                 {
@@ -348,8 +245,8 @@ namespace LinearIndexedGrammarLearner
             }
             
 
-            currentValue = max.Item1.objectiveFunctionValue;
-            feasible = max.Item1.feasible;
+            currentValue = max.Item1.ObjectiveFunctionValue;
+            feasible = max.Item1.Feasible;
 
             //LogManager.GetCurrentClassLogger().Info($"Value of the objective function of the last key in best grammars: {currentValue} and its feasibility { bestGrammars.Last().Key.feasible} ");
             currentGrammar = new ContextSensitiveGrammar(max.Item2);

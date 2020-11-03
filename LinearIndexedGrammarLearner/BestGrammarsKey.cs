@@ -8,7 +8,7 @@ namespace LinearIndexedGrammarLearner
     public class BestGrammarsQueue
     {
         private List<(BestGrammarsKey, ContextSensitiveGrammar)> list = new List<(BestGrammarsKey, ContextSensitiveGrammar)>();
-        private int currentIndex = 0;
+        private int _currentIndex;
         public int Count => list.Count;
 
         public (BestGrammarsKey, ContextSensitiveGrammar) FindMin()
@@ -47,7 +47,7 @@ namespace LinearIndexedGrammarLearner
             {
                 var min = FindMin();
                 list.Remove(min);
-                currentIndex--;
+                _currentIndex--;
 
             }
         }
@@ -58,7 +58,7 @@ namespace LinearIndexedGrammarLearner
             {
                 var max = FindMax();
                 list.Remove(max);
-                currentIndex--;
+                _currentIndex--;
                 return max;
 
             }
@@ -90,8 +90,8 @@ namespace LinearIndexedGrammarLearner
             if (list.Count == 0)
                 throw new Exception("empty best grammars queue");
 
-            if (currentIndex == list.Count) currentIndex = 0;
-            return list[currentIndex++]; 
+            if (_currentIndex == list.Count) _currentIndex = 0;
+            return list[_currentIndex++]; 
         }
 
 
@@ -99,31 +99,33 @@ namespace LinearIndexedGrammarLearner
     }
     public class BestGrammarsKey : IComparable<BestGrammarsKey>, IEquatable<BestGrammarsKey>
     {
-        public readonly double objectiveFunctionValue;
-        public readonly bool feasible;
+        public readonly double ObjectiveFunctionValue;
+        public readonly bool Feasible;
+        private double TOLERANCE = 0.0001;
+
         public double Key
         {
             get
             {
 
-                var k = feasible ? objectiveFunctionValue + 1.0 : objectiveFunctionValue;
+                var k = Feasible ? ObjectiveFunctionValue + 1.0 : ObjectiveFunctionValue;
                 return k;
             }
         }
         public override string ToString()
         {
-            return $"objective function value {objectiveFunctionValue:0.000} feasible: {feasible}";
+            return $"objective function value {ObjectiveFunctionValue:0.000} feasible: {Feasible}";
         }
         public BestGrammarsKey(double objectiveVal, bool f)
         {
-            objectiveFunctionValue = objectiveVal;
-            feasible = f;
+            ObjectiveFunctionValue = objectiveVal;
+            Feasible = f;
         }
 
         public BestGrammarsKey(BestGrammarsKey other)
         {
-            objectiveFunctionValue = other.objectiveFunctionValue;
-            feasible = other.feasible;
+            ObjectiveFunctionValue = other.ObjectiveFunctionValue;
+            Feasible = other.Feasible;
         }
 
         public int CompareTo(BestGrammarsKey other)
@@ -133,7 +135,7 @@ namespace LinearIndexedGrammarLearner
 
         public bool Equals(BestGrammarsKey other)
         {
-            return Key == other.Key;
+            return Math.Abs(Key - other.Key) < TOLERANCE;
         }
     }
 }

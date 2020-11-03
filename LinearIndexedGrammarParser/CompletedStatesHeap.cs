@@ -4,19 +4,19 @@ namespace LinearIndexedGrammarParser
 {
     public class CompletedStatesHeap
     {
-        private readonly MaxHeap indicesHeap = new MaxHeap();
-        private readonly Dictionary<int, Queue<EarleyState>> items = new Dictionary<int, Queue<EarleyState>>();
+        private readonly MaxHeap _indicesHeap = new MaxHeap();
+        private readonly Dictionary<int, Queue<EarleyState>> _items = new Dictionary<int, Queue<EarleyState>>();
 
-        public int Count => indicesHeap.Count;
+        public int Count => _indicesHeap.Count;
 
         public void Enqueue(EarleyState state)
         {
             var index = state.StartColumn.Index;
-            if (!items.TryGetValue(index, out var queue))
+            if (!_items.TryGetValue(index, out var queue))
             {
-                indicesHeap.Add(index);
+                _indicesHeap.Add(index);
                 queue = new Queue<EarleyState>();
-                items.Add(index, queue);
+                _items.Add(index, queue);
             }
 
             queue.Enqueue(state);
@@ -24,14 +24,14 @@ namespace LinearIndexedGrammarParser
 
         public EarleyState Dequeue()
         {
-            var index = indicesHeap.Max;
-            var queue = items[index];
+            var index = _indicesHeap.Max;
+            var queue = _items[index];
 
             var state = queue.Dequeue();
             if (queue.Count == 0)
             {
-                items.Remove(index);
-                indicesHeap.PopMax();
+                _items.Remove(index);
+                _indicesHeap.PopMax();
             }
 
             return state;

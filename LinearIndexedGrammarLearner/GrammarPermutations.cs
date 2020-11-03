@@ -97,11 +97,11 @@ namespace LinearIndexedGrammarLearner
             ContextSensitiveGrammar grammar, Learner learner)
         {
 
-            for (int i = 0; i < learner._sentencesParser.Length; i++)
+            for (int i = 0; i < learner.SentencesParser.Length; i++)
             {
-                if (learner._sentencesParser[i].BracketedRepresentations.Count == 0)
+                if (learner.SentencesParser[i].BracketedRepresentations.Count == 0)
                 {
-                    var rhs = learner._sentencesParser[i].SuggestRHSForCompletion();
+                    var rhs = learner.SentencesParser[i].SuggestRHSForCompletion();
                     if (rhs == null)
                         return (null, false);
                     var lhs = ContextSensitiveGrammar.RuleSpace.GetRandomLHSIndex();
@@ -194,7 +194,7 @@ namespace LinearIndexedGrammarLearner
             (grammar, reparsed2) = InnerInsertStackConstantRule(grammar, learner, rcNew);
             if (reparsed2 == false)
                 throw new Exception("changeLHS aborted half-way! WRONG");
-            return (grammar, reparsed2);
+            return (grammar, true);
         }
 
         public (ContextSensitiveGrammar mutatedGrammar, bool reparsed)
@@ -221,7 +221,7 @@ namespace LinearIndexedGrammarLearner
             (grammar, reparsed2) = InnerInsertStackConstantRule(grammar, learner, rcNew);
             if (reparsed2 == false)
                 throw new Exception("changeRHS aborted half-way! WRONG");
-            return (grammar, reparsed2);
+            return (grammar, true);
         }
 
         //public ContextSensitiveGrammar ChangeLHSPush(ContextSensitiveGrammar grammar)

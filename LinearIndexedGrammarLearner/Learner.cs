@@ -12,12 +12,12 @@ namespace LinearIndexedGrammarLearner
         private readonly int _minWordsInSentence;
 
         private readonly HashSet<string> _posInText;
-        public readonly EarleyParser[] _sentencesParser;
+        public readonly EarleyParser[] SentencesParser;
         private readonly Vocabulary _voc;
 
         // ReSharper disable once NotAccessedField.Local
-        public GrammarPermutations _gp;
-        public GrammarTreeCountsCalculator _grammarTreesCalculator;
+        public GrammarPermutations Gp;
+        public GrammarTreeCountsCalculator GrammarTreesCalculator;
 
         public Learner(string[][] sentences, int minWordsInSentence, int maxWordsInSentence,
             Vocabulary dataVocabulary)
@@ -34,9 +34,9 @@ namespace LinearIndexedGrammarLearner
             Parses = new SentenceParsingResults[dict.Count];
             var arrayOfDesiredVals = dict.Select(x => (x.Key, x.Value)).ToArray();
 
-            _grammarTreesCalculator =
-                new GrammarTreeCountsCalculator(_posInText, _minWordsInSentence, _maxWordsInSentence);
-            _sentencesParser = new EarleyParser[Parses.Length];
+            GrammarTreesCalculator =
+                new GrammarTreeCountsCalculator(_posInText, _maxWordsInSentence);
+            SentencesParser = new EarleyParser[Parses.Length];
 
             for (var i = 0; i < Parses.Length; i++)
             {
@@ -83,20 +83,20 @@ namespace LinearIndexedGrammarLearner
         //in the former we keep using the _sentencesParser parsers.
         public void ParseAllSentencesFromScratch(ContextSensitiveGrammar currentHypothesis)
         {
-            var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
+            var currentCFGHypothesis = new ContextFreeGrammar(currentHypothesis);
 
-            if (currentCFHypothesis.ContainsCyclicUnitProduction())
+            if (currentCFGHypothesis.ContainsCyclicUnitProduction())
                 throw new Exception("initial grammar should not contain cyclic unit productions");
 
-            for (var i = 0; i < _sentencesParser.Length; i++)
-                _sentencesParser[i] =
-                    new EarleyParser(currentCFHypothesis, _voc,
+            for (var i = 0; i < SentencesParser.Length; i++)
+                SentencesParser[i] =
+                    new EarleyParser(currentCFGHypothesis, _voc, Parses[i].Sentence,
                         false); //parser does not check for cyclic unit productions
 
             Parallel.ForEach(Parses,
                 (sentenceItem, loopState, i) =>
                 {
-                    _sentencesParser[i].ParseSentence(sentenceItem.Sentence);
+                    SentencesParser[i].ParseSentence();
                 });
 
             AcceptChanges();
@@ -107,21 +107,21 @@ namespace LinearIndexedGrammarLearner
         public void SetOriginalGrammarBeforePermutation()
         {
             for (var i = 0; i < Parses.Length; i++)
-                _sentencesParser[i]._oldGrammar = _sentencesParser[i]._grammar;
+                SentencesParser[i].OldGrammar = SentencesParser[i].Grammar;
         }
 
 
         public bool ReparseWithAddition(ContextSensitiveGrammar currentHypothesis, int numberOfGeneratingRule)
         {
-            var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
+            var currentCFGHypothesis = new ContextFreeGrammar(currentHypothesis);
 
-            if (currentCFHypothesis.ContainsCyclicUnitProduction())
+            if (currentCFGHypothesis.ContainsCyclicUnitProduction())
             {
                 //Console.WriteLine("ContainsCyclicUnitProduction in ReparseWithAddition ");
                 return false;
             }
 
-            var rs = currentCFHypothesis.Rules.Where(x => x.NumberOfGeneratingRule == numberOfGeneratingRule).ToList();
+            var rs = currentCFGHypothesis.Rules.Where(x => x.NumberOfGeneratingRule == numberOfGeneratingRule).ToList();
 
             if (rs.Count == 0)
             {
@@ -137,7 +137,7 @@ namespace LinearIndexedGrammarLearner
             Parallel.ForEach(Parses,
                 (sentenceItem, loopState, i) =>
                 {
-                    _sentencesParser[i].ReParseSentenceWithRuleAddition(currentCFHypothesis, rs);
+                    SentencesParser[i].ReParseSentenceWithRuleAddition(currentCFGHypothesis, rs);
                 });
 
 
@@ -146,9 +146,9 @@ namespace LinearIndexedGrammarLearner
 
         public bool ReparseWithDeletion(ContextSensitiveGrammar currentHypothesis, int numberOfGeneratingRule)
         {
-            var currentCFHypothesis = new ContextFreeGrammar(currentHypothesis);
+            var currentCFGHypothesis = new ContextFreeGrammar(currentHypothesis);
 
-            if (currentCFHypothesis.ContainsCyclicUnitProduction())
+            if (currentCFGHypothesis.ContainsCyclicUnitProduction())
             {
                 //Console.WriteLine("ContainsCyclicUnitProduction in ReparseWithDeletion ");
                 return false;
@@ -158,7 +158,7 @@ namespace LinearIndexedGrammarLearner
                 new Dictionary<DerivedCategory, List<Rule>>();
 
             var deletedRule = new List<Rule>();
-            foreach (var kvp in _sentencesParser[0]._grammar.StaticRules)
+            foreach (var kvp in SentencesParser[0].Grammar.StaticRules)
             {
                 rulesExceptDeletedRule[kvp.Key] = new List<Rule>();
 
@@ -177,8 +177,8 @@ namespace LinearIndexedGrammarLearner
             Parallel.ForEach(Parses,  
                 (sentenceItem, loopState, i) =>
                 {
-                    _sentencesParser[i]
-                        .ReParseSentenceWithRuleDeletion(currentCFHypothesis, deletedRule, predictionSet);
+                    SentencesParser[i]
+                        .ReParseSentenceWithRuleDeletion(currentCFGHypothesis, deletedRule, predictionSet);
                 });
 
 
@@ -201,34 +201,34 @@ namespace LinearIndexedGrammarLearner
             var parsers = new EarleyParser[Parses.Length];
             for (var i = 0; i < parsers.Length; i++)
                 parsers[i] =
-                    new EarleyParser(currentHypothesis, _voc,
+                    new EarleyParser(currentHypothesis, _voc, Parses[i].Sentence,
                         false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
 
 
-                Parallel.ForEach(sentencesWithCounts,
-                    (sentenceItem, loopState, i) =>
+            Parallel.ForEach(sentencesWithCounts,
+                (sentenceItem, loopState, i) =>
+                {
+                    parsers[i].ParseSentence();
+                });
+
+
+            if (diffparsers != null)
+                for (var i = 0; i < diffparsers.Length; i++)
+                {
+                    var actual = diffparsers[i].ToString();
+                    var expected = parsers[i].ToString();
+                    if (actual != expected)
                     {
-                        parsers[i].ParseSentence(sentenceItem.Sentence);
-                    });
+                        var grammar = parsers[i].Grammar.ToString();
+                        NLog.LogManager.GetCurrentClassLogger().Info($"Actual: {actual}");
+                        NLog.LogManager.GetCurrentClassLogger().Info($"Expected: {expected}");
+                        NLog.LogManager.GetCurrentClassLogger().Info($"Grammar in parser: {grammar}");
+                        NLog.LogManager.GetCurrentClassLogger().Info($"Grammar in currentHypothesis: {currentHypothesis}");
+                        NLog.LogManager.GetCurrentClassLogger().Info($"Grammar in currentHypothesis: {previousHypothesis}");
 
-
-                if (diffparsers != null)
-                    for (var i = 0; i < diffparsers.Length; i++)
-                    {
-                        var actual = diffparsers[i].ToString();
-                        var expected = parsers[i].ToString();
-                        if (actual != expected)
-                        {
-                            var grammar = parsers[i]._grammar.ToString();
-                            NLog.LogManager.GetCurrentClassLogger().Info($"Actual: {actual}");
-                            NLog.LogManager.GetCurrentClassLogger().Info($"Expected: {expected}");
-                            NLog.LogManager.GetCurrentClassLogger().Info($"Grammar in parser: {grammar}");
-                            NLog.LogManager.GetCurrentClassLogger().Info($"Grammar in currentHypothesis: {currentHypothesis}");
-                            NLog.LogManager.GetCurrentClassLogger().Info($"Grammar in currentHypothesis: {previousHypothesis}");
-
-                            throw new Exception("actual parse differs from expected parse");
-                        }
+                        throw new Exception("actual parse differs from expected parse");
                     }
+                }
 
 
             return sentencesWithCounts;
@@ -236,7 +236,7 @@ namespace LinearIndexedGrammarLearner
 
         public Dictionary<int, int> GetGrammarTrees(ContextFreeGrammar hypothesis)
         {
-            var res = _grammarTreesCalculator.Recalculate(hypothesis);
+            var res = GrammarTreesCalculator.Recalculate(hypothesis);
             var grammarTreesPerLength = new Dictionary<int, int>();
             for (var i = 0; i < res.Length; i++)
                 if (i <= _maxWordsInSentence && i >= _minWordsInSentence && res[i] > 0)
@@ -254,7 +254,7 @@ namespace LinearIndexedGrammarLearner
             {
                 for (int i = 0; i < Parses.Length; i++)
                 {
-                    foreach (var gammaState in _sentencesParser[i].GetGammaStates())
+                    foreach (var gammaState in SentencesParser[i].GetGammaStates())
                         CollectRuleUsages(gammaState, usagesDic, Parses[i].Count);
                 }
 
@@ -301,7 +301,7 @@ namespace LinearIndexedGrammarLearner
              Parallel.ForEach(Parses,
             (sentenceItem, loopState, i) =>
             {
-                _sentencesParser[i].AcceptChanges();
+                SentencesParser[i].AcceptChanges();
             });
         }
 
@@ -310,7 +310,7 @@ namespace LinearIndexedGrammarLearner
             Parallel.ForEach(Parses,
            (sentenceItem, loopState, i) =>
            {
-               _sentencesParser[i].RejectChanges();
+               SentencesParser[i].RejectChanges();
            });
         }
     }

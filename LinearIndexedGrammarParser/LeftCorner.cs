@@ -12,13 +12,13 @@ namespace LinearIndexedGrammarParser
 
     public class LeftCorner
     {
-        private Dictionary<DerivedCategory, LeftCornerInfo> leftCorners;
+        private Dictionary<DerivedCategory, LeftCornerInfo> _leftCorners;
 
         private void DFS(DerivedCategory root, DerivedCategory cat, HashSet<DerivedCategory> visited,
             Dictionary<DerivedCategory, List<Rule>> rules)
         {
             visited.Add(cat);
-            leftCorners[root].NonTerminals.Add(cat);
+            _leftCorners[root].NonTerminals.Add(cat);
 
             if (rules.TryGetValue(cat, out var rulesOfCat))
             {
@@ -34,14 +34,14 @@ namespace LinearIndexedGrammarParser
             Dictionary<DerivedCategory, List<Rule>> rules)
         {
             //key - nonterminal, value - see above
-            leftCorners = new Dictionary<DerivedCategory, LeftCornerInfo>();
+            _leftCorners = new Dictionary<DerivedCategory, LeftCornerInfo>();
 
             var nonTerminals = rules.Keys;
 
             foreach (var nt in nonTerminals)
             {
-                leftCorners[nt] = new LeftCornerInfo();
-                leftCorners[nt].NonTerminals = new HashSet<DerivedCategory>();
+                _leftCorners[nt] = new LeftCornerInfo();
+                _leftCorners[nt].NonTerminals = new HashSet<DerivedCategory>();
                 var visited = new HashSet<DerivedCategory>();
                 foreach (var r in rules[nt])
                 {
@@ -50,7 +50,7 @@ namespace LinearIndexedGrammarParser
                 }
             }
 
-            return leftCorners;
+            return _leftCorners;
         }
     }
 }
