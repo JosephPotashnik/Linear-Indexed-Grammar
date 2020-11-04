@@ -1,1 +1,262 @@
-x
+2020-11-04 05:58:35.0007|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
+Session 11/04/2020 5:58 AM
+runs: 1, grammar file name: YesNPYesV3WithADJ.txt, vocabulary file name: Vocabulary.json, Distribution: Normal
+2020-11-04 05:58:35.0547|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N V2 P V3 A
+2020-11-04 05:58:35.0547|INFO|LinearIndexedGrammar.Program|Data samples:
+2020-11-04 05:58:35.0615|INFO|LinearIndexedGrammar.Program|200 sentences of length 2
+2020-11-04 05:58:35.0615|INFO|LinearIndexedGrammar.Program|200 sentences of length 3
+2020-11-04 05:58:35.0615|INFO|LinearIndexedGrammar.Program|200 sentences of length 4
+2020-11-04 05:58:35.0615|INFO|LinearIndexedGrammar.Program|200 sentences of length 5
+2020-11-04 05:58:35.0615|INFO|LinearIndexedGrammar.Program|200 sentences of length 6
+2020-11-04 05:58:35.0615|INFO|LinearIndexedGrammar.Program|200 sentences of length 7
+2020-11-04 05:58:35.0764|INFO|LinearIndexedGrammar.Program|200 sentences of length 8
+2020-11-04 05:58:35.0764|INFO|LinearIndexedGrammar.Program|Unique sentences types (POS sequences) from data samples:
+2020-11-04 05:58:35.0764|INFO|LinearIndexedGrammar.Program|1 unique sentences types of length 2
+2020-11-04 05:58:35.0918|INFO|LinearIndexedGrammar.Program|2 unique sentences types of length 3
+2020-11-04 05:58:35.0918|INFO|LinearIndexedGrammar.Program|5 unique sentences types of length 4
+2020-11-04 05:58:35.0918|INFO|LinearIndexedGrammar.Program|8 unique sentences types of length 5
+2020-11-04 05:58:35.0918|INFO|LinearIndexedGrammar.Program|15 unique sentences types of length 6
+2020-11-04 05:58:35.0918|INFO|LinearIndexedGrammar.Program|25 unique sentences types of length 7
+2020-11-04 05:58:35.0918|INFO|LinearIndexedGrammar.Program|39 unique sentences types of length 8
+2020-11-04 05:58:35.1105|INFO|LinearIndexedGrammar.Program|Run 1:
+2020-11-04 05:58:35.1105|INFO|LinearIndexedGrammar.Program|				Hyper-parameters : NumberOfNonTerminals: 5 NoiseTolerance: 0.00
+
+2020-11-04 05:58:35.1105|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  6
+2020-11-04 06:01:41.7325|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  7
+2020-11-04 06:05:34.8073|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  8
+2020-11-04 06:10:16.9986|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+212. START* -> X2*
+420. X2* -> X5 X3*
+901. X5* -> D X1*
+132. X1* -> A X1*
+846. X5* -> PN
+468. X3* -> V1 X5*
+540. X3* -> V3 X2*
+62. X1* -> N
+439. X3* -> V0
+717. X4* -> V2 P
+618. X3* -> X4 X5*
+896. X5* -> D N
+Stack Changing Rules:
+ 
+ with objective function value 0.967
+2020-11-04 06:10:16.9986|INFO|LinearIndexedGrammar.Program|Precision: 1.0000 Recall: 1.0000 F1-Score: 1.0000
+2020-11-04 06:10:17.0142|INFO|LinearIndexedGrammar.Program|f1_score sufficiently high for latest hypothesis.
+2020-11-04 06:10:17.0142|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+212. START* -> X2*
+420. X2* -> X5 X3*
+901. X5* -> D X1*
+132. X1* -> A X1*
+846. X5* -> PN
+468. X3* -> V1 X5*
+540. X3* -> V3 X2*
+62. X1* -> N
+439. X3* -> V0
+717. X4* -> V2 P
+618. X3* -> X4 X5*
+896. X5* -> D N
+Stack Changing Rules:
+ 
+ with objective function value 0.967
+2020-11-04 06:10:17.0142|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:11:41.91
+2020-11-04 06:10:17.0142|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
+Session 11/04/2020 6:10 AM
+runs: 1, grammar file name: YesNPYesV3WithADJAmbiguous.txt, vocabulary file name: Vocabulary.json, Distribution: Normal
+2020-11-04 06:10:17.0442|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N V2 P V3 A
+2020-11-04 06:10:17.0442|INFO|LinearIndexedGrammar.Program|Data samples:
+2020-11-04 06:10:17.0442|INFO|LinearIndexedGrammar.Program|200 sentences of length 2
+2020-11-04 06:10:17.0442|INFO|LinearIndexedGrammar.Program|200 sentences of length 3
+2020-11-04 06:10:17.0442|INFO|LinearIndexedGrammar.Program|200 sentences of length 4
+2020-11-04 06:10:17.0442|INFO|LinearIndexedGrammar.Program|200 sentences of length 5
+2020-11-04 06:10:17.0630|INFO|LinearIndexedGrammar.Program|200 sentences of length 6
+2020-11-04 06:10:17.0630|INFO|LinearIndexedGrammar.Program|200 sentences of length 7
+2020-11-04 06:10:17.0630|INFO|LinearIndexedGrammar.Program|200 sentences of length 8
+2020-11-04 06:10:17.0630|INFO|LinearIndexedGrammar.Program|Unique sentences types (POS sequences) from data samples:
+2020-11-04 06:10:17.0771|INFO|LinearIndexedGrammar.Program|1 unique sentences types of length 2
+2020-11-04 06:10:17.0771|INFO|LinearIndexedGrammar.Program|2 unique sentences types of length 3
+2020-11-04 06:10:17.0771|INFO|LinearIndexedGrammar.Program|7 unique sentences types of length 4
+2020-11-04 06:10:17.0771|INFO|LinearIndexedGrammar.Program|14 unique sentences types of length 5
+2020-11-04 06:10:17.0771|INFO|LinearIndexedGrammar.Program|31 unique sentences types of length 6
+2020-11-04 06:10:17.0917|INFO|LinearIndexedGrammar.Program|57 unique sentences types of length 7
+2020-11-04 06:10:17.0917|INFO|LinearIndexedGrammar.Program|101 unique sentences types of length 8
+2020-11-04 06:10:17.0917|INFO|LinearIndexedGrammar.Program|Run 1:
+2020-11-04 06:10:17.0917|INFO|LinearIndexedGrammar.Program|				Hyper-parameters : NumberOfNonTerminals: 5 NoiseTolerance: 0.00
+
+2020-11-04 06:10:17.0917|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  6
+2020-11-04 06:11:46.7754|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  7
+2020-11-04 06:13:58.4738|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  8
+2020-11-04 06:18:05.6521|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+1. START* -> X1*
+635. X4* -> PN
+196. X1* -> X4 X5*
+889. X5* -> V1 X4*
+961. X5* -> V3 X1*
+692. X4* -> D X3*
+316. X2* -> P X4*
+826. X4* -> X4 X2*
+556. X3* -> A X3*
+484. X3* -> N
+861. X5* -> V0
+932. X5* -> V2 X2*
+148. X1* -> X1 X2*
+1052. X5* -> X5 X2*
+Stack Changing Rules:
+ 
+ with objective function value 0.917
+2020-11-04 06:18:05.6851|INFO|LinearIndexedGrammar.Program|Precision: 1.0000 Recall: 1.0000 F1-Score: 1.0000
+2020-11-04 06:18:05.6851|INFO|LinearIndexedGrammar.Program|f1_score sufficiently high for latest hypothesis.
+2020-11-04 06:18:05.6851|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+1. START* -> X1*
+635. X4* -> PN
+196. X1* -> X4 X5*
+889. X5* -> V1 X4*
+961. X5* -> V3 X1*
+692. X4* -> D X3*
+316. X2* -> P X4*
+826. X4* -> X4 X2*
+556. X3* -> A X3*
+484. X3* -> N
+861. X5* -> V0
+932. X5* -> V2 X2*
+148. X1* -> X1 X2*
+1052. X5* -> X5 X2*
+Stack Changing Rules:
+ 
+ with objective function value 0.917
+2020-11-04 06:18:05.6851|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:07:48.59
+2020-11-04 06:18:05.6851|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
+Session 11/04/2020 6:18 AM
+runs: 1, grammar file name: YesNPYesV3WithADJ - Copy.txt, vocabulary file name: VocabularySingleVerbalCategory.json, Distribution: Normal
+2020-11-04 06:18:05.7136|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V D N P A
+2020-11-04 06:18:05.7173|INFO|LinearIndexedGrammar.Program|Data samples:
+2020-11-04 06:18:05.7173|INFO|LinearIndexedGrammar.Program|200 sentences of length 2
+2020-11-04 06:18:05.7173|INFO|LinearIndexedGrammar.Program|200 sentences of length 3
+2020-11-04 06:18:05.7173|INFO|LinearIndexedGrammar.Program|200 sentences of length 4
+2020-11-04 06:18:05.7173|INFO|LinearIndexedGrammar.Program|200 sentences of length 5
+2020-11-04 06:18:05.7322|INFO|LinearIndexedGrammar.Program|200 sentences of length 6
+2020-11-04 06:18:05.7322|INFO|LinearIndexedGrammar.Program|200 sentences of length 7
+2020-11-04 06:18:05.7322|INFO|LinearIndexedGrammar.Program|200 sentences of length 8
+2020-11-04 06:18:05.7322|INFO|LinearIndexedGrammar.Program|Unique sentences types (POS sequences) from data samples:
+2020-11-04 06:18:05.7322|INFO|LinearIndexedGrammar.Program|1 unique sentences types of length 2
+2020-11-04 06:18:05.7494|INFO|LinearIndexedGrammar.Program|2 unique sentences types of length 3
+2020-11-04 06:18:05.7494|INFO|LinearIndexedGrammar.Program|5 unique sentences types of length 4
+2020-11-04 06:18:05.7494|INFO|LinearIndexedGrammar.Program|9 unique sentences types of length 5
+2020-11-04 06:18:05.7494|INFO|LinearIndexedGrammar.Program|15 unique sentences types of length 6
+2020-11-04 06:18:05.7494|INFO|LinearIndexedGrammar.Program|23 unique sentences types of length 7
+2020-11-04 06:18:05.7643|INFO|LinearIndexedGrammar.Program|35 unique sentences types of length 8
+2020-11-04 06:18:05.7643|INFO|LinearIndexedGrammar.Program|Run 1:
+2020-11-04 06:18:05.7643|INFO|LinearIndexedGrammar.Program|				Hyper-parameters : NumberOfNonTerminals: 5 NoiseTolerance: 0.00
+
+2020-11-04 06:18:05.7643|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  6
+2020-11-04 06:18:13.7746|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  7
+2020-11-04 06:18:15.0704|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  8
+2020-11-04 06:24:37.4654|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+1. START* -> X1*
+303. X3* -> D X5*
+605. X5* -> A X5*
+268. X3* -> PN
+108. X1* -> X3 X4*
+420. X4* -> V X1*
+422. X4* -> V X3*
+570. X5* -> N
+100. X1* -> X3 V
+152. X2* -> V P
+494. X4* -> X2 X3*
+296. X3* -> D N
+Stack Changing Rules:
+ 
+ with objective function value 0.963
+2020-11-04 06:24:37.4779|INFO|LinearIndexedGrammar.Program|Precision: 1.0000 Recall: 1.0000 F1-Score: 1.0000
+2020-11-04 06:24:37.4821|INFO|LinearIndexedGrammar.Program|f1_score sufficiently high for latest hypothesis.
+2020-11-04 06:24:37.4821|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+1. START* -> X1*
+303. X3* -> D X5*
+605. X5* -> A X5*
+268. X3* -> PN
+108. X1* -> X3 X4*
+420. X4* -> V X1*
+422. X4* -> V X3*
+570. X5* -> N
+100. X1* -> X3 V
+152. X2* -> V P
+494. X4* -> X2 X3*
+296. X3* -> D N
+Stack Changing Rules:
+ 
+ with objective function value 0.963
+2020-11-04 06:24:37.4821|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:06:31.72
+2020-11-04 06:24:37.4821|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
+Session 11/04/2020 6:24 AM
+runs: 1, grammar file name: YesNPYesV3WithADJAmbiguous - Copy.txt, vocabulary file name: VocabularySingleVerbalCategory.json, Distribution: Normal
+2020-11-04 06:24:37.5232|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V D N P A
+2020-11-04 06:24:37.5232|INFO|LinearIndexedGrammar.Program|Data samples:
+2020-11-04 06:24:37.5314|INFO|LinearIndexedGrammar.Program|200 sentences of length 2
+2020-11-04 06:24:37.5314|INFO|LinearIndexedGrammar.Program|200 sentences of length 3
+2020-11-04 06:24:37.5314|INFO|LinearIndexedGrammar.Program|200 sentences of length 4
+2020-11-04 06:24:37.5314|INFO|LinearIndexedGrammar.Program|200 sentences of length 5
+2020-11-04 06:24:37.5446|INFO|LinearIndexedGrammar.Program|200 sentences of length 6
+2020-11-04 06:24:37.5446|INFO|LinearIndexedGrammar.Program|200 sentences of length 7
+2020-11-04 06:24:37.5446|INFO|LinearIndexedGrammar.Program|200 sentences of length 8
+2020-11-04 06:24:37.5446|INFO|LinearIndexedGrammar.Program|Unique sentences types (POS sequences) from data samples:
+2020-11-04 06:24:37.5610|INFO|LinearIndexedGrammar.Program|1 unique sentences types of length 2
+2020-11-04 06:24:37.5610|INFO|LinearIndexedGrammar.Program|2 unique sentences types of length 3
+2020-11-04 06:24:37.5610|INFO|LinearIndexedGrammar.Program|6 unique sentences types of length 4
+2020-11-04 06:24:37.5610|INFO|LinearIndexedGrammar.Program|13 unique sentences types of length 5
+2020-11-04 06:24:37.5610|INFO|LinearIndexedGrammar.Program|25 unique sentences types of length 6
+2020-11-04 06:24:37.5773|INFO|LinearIndexedGrammar.Program|46 unique sentences types of length 7
+2020-11-04 06:24:37.5773|INFO|LinearIndexedGrammar.Program|91 unique sentences types of length 8
+2020-11-04 06:24:37.5773|INFO|LinearIndexedGrammar.Program|Run 1:
+2020-11-04 06:24:37.5773|INFO|LinearIndexedGrammar.Program|				Hyper-parameters : NumberOfNonTerminals: 5 NoiseTolerance: 0.00
+
+2020-11-04 06:24:37.5773|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  6
+2020-11-04 06:29:01.2902|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  7
+2020-11-04 06:38:11.7737|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  8
+2020-11-04 06:53:17.5439|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+534. X5* -> PN
+610. X5* -> X1 N
+26. X1* -> D
+194. X2* -> P X5*
+80. X1* -> X1 A
+267. START* -> X3*
+424. X4* -> V X5*
+398. X3* -> X5 X4*
+422. X4* -> V X3*
+517. X4* -> X4 X2*
+184. X2* -> P PN
+413. X4* -> V
+372. X3* -> X3 X2*
+458. X4* -> P X3*
+421. X4* -> V X2*
+Stack Changing Rules:
+ 
+ with objective function value 0.961
+2020-11-04 06:53:17.6071|INFO|LinearIndexedGrammar.Program|Precision: 1.0000 Recall: 1.0000 F1-Score: 1.0000
+2020-11-04 06:53:17.6071|INFO|LinearIndexedGrammar.Program|f1_score sufficiently high for latest hypothesis.
+2020-11-04 06:53:17.6071|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+534. X5* -> PN
+610. X5* -> X1 N
+26. X1* -> D
+194. X2* -> P X5*
+80. X1* -> X1 A
+267. START* -> X3*
+424. X4* -> V X5*
+398. X3* -> X5 X4*
+422. X4* -> V X3*
+517. X4* -> X4 X2*
+184. X2* -> P PN
+413. X4* -> V
+372. X3* -> X3 X2*
+458. X4* -> P X3*
+421. X4* -> V X2*
+Stack Changing Rules:
+ 
+ with objective function value 0.961
+2020-11-04 06:53:17.6071|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:28:40.03
