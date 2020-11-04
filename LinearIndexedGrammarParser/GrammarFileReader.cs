@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -50,8 +51,8 @@ namespace LinearIndexedGrammarParser
             var cfGrammar = new ContextFreeGrammar(rules);
 
             var parser = new EarleyParser(cfGrammar, universalVocabulary, sentence.Split());
-
-            parser.ParseSentence();
+            var treesDic = new Dictionary<int, HashSet<string>>();
+            parser.ParseSentence(treesDic);
 
             return parser.GetGammaStates();
         }

@@ -18,7 +18,8 @@ namespace LinearIndexedGrammarLearner
         // ReSharper disable once NotAccessedField.Local
         public GrammarPermutations Gp;
         public GrammarTreeCountsCalculator GrammarTreesCalculator;
-
+        public Dictionary<int, HashSet<string>> TreesDic { get; set; }
+        public Dictionary<int, int> GrammarTreesDic { get; set; }
         public Learner(string[][] sentences, int minWordsInSentence, int maxWordsInSentence,
             Vocabulary dataVocabulary)
         {
@@ -66,18 +67,6 @@ namespace LinearIndexedGrammarLearner
             return originalGrammar;
         }
 
-        public double GetGrammarGrowth(Dictionary<int, int> grammarTreesPerLength)
-        {
-            int sumTrees = 0;
-            int maxLength = 0;
-            foreach (var length in grammarTreesPerLength.Keys)
-            {
-                sumTrees += grammarTreesPerLength[length];
-                if (length > maxLength) maxLength = length;
-            }
-
-            return Math.Pow(sumTrees, (1 / (double)maxLength));
-        }
 
         //the difference between ParseAllSentencesFromScratch and ParseAllSentence is that the
         //in the former we keep using the _sentencesParser parsers.
@@ -93,15 +82,30 @@ namespace LinearIndexedGrammarLearner
                     new EarleyParser(currentCFGHypothesis, _voc, Parses[i].Sentence,
                         false); //parser does not check for cyclic unit productions
 
-            Parallel.ForEach(Parses,
-                (sentenceItem, loopState, i) =>
-                {
-                    SentencesParser[i].ParseSentence();
-                });
+            InitTreesDictionary();
+
+            Parallel.Invoke(
+                () => {
+                    Parallel.ForEach(Parses,
+                        (sentenceItem, loopState, i) =>
+                        {
+                            SentencesParser[i].ParseSentence(TreesDic);
+                        });
+                },
+                () => { GrammarTreesDic = GetGrammarTrees(currentCFGHypothesis); }
+            );
+
+
 
             AcceptChanges();
         }
 
+        private void InitTreesDictionary()
+        {
+            TreesDic = new Dictionary<int, HashSet<string>>();
+            for (int i = _minWordsInSentence; i <= _maxWordsInSentence; i++)
+                TreesDic[i] = new HashSet<string>();
+        }
 
 
         public void SetOriginalGrammarBeforePermutation()
@@ -133,12 +137,17 @@ namespace LinearIndexedGrammarLearner
                 return true;
             }
 
-
-            Parallel.ForEach(Parses,
-                (sentenceItem, loopState, i) =>
-                {
-                    SentencesParser[i].ReParseSentenceWithRuleAddition(currentCFGHypothesis, rs);
-                });
+            InitTreesDictionary();
+            Parallel.Invoke(
+                () => {
+                    Parallel.ForEach(Parses,
+                        (sentenceItem, loopState, i) =>
+                        {
+                            SentencesParser[i].ReParseSentenceWithRuleAddition(TreesDic, currentCFGHypothesis, rs);
+                        });
+                },
+                () => { GrammarTreesDic = GetGrammarTrees(currentCFGHypothesis); }
+            );
 
 
             return true;
@@ -173,18 +182,25 @@ namespace LinearIndexedGrammarLearner
 
             var leftCorner = new LeftCorner();
             var predictionSet = leftCorner.ComputeLeftCorner(rulesExceptDeletedRule);
-
-            Parallel.ForEach(Parses,  
-                (sentenceItem, loopState, i) =>
+            InitTreesDictionary();
+            Parallel.Invoke(
+                () =>
                 {
-                    SentencesParser[i]
-                        .ReParseSentenceWithRuleDeletion(currentCFGHypothesis, deletedRule, predictionSet);
-                });
+                    Parallel.ForEach(Parses,
+                        (sentenceItem, loopState, i) =>
+                        {
+                            SentencesParser[i]
+                                .ReParseSentenceWithRuleDeletion(TreesDic, currentCFGHypothesis, deletedRule, predictionSet);
+                        });
+                },
+                () => { GrammarTreesDic = GetGrammarTrees(currentCFGHypothesis); }
+            );
 
 
             return true;
         }
 
+        /*
         public SentenceParsingResults[] ParseAllSentencesWithDebuggingAssertion(ContextFreeGrammar currentHypothesis, ContextFreeGrammar previousHypothesis,
             EarleyParser[] diffparsers = null)
         {
@@ -204,11 +220,11 @@ namespace LinearIndexedGrammarLearner
                     new EarleyParser(currentHypothesis, _voc, Parses[i].Sentence,
                         false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
 
-
+            InitTreesDictionary();
             Parallel.ForEach(sentencesWithCounts,
                 (sentenceItem, loopState, i) =>
                 {
-                    parsers[i].ParseSentence();
+                    parsers[i].ParseSentence(TreesDic);
                 });
 
 
@@ -233,7 +249,7 @@ namespace LinearIndexedGrammarLearner
 
             return sentencesWithCounts;
         }
-
+        */
         public Dictionary<int, int> GetGrammarTrees(ContextFreeGrammar hypothesis)
         {
             var res = GrammarTreesCalculator.Recalculate(hypothesis);

@@ -1,5 +1,6 @@
 ﻿using NLog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -142,7 +143,7 @@ namespace LinearIndexedGrammarParser
             return gammaStates;
         }
 
-        public void ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs)
+        public void ReParseSentenceWithRuleAddition(Dictionary<int, HashSet<string>> treesDic, ContextFreeGrammar g, List<Rule> rs)
         {
             Grammar = g;
 
@@ -190,9 +191,11 @@ namespace LinearIndexedGrammarParser
                 //TraverseScannableStates(_table, col);
 
             }
+
+            UpdateConcurrentDictionary(treesDic);
         }
 
-        public void ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, List<Rule> rs,
+        public void ReParseSentenceWithRuleDeletion(Dictionary<int, HashSet<string>> treesDic, ContextFreeGrammar g, List<Rule> rs,
             Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
         {
             foreach (var col in _table)
@@ -215,6 +218,8 @@ namespace LinearIndexedGrammarParser
             }
 
             Grammar = g;
+
+            UpdateConcurrentDictionary(treesDic);
         }
 
         private void TraversePredictedStatesToDelete(EarleyColumn col,
@@ -401,7 +406,7 @@ namespace LinearIndexedGrammarParser
             return GetGammaStates();
         }
 
-        public void ParseSentence(int maxWords = 0)
+        public void ParseSentence(Dictionary<int, HashSet<string>> treesDic, int maxWords = 0)
         {
             (_table, _finalColumns) = PrepareEarleyTable(_text, maxWords);
             BracketedRepresentations = _table[_table.Length - 1].BracketedRepresentations;
@@ -447,6 +452,15 @@ namespace LinearIndexedGrammarParser
                 LogManager.GetCurrentClassLogger().Info(s);
             }
 
+            UpdateConcurrentDictionary(treesDic);
+        }
+
+        private void UpdateConcurrentDictionary(Dictionary<int, HashSet<string>> treesDic)
+        {
+            lock (treesDic[_text.Length])
+            {
+                treesDic[_text.Length].UnionWith(BracketedRepresentations);
+            }
         }
 
         protected virtual (EarleyColumn[], int[]) PrepareEarleyTable(string[] text, int maxWord)
