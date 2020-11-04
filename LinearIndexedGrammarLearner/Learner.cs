@@ -125,7 +125,15 @@ namespace LinearIndexedGrammarLearner
                 return false;
             }
 
-            var rs = currentCFGHypothesis.Rules.Where(x => x.NumberOfGeneratingRule == numberOfGeneratingRule).ToList();
+            var rs = new List<Rule>();
+            foreach (var ruleList in currentCFGHypothesis.StaticRules.Values)
+            {
+                foreach (var rule in ruleList)
+                {
+                    if (rule.NumberOfGeneratingRule == numberOfGeneratingRule)
+                        rs.Add((rule));
+                }
+            }
 
             if (rs.Count == 0)
             {

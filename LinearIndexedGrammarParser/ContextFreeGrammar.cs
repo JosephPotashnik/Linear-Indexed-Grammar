@@ -30,10 +30,6 @@ namespace LinearIndexedGrammarParser
             ConstructCFG(rules);
         }
 
-        public List<Rule> Rules
-        {
-            get { return StaticRules.Values.SelectMany(x => x).ToList(); }
-        }
 
         private void ConstructCFG(IEnumerable<Rule> ruleList)
         {
@@ -125,13 +121,14 @@ namespace LinearIndexedGrammarParser
             //2. then find the stack contents - anything by "*" (the first group)
             var patternString = patternStringLeftHandSide.Replace(StarSymbol, "(.*)");
 
-            var pattern = new Regex(patternString);
 
+            //TODO the regular expression is slow. might take upon yourself to implement manually.
+            var pattern = new Regex(patternString);
             var textToMatch = leftHandSide.Stack;
             var match = pattern.Match(textToMatch);
             if (!match.Success) return null;
-
             var stackContents = match.Groups[1].Value;
+
             newRule.LeftHandSide = leftHandSide;
             var posInRhsCount = 0;
 
@@ -306,23 +303,25 @@ namespace LinearIndexedGrammarParser
         public bool ContainsCyclicUnitProduction()
         {
             var possibleNullableCategories = ComputeTransitiveClosureOfNullableCategories();
-            var allRules = StaticRules.Values.SelectMany(x => x);
             var unitProductions = new Dictionary<DerivedCategory, List<DerivedCategory>>();
 
-            foreach (var r in allRules)
+            foreach (var ruleList in StaticRules.Values)
             {
-                if (!unitProductions.TryGetValue(r.LeftHandSide, out var categories))
+                foreach (var r in ruleList)
                 {
-                    categories = new List<DerivedCategory>();
-                    unitProductions.Add(r.LeftHandSide, categories);
-                }
+                    if (!unitProductions.TryGetValue(r.LeftHandSide, out var categories))
+                    {
+                        categories = new List<DerivedCategory>();
+                        unitProductions.Add(r.LeftHandSide, categories);
+                    }
 
-                if (r.RightHandSide.Length == 1)
-                    categories.Add(r.RightHandSide[0]);
-                else if (possibleNullableCategories.Contains(r.RightHandSide[0]))
-                    categories.Add(r.RightHandSide[1]);
-                else if (possibleNullableCategories.Contains(r.RightHandSide[1]))
-                    categories.Add(r.RightHandSide[0]);
+                    if (r.RightHandSide.Length == 1)
+                        categories.Add(r.RightHandSide[0]);
+                    else if (possibleNullableCategories.Contains(r.RightHandSide[0]))
+                        categories.Add(r.RightHandSide[1]);
+                    else if (possibleNullableCategories.Contains(r.RightHandSide[1]))
+                        categories.Add(r.RightHandSide[0]);
+                }
             }
 
             foreach (var root in unitProductions.Keys)
@@ -337,7 +336,6 @@ namespace LinearIndexedGrammarParser
 
         private HashSet<DerivedCategory> ComputeTransitiveClosureOfNullableCategories()
         {
-            var allRules = StaticRules.Values.SelectMany(x => x).ToArray();
             var epsilonCat = new DerivedCategory(EpsilonSymbol);
             var possibleNullableCategories = new HashSet<DerivedCategory>();
             possibleNullableCategories.Add(epsilonCat);
@@ -348,13 +346,18 @@ namespace LinearIndexedGrammarParser
                 added = false;
                 var toAddToPossibleNullableCategories = new List<DerivedCategory>();
 
-                foreach (var r in allRules)
-                    if (!possibleNullableCategories.Contains(r.LeftHandSide))
-                        if (r.RightHandSide.All(x => possibleNullableCategories.Contains(x)))
-                        {
-                            added = true;
-                            toAddToPossibleNullableCategories.Add(new DerivedCategory(r.LeftHandSide));
-                        }
+                foreach (var ruleList in StaticRules.Values)
+                {
+                    foreach (var r in ruleList)
+                    {
+                        if (!possibleNullableCategories.Contains(r.LeftHandSide))
+                            if (r.RightHandSide.All(x => possibleNullableCategories.Contains(x)))
+                            {
+                                added = true;
+                                toAddToPossibleNullableCategories.Add(new DerivedCategory(r.LeftHandSide));
+                            }
+                    }
+                }
 
                 foreach (var cat in toAddToPossibleNullableCategories)
                     possibleNullableCategories.Add(cat);
