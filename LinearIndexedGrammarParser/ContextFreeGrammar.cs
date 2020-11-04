@@ -123,11 +123,13 @@ namespace LinearIndexedGrammarParser
 
 
             //TODO the regular expression is slow. might take upon yourself to implement manually.
-            var pattern = new Regex(patternString);
-            var textToMatch = leftHandSide.Stack;
-            var match = pattern.Match(textToMatch);
-            if (!match.Success) return null;
-            var stackContents = match.Groups[1].Value;
+            //TODO at the moment the commented part below means the learner only works with CFG but not LIG
+            //var pattern = new Regex(patternString);
+            //var textToMatch = leftHandSide.Stack;
+            //var match = pattern.Match(textToMatch);
+            //if (!match.Success) return null;
+            //var stackContents = match.Groups[1].Value;
+            var stackContents = "";
 
             newRule.LeftHandSide = leftHandSide;
             var posInRhsCount = 0;
