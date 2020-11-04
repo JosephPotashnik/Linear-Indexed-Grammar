@@ -1,1416 +1,262 @@
-2020-10-02 16:47:07.2528|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 4:47 PM
-runs: 1, grammar file name: NoNPNoV3.txt, vocabulary file name: Vocabulary.json, Distribution: Normal
-2020-10-02 16:47:07.3075|INFO|LinearIndexedGrammar.Program|POS contained in data: D N V0 V1 V2 P
-2020-10-02 16:47:07.3873|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-698. X3* -> P X4*
-823. X4* -> D N
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 16:47:07.3917|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 16:47:07.3917|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 16:47:07.3917|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 16:47:07.3917|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 16:47:07.4047|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 16:47:07.4047|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 16:47:51.5955|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.8333333333333334 (feasible: True)
-2020-10-02 16:48:24.1306|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.6451149425287357 (feasible: False)
-2020-10-02 16:48:39.0754|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 1 (feasible: True)
-2020-10-02 16:48:39.0754|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-789. X6* -> D N
-778. X5* -> X6 V2
-463. X3* -> X6 V1
-452. X3* -> X5 P
-118. X1* -> X3 X6*
-148. X1* -> X6 V0
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 16:48:39.0754|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 16:48:39.0754|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 16:48:39.0919|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:01:31.70
-2020-10-02 16:48:39.0919|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 4:48 PM
-runs: 1, grammar file name: NoNPWithV3.txt, vocabulary file name: Vocabulary.json, Distribution: Normal
-2020-10-02 16:48:39.1430|INFO|LinearIndexedGrammar.Program|POS contained in data: D N V0 V1 V2 P V3
-2020-10-02 16:48:39.5470|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-388. X2* -> V3 X1*
-698. X3* -> P X4*
-823. X4* -> D N
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 16:48:39.5470|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 16:48:39.5470|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 16:48:39.5470|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 16:48:39.5629|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 16:48:39.5629|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 16:48:39.5629|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 16:48:39.5629|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 16:48:39.5766|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 16:48:39.5766|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 16:49:26.0680|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.48430962343096234 (feasible: False)
-2020-10-02 16:49:37.7903|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 1 (feasible: True)
-2020-10-02 16:49:37.7955|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-02 16:49:37.9084|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-02 16:49:38.0671|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-02 16:49:38.3693|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-02 16:49:38.6483|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-02 16:49:39.0846|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-736. X5* -> D N
-916. START* -> X6*
-1082. X6* -> X5 X4*
-605. X4* -> V1 X5*
-84. X1* -> P X5*
-615. X4* -> V2 X1*
-1074. X6* -> X5 V0
-648. X4* -> V3 X6*
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 16:49:39.1016|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 16:49:39.1016|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 16:49:39.1103|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:00:59.55
-2020-10-02 16:49:39.1103|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 4:49 PM
-runs: 1, grammar file name: YesNPNoV3.txt, vocabulary file name: Vocabulary.json, Distribution: Normal
-2020-10-02 16:49:39.1248|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N V2 P
-2020-10-02 16:49:39.2078|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 16:49:39.2078|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 16:49:39.2194|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 16:49:39.2194|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 16:49:39.2194|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 16:49:39.2194|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 16:49:39.2346|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 16:49:39.2346|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 16:49:39.2346|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 16:50:36.1504|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 1 (feasible: True)
-2020-10-02 16:50:36.1566|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-15. X1* -> PN X6*
-781. X5* -> D N
-931. X6* -> V0
-1058. X6* -> X4 PN
-169. X1* -> X5 X6*
-957. X6* -> V1 X5*
-946. X6* -> V1 PN
-628. X4* -> V2 P
-1069. X6* -> X4 X5*
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 16:50:36.1566|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 16:50:36.1566|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 16:50:36.1566|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:00:56.95
-2020-10-02 16:50:36.1725|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 4:50 PM
-runs: 1, grammar file name: YesNPNoV3WithADJ.txt, vocabulary file name: Vocabulary.json, Distribution: Normal
-2020-10-02 16:50:36.2050|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N V2 P A
-2020-10-02 16:50:36.9092|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-836. X4* -> D X5*
-1262. X5* -> A X5*
-1249. X5* -> A N
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 16:50:36.9092|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 16:50:36.9209|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 16:50:36.9209|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 16:50:36.9209|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 16:50:36.9209|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 16:50:36.9360|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 16:50:36.9360|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 16:50:36.9360|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
-2020-10-02 16:50:36.9360|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 16:50:36.9522|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 16:50:36.9522|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
-2020-10-02 16:50:36.9522|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 16:50:36.9522|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 16:53:26.9140|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.4539218416411399 (feasible: False)
-2020-10-02 16:54:55.6727|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 1 (feasible: True)
-2020-10-02 16:54:55.6727|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-02 16:54:55.9797|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-02 16:54:56.3741|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-02 16:54:56.9162|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-02 16:54:57.4910|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-02 16:54:58.2288|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-634. START* -> X4*
-213. X2* -> PN
-781. X4* -> X2 X3*
-263. X2* -> D N
-629. X3* -> X6 X2*
-1139. X6* -> V2 P
-398. X2* -> X5 N
-899. X5* -> D A
-772. X4* -> X2 V0
-1087. X6* -> V1
-1034. X5* -> X5 A
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 16:54:58.2555|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 16:54:58.2555|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 16:54:58.2653|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:04:21.34
-2020-10-02 16:54:58.2653|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 4:54 PM
-runs: 1, grammar file name: YesNPYesV3.txt, vocabulary file name: Vocabulary.json, Distribution: Normal
-2020-10-02 16:54:58.3771|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N V2 P V3
-2020-10-02 16:54:59.1320|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-388. X2* -> V3 X1*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 16:54:59.1395|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 16:54:59.1395|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 16:54:59.1395|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 16:54:59.1395|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 16:54:59.1554|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 16:54:59.1554|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 16:54:59.1554|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 16:54:59.1554|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
-2020-10-02 16:54:59.1714|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 16:54:59.1714|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 16:54:59.1714|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
-2020-10-02 16:54:59.1714|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 16:54:59.1876|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 16:57:09.8694|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.18176841357187806 (feasible: False)
-2020-10-02 16:59:15.1421|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.7032032032032032 (feasible: False)
-2020-10-02 16:59:47.4638|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 1 (feasible: True)
-2020-10-02 16:59:47.4638|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-02 16:59:47.8284|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-02 16:59:48.2678|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-02 16:59:48.7979|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-02 16:59:49.4884|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-02 16:59:50.4100|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-685. X4* -> D N
-149. X1* -> X2 X4*
-169. X1* -> X4 V0
-381. X2* -> X4 V1
-635. X4* -> PN
-1019. X5* -> X4 V3
-191. X1* -> X5 X1*
-595. X3* -> X4 V2
-370. X2* -> X3 P
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 16:59:50.4448|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 16:59:50.4448|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 16:59:50.4448|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:04:48.55
-2020-10-02 16:59:50.4588|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 4:59 PM
+2020-11-04 05:58:35.0007|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
+Session 11/04/2020 5:58 AM
 runs: 1, grammar file name: YesNPYesV3WithADJ.txt, vocabulary file name: Vocabulary.json, Distribution: Normal
-2020-10-02 16:59:50.5552|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N V2 P V3 A
-2020-10-02 16:59:51.3691|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-388. X2* -> V3 X1*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-836. X4* -> D X5*
-1262. X5* -> A X5*
-1249. X5* -> A N
-1. START* -> X1*
-Stack Changing Rules:
+2020-11-04 05:58:35.0547|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N V2 P V3 A
+2020-11-04 05:58:35.0547|INFO|LinearIndexedGrammar.Program|Data samples:
+2020-11-04 05:58:35.0615|INFO|LinearIndexedGrammar.Program|200 sentences of length 2
+2020-11-04 05:58:35.0615|INFO|LinearIndexedGrammar.Program|200 sentences of length 3
+2020-11-04 05:58:35.0615|INFO|LinearIndexedGrammar.Program|200 sentences of length 4
+2020-11-04 05:58:35.0615|INFO|LinearIndexedGrammar.Program|200 sentences of length 5
+2020-11-04 05:58:35.0615|INFO|LinearIndexedGrammar.Program|200 sentences of length 6
+2020-11-04 05:58:35.0615|INFO|LinearIndexedGrammar.Program|200 sentences of length 7
+2020-11-04 05:58:35.0764|INFO|LinearIndexedGrammar.Program|200 sentences of length 8
+2020-11-04 05:58:35.0764|INFO|LinearIndexedGrammar.Program|Unique sentences types (POS sequences) from data samples:
+2020-11-04 05:58:35.0764|INFO|LinearIndexedGrammar.Program|1 unique sentences types of length 2
+2020-11-04 05:58:35.0918|INFO|LinearIndexedGrammar.Program|2 unique sentences types of length 3
+2020-11-04 05:58:35.0918|INFO|LinearIndexedGrammar.Program|5 unique sentences types of length 4
+2020-11-04 05:58:35.0918|INFO|LinearIndexedGrammar.Program|8 unique sentences types of length 5
+2020-11-04 05:58:35.0918|INFO|LinearIndexedGrammar.Program|15 unique sentences types of length 6
+2020-11-04 05:58:35.0918|INFO|LinearIndexedGrammar.Program|25 unique sentences types of length 7
+2020-11-04 05:58:35.0918|INFO|LinearIndexedGrammar.Program|39 unique sentences types of length 8
+2020-11-04 05:58:35.1105|INFO|LinearIndexedGrammar.Program|Run 1:
+2020-11-04 05:58:35.1105|INFO|LinearIndexedGrammar.Program|				Hyper-parameters : NumberOfNonTerminals: 5 NoiseTolerance: 0.00
 
-. Verifying objective function value of target grammar given the data: 0.9823509669841004 
-
-2020-10-02 16:59:51.3691|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 16:59:51.3808|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 16:59:51.3808|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 16:59:51.3808|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 16:59:51.3808|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 16:59:51.3970|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 16:59:51.3970|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 16:59:51.3970|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
-2020-10-02 16:59:51.4095|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 16:59:51.4095|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 16:59:51.4095|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
-2020-10-02 16:59:51.4095|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 16:59:51.4251|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 17:01:37.6578|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.43058220905061567 (feasible: False)
-2020-10-02 17:03:13.9284|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.3303405863963268 (feasible: False)
-2020-10-02 17:04:46.5984|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.40792070033141453 (feasible: False)
-2020-10-02 17:06:13.4090|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 0.40792070033141453 (feasible: False)
-2020-10-02 17:07:21.0037|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, objective function value 0.5004578754578755 (feasible: False)
-2020-10-02 17:08:04.0477|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, objective function value 0.5004578754578755 (feasible: False)
-2020-10-02 17:08:44.1783|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, objective function value 0.5004578754578755 (feasible: False)
-2020-10-02 17:09:22.3886|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 8, objective function value 0.5004578754578755 (feasible: False)
-2020-10-02 17:10:10.6163|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 9, objective function value 0.7065018315018314 (feasible: False)
-2020-10-02 17:11:05.4198|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 10, objective function value 0.7065018315018314 (feasible: False)
-2020-10-02 17:11:49.2249|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 11, objective function value 0.7065018315018314 (feasible: False)
-2020-10-02 17:12:30.0894|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 12, objective function value 0.7065018315018314 (feasible: False)
-2020-10-02 17:13:16.2112|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 13, objective function value 0.5004578754578755 (feasible: False)
-2020-10-02 17:13:58.0226|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 14, objective function value 0.5004578754578755 (feasible: False)
-2020-10-02 17:14:42.0278|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 15, objective function value 0.7138278388278388 (feasible: False)
-2020-10-02 17:15:16.9813|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 16, objective function value 1 (feasible: True)
-2020-10-02 17:15:16.9875|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-02 17:15:17.3710|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-02 17:15:17.8135|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-02 17:15:18.3397|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-02 17:15:18.9767|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-02 17:15:19.8189|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+2020-11-04 05:58:35.1105|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  6
+2020-11-04 06:01:41.7325|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  7
+2020-11-04 06:05:34.8073|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  8
+2020-11-04 06:10:16.9986|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
 Stack Constant Rules:
-1. START* -> X1*
-1019. X5* -> D N
-966. X5* -> PN
-225. X1* -> X5 X6*
-1329. X6* -> V3 X1*
-1253. X6* -> V1 X5*
-212. X1* -> X5 V0
-1163. X5* -> X4 N
-782. X4* -> D A
-353. X2* -> P X5*
-1298. X6* -> V2 X2*
-926. X4* -> X4 A
-Stack Changing Rules:
- 
- with objective function value 0.9823509669841004
-2020-10-02 17:15:19.9935|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 17:15:19.9935|INFO|LinearIndexedGrammar.Program|Average objective function value is: 0.9823509669841004
-Achieved objective function value=1 in 0 times out of 1 runs
-2020-10-02 17:15:20.0024|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:15:28.62
-2020-10-02 17:15:20.0024|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 5:15 PM
-runs: 1, grammar file name: NoNPNoV3.txt, vocabulary file name: Vocabulary.json, Distribution: Uniform
-2020-10-02 17:15:20.0024|INFO|LinearIndexedGrammar.Program|POS contained in data: D N V0 V1 V2 P
-2020-10-02 17:15:20.0570|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-698. X3* -> P X4*
-823. X4* -> D N
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 17:15:20.0570|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 17:15:20.0683|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 17:15:20.0683|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 17:15:20.0683|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 17:15:20.0683|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 17:15:20.0832|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 17:16:01.9210|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.6540130151843817 (feasible: False)
-2020-10-02 17:16:28.0085|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.6540130151843817 (feasible: False)
-2020-10-02 17:16:54.1107|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.6540130151843817 (feasible: False)
-2020-10-02 17:17:11.8865|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 1 (feasible: True)
-2020-10-02 17:17:11.8865|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-690. X5* -> V2 X2*
-304. X2* -> X6 N
-853. X6* -> P D
-786. START* -> X6*
-4. X1* -> D N
-876. X6* -> X1 X5*
-555. X4* -> X1 V1
-434. X3* -> X4 D
-893. X6* -> X3 N
-868. X6* -> X1 V0
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 17:17:11.8969|INFO|LinearIndexedGrammar.Program|Precision: 0.375 Recall: 1 F1-Score: 0.5454545454545454
-2020-10-02 17:17:11.8969|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 17:17:11.8969|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:01:51.84
-2020-10-02 17:17:11.9097|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 5:17 PM
-runs: 1, grammar file name: NoNPWithV3.txt, vocabulary file name: Vocabulary.json, Distribution: Uniform
-2020-10-02 17:17:11.9333|INFO|LinearIndexedGrammar.Program|POS contained in data: D N V0 V1 V3 V2 P
-2020-10-02 17:17:12.3442|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-388. X2* -> V3 X1*
-698. X3* -> P X4*
-823. X4* -> D N
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 17:17:12.3514|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 17:17:12.3514|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 17:17:12.3622|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 17:17:12.3622|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 17:17:12.3622|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 17:17:12.3622|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 17:17:12.3622|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 17:17:12.3816|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 17:17:12.3816|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 17:17:47.9777|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.35542747358309323 (feasible: False)
-2020-10-02 17:18:11.1353|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.35542747358309323 (feasible: False)
-2020-10-02 17:18:35.4709|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.6320845341018252 (feasible: False)
-2020-10-02 17:18:42.8635|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 1 (feasible: True)
-2020-10-02 17:18:42.8635|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-02 17:18:42.9300|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-02 17:18:43.1775|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-02 17:18:43.4990|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-02 17:18:43.8592|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-02 17:18:44.3585|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-187. X2* -> D N
-117. X1* -> X2 V0
-668. X4* -> X2 V3
-334. X2* -> X4 X2*
-484. X3* -> X2 V1
-861. X5* -> X3 D
-158. X1* -> X5 N
-1035. X6* -> X2 V2
-543. X3* -> X6 P
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 17:18:44.3666|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 17:18:44.3666|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 17:18:44.3666|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:01:32.02
-2020-10-02 17:18:44.3793|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 5:18 PM
-runs: 1, grammar file name: YesNPNoV3.txt, vocabulary file name: Vocabulary.json, Distribution: Uniform
-2020-10-02 17:18:44.4208|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 D N V1 V2 P
-2020-10-02 17:18:44.5390|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 17:18:44.5390|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 17:18:44.5504|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 17:18:44.5504|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 17:18:44.5504|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 17:18:44.5504|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 17:18:44.5657|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 17:18:44.5657|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 17:18:44.5657|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 17:20:38.0703|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.7019286966686149 (feasible: False)
-2020-10-02 17:21:16.2643|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.7019286966686149 (feasible: False)
-2020-10-02 17:21:38.5484|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 1 (feasible: True)
-2020-10-02 17:21:38.5537|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-127. X1* -> X2 X6*
-917. X6* -> PN
-628. X4* -> V2 P
-364. X2* -> X6 X4*
-949. X6* -> D N
-172. X1* -> X6 V0
-358. X2* -> X6 V1
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 17:21:38.5537|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 17:21:38.5537|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 17:21:38.5661|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:02:54.01
-2020-10-02 17:21:38.5661|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 5:21 PM
-runs: 1, grammar file name: YesNPNoV3WithADJ.txt, vocabulary file name: Vocabulary.json, Distribution: Uniform
-2020-10-02 17:21:38.6199|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N A V2 P
-2020-10-02 17:21:39.3669|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-836. X4* -> D X5*
-1262. X5* -> A X5*
-1249. X5* -> A N
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 17:21:39.3669|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 17:21:39.3788|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 17:21:39.3788|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 17:21:39.3788|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 17:21:39.3788|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 17:21:39.3951|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 17:21:39.3951|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 17:21:39.3951|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
-2020-10-02 17:21:39.3951|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 17:21:39.4117|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 17:21:39.4117|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
-2020-10-02 17:21:39.4117|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 17:21:39.4281|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 17:23:43.9480|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.6660657954033349 (feasible: False)
-2020-10-02 17:24:01.6364|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 1 (feasible: True)
-2020-10-02 17:24:01.6364|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-02 17:24:01.9572|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-02 17:24:02.3402|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-02 17:24:02.8516|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-02 17:24:03.4390|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-02 17:24:04.1736|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-272. X2* -> D X6*
-177. X1* -> X4 X2*
-1117. X6* -> N
-773. X4* -> X2 V1
-1146. X6* -> A X6*
-213. X2* -> PN
-566. X3* -> X2 V2
-139. X1* -> X2 V0
-793. X4* -> X3 P
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 17:24:04.1899|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 17:24:04.1948|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 17:24:04.1948|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:02:24.82
-2020-10-02 17:24:04.1948|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 5:24 PM
-runs: 1, grammar file name: YesNPYesV3.txt, vocabulary file name: Vocabulary.json, Distribution: Uniform
-2020-10-02 17:24:04.3065|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 D N V1 V2 P V3
-2020-10-02 17:24:05.0389|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-388. X2* -> V3 X1*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 17:24:05.0389|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 17:24:05.0519|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 17:24:05.0519|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 17:24:05.0519|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 17:24:05.0519|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 17:24:05.0832|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 17:24:05.0832|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 17:24:05.0832|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
-2020-10-02 17:24:05.0832|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 17:24:05.1006|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 17:24:05.1006|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
-2020-10-02 17:24:05.1006|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 17:24:05.1160|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 17:26:41.8760|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.2830384881434756 (feasible: False)
-2020-10-02 17:29:11.2408|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.46948717948717944 (feasible: False)
-2020-10-02 17:30:28.8391|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.6954938552571689 (feasible: False)
-2020-10-02 17:31:18.6570|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 0.6954938552571689 (feasible: False)
-2020-10-02 17:32:15.1595|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, objective function value 0.6954938552571689 (feasible: False)
-2020-10-02 17:33:03.3178|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, objective function value 1 (feasible: True)
-2020-10-02 17:33:03.3178|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-02 17:33:03.6417|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-02 17:33:04.0646|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-02 17:33:04.6228|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-02 17:33:05.2520|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-02 17:33:06.0497|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-1057. X6* -> PN
-207. X1* -> X6 X2*
-327. X2* -> V3 X1*
-287. X2* -> V1 X6*
-199. X1* -> X6 V0
-1091. X6* -> D N
-299. X2* -> V2 X3*
-528. X3* -> P X6*
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 17:33:06.1029|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 17:33:06.1029|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 17:33:06.1029|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:09:01.06
-2020-10-02 17:33:06.1160|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 5:33 PM
-runs: 1, grammar file name: YesNPYesV3WithADJ.txt, vocabulary file name: Vocabulary.json, Distribution: Uniform
-2020-10-02 17:33:06.1923|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N V2 P A V3
-2020-10-02 17:33:06.9556|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-388. X2* -> V3 X1*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-836. X4* -> D X5*
-1262. X5* -> A X5*
-1249. X5* -> A N
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 0.9986659395058103 
-
-2020-10-02 17:33:06.9632|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 17:33:06.9632|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 17:33:06.9717|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 17:33:06.9717|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 17:33:06.9717|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 17:33:06.9717|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 17:33:06.9895|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 17:33:06.9895|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
-2020-10-02 17:33:06.9895|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 17:33:07.0170|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 17:33:07.0216|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
-2020-10-02 17:33:07.0216|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 17:33:07.0216|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 17:36:01.2648|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.5287070638207376 (feasible: False)
-2020-10-02 17:36:56.9284|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.5992597845840167 (feasible: False)
-2020-10-02 17:37:25.8771|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 1 (feasible: True)
-2020-10-02 17:37:25.8828|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-02 17:37:26.2638|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-02 17:37:26.7926|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-02 17:37:27.3685|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-02 17:37:28.0736|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-02 17:37:29.0874|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-189. X1* -> X3 X2*
-306. X2* -> D X6*
-647. X3* -> X2 V1
-1334. X6* -> A X6*
-164. X1* -> X2 V0
-1271. X6* -> N
-243. X2* -> PN
-891. X4* -> X2 V2
-683. X3* -> X4 P
-220. X1* -> X5 X1*
-1135. X5* -> X2 V3
-704. X3* -> X5 X3*
-Stack Changing Rules:
- 
- with objective function value 0.9990982776089159
-2020-10-02 17:37:29.3071|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 17:37:29.3071|INFO|LinearIndexedGrammar.Program|Average objective function value is: 0.9990982776089159
-Achieved objective function value=1 in 0 times out of 1 runs
-2020-10-02 17:37:29.3158|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:04:22.35
-2020-10-02 17:37:29.3158|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 5:37 PM
-runs: 1, grammar file name: NoNPNoV3.txt, vocabulary file name: Vocabulary.json, Distribution: PowerLaw
-2020-10-02 17:37:29.3158|INFO|LinearIndexedGrammar.Program|POS contained in data: D N V0 V1 V2 P
-2020-10-02 17:37:29.3757|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-698. X3* -> P X4*
-823. X4* -> D N
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 17:37:29.3833|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 17:37:29.3833|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 17:37:29.3833|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 17:37:29.3956|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 17:37:29.3956|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 17:37:29.3956|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 17:38:01.6925|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 1 (feasible: True)
-2020-10-02 17:38:01.6925|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-374. X3* -> V2 P
-161. X2* -> D N
-742. X5* -> X3 X2*
-677. X5* -> V1 X2*
-104. X1* -> X2 X5*
-96. X1* -> X2 V0
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 17:38:01.6925|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 17:38:01.7085|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 17:38:01.7085|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:00:32.32
-2020-10-02 17:38:01.7085|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 5:38 PM
-runs: 1, grammar file name: NoNPWithV3.txt, vocabulary file name: Vocabulary.json, Distribution: PowerLaw
-2020-10-02 17:38:01.7625|INFO|LinearIndexedGrammar.Program|POS contained in data: D N V0 V1 V2 P V3
-2020-10-02 17:38:02.1493|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-388. X2* -> V3 X1*
-698. X3* -> P X4*
-823. X4* -> D N
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 17:38:02.1493|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 17:38:02.1610|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 17:38:02.1610|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 17:38:02.1610|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 17:38:02.1610|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 17:38:02.1813|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 17:38:02.2023|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 17:38:02.2075|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 17:38:02.2075|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 17:38:42.4609|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.38333333333333336 (feasible: True)
-2020-10-02 17:39:11.1112|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:39:38.8495|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:40:00.4507|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:40:25.1664|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:40:51.4425|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:41:16.6546|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:41:47.5108|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 8, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:42:12.5840|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 9, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:42:36.4882|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 10, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:42:59.1501|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 11, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:43:24.2548|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 12, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:43:48.2543|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 13, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:44:16.9477|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 14, objective function value 0.5893385982230996 (feasible: False)
-2020-10-02 17:44:42.9188|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 15, objective function value 0.5597235932872655 (feasible: False)
-2020-10-02 17:45:12.9086|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 16, objective function value 0.8333333333333334 (feasible: True)
-2020-10-02 17:45:37.4769|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 17, objective function value 0.7314906219151036 (feasible: False)
-2020-10-02 17:45:57.4620|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 18, objective function value 0.7314906219151036 (feasible: False)
-2020-10-02 17:46:00.2238|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 19, objective function value 1 (feasible: True)
-2020-10-02 17:46:00.2238|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-02 17:46:00.2989|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-02 17:46:00.5058|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-02 17:46:00.8121|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-02 17:46:01.1061|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-02 17:46:01.5482|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-14. X1* -> D X5*
-228. X2* -> V1 D
-482. X3* -> X2 N
-460. X3* -> V3 X1*
-758. X5* -> N X3*
-751. X5* -> N V0
-622. X4* -> P D
-252. X2* -> V2 X4*
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 17:46:01.5570|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 17:46:01.5570|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 17:46:01.5657|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:07:59.40
-2020-10-02 17:46:01.5657|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 5:46 PM
-runs: 1, grammar file name: YesNPNoV3.txt, vocabulary file name: Vocabulary.json, Distribution: PowerLaw
-2020-10-02 17:46:01.6123|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 D N V1 V2 P
-2020-10-02 17:46:01.7117|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 17:46:01.7117|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 17:46:01.7232|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 17:46:01.7232|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 17:46:01.7232|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 17:46:01.7232|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 17:46:01.7400|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 17:46:01.7400|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 17:46:01.7400|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 17:47:29.3031|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.703656998738966 (feasible: False)
-2020-10-02 17:48:17.9699|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.8814627994955864 (feasible: False)
-2020-10-02 17:49:14.1689|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.8814627994955864 (feasible: False)
-2020-10-02 17:49:51.5517|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 0.8058007566204287 (feasible: False)
-2020-10-02 17:50:33.0510|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, objective function value 0.8058007566204287 (feasible: False)
-2020-10-02 17:51:25.9090|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, objective function value 0.8814627994955864 (feasible: False)
-2020-10-02 17:52:00.4841|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, objective function value 0.8814627994955864 (feasible: False)
-2020-10-02 17:52:50.2727|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 8, objective function value 0.8814627994955864 (feasible: False)
-2020-10-02 17:53:47.0106|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 9, objective function value 0.703656998738966 (feasible: False)
-2020-10-02 17:54:33.6958|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 10, objective function value 0.8814627994955864 (feasible: False)
-2020-10-02 17:55:20.3914|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 11, objective function value 0.8814627994955864 (feasible: False)
-2020-10-02 17:56:07.9245|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 12, objective function value 0.8814627994955864 (feasible: False)
-2020-10-02 17:56:54.3799|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 13, objective function value 0.8814627994955864 (feasible: False)
-2020-10-02 17:57:52.0745|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 14, objective function value 0.703656998738966 (feasible: False)
-2020-10-02 17:58:40.0662|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 15, objective function value 0.9735182849936949 (feasible: False)
-2020-10-02 17:59:28.6248|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 16, objective function value 0.6147540983606558 (feasible: False)
-2020-10-02 18:00:03.2321|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 17, objective function value 0.9735182849936949 (feasible: False)
-2020-10-02 18:00:30.7201|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 18, objective function value 0.9810844892812106 (feasible: False)
-2020-10-02 18:01:27.0668|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 19, objective function value 0.8814627994955864 (feasible: False)
-2020-10-02 18:02:10.5200|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 20, objective function value 0.7137452711223202 (feasible: False)
-2020-10-02 18:03:28.3785|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 21, objective function value 1 (feasible: True)
-2020-10-02 18:03:28.3785|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-217. X2* -> D N
-179. X1* -> X6 X2*
-1064. X6* -> X4 P
-669. X4* -> X2 V2
-1034. X6* -> X2 V1
-185. X2* -> PN
-116. X1* -> X2 V0
-Stack Changing Rules:
- 
- with objective function value 1
-2020-10-02 18:03:28.3785|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 18:03:28.3939|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 18:03:28.3939|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:17:26.67
-2020-10-02 18:03:28.3939|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 6:03 PM
-runs: 1, grammar file name: YesNPNoV3WithADJ.txt, vocabulary file name: Vocabulary.json, Distribution: PowerLaw
-2020-10-02 18:03:28.4552|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 D N V1 A V2 P
-2020-10-02 18:03:29.1756|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-836. X4* -> D X5*
-1262. X5* -> A X5*
-1249. X5* -> A N
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 18:03:29.1756|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 18:03:29.1756|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 18:03:29.1916|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 18:03:29.1916|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 18:03:29.1916|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 18:03:29.1916|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 18:03:29.2077|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 18:03:29.2077|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
-2020-10-02 18:03:29.2077|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 18:03:29.2077|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 18:03:29.2241|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
-2020-10-02 18:03:29.2241|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 18:03:29.2241|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 18:06:14.1929|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.4757936507936507 (feasible: False)
-2020-10-02 18:08:06.5868|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.3702345309381238 (feasible: False)
-2020-10-02 18:09:37.5226|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.3891119103788787 (feasible: True)
-2020-10-02 18:12:03.5090|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 0.42448676899896426 (feasible: True)
-2020-10-02 18:14:33.3516|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, objective function value 0.49610281923714755 (feasible: False)
-2020-10-02 18:16:22.1949|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, objective function value 0.4988888888888888 (feasible: True)
-2020-10-02 18:18:11.8665|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, objective function value 1 (feasible: True)
-2020-10-02 18:18:11.8665|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-02 18:18:12.1392|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-02 18:18:12.5125|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-02 18:18:13.0407|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-02 18:18:13.6019|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-02 18:18:14.2919|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-193. X1* -> X5 X3*
-13. X1* -> PN X3*
-733. X4* -> V2 P
-602. X3* -> X4 X5*
-590. X3* -> X4 PN
-695. X4* -> V1
+212. START* -> X2*
+420. X2* -> X5 X3*
+901. X5* -> D X1*
+132. X1* -> A X1*
+846. X5* -> PN
+468. X3* -> V1 X5*
+540. X3* -> V3 X2*
+62. X1* -> N
 439. X3* -> V0
-985. X5* -> X2 N
-880. X5* -> D N
-249. X2* -> D A
-354. X2* -> X2 A
+717. X4* -> V2 P
+618. X3* -> X4 X5*
+896. X5* -> D N
 Stack Changing Rules:
  
- with objective function value 1
-2020-10-02 18:18:14.3197|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 18:18:14.3197|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 18:18:14.3197|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:14:45.14
-2020-10-02 18:18:14.3327|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 6:18 PM
-runs: 1, grammar file name: YesNPYesV3.txt, vocabulary file name: Vocabulary.json, Distribution: PowerLaw
-2020-10-02 18:18:14.4397|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N V3 V2 P
-2020-10-02 18:18:15.1538|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
+ with objective function value 0.967
+2020-11-04 06:10:16.9986|INFO|LinearIndexedGrammar.Program|Precision: 1.0000 Recall: 1.0000 F1-Score: 1.0000
+2020-11-04 06:10:17.0142|INFO|LinearIndexedGrammar.Program|f1_score sufficiently high for latest hypothesis.
+2020-11-04 06:10:17.0142|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
 Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-388. X2* -> V3 X1*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 1 
-
-2020-10-02 18:18:15.1613|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 18:18:15.1613|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 18:18:15.1613|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 18:18:15.1751|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 18:18:15.1751|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 18:18:15.1751|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 18:18:15.1751|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 18:18:15.1926|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
-2020-10-02 18:18:15.1926|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 18:18:15.1926|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 18:18:15.2064|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
-2020-10-02 18:18:15.2064|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 18:18:15.2064|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 18:20:05.5076|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.21375620347394544 (feasible: False)
-2020-10-02 18:21:06.7682|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.32177419354838716 (feasible: False)
-2020-10-02 18:22:58.4112|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.46373773027856774 (feasible: False)
-2020-10-02 18:24:55.7254|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 0.8372727272727272 (feasible: False)
-2020-10-02 18:25:30.3972|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, objective function value 0.5327620967741935 (feasible: False)
-2020-10-02 18:26:06.9877|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, objective function value 0.5327620967741935 (feasible: False)
-2020-10-02 18:26:36.7570|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, objective function value 0.5327620967741935 (feasible: False)
-2020-10-02 18:27:08.9772|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 8, objective function value 0.5327620967741935 (feasible: False)
-2020-10-02 18:27:45.4192|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 9, objective function value 0.5327620967741935 (feasible: False)
-2020-10-02 18:28:17.5855|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 10, objective function value 0.5327620967741935 (feasible: False)
-2020-10-02 18:28:49.4067|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 11, objective function value 0.5327620967741935 (feasible: False)
-2020-10-02 18:29:25.4774|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 12, objective function value 1 (feasible: True)
-2020-10-02 18:29:25.4774|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-02 18:29:25.7558|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-02 18:29:26.1687|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-02 18:29:26.7002|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-02 18:29:27.2745|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-02 18:29:28.2258|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-15. X1* -> PN X5*
-877. X5* -> V1 PN
-930. X5* -> V3 X1*
-861. X5* -> V0
-61. X1* -> D X6*
-1130. X6* -> N X5*
-458. X3* -> V1 D
-1001. X5* -> X3 N
-733. X4* -> V2 P
-1012. X5* -> X4 PN
-593. X3* -> X4 D
+212. START* -> X2*
+420. X2* -> X5 X3*
+901. X5* -> D X1*
+132. X1* -> A X1*
+846. X5* -> PN
+468. X3* -> V1 X5*
+540. X3* -> V3 X2*
+62. X1* -> N
+439. X3* -> V0
+717. X4* -> V2 P
+618. X3* -> X4 X5*
+896. X5* -> D N
 Stack Changing Rules:
  
- with objective function value 1
-2020-10-02 18:29:28.2608|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 18:29:28.2744|INFO|LinearIndexedGrammar.Program|Average objective function value is: 1
-Achieved objective function value=1 in 1 times out of 1 runs
-2020-10-02 18:29:28.2744|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:11:13.11
-2020-10-02 18:29:28.2744|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 6:29 PM
-runs: 1, grammar file name: YesNPYesV3WithADJ.txt, vocabulary file name: Vocabulary.json, Distribution: PowerLaw
-2020-10-02 18:29:28.3744|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N A V3 V2 P
-2020-10-02 18:29:29.1129|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-388. X2* -> V3 X1*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-836. X4* -> D X5*
-1262. X5* -> A X5*
-1249. X5* -> A N
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 0.9627370689899533 
-
-2020-10-02 18:29:29.1129|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 18:29:29.1129|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 18:29:29.1296|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 18:29:29.1296|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 18:29:29.1296|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 18:29:29.1435|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 18:29:29.1435|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 18:29:29.1435|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
-2020-10-02 18:29:29.1435|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 18:29:29.1598|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 18:29:29.1598|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
-2020-10-02 18:29:29.1598|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 18:29:29.1598|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 18:32:22.8448|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.3005835340578448 (feasible: False)
-2020-10-02 18:35:41.2284|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.39693213448319387 (feasible: False)
-2020-10-02 18:36:58.4936|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.6719500480307397 (feasible: False)
-2020-10-02 18:37:29.9645|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 0.5441882804995197 (feasible: False)
-2020-10-02 18:38:01.5859|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, objective function value 0.6719500480307397 (feasible: False)
-2020-10-02 18:38:30.8507|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, objective function value 0.504803073967339 (feasible: False)
-2020-10-02 18:39:04.1777|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, objective function value 0.4759846301633045 (feasible: False)
-2020-10-02 18:39:33.4453|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 8, objective function value 0.4759846301633045 (feasible: False)
-2020-10-02 18:40:11.7320|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 9, objective function value 0.6719500480307397 (feasible: False)
-2020-10-02 18:40:57.7630|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 10, objective function value 0.6719500480307397 (feasible: False)
-2020-10-02 18:41:26.9819|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 11, objective function value 0.6719500480307397 (feasible: False)
-2020-10-02 18:42:08.1977|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 12, objective function value 0.6719500480307397 (feasible: False)
-2020-10-02 18:42:43.7424|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 13, objective function value 0.504803073967339 (feasible: False)
-2020-10-02 18:43:18.3313|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 14, objective function value 0.5499519692603266 (feasible: False)
-2020-10-02 18:43:45.3610|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 15, objective function value 0.4759846301633045 (feasible: False)
-2020-10-02 18:44:16.9972|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 16, objective function value 0.5254562920268973 (feasible: False)
-2020-10-02 18:44:41.5823|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 17, objective function value 0.2809798270893372 (feasible: False)
-2020-10-02 18:45:05.5204|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 18, objective function value 0.2809798270893372 (feasible: False)
-2020-10-02 18:45:39.4451|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 19, objective function value 0.4759846301633045 (feasible: False)
-2020-10-02 18:46:06.4173|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 20, objective function value 0.2809798270893372 (feasible: False)
-2020-10-02 18:48:58.2688|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 21, objective function value 0.9553314121037464 (feasible: False)
-2020-10-02 18:49:46.2707|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 22, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 18:50:31.5951|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 23, objective function value 0.5763688760806917 (feasible: False)
-2020-10-02 18:51:08.7238|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 24, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 18:52:01.4084|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 25, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 18:52:52.3717|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 26, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 18:53:27.8759|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 27, objective function value 0.3390970220941403 (feasible: False)
-2020-10-02 18:53:57.5233|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 28, objective function value 0.2867435158501441 (feasible: False)
-2020-10-02 18:54:27.0193|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 29, objective function value 0.3376560999039385 (feasible: False)
-2020-10-02 18:54:55.0231|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 30, objective function value 0.2867435158501441 (feasible: False)
-2020-10-02 18:55:22.8691|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 31, objective function value 0.2809798270893372 (feasible: False)
-2020-10-02 18:55:53.2935|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 32, objective function value 0.3482228626320846 (feasible: False)
-2020-10-02 18:56:18.2474|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 33, objective function value 0.30979827089337175 (feasible: False)
-2020-10-02 18:56:48.8514|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 34, objective function value 0.2809798270893372 (feasible: False)
-2020-10-02 18:57:14.4137|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 35, objective function value 0.30403458213256485 (feasible: False)
-2020-10-02 18:57:42.8997|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 36, objective function value 0.2809798270893372 (feasible: False)
-2020-10-02 18:58:06.6633|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 37, objective function value 0.2809798270893372 (feasible: False)
-2020-10-02 18:58:28.1126|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 38, objective function value 0.2809798270893372 (feasible: False)
-2020-10-02 18:58:55.2893|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 39, objective function value 0.4932756964457252 (feasible: False)
-2020-10-02 18:59:22.4101|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 40, objective function value 0.4759846301633045 (feasible: False)
-2020-10-02 19:01:34.4330|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 41, objective function value 0.7055715658021133 (feasible: False)
-2020-10-02 19:02:22.5002|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 42, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:02:57.0709|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 43, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:03:46.0507|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 44, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:04:29.2888|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 45, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:05:23.1250|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 46, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:06:20.1906|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 47, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:07:07.8664|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 48, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:07:57.8752|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 49, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:08:41.5656|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 50, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:09:29.1866|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 51, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:10:12.5321|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 52, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:10:54.9571|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 53, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:11:42.7365|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 54, objective function value 0.7962728146013448 (feasible: False)
-2020-10-02 19:12:24.7243|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 55, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:13:09.1962|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 56, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:14:03.5740|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 57, objective function value 0.8395773294908742 (feasible: False)
-2020-10-02 19:14:37.4964|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 58, objective function value 1 (feasible: True)
-2020-10-02 19:14:37.4964|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-02 19:14:37.8182|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-02 19:14:38.2335|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-02 19:14:38.7588|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-02 19:14:39.3656|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-02 19:14:40.1147|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
-Stack Constant Rules:
-1. START* -> X1*
-532. X3* -> D
-177. X1* -> X2 X6*
-666. X3* -> X3 A
-424. X2* -> X3 N
-1250. X6* -> V1 X2*
-243. X2* -> PN
-164. X1* -> X2 V0
-1332. X6* -> V2 X4*
-864. X4* -> P X2*
-1313. X6* -> V3 X1*
-Stack Changing Rules:
- 
- with objective function value 0.9627370689899533
-2020-10-02 19:14:40.2849|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-02 19:14:40.2849|INFO|LinearIndexedGrammar.Program|Average objective function value is: 0.9627370689899533
-Achieved objective function value=1 in 0 times out of 1 runs
-2020-10-02 19:14:40.2849|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:45:11.172020-10-02 23:37:49.2896|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/02/2020 11:37 PM
+ with objective function value 0.967
+2020-11-04 06:10:17.0142|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:11:41.91
+2020-11-04 06:10:17.0142|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
+Session 11/04/2020 6:10 AM
 runs: 1, grammar file name: YesNPYesV3WithADJAmbiguous.txt, vocabulary file name: Vocabulary.json, Distribution: Normal
-2020-10-02 23:37:49.8658|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N V3 P V2 A
-2020-10-02 23:37:50.6969|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-388. X2* -> V3 X1*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-836. X4* -> D X5*
-1262. X5* -> A X5*
-1249. X5* -> A N
-1055. X4* -> X4 X3*
-475. X2* -> X2 X3*
-1. START* -> X1*
-Stack Changing Rules:
+2020-11-04 06:10:17.0442|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 V1 D N V2 P V3 A
+2020-11-04 06:10:17.0442|INFO|LinearIndexedGrammar.Program|Data samples:
+2020-11-04 06:10:17.0442|INFO|LinearIndexedGrammar.Program|200 sentences of length 2
+2020-11-04 06:10:17.0442|INFO|LinearIndexedGrammar.Program|200 sentences of length 3
+2020-11-04 06:10:17.0442|INFO|LinearIndexedGrammar.Program|200 sentences of length 4
+2020-11-04 06:10:17.0442|INFO|LinearIndexedGrammar.Program|200 sentences of length 5
+2020-11-04 06:10:17.0630|INFO|LinearIndexedGrammar.Program|200 sentences of length 6
+2020-11-04 06:10:17.0630|INFO|LinearIndexedGrammar.Program|200 sentences of length 7
+2020-11-04 06:10:17.0630|INFO|LinearIndexedGrammar.Program|200 sentences of length 8
+2020-11-04 06:10:17.0630|INFO|LinearIndexedGrammar.Program|Unique sentences types (POS sequences) from data samples:
+2020-11-04 06:10:17.0771|INFO|LinearIndexedGrammar.Program|1 unique sentences types of length 2
+2020-11-04 06:10:17.0771|INFO|LinearIndexedGrammar.Program|2 unique sentences types of length 3
+2020-11-04 06:10:17.0771|INFO|LinearIndexedGrammar.Program|7 unique sentences types of length 4
+2020-11-04 06:10:17.0771|INFO|LinearIndexedGrammar.Program|14 unique sentences types of length 5
+2020-11-04 06:10:17.0771|INFO|LinearIndexedGrammar.Program|31 unique sentences types of length 6
+2020-11-04 06:10:17.0917|INFO|LinearIndexedGrammar.Program|57 unique sentences types of length 7
+2020-11-04 06:10:17.0917|INFO|LinearIndexedGrammar.Program|101 unique sentences types of length 8
+2020-11-04 06:10:17.0917|INFO|LinearIndexedGrammar.Program|Run 1:
+2020-11-04 06:10:17.0917|INFO|LinearIndexedGrammar.Program|				Hyper-parameters : NumberOfNonTerminals: 5 NoiseTolerance: 0.00
 
-. Verifying objective function value of target grammar given the data: 0.8991706732192598 
-
-2020-10-02 23:37:50.6969|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-02 23:37:50.7086|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-02 23:37:50.7086|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-02 23:37:50.7306|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-02 23:37:50.7306|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-02 23:37:50.7386|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-02 23:37:50.7386|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-02 23:37:50.7386|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
-2020-10-02 23:37:50.7386|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-02 23:37:50.7386|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-02 23:37:50.7571|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
-2020-10-02 23:37:50.7571|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-02 23:37:50.7571|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-02 23:43:47.5063|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.6477268611206239 (feasible: False)
-2020-10-02 23:44:45.8554|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.5870182555780933 (feasible: False)
-2020-10-02 23:45:57.6105|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.8563894523326572 (feasible: False)
-2020-10-02 23:46:51.0930|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 0.8563894523326572 (feasible: False)
-2020-10-02 23:47:58.6785|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, objective function value 0.6997971602434077 (feasible: False)
-2020-10-02 23:49:11.8960|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, objective function value 0.8563894523326572 (feasible: False)
-2020-10-02 23:50:34.4307|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, objective function value 0.6608519269776876 (feasible: False)
-2020-10-02 23:51:38.1460|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 8, objective function value 0.5221095334685598 (feasible: False)
-2020-10-02 23:52:44.9548|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 9, objective function value 0.6373225152129818 (feasible: False)
-2020-10-02 23:54:11.4881|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 10, objective function value 0.8563894523326572 (feasible: False)
-2020-10-02 23:55:29.9563|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 11, objective function value 0.8563894523326572 (feasible: False)
-2020-10-02 23:56:19.3446|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 12, objective function value 0.5156067121519454 (feasible: False)
-2020-10-02 23:57:23.8281|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 13, objective function value 0.8236146044624746 (feasible: False)
-2020-10-02 23:58:55.6785|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 14, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 00:00:02.2356|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 15, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 00:01:10.2138|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 16, objective function value 0.6924949290060851 (feasible: False)
-2020-10-03 00:02:23.3385|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 17, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 00:03:10.1191|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 18, objective function value 0.7732283975659229 (feasible: False)
-2020-10-03 00:04:08.3205|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 19, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 00:05:27.8437|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 20, objective function value 0.5318458417849898 (feasible: False)
-2020-10-03 00:07:55.4386|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 21, objective function value 0.8490872210953346 (feasible: False)
-2020-10-03 00:09:27.9801|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 22, objective function value 0.8490872210953346 (feasible: False)
-2020-10-03 00:10:45.1853|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 23, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 00:12:06.6890|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 24, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 00:13:16.7961|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 25, objective function value 0.7858012170385396 (feasible: False)
-2020-10-03 00:14:15.3904|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 26, objective function value 0.6267748478701826 (feasible: False)
-2020-10-03 00:15:15.0413|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 27, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 00:16:11.4170|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 28, objective function value 0.7885516031560657 (feasible: False)
-2020-10-03 00:17:17.6124|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 29, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 00:18:42.6016|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 30, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 00:19:44.6067|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 31, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 00:21:14.7952|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 32, objective function value 0.8490872210953346 (feasible: False)
-2020-10-03 00:22:23.3309|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 33, objective function value 0.7019457469508179 (feasible: False)
-2020-10-03 00:23:24.4208|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 34, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 00:24:48.7392|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 35, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 00:25:59.2659|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 36, objective function value 0.5675862068965517 (feasible: False)
-2020-10-03 00:27:03.1839|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 37, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 00:28:27.1257|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 38, objective function value 0.7768292089249492 (feasible: False)
-2020-10-03 00:29:56.7672|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 39, objective function value 0.6162271805273833 (feasible: False)
-2020-10-03 00:31:30.8038|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 40, objective function value 0.821009656425478 (feasible: False)
-2020-10-03 00:35:30.0326|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 41, objective function value 0.5152314140866924 (feasible: False)
-2020-10-03 00:36:24.0343|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 42, objective function value 0.6795807978363759 (feasible: False)
-2020-10-03 00:37:55.8020|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 43, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 00:39:08.3857|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 44, objective function value 0.8235294117647058 (feasible: False)
-2020-10-03 00:40:22.7800|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 45, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 00:41:06.2821|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 46, objective function value 0.6234129667192547 (feasible: False)
-2020-10-03 00:42:16.7533|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 47, objective function value 0.6924949290060851 (feasible: False)
-2020-10-03 00:43:31.4482|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 48, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 00:44:43.3778|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 49, objective function value 0.8490872210953346 (feasible: False)
-2020-10-03 00:45:44.6402|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 50, objective function value 0.7212981744421907 (feasible: False)
-2020-10-03 00:46:40.4650|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 51, objective function value 0.6924949290060851 (feasible: False)
-2020-10-03 00:47:25.8928|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 52, objective function value 0.5429918864097363 (feasible: False)
-2020-10-03 00:48:14.8017|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 53, objective function value 0.4600405679513184 (feasible: False)
-2020-10-03 00:49:22.6003|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 54, objective function value 0.8490872210953346 (feasible: False)
-2020-10-03 00:50:40.9942|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 55, objective function value 0.8094903651115619 (feasible: False)
-2020-10-03 00:52:23.3327|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 56, objective function value 0.8119314852377733 (feasible: False)
-2020-10-03 00:53:46.4770|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 57, objective function value 0.8490872210953346 (feasible: False)
-2020-10-03 00:54:41.7188|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 58, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 00:55:56.8066|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 59, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 00:57:15.3653|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 60, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 00:58:42.4861|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 61, objective function value 0.17931034482758623 (feasible: False)
-2020-10-03 00:59:11.0534|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 62, objective function value 0.16713995943204873 (feasible: False)
-2020-10-03 00:59:50.5254|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 63, objective function value 0.23529411764705888 (feasible: False)
-2020-10-03 01:00:17.6582|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 64, objective function value 0.16713995943204873 (feasible: False)
-2020-10-03 01:00:42.0624|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 65, objective function value 0.20243407707910754 (feasible: False)
-2020-10-03 01:01:19.1280|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 66, objective function value 0.28722109533468565 (feasible: False)
-2020-10-03 01:01:48.9889|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 67, objective function value 0.333711967545639 (feasible: False)
-2020-10-03 01:02:19.1684|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 68, objective function value 0.3214604462474645 (feasible: False)
-2020-10-03 01:02:49.5555|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 69, objective function value 0.18766734279918867 (feasible: False)
-2020-10-03 01:03:26.3931|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 70, objective function value 0.4377281947261663 (feasible: False)
-2020-10-03 01:03:52.6230|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 71, objective function value 0.3026774847870182 (feasible: False)
-2020-10-03 01:04:27.7743|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 72, objective function value 0.25111561866125764 (feasible: False)
-2020-10-03 01:04:56.1547|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 73, objective function value 0.1703853955375254 (feasible: False)
-2020-10-03 01:05:27.6322|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 74, objective function value 0.41732251521298175 (feasible: False)
-2020-10-03 01:05:57.2214|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 75, objective function value 0.2677484787018256 (feasible: False)
-2020-10-03 01:06:39.2401|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 76, objective function value 0.3939553752535497 (feasible: False)
-2020-10-03 01:07:18.4317|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 77, objective function value 0.35699797160243407 (feasible: False)
-2020-10-03 01:07:47.4679|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 78, objective function value 0.3600811359026369 (feasible: False)
-2020-10-03 01:08:24.1471|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 79, objective function value 0.34758620689655173 (feasible: False)
-2020-10-03 01:08:58.9900|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 80, objective function value 0.34758620689655173 (feasible: False)
-2020-10-03 01:13:06.9957|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 81, objective function value 0.3951295062742179 (feasible: False)
-2020-10-03 01:14:33.4605|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 82, objective function value 0.7456389452332657 (feasible: False)
-2020-10-03 01:15:45.0604|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 83, objective function value 0.7403257026948711 (feasible: False)
-2020-10-03 01:17:02.6621|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 84, objective function value 0.7287492152033226 (feasible: False)
-2020-10-03 01:18:13.5057|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 85, objective function value 0.7020234544121908 (feasible: False)
-2020-10-03 01:19:30.7211|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 86, objective function value 0.7752535496957403 (feasible: False)
-2020-10-03 01:20:40.1805|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 87, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:21:58.5519|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 88, objective function value 0.7300481991681661 (feasible: False)
-2020-10-03 01:23:02.2887|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 89, objective function value 0.732657200811359 (feasible: False)
-2020-10-03 01:24:02.5999|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 90, objective function value 0.8531440162271805 (feasible: False)
-2020-10-03 01:25:41.1514|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 91, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:27:18.5757|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 92, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 01:28:25.1703|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 93, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:29:40.4516|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 94, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:30:35.2364|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 95, objective function value 0.6628803245436106 (feasible: False)
-2020-10-03 01:31:51.5030|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 96, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:33:12.8120|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 97, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:34:24.1025|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 98, objective function value 0.8316430020283976 (feasible: False)
-2020-10-03 01:35:31.1876|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 99, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:36:56.2247|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 100, objective function value 0.8498018411608675 (feasible: False)
-2020-10-03 01:41:02.3283|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 101, objective function value 0.33084281267288973 (feasible: False)
-2020-10-03 01:44:28.9668|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 102, objective function value 0.5301738729679907 (feasible: False)
-2020-10-03 01:46:06.1554|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 103, objective function value 0.8316430020283976 (feasible: False)
-2020-10-03 01:47:18.5021|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 104, objective function value 0.8490872210953346 (feasible: False)
-2020-10-03 01:48:24.0821|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 105, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:49:29.2707|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 106, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:50:39.9928|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 107, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:51:56.7998|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 108, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:53:15.9871|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 109, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:54:25.0451|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 110, objective function value 0.8490872210953346 (feasible: False)
-2020-10-03 01:55:33.7284|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 111, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:56:41.2102|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 112, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:57:45.3968|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 113, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 01:58:43.3347|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 114, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 01:59:55.0938|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 115, objective function value 0.7319463403398494 (feasible: False)
-2020-10-03 02:01:14.5325|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 116, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 02:02:40.7272|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 117, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 02:03:53.7259|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 118, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 02:05:10.7323|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 119, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 02:06:26.4833|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 120, objective function value 0.8498018411608675 (feasible: False)
-2020-10-03 02:09:34.9846|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 121, objective function value 0.6700745926846823 (feasible: False)
-2020-10-03 02:10:49.6899|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 122, objective function value 0.6924949290060851 (feasible: False)
-2020-10-03 02:11:52.5606|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 123, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 02:13:02.6504|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 124, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 02:14:00.0651|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 125, objective function value 0.6924949290060851 (feasible: False)
-2020-10-03 02:15:02.2585|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 126, objective function value 0.6924949290060851 (feasible: False)
-2020-10-03 02:16:17.9356|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 127, objective function value 0.6700745926846823 (feasible: False)
-2020-10-03 02:17:35.3817|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 128, objective function value 0.6777429467084639 (feasible: False)
-2020-10-03 02:19:10.2253|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 129, objective function value 0.821009656425478 (feasible: False)
-2020-10-03 02:20:10.3631|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 130, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 02:21:23.1510|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 131, objective function value 0.8490872210953346 (feasible: False)
-2020-10-03 02:22:44.7475|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 132, objective function value 0.6585965758379551 (feasible: False)
-2020-10-03 02:23:41.9964|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 133, objective function value 0.8664074142370289 (feasible: False)
-2020-10-03 02:24:55.9251|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 134, objective function value 0.8563894523326572 (feasible: False)
-2020-10-03 02:26:45.5205|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 135, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 02:27:46.5405|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 136, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 02:28:35.1924|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 137, objective function value 0.5870182555780933 (feasible: False)
-2020-10-03 02:29:41.8327|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 138, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 02:30:59.7658|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 139, objective function value 0.8490872210953346 (feasible: False)
-2020-10-03 02:32:05.3178|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 140, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 02:35:26.2059|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 141, objective function value 0.30789797836616817 (feasible: True)
-2020-10-03 02:39:45.4390|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 142, objective function value 0.33197995429196336 (feasible: False)
-2020-10-03 02:43:28.1176|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 143, objective function value 0.3390179153983898 (feasible: False)
-2020-10-03 02:46:43.9768|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 144, objective function value 0.40429291885253693 (feasible: False)
-2020-10-03 02:51:01.3142|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 145, objective function value 0.480657535915838 (feasible: False)
-2020-10-03 02:53:45.2539|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 146, objective function value 0.8126288924057687 (feasible: False)
-2020-10-03 02:55:01.6710|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 147, objective function value 0.6997971602434077 (feasible: False)
-2020-10-03 02:56:01.3091|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 148, objective function value 0.8109533468559837 (feasible: False)
-2020-10-03 02:56:02.6814|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 149, objective function value 0.9147648902821316 (feasible: False)
-2020-10-03 02:56:03.3982|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 150, objective function value 0.9177818895430334 (feasible: False)
-2020-10-03 02:56:04.3733|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 151, objective function value 0.910615849969752 (feasible: False)
-2020-10-03 02:57:04.2612|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 152, objective function value 0.9227272727272727 (feasible: True)
-2020-10-03 02:57:04.2781|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-03 02:57:04.7282|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-03 02:57:05.2886|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-03 02:57:06.1332|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-03 02:57:07.1392|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-03 03:05:33.5509|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.7263063185818048 (feasible: False)
-2020-10-03 03:13:16.7168|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.6865226909356223 (feasible: False)
-2020-10-03 03:22:03.6221|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.7263063185818048 (feasible: False)
-2020-10-03 03:30:17.4134|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 0.75038554348395 (feasible: False)
-2020-10-03 03:38:57.1625|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, objective function value 0.75038554348395 (feasible: False)
-2020-10-03 03:48:20.4147|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, objective function value 0.7499060353875187 (feasible: False)
-2020-10-03 03:57:50.7317|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, objective function value 0.75038554348395 (feasible: False)
-2020-10-03 04:07:15.2682|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 8, objective function value 0.7302361004607711 (feasible: False)
-2020-10-03 04:16:50.4849|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 9, objective function value 0.75038554348395 (feasible: False)
-2020-10-03 04:25:34.7358|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 10, objective function value 0.7263063185818048 (feasible: False)
-2020-10-03 04:33:07.5786|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 11, objective function value 0.9078444492614262 (feasible: True)
-2020-10-03 04:33:07.6102|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+2020-11-04 06:10:17.0917|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  6
+2020-11-04 06:11:46.7754|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  7
+2020-11-04 06:13:58.4738|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  8
+2020-11-04 06:18:05.6521|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
 Stack Constant Rules:
 1. START* -> X1*
-966. X5* -> PN
-240. X1* -> X6 X5*
-212. X1* -> X5 V0
-1358. X6* -> X1 P
-1418. X6* -> X5 V1
-204. X1* -> X4 X1*
-1147. X5* -> X3 N
-532. X3* -> D
-669. X3* -> X3 A
-939. X4* -> X5 V3
-940. X4* -> X5 P
-459. X2* -> X5 V2
-1374. X6* -> X2 P
-227. X1* -> X6 PN
+635. X4* -> PN
+196. X1* -> X4 X5*
+889. X5* -> V1 X4*
+961. X5* -> V3 X1*
+692. X4* -> D X3*
+316. X2* -> P X4*
+826. X4* -> X4 X2*
+556. X3* -> A X3*
+484. X3* -> N
+861. X5* -> V0
+932. X5* -> V2 X2*
+148. X1* -> X1 X2*
+1052. X5* -> X5 X2*
 Stack Changing Rules:
  
- with objective function value 0.9078444492614262
-2020-10-03 04:33:12.7983|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-03 04:33:12.8037|INFO|LinearIndexedGrammar.Program|Average objective function value is: 0.9078444492614262
-Achieved objective function value=1 in 0 times out of 1 runs
-2020-10-03 04:33:12.8037|INFO|LinearIndexedGrammar.Program|Overall session RunTime 04:55:22.10
-2020-10-03 04:33:12.8037|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
-Session 10/03/2020 4:33 AM
-runs: 1, grammar file name: YesNPYesV3WithADJAmbiguous.txt, vocabulary file name: Vocabulary.json, Distribution: Uniform
-2020-10-03 04:33:13.2069|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V0 D N V1 A P V3 V2
-2020-10-03 04:33:14.4173|INFO|LinearIndexedGrammar.Program|Target Hypothesis:
-Stack Constant Rules:
-235. X1* -> X4 X2*
-326. X2* -> V0
-357. X2* -> V1 X4*
-373. X2* -> V2 X3*
-388. X2* -> V3 X1*
-698. X3* -> P X4*
-823. X4* -> D N
-940. X4* -> PN
-836. X4* -> D X5*
-1262. X5* -> A X5*
-1249. X5* -> A N
-1055. X4* -> X4 X3*
-475. X2* -> X2 X3*
-1. START* -> X1*
-Stack Changing Rules:
-
-. Verifying objective function value of target grammar given the data: 0.9296337119197545 
-
-2020-10-03 04:33:14.4246|INFO|LinearIndexedGrammar.Program|Run 1:
-2020-10-03 04:33:14.4246|INFO|LinearIndexedGrammar.Program|Data samples:
-2020-10-03 04:33:14.4246|INFO|LinearIndexedGrammar.Program|1000 sentences of length 2
-2020-10-03 04:33:14.4246|INFO|LinearIndexedGrammar.Program|1000 sentences of length 3
-2020-10-03 04:33:14.4405|INFO|LinearIndexedGrammar.Program|1000 sentences of length 4
-2020-10-03 04:33:14.4405|INFO|LinearIndexedGrammar.Program|1000 sentences of length 5
-2020-10-03 04:33:14.4405|INFO|LinearIndexedGrammar.Program|1000 sentences of length 6
-2020-10-03 04:33:14.4405|INFO|LinearIndexedGrammar.Program|1000 sentences of length 7
-2020-10-03 04:33:14.4565|INFO|LinearIndexedGrammar.Program|1000 sentences of length 8
-2020-10-03 04:33:14.4565|INFO|LinearIndexedGrammar.Program|1000 sentences of length 9
-2020-10-03 04:33:14.4565|INFO|LinearIndexedGrammar.Program|1000 sentences of length 10
-2020-10-03 04:33:14.4565|INFO|LinearIndexedGrammar.Program|1000 sentences of length 11
-2020-10-03 04:33:14.4734|INFO|LinearIndexedGrammar.Program|learning word length  6
-2020-10-03 04:34:40.1433|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.37165048543689316 (feasible: False)
-2020-10-03 04:35:23.0806|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.37165048543689316 (feasible: False)
-2020-10-03 04:36:15.9620|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.37165048543689316 (feasible: False)
-2020-10-03 04:36:56.7825|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 0.516116504854369 (feasible: False)
-2020-10-03 04:38:03.1358|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, objective function value 0.7106796116504854 (feasible: False)
-2020-10-03 04:39:04.2882|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, objective function value 0.6605825242718446 (feasible: False)
-2020-10-03 04:40:28.2970|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, objective function value 0.7937864077669903 (feasible: False)
-2020-10-03 04:41:39.1935|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 8, objective function value 0.7937864077669903 (feasible: False)
-2020-10-03 04:42:45.6930|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 9, objective function value 0.7006364792890404 (feasible: False)
-2020-10-03 04:43:47.0047|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 10, objective function value 0.6999752868490733 (feasible: False)
-2020-10-03 04:44:57.4522|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 11, objective function value 0.9502912621359223 (feasible: False)
-2020-10-03 04:45:33.6208|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 12, objective function value 0.9381727158948685 (feasible: True)
-2020-10-03 04:45:33.6208|INFO|LinearIndexedGrammar.Program|learning word length  7
-2020-10-03 04:45:34.0728|INFO|LinearIndexedGrammar.Program|learning word length  8
-2020-10-03 04:45:34.7126|INFO|LinearIndexedGrammar.Program|learning word length  9
-2020-10-03 04:45:35.3066|INFO|LinearIndexedGrammar.Program|learning word length  10
-2020-10-03 04:45:36.2426|INFO|LinearIndexedGrammar.Program|learning word length  11
-2020-10-03 04:51:30.8178|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 1, objective function value 0.6207711695807956 (feasible: False)
-2020-10-03 04:56:48.7033|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 2, objective function value 0.5161535058632551 (feasible: False)
-2020-10-03 05:02:21.7179|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 3, objective function value 0.522538124230912 (feasible: False)
-2020-10-03 05:08:10.8711|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 4, objective function value 0.6095933028612189 (feasible: False)
-2020-10-03 05:13:19.2931|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 5, objective function value 0.5161535058632551 (feasible: False)
-2020-10-03 05:19:42.2290|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 6, objective function value 0.6250197029345274 (feasible: False)
-2020-10-03 05:24:28.3191|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 7, objective function value 0.5161535058632551 (feasible: False)
-2020-10-03 05:30:10.4166|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 8, objective function value 0.6261950233597251 (feasible: False)
-2020-10-03 05:36:36.3414|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 9, objective function value 0.6244399211572963 (feasible: False)
-2020-10-03 05:41:29.0444|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 10, objective function value 0.6095933028612189 (feasible: False)
-2020-10-03 05:46:39.4876|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 11, objective function value 0.6207711695807956 (feasible: False)
-2020-10-03 05:52:34.1130|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 12, objective function value 0.5161535058632551 (feasible: False)
-2020-10-03 05:58:12.1545|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 13, objective function value 0.6261950233597251 (feasible: False)
-2020-10-03 05:59:24.1920|INFO|LinearIndexedGrammarLearner.SimulatedAnnealing|iteration 14, objective function value 0.9296337119197545 (feasible: True)
-2020-10-03 05:59:24.1920|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+ with objective function value 0.917
+2020-11-04 06:18:05.6851|INFO|LinearIndexedGrammar.Program|Precision: 1.0000 Recall: 1.0000 F1-Score: 1.0000
+2020-11-04 06:18:05.6851|INFO|LinearIndexedGrammar.Program|f1_score sufficiently high for latest hypothesis.
+2020-11-04 06:18:05.6851|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
 Stack Constant Rules:
 1. START* -> X1*
-520. X3* -> D N
-192. X1* -> X3 X5*
-484. X3* -> PN
-1042. X5* -> V1 X3*
-675. X3* -> X3 X6*
-1315. X6* -> P X3*
-180. X1* -> X3 V0
-1088. X5* -> V3 X1*
-1109. X5* -> V2 X6*
-763. X4* -> D A
-680. X3* -> X4 N
-161. X1* -> X1 X6*
-923. X4* -> X4 A
+635. X4* -> PN
+196. X1* -> X4 X5*
+889. X5* -> V1 X4*
+961. X5* -> V3 X1*
+692. X4* -> D X3*
+316. X2* -> P X4*
+826. X4* -> X4 X2*
+556. X3* -> A X3*
+484. X3* -> N
+861. X5* -> V0
+932. X5* -> V2 X2*
+148. X1* -> X1 X2*
+1052. X5* -> X5 X2*
 Stack Changing Rules:
  
- with objective function value 0.9296337119197545
-2020-10-03 05:59:27.6880|INFO|LinearIndexedGrammar.Program|Precision: 1 Recall: 1 F1-Score: 1
-2020-10-03 05:59:27.6933|INFO|LinearIndexedGrammar.Program|Average objective function value is: 0.9296337119197545
-Achieved objective function value=1 in 0 times out of 1 runs
-2020-10-03 05:59:27.6933|INFO|LinearIndexedGrammar.Program|Overall session RunTime 01:26:13.27
+ with objective function value 0.917
+2020-11-04 06:18:05.6851|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:07:48.59
+2020-11-04 06:18:05.6851|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
+Session 11/04/2020 6:18 AM
+runs: 1, grammar file name: YesNPYesV3WithADJ - Copy.txt, vocabulary file name: VocabularySingleVerbalCategory.json, Distribution: Normal
+2020-11-04 06:18:05.7136|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V D N P A
+2020-11-04 06:18:05.7173|INFO|LinearIndexedGrammar.Program|Data samples:
+2020-11-04 06:18:05.7173|INFO|LinearIndexedGrammar.Program|200 sentences of length 2
+2020-11-04 06:18:05.7173|INFO|LinearIndexedGrammar.Program|200 sentences of length 3
+2020-11-04 06:18:05.7173|INFO|LinearIndexedGrammar.Program|200 sentences of length 4
+2020-11-04 06:18:05.7173|INFO|LinearIndexedGrammar.Program|200 sentences of length 5
+2020-11-04 06:18:05.7322|INFO|LinearIndexedGrammar.Program|200 sentences of length 6
+2020-11-04 06:18:05.7322|INFO|LinearIndexedGrammar.Program|200 sentences of length 7
+2020-11-04 06:18:05.7322|INFO|LinearIndexedGrammar.Program|200 sentences of length 8
+2020-11-04 06:18:05.7322|INFO|LinearIndexedGrammar.Program|Unique sentences types (POS sequences) from data samples:
+2020-11-04 06:18:05.7322|INFO|LinearIndexedGrammar.Program|1 unique sentences types of length 2
+2020-11-04 06:18:05.7494|INFO|LinearIndexedGrammar.Program|2 unique sentences types of length 3
+2020-11-04 06:18:05.7494|INFO|LinearIndexedGrammar.Program|5 unique sentences types of length 4
+2020-11-04 06:18:05.7494|INFO|LinearIndexedGrammar.Program|9 unique sentences types of length 5
+2020-11-04 06:18:05.7494|INFO|LinearIndexedGrammar.Program|15 unique sentences types of length 6
+2020-11-04 06:18:05.7494|INFO|LinearIndexedGrammar.Program|23 unique sentences types of length 7
+2020-11-04 06:18:05.7643|INFO|LinearIndexedGrammar.Program|35 unique sentences types of length 8
+2020-11-04 06:18:05.7643|INFO|LinearIndexedGrammar.Program|Run 1:
+2020-11-04 06:18:05.7643|INFO|LinearIndexedGrammar.Program|				Hyper-parameters : NumberOfNonTerminals: 5 NoiseTolerance: 0.00
+
+2020-11-04 06:18:05.7643|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  6
+2020-11-04 06:18:13.7746|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  7
+2020-11-04 06:18:15.0704|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  8
+2020-11-04 06:24:37.4654|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+1. START* -> X1*
+303. X3* -> D X5*
+605. X5* -> A X5*
+268. X3* -> PN
+108. X1* -> X3 X4*
+420. X4* -> V X1*
+422. X4* -> V X3*
+570. X5* -> N
+100. X1* -> X3 V
+152. X2* -> V P
+494. X4* -> X2 X3*
+296. X3* -> D N
+Stack Changing Rules:
+ 
+ with objective function value 0.963
+2020-11-04 06:24:37.4779|INFO|LinearIndexedGrammar.Program|Precision: 1.0000 Recall: 1.0000 F1-Score: 1.0000
+2020-11-04 06:24:37.4821|INFO|LinearIndexedGrammar.Program|f1_score sufficiently high for latest hypothesis.
+2020-11-04 06:24:37.4821|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+1. START* -> X1*
+303. X3* -> D X5*
+605. X5* -> A X5*
+268. X3* -> PN
+108. X1* -> X3 X4*
+420. X4* -> V X1*
+422. X4* -> V X3*
+570. X5* -> N
+100. X1* -> X3 V
+152. X2* -> V P
+494. X4* -> X2 X3*
+296. X3* -> D N
+Stack Changing Rules:
+ 
+ with objective function value 0.963
+2020-11-04 06:24:37.4821|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:06:31.72
+2020-11-04 06:24:37.4821|INFO|LinearIndexedGrammar.Program|------------------------------------------------------------
+Session 11/04/2020 6:24 AM
+runs: 1, grammar file name: YesNPYesV3WithADJAmbiguous - Copy.txt, vocabulary file name: VocabularySingleVerbalCategory.json, Distribution: Normal
+2020-11-04 06:24:37.5232|INFO|LinearIndexedGrammar.Program|POS contained in data: PN V D N P A
+2020-11-04 06:24:37.5232|INFO|LinearIndexedGrammar.Program|Data samples:
+2020-11-04 06:24:37.5314|INFO|LinearIndexedGrammar.Program|200 sentences of length 2
+2020-11-04 06:24:37.5314|INFO|LinearIndexedGrammar.Program|200 sentences of length 3
+2020-11-04 06:24:37.5314|INFO|LinearIndexedGrammar.Program|200 sentences of length 4
+2020-11-04 06:24:37.5314|INFO|LinearIndexedGrammar.Program|200 sentences of length 5
+2020-11-04 06:24:37.5446|INFO|LinearIndexedGrammar.Program|200 sentences of length 6
+2020-11-04 06:24:37.5446|INFO|LinearIndexedGrammar.Program|200 sentences of length 7
+2020-11-04 06:24:37.5446|INFO|LinearIndexedGrammar.Program|200 sentences of length 8
+2020-11-04 06:24:37.5446|INFO|LinearIndexedGrammar.Program|Unique sentences types (POS sequences) from data samples:
+2020-11-04 06:24:37.5610|INFO|LinearIndexedGrammar.Program|1 unique sentences types of length 2
+2020-11-04 06:24:37.5610|INFO|LinearIndexedGrammar.Program|2 unique sentences types of length 3
+2020-11-04 06:24:37.5610|INFO|LinearIndexedGrammar.Program|6 unique sentences types of length 4
+2020-11-04 06:24:37.5610|INFO|LinearIndexedGrammar.Program|13 unique sentences types of length 5
+2020-11-04 06:24:37.5610|INFO|LinearIndexedGrammar.Program|25 unique sentences types of length 6
+2020-11-04 06:24:37.5773|INFO|LinearIndexedGrammar.Program|46 unique sentences types of length 7
+2020-11-04 06:24:37.5773|INFO|LinearIndexedGrammar.Program|91 unique sentences types of length 8
+2020-11-04 06:24:37.5773|INFO|LinearIndexedGrammar.Program|Run 1:
+2020-11-04 06:24:37.5773|INFO|LinearIndexedGrammar.Program|				Hyper-parameters : NumberOfNonTerminals: 5 NoiseTolerance: 0.00
+
+2020-11-04 06:24:37.5773|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  6
+2020-11-04 06:29:01.2902|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  7
+2020-11-04 06:38:11.7737|INFO|LinearIndexedGrammar.Program|learning from sentences up to word length  8
+2020-11-04 06:53:17.5439|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+534. X5* -> PN
+610. X5* -> X1 N
+26. X1* -> D
+194. X2* -> P X5*
+80. X1* -> X1 A
+267. START* -> X3*
+424. X4* -> V X5*
+398. X3* -> X5 X4*
+422. X4* -> V X3*
+517. X4* -> X4 X2*
+184. X2* -> P PN
+413. X4* -> V
+372. X3* -> X3 X2*
+458. X4* -> P X3*
+421. X4* -> V X2*
+Stack Changing Rules:
+ 
+ with objective function value 0.961
+2020-11-04 06:53:17.6071|INFO|LinearIndexedGrammar.Program|Precision: 1.0000 Recall: 1.0000 F1-Score: 1.0000
+2020-11-04 06:53:17.6071|INFO|LinearIndexedGrammar.Program|f1_score sufficiently high for latest hypothesis.
+2020-11-04 06:53:17.6071|INFO|LinearIndexedGrammar.Program|Best Hypothesis:
+Stack Constant Rules:
+534. X5* -> PN
+610. X5* -> X1 N
+26. X1* -> D
+194. X2* -> P X5*
+80. X1* -> X1 A
+267. START* -> X3*
+424. X4* -> V X5*
+398. X3* -> X5 X4*
+422. X4* -> V X3*
+517. X4* -> X4 X2*
+184. X2* -> P PN
+413. X4* -> V
+372. X3* -> X3 X2*
+458. X4* -> P X3*
+421. X4* -> V X2*
+Stack Changing Rules:
+ 
+ with objective function value 0.961
+2020-11-04 06:53:17.6071|INFO|LinearIndexedGrammar.Program|Overall session RunTime 00:28:40.03
