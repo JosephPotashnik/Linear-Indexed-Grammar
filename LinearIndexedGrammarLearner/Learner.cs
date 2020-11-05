@@ -84,13 +84,12 @@ namespace LinearIndexedGrammarLearner
 
             InitTreesDictionary();
 
+
             Parallel.Invoke(
-                () => {
-                    Parallel.ForEach(Parses,
-                        (sentenceItem, loopState, i) =>
-                        {
-                            SentencesParser[i].ParseSentence(TreesDic);
-                        });
+                () =>
+                {
+                    Parallel.For(0, SentencesParser.Length,
+                        (i) => SentencesParser[i].ParseSentence(TreesDic));
                 },
                 () => { GrammarTreesDic = GetGrammarTrees(currentCFGHypothesis); }
             );
@@ -147,17 +146,13 @@ namespace LinearIndexedGrammarLearner
 
             InitTreesDictionary();
             Parallel.Invoke(
-                () => {
-                    Parallel.ForEach(Parses,
-                        (sentenceItem, loopState, i) =>
-                        {
-                            SentencesParser[i].ReParseSentenceWithRuleAddition(TreesDic, currentCFGHypothesis, rs);
-                        });
+                () =>
+                {
+                    Parallel.For(0, SentencesParser.Length,
+                        (i) => SentencesParser[i].ReParseSentenceWithRuleAddition(TreesDic, currentCFGHypothesis, rs));
                 },
                 () => { GrammarTreesDic = GetGrammarTrees(currentCFGHypothesis); }
             );
-
-
             return true;
         }
 
@@ -194,16 +189,11 @@ namespace LinearIndexedGrammarLearner
             Parallel.Invoke(
                 () =>
                 {
-                    Parallel.ForEach(Parses,
-                        (sentenceItem, loopState, i) =>
-                        {
-                            SentencesParser[i]
-                                .ReParseSentenceWithRuleDeletion(TreesDic, currentCFGHypothesis, deletedRule, predictionSet);
-                        });
+                    Parallel.For(0, SentencesParser.Length,
+                        (i) => SentencesParser[i].ReParseSentenceWithRuleDeletion(TreesDic, currentCFGHypothesis, deletedRule, predictionSet));
                 },
                 () => { GrammarTreesDic = GetGrammarTrees(currentCFGHypothesis); }
             );
-
 
             return true;
         }
@@ -322,20 +312,14 @@ namespace LinearIndexedGrammarLearner
 
         public void AcceptChanges()
         {
-             Parallel.ForEach(Parses,
-            (sentenceItem, loopState, i) =>
-            {
-                SentencesParser[i].AcceptChanges();
-            });
+             Parallel.For(0, SentencesParser.Length,
+                 (i) => SentencesParser[i].AcceptChanges());
         }
 
         public void RejectChanges()
         {
-            Parallel.ForEach(Parses,
-           (sentenceItem, loopState, i) =>
-           {
-               SentencesParser[i].RejectChanges();
-           });
+            Parallel.For(0, SentencesParser.Length,
+                (i) => SentencesParser[i].RejectChanges());
         }
     }
 }
