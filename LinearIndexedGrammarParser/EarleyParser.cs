@@ -649,6 +649,7 @@ namespace LinearIndexedGrammarParser
         }
 
         //Suggest RHS for a rule that would complete currently unparsed sequence.
+        //not working for LIG - only for CFG.
         public string[] SuggestRHSForCompletion()
         {
             //1. find completion that is closest to the end of the table

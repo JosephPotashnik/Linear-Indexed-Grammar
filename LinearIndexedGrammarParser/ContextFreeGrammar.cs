@@ -110,26 +110,13 @@ namespace LinearIndexedGrammarParser
 
         public static Rule GenerateStaticRuleFromDynamicRule(Rule dynamicGrammarRule, DerivedCategory leftHandSide)
         {
-            var patternStringLeftHandSide = dynamicGrammarRule.LeftHandSide.Stack;
             var newRule = new Rule(dynamicGrammarRule);
 
-            if (!patternStringLeftHandSide.Contains(StarSymbol))
+            if (!dynamicGrammarRule.LeftHandSide.Stack.Contains(StarSymbol))
                 return dynamicGrammarRule.LeftHandSide.Equals(leftHandSide) ? newRule : null;
 
-            //if contains a stack with * symbol (dynamically sized stack)
-            //1. make the pattern be your Syntactic Category
-            //2. then find the stack contents - anything by "*" (the first group)
-            var patternString = patternStringLeftHandSide.Replace(StarSymbol, "(.*)");
-
-
-            //TODO the regular expression is slow. might take upon yourself to implement manually.
-            //TODO at the moment the commented part below means the learner only works with CFG but not LIG
-            //var pattern = new Regex(patternString);
-            //var textToMatch = leftHandSide.Stack;
-            //var match = pattern.Match(textToMatch);
-            //if (!match.Success) return null;
-            //var stackContents = match.Groups[1].Value;
-            var stackContents = "";
+            if (!MatchStackContents(leftHandSide, dynamicGrammarRule.LeftHandSide.Stack, out var stackContents)) 
+                return null;
 
             newRule.LeftHandSide = leftHandSide;
             var posInRhsCount = 0;
@@ -161,6 +148,38 @@ namespace LinearIndexedGrammarParser
                 return null;
 
             return newRule;
+        }
+
+        private static bool MatchStackContents(DerivedCategory leftHandSide, string patternStringLeftHandSide,
+            out string stackContents)
+        {
+            stackContents = "";
+            // guaranteed that patternStringLeftHandSide contains *.
+            //Linear Indexed Grammars stacks are of the following forms:
+            //1. [*], 2. [*X] 3. [X*] 4. [X] 
+            if (patternStringLeftHandSide.StartsWith(StarSymbol))
+            {
+                if (patternStringLeftHandSide.Length > 1)
+                {
+                    var remainder = patternStringLeftHandSide.Substring(1);
+                    if (leftHandSide.Stack.EndsWith(remainder))
+                        stackContents = leftHandSide.Stack.Substring(0, leftHandSide.Stack.Length - remainder.Length);
+                    else
+                        return false;
+                }
+                else
+                    stackContents = leftHandSide.Stack;
+            }
+            else if (patternStringLeftHandSide.EndsWith(StarSymbol))
+            {
+                var remainder = patternStringLeftHandSide.Substring(0, patternStringLeftHandSide.Length - 1);
+                if (leftHandSide.Stack.StartsWith(remainder))
+                    stackContents = leftHandSide.Stack.Substring(remainder.Length);
+                else
+                    return false;
+            }
+
+            return true;
         }
 
         public void GenerateAllStaticRulesFromDynamicRules(Dictionary<SyntacticCategory, List<Rule>> dynamicRules)
