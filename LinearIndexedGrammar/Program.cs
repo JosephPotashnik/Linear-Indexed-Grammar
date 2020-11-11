@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using NLog.LayoutRenderers.Wrappers;
 
 namespace LinearIndexedGrammar
 {
@@ -76,7 +77,7 @@ namespace LinearIndexedGrammar
                 RunProgram(programParams);
         }
 
-/*
+
         private static List<string[]> ReadChildesCSVFile(string filename)
         {
             var data = new List<string[]>();
@@ -91,7 +92,7 @@ namespace LinearIndexedGrammar
 
             return data;
         }
-*/
+
 
 
         private static void Main(string[] args)
@@ -283,6 +284,7 @@ namespace LinearIndexedGrammar
             ContextFreeGrammar.PartsOfSpeech = universalVocabulary.POSWithPossibleWords.Keys
                 .Select(x => new SyntacticCategory(x)).ToHashSet();
 
+
             string[][] data;
             Vocabulary dataVocabulary;
             List<Rule> grammarRules = null;
@@ -296,13 +298,19 @@ namespace LinearIndexedGrammar
             }
             else
             {
-                //var data1 = ReadChildesCSVFile("childes.csv");
+                var dataWithPOSTags = ReadChildesCSVFile("childes.csv");
+                var filteredData = FilterUnrecognizedPOS(dataWithPOSTags);
+                ReplaceContractions(filteredData);
 
+                var s1 =  filteredData.Select(x => x.Split()).ToArray();
+                var sentences =
+                    GrammarFileReader.GetSentencesInWordLengthRange(s1, 3,
+                        8);
 
-                //leave only sentences in range [minWordsInSentence,maxWordsInSentence]
-                var minWordsInSentence = 1;
-                var sentences = FilterDataAccordingToTargetGrammar(null, programParams.InputParams.DataFileName,
-                    minWordsInSentence, maxWordsInSentence, universalVocabulary);
+                //leave only sentences in range[minWordsInSentence, maxWordsInSentence]
+                //var minWordsInSentence = 1;
+                //var sentences = FilterDataAccordingToTargetGrammar(null, programParams.InputParams.DataFileName,
+                //    minWordsInSentence, maxWordsInSentence, universalVocabulary);
                 (data, dataVocabulary) = (sentences, universalVocabulary);
             }
 
@@ -428,6 +436,70 @@ namespace LinearIndexedGrammar
             StopWatch(stopWatch);
         }
 
+        private static void ReplaceContractions(List<string> filteredData)
+        {
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            dic["'ll"] = " will"; //ambiguous: I'll = I will / I shall
+            dic["'ve"] = " have";
+            dic["'m"] = " am";
+            dic["'d"] = " had";  //ambiguous: I'd = I had / I would, how'd = how did / how would.
+                                //therefore subsequent assumption: POS(had) = POS(would) = POS(did)
+            dic["that's"] = "that is";   //ambiguous: that's = that is / that has
+                                   //therefore subsequent assumption: POS(is) = POS(has) 
+            dic["it's"] = "it is";   //as "that's"
+            dic["he's"] = "he is";   //as "that's"
+            dic["she's"] = "she is";   //as "that's"
+
+            dic["let's"] = "let us";
+            dic["n't"] = " not";
+            dic["'re"] = " are";
+
+            for (int i = 0; i < filteredData.Count; i++)
+            {
+                foreach (var kvp in dic)
+                    filteredData[i] = filteredData[i].Replace(kvp.Key, kvp.Value);
+
+
+                //if (filteredData[i].Contains("'"))
+                //{
+                //    Console.WriteLine(filteredData[i]);
+                //}
+            }
+
+        }
+
+        private static List<string> FilterUnrecognizedPOS(List<string[]> dataWithPOSTags)
+        {
+            List<string> filteredData = new List<string>();
+            for (int i = 0; i < dataWithPOSTags.Count; i++)
+            {
+                //do not analyze not (negative) POS at the moment.
+                if (dataWithPOSTags[i][0].Contains("n't") || dataWithPOSTags[i][0].Contains("not"))
+                    continue;
+
+                var POSSequence = dataWithPOSTags[i][1].Split();
+                var sentence = dataWithPOSTags[i][0].Split();
+
+                if (POSSequence.Length != sentence.Length)
+                    continue;
+
+                var unrecognizedPOS = false;
+                for (int j = 0; j < POSSequence.Length; j++)
+                {
+                    if (!ContextFreeGrammar.PartsOfSpeech.Contains(new SyntacticCategory(POSSequence[j])))
+                    {
+                        unrecognizedPOS = true;
+                        break;
+                    }
+                }
+
+                if (!unrecognizedPOS)
+                    filteredData.Add(dataWithPOSTags[i][0]);
+            }
+
+            return filteredData;
+        }
+
         private static string[][] ReduceDataToUniquePOSTypes(string[][] data, Vocabulary dataVocabulary)
         {
             List<string[]> uniqueData = new List<string[]>();
@@ -453,7 +525,11 @@ namespace LinearIndexedGrammar
         {
 
             //note - in real data you don't have access to target hypothesis grammarRules (i.e. = null).
-
+            if (grammarRules == null)
+            {
+                LogManager.GetCurrentClassLogger().Info("precision and recall must be computed by hand for actual grammar. Or use test set. For starters look at the quality of the hypothesis");
+                return 0;
+            }
             //get all distinct sentences of target grammar:
             var targetGrammar = new ContextFreeGrammar(grammarRules);
             var targetSentences = GetAllNonTerminalSentencesOfGrammar(targetGrammar, universalVocabulary, maxWords).Distinct().ToArray();

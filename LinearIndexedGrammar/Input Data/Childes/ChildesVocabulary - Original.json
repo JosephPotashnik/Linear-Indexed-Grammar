@@ -2283,7 +2283,7 @@
       "right",
       "smart",
       "blue",
-      "TRUE",
+      "true",
       "first",
       "nice",
       "dirty",
@@ -5349,6 +5349,7 @@
     ],
     "det:dem": [
       "those",
+      "dose", 
       "this",
       "that",
       "these"

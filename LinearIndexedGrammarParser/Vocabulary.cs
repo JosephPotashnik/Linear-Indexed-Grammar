@@ -257,7 +257,7 @@ namespace LinearIndexedGrammarParser
         //private HashSet<string> outruledWords = new HashSet<string>()
         //    {"who", "what", "why", "where", "how", "whom", "whose", "when", "which"};
 
-        private string ReplaceContractions(string sentence)
+        public string ReplaceContractions(string sentence)
         {
             var s = sentence.Replace("'ll", " will"); //ambiguous: I'll = I will / I shall
             var s1 = s.Replace("'ve", " have");

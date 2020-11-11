@@ -1,5 +1,6 @@
 ﻿using LinearIndexedGrammarParser;
 using System;
+using NLog;
 
 
 namespace LinearIndexedGrammarLearner
@@ -162,6 +163,7 @@ namespace LinearIndexedGrammarLearner
             int noImprovementCounter;
 
             bool foundMaxSolution = false;
+            int currentIteration = 0;
             for (int i = 0; i < _params.NumberOfRestarts; i++)
             {
                 noImprovementCounter = 0;
@@ -170,7 +172,7 @@ namespace LinearIndexedGrammarLearner
                 while (noImprovementCounter < _params.NumberOfNonImprovingIterationsBeforeRestart)
                 {
                     (currentGrammar, currentValue, feasible) = RunSingleIteration(currentGrammar, currentValue, feasible);
-                    //LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration}, objective function value {currentValue} (feasible: {feasible})");
+                    //LogManager.GetCurrentClassLogger().Info($"iteration {currentIteration++}, objective function value {currentValue} (feasible: {feasible})");
                     var currentKey = new BestGrammarsKey(currentValue, feasible);
                     if (maxKey.Key < currentKey.Key)
                     {
