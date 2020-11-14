@@ -78,19 +78,19 @@ namespace LinearIndexedGrammar
         }
 
 
-        private static List<string[]> ReadChildesCSVFile(string filename)
+        private static List<string> ReadChildesCSVFile(string filename)
         {
-            var data = new List<string[]>();
+            var sentences = new List<string>();
             string line;
             using var file = File.OpenText(filename);
             while ((line = file.ReadLine()) != null)
             {
                 var row = line.Split(',');
-                data.Add(row);
+                sentences.Add(row[0]); //row[0] = sentence, row[1] = POS sequence.
 
             }
 
-            return data;
+            return sentences;
         }
 
 
@@ -210,7 +210,7 @@ namespace LinearIndexedGrammar
         {
 
             //1. get sentences from file
-            var allData = GetSentenceFromDataFile(dataFileName);
+            var allData = ReadChildesCSVFile("childes.csv");
 
             //2. leave only sentences with words recognized by the universal vocabulary.
             var sentencesInVocabulary = universalVocabulary.LeaveOnlySentencesWithWordsInVocabulary(allData).ToArray();
@@ -220,27 +220,62 @@ namespace LinearIndexedGrammar
                 GrammarFileReader.GetSentencesInWordLengthRange(sentencesInVocabulary, minWords,
                     maxWords);
 
-            var learner = new Learner(sentences, maxWords, minWords, universalVocabulary);
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    Console.WriteLine(string.Join(" ", sentences[i]));
+            //    string s = "";
+            //    foreach (var word in sentences[i])
+            //        s += string.Join(" ", universalVocabulary.WordWithPossiblePOS[word]) + " , ";
+            //    Console.WriteLine(s);
 
+            //}
+            //var dic = new Dictionary<string, int>();
+            //for (int i = 0; i < sentences.Length; i++)
+            //{
+            //    for (int j = 0; j < sentences[i].Length; j++)
+            //    {
+            //        if (dic.ContainsKey(sentences[i][j]))
+            //            dic[sentences[i][j]]++;
+            //        else
+            //            dic[sentences[i][j]] = 1;
+            //    }
+            //}
+
+            //var reverseList = dic.Select(x => (x.Value, x.Key)).ToList();
+            //reverseList.Sort( (x, y) =>
+            //{
+            //    if (x.Value > y.Value) return -1;
+            //    if (x.Value < y.Value) return 1;
+            //    return 0;
+            //});
+
+            var res = sentences;
             //4. leave only sentences that can be parsed according to an ideal, oracular grammar that is supposed to parse the input
             //if no oracle is supplied, try to learn the entire input. 
-            var filteredSen = new List<string[]>();
-
-            learner.ParseAllSentencesFromScratch(new ContextSensitiveGrammar(grammarRules));
-
-            List<SentenceParsingResults> parsableData = new List<SentenceParsingResults>();
-            for (int i = 0; i < learner.SentencesParser.Length; i++)
+            if (grammarRules != null)
             {
-                if (learner.SentencesParser[i].BracketedRepresentations.Count > 0)
-                    parsableData.Add(learner.Parses[i]);
+                var learner = new Learner(sentences, maxWords, minWords, universalVocabulary);
 
+                var filteredSen = new List<string[]>();
+
+                learner.ParseAllSentencesFromScratch(new ContextSensitiveGrammar(grammarRules));
+
+                List<SentenceParsingResults> parsableData = new List<SentenceParsingResults>();
+                for (int i = 0; i < learner.SentencesParser.Length; i++)
+                {
+                    if (learner.SentencesParser[i].BracketedRepresentations.Count > 0)
+                        parsableData.Add(learner.Parses[i]);
+
+                }
+
+                foreach (var sen in parsableData)
+                    for (var i = 0; i < sen.Count; i++)
+                        filteredSen.Add(sen.Sentence);
+
+                res = filteredSen.ToArray();
             }
 
-            foreach (var sen in parsableData)
-                for (var i = 0; i < sen.Count; i++)
-                    filteredSen.Add(sen.Sentence);
-
-            return filteredSen.ToArray();
+            return res;
         }
 
         private static List<string[]> POSSequencesOfSentences(Span<string> sentence, Vocabulary voc)
@@ -298,19 +333,11 @@ namespace LinearIndexedGrammar
             }
             else
             {
-                var dataWithPOSTags = ReadChildesCSVFile("childes.csv");
-                var filteredData = FilterUnrecognizedPOS(dataWithPOSTags);
-                ReplaceContractions(filteredData);
-
-                var s1 =  filteredData.Select(x => x.Split()).ToArray();
-                var sentences =
-                    GrammarFileReader.GetSentencesInWordLengthRange(s1, 3,
-                        8);
 
                 //leave only sentences in range[minWordsInSentence, maxWordsInSentence]
-                //var minWordsInSentence = 1;
-                //var sentences = FilterDataAccordingToTargetGrammar(null, programParams.InputParams.DataFileName,
-                //    minWordsInSentence, maxWordsInSentence, universalVocabulary);
+                var minWordsInSentence = 3;
+                var sentences = FilterDataAccordingToTargetGrammar(null, programParams.InputParams.DataFileName,
+                    minWordsInSentence, maxWordsInSentence, universalVocabulary);
                 (data, dataVocabulary) = (sentences, universalVocabulary);
             }
 
@@ -436,37 +463,6 @@ namespace LinearIndexedGrammar
             StopWatch(stopWatch);
         }
 
-        private static void ReplaceContractions(List<string> filteredData)
-        {
-            Dictionary<string, string> dic = new Dictionary<string, string>();
-            dic["'ll"] = " will"; //ambiguous: I'll = I will / I shall
-            dic["'ve"] = " have";
-            dic["'m"] = " am";
-            dic["'d"] = " had";  //ambiguous: I'd = I had / I would, how'd = how did / how would.
-                                //therefore subsequent assumption: POS(had) = POS(would) = POS(did)
-            dic["that's"] = "that is";   //ambiguous: that's = that is / that has
-                                   //therefore subsequent assumption: POS(is) = POS(has) 
-            dic["it's"] = "it is";   //as "that's"
-            dic["he's"] = "he is";   //as "that's"
-            dic["she's"] = "she is";   //as "that's"
-
-            dic["let's"] = "let us";
-            dic["n't"] = " not";
-            dic["'re"] = " are";
-
-            for (int i = 0; i < filteredData.Count; i++)
-            {
-                foreach (var kvp in dic)
-                    filteredData[i] = filteredData[i].Replace(kvp.Key, kvp.Value);
-
-
-                //if (filteredData[i].Contains("'"))
-                //{
-                //    Console.WriteLine(filteredData[i]);
-                //}
-            }
-
-        }
 
         private static List<string> FilterUnrecognizedPOS(List<string[]> dataWithPOSTags)
         {

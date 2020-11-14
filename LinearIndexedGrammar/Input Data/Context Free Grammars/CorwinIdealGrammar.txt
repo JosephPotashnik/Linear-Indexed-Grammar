@@ -18,5 +18,4 @@ VP -> V PP
 VP -> V NP
 VP -> V IP
 VP -> V
-VP -> VP ADV
 PP -> P NP

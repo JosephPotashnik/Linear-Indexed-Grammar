@@ -21,11 +21,7 @@ namespace LinearIndexedGrammarParser
             Token = token;
 
             //completed agenda is ordered in decreasing order of start indices (see Stolcke 1995 about completion priority queue).
-
-            //ActionableCompleteStates =
-            //    new SortedDictionary<EarleyState, Queue<EarleyState>>(new CompletedStateComparer());
             ActionableCompleteStates = new CompletedStatesHeap();
-
             ActionableDeletedStates = new DeletedStatesHeap();
 
             //ActionableNonCompleteStates = new Queue<EarleyState>();

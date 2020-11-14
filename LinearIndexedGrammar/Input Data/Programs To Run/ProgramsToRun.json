@@ -3,7 +3,7 @@
     {
       "InputParams": {
         "IsCFG": true,
-        "VocabularyFileName": "ChildesVocabulary.json",
+        "VocabularyFileName": "UniversalVocabulary.json",
         "GrammarFileName": null,
         "DataFileName": "childes.csv",
         "DistributionType": "Normal",
@@ -11,7 +11,7 @@
       },
       "SearchSpaceParams": {
         "NumberOfRuns": 1,
-        "MinNumberOfNonTerminals": 5,
+        "MinNumberOfNonTerminals": 6,
         "MaxNumberOfNonTerminals": 10,
         "MinNoise": 0.0,
         "MaxNoise": 0.0,

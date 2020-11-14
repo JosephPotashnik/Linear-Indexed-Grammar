@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
@@ -89,16 +90,24 @@ namespace LinearIndexedGrammarParser
         //filter sentences with words that are not recognized by vocabulary
         //note: this function also adds inflected nouns and conjugated verbs in text to
         //the vocabulary they are not present (i.e. remembered (-> remember), gates -> gate)
-        public string[][] LeaveOnlySentencesWithWordsInVocabulary(IEnumerable<string> sentences)
+        public string[][] LeaveOnlySentencesWithWordsInVocabulary(List<string> sentences)
         {
             var sentencesToLearn = new List<string[]>();
             var wordsNotInVocabulary = new HashSet<string>();
             var encounteredWords = new HashSet<string>();
-            foreach (var sentence1 in sentences)
+
+            ReplaceContractions(sentences);
+
+            //interjunctions / speech act words, untreated for now.
+            HashSet<string> bannedWords = 
+                new HashSet<string>(new [] {"okay", "ok", "yes", "no", "alright", "oh", "please", "right", "well"});
+            //also ban WH-words for now. see if you succeed learning "simple" CFG.
+            bannedWords = bannedWords.Concat(new[] {"who", "what", "why", "where", "how", "whom", "whose", "when", "which"}).ToHashSet();
+
+            foreach (var sentence in sentences)
             {
                 //first stage of preprocessing =
                 //replace contractions with full words.
-                var sentence = ReplaceContractions(sentence1);
                 var unableToResolveWord = false;
 
                 //split to words
@@ -127,7 +136,7 @@ namespace LinearIndexedGrammarParser
                     var word1 = wordOrig.TrimStart('\'');
                     var word = word1.TrimEnd('\'');
 
-                    if (wordsNotInVocabulary.Contains(word))
+                    if (wordsNotInVocabulary.Contains(word) || bannedWords.Contains(word))
                     {
                         unableToResolveWord = true;
                         break;
@@ -152,6 +161,7 @@ namespace LinearIndexedGrammarParser
                     {
                         newWords["V"].Add(word);
                         newWords["ADJ"].Add(word);
+                        newWords["N"].Add(word);
                         unableToResolveWord = false;
                     }
                     else if (word.EndsWith("s") || word.EndsWith("es") || word.EndsWith("ies"))
@@ -257,20 +267,30 @@ namespace LinearIndexedGrammarParser
         //private HashSet<string> outruledWords = new HashSet<string>()
         //    {"who", "what", "why", "where", "how", "whom", "whose", "when", "which"};
 
-        public string ReplaceContractions(string sentence)
+        public void ReplaceContractions(List<string> sentences)
         {
-            var s = sentence.Replace("'ll", " will"); //ambiguous: I'll = I will / I shall
-            var s1 = s.Replace("'ve", " have");
-            var s2 = s1.Replace("'m", " am");
-            var s3 = s2.Replace("'d", " had"); //ambiguous: I'd = I had / I would, how'd = how did / how would.
-            var s4 = s3.Replace("n't", " not");
-            var s5 = s4.Replace("'re", " are");
+            Dictionary<string, string> dic = new Dictionary<string, string>();
+            dic["'ll"] = " will"; //ambiguous: I'll = I will / I shall
+            dic["'ve"] = " have";
+            dic["'m"] = " am";
+            dic["'d"] = " had";  //ambiguous: I'd = I had / I would, how'd = how did / how would.
+            //therefore subsequent assumption: POS(had) = POS(would) = POS(did)
+            dic["that's"] = "that is";   //ambiguous: that's = that is / that has
+            //therefore subsequent assumption: POS(is) = POS(has) 
+            dic["it's"] = "it is";   //as "that's"
+            dic["he's"] = "he is";   //as "that's"
+            dic["she's"] = "she is";   //as "that's"
 
-            //
-            //string s6 = s5.Replace("'s", " is"); //ambiguous: it's = it is / it has
-            //another problem: 's could be also the possessive:
-            //[john's father] -> not! [john is/has father].
-            return s5;
+            dic["let's"] = "let us";
+            dic["n't"] = " not";
+            dic["'re"] = " are";
+
+            for (int i = 0; i < sentences.Count; i++)
+            {
+                foreach (var kvp in dic)
+                    sentences[i] = sentences[i].Replace(kvp.Key, kvp.Value);
+
+            }
         }
 
         //private bool RuleOutSentence(string prevWord, string word)
