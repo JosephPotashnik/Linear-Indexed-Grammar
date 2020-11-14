@@ -15,9 +15,9 @@ namespace LinearIndexedGrammarParser
         public ContextFreeGrammar OldGrammar;
         private EarleyColumn[] _table;
         private string[] _text;
-        private readonly HashSet<EarleyState> _statesRemovedInLastReparse = new HashSet<EarleyState>();
         protected Vocabulary Voc;
-        public HashSet<string> BracketedRepresentations;
+        //public HashSet<string> BracketedRepresentations;
+        public bool HasParse = false;
 
         public EarleyParser(ContextFreeGrammar g, Vocabulary v, string[] text, bool checkUnitProductionCycles = true)
         {
@@ -65,7 +65,9 @@ namespace LinearIndexedGrammarParser
                 reductorState.Reductor.CreateBracketedRepresentation(sb, Grammar);
                 reductorState.BracketedRepresentation = sb.ToString();
                 col.GammaStates.Add(reductorState);
-                col.BracketedRepresentations.Add(reductorState.BracketedRepresentation);
+                col.AddToTreeDic(reductorState);
+
+
                 return;
             }
 
@@ -143,7 +145,7 @@ namespace LinearIndexedGrammarParser
             return gammaStates;
         }
 
-        public void ReParseSentenceWithRuleAddition(Dictionary<int, HashSet<string>> treesDic, ContextFreeGrammar g, List<Rule> rs)
+        public void ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs)
         {
             Grammar = g;
 
@@ -192,24 +194,26 @@ namespace LinearIndexedGrammarParser
 
             }
 
-            UpdateConcurrentDictionary(treesDic);
+            HasParse = _table[_table.Length - 1].GammaStates.Count > 0;
+
+
         }
 
-        public void ReParseSentenceWithRuleDeletion(Dictionary<int, HashSet<string>> treesDic, ContextFreeGrammar g, List<Rule> rs,
+        public void ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, List<Rule> rs,
             Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
         {
             foreach (var col in _table)
             {
                 foreach (var rule in rs)
-                    col.Unpredict(rule, Grammar, _statesRemovedInLastReparse, predictionSet);
+                    col.Unpredict(rule, Grammar, predictionSet);
 
 
                 var exhausted = false;
                 while (!exhausted)
                 {
-                    TraverseStatesToDelete(col, _statesRemovedInLastReparse);
+                    TraverseStatesToDelete(col);
 
-                    TraversePredictedStatesToDelete(col, predictionSet, _statesRemovedInLastReparse);
+                    TraversePredictedStatesToDelete(col, predictionSet);
 
                     //unprediction can lead to completed /uncompleted parents in the same column
                     //if there is a nullable production, same as in the regular
@@ -218,12 +222,12 @@ namespace LinearIndexedGrammarParser
             }
 
             Grammar = g;
+            HasParse = _table[_table.Length - 1].GammaStates.Count > 0;
 
-            UpdateConcurrentDictionary(treesDic);
         }
 
         private void TraversePredictedStatesToDelete(EarleyColumn col,
-            Dictionary<DerivedCategory, LeftCornerInfo> predictionSet, HashSet<EarleyState> statesRemovedInLastReparse)
+            Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
         {
 
             //var visitedDeletedNonterminals = new HashSet<DerivedCategory>();
@@ -277,7 +281,7 @@ namespace LinearIndexedGrammarParser
                         //unpredict the relevant nonterminal(s):
                         if (Grammar.StaticRules.TryGetValue(nt, out var ruleList))
                             foreach (var rule in ruleList)
-                                col.Unpredict(rule, Grammar, statesRemovedInLastReparse, predictionSet);
+                                col.Unpredict(rule, Grammar, predictionSet);
                     }
 
                 }
@@ -348,12 +352,12 @@ namespace LinearIndexedGrammarParser
             return (topmostCandidate, nonTerminalsToConsider);
         }
 
-        private void TraverseStatesToDelete(EarleyColumn col, HashSet<EarleyState> statesRemoved)
+        private void TraverseStatesToDelete(EarleyColumn col)
         {
             while (col.ActionableDeletedStates.Count > 0)
             {
                 var state = col.ActionableDeletedStates.Pop();
-                state.EndColumn.MarkStateDeleted(state, Grammar, statesRemoved);
+                state.EndColumn.MarkStateDeleted(state, Grammar);
             }
         }
 
@@ -409,7 +413,8 @@ namespace LinearIndexedGrammarParser
         public void ParseSentence(Dictionary<int, HashSet<string>> treesDic, int maxWords = 0)
         {
             (_table, _finalColumns) = PrepareEarleyTable(_text, maxWords);
-            BracketedRepresentations = _table[_table.Length - 1].BracketedRepresentations;
+            //BracketedRepresentations = _table[_table.Length - 1].BracketedRepresentations;
+            _table[_table.Length - 1].SetLastColumn(_text.Length, treesDic);
             PrepareScannedStates();
 
             //assumption: GenerateAllStaticRulesFromDynamicRules has been called before parsing
@@ -452,16 +457,16 @@ namespace LinearIndexedGrammarParser
                 LogManager.GetCurrentClassLogger().Info(s);
             }
 
-            UpdateConcurrentDictionary(treesDic);
+            HasParse = _table[_table.Length - 1].GammaStates.Count > 0;
         }
 
-        private void UpdateConcurrentDictionary(Dictionary<int, HashSet<string>> treesDic)
-        {
-            lock (treesDic[_text.Length])
-            {
-                treesDic[_text.Length].UnionWith(BracketedRepresentations);
-            }
-        }
+        //private void UpdateConcurrentDictionary(Dictionary<int, HashSet<string>> treesDic)
+        //{
+        //    lock (treesDic[_text.Length])
+        //    {
+        //        treesDic[_text.Length].UnionWith(BracketedRepresentations);
+        //    }
+        //}
 
         protected virtual (EarleyColumn[], int[]) PrepareEarleyTable(string[] text, int maxWord)
         {
@@ -617,24 +622,16 @@ namespace LinearIndexedGrammarParser
             foreach (var col in _table)
                 col.AcceptChanges();
 
-            if (_statesRemovedInLastReparse != null)
-            {
-                foreach (var state in _statesRemovedInLastReparse)
-                    state.EndColumn.DeleteState(state, _statesRemovedInLastReparse);
-            }
 
             foreach (var col in _table)
                 col.OldGammaStates?.Clear();
 
-            _statesRemovedInLastReparse?.Clear();
 
             OldGrammar = null;
         }
 
         public void RejectChanges()
         {
-            foreach (var state in _statesRemovedInLastReparse)
-                state.Removed = false;
 
             foreach (var col in _table)
                 col.RejectChanges();
@@ -642,7 +639,6 @@ namespace LinearIndexedGrammarParser
             foreach (var col in _table)
                 col.AcceptChanges();
 
-            _statesRemovedInLastReparse.Clear();
             Grammar = OldGrammar;
             OldGrammar = null;
 

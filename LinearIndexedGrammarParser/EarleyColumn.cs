@@ -11,15 +11,49 @@ namespace LinearIndexedGrammarParser
         internal Dictionary<Rule, List<EarleyState>> Predicted;
         internal Dictionary<DerivedCategory, HashSet<EarleyState>> Reductors;
         internal List<EarleyState> StatesAddedInLastReparse = new List<EarleyState>();
+        internal HashSet<EarleyState> StatesRemovedInLastReparse = new HashSet<EarleyState>();
+        private Dictionary<int, HashSet<string>> _treesDic;
+        public bool _isLastColumn = false;
+        private int _textLength = 0;
+        private int stateCount = 0;
 
         internal HashSet<DerivedCategory> VisitedCategoriesInUnprediction = new HashSet<DerivedCategory>();
         internal HashSet<DerivedCategory> NonTerminalsCandidatesToUnpredict = new HashSet<DerivedCategory>();
+
+        public void SetLastColumn(int textLength, Dictionary<int, HashSet<string>> treesDic)
+        {
+            _isLastColumn = true;
+            _textLength = textLength;
+            _treesDic = treesDic;
+        }
+
+        public void RemoveFromTreeDic(EarleyState state)
+        {
+            if (_isLastColumn)
+            {
+                lock (_treesDic[_textLength])
+                {
+                    _treesDic[_textLength].Remove(state.BracketedRepresentation);
+                }
+            }
+        }
+
+        public void AddToTreeDic(EarleyState state)
+        {
+            if (_isLastColumn)
+            {
+                lock (_treesDic[_textLength])
+                {
+                    _treesDic[_textLength].Add(state.BracketedRepresentation);
+                }
+            }
+        }
 
         public EarleyColumn(int index, string token)
         {
             Index = index;
             Token = token;
-
+            
             //completed agenda is ordered in decreasing order of start indices (see Stolcke 1995 about completion priority queue).
             ActionableCompleteStates = new CompletedStatesHeap();
             ActionableDeletedStates = new DeletedStatesHeap();
@@ -29,7 +63,7 @@ namespace LinearIndexedGrammarParser
             Reductors = new Dictionary<DerivedCategory, HashSet<EarleyState>>();
             Predicted = new Dictionary<Rule, List<EarleyState>>(new RuleValueEquals());
             GammaStates = new List<EarleyState>();
-            BracketedRepresentations = new HashSet<string>();
+            //BracketedRepresentations = new HashSet<string>();
             OldGammaStates = new List<EarleyState>();
             ActionableNonTerminalsToPredict = new Queue<DerivedCategory>();
         }
@@ -40,7 +74,7 @@ namespace LinearIndexedGrammarParser
         internal Queue<EarleyState> ActionableNonCompleteStates { get; set; }
 
         //bracketed representation of gamma states
-        public HashSet<string> BracketedRepresentations { get; set; }
+        //public HashSet<string> BracketedRepresentations { get; set; }
 
         public List<EarleyState> GammaStates { get; set; }
         public List<EarleyState> OldGammaStates { get; set; }
@@ -66,10 +100,9 @@ namespace LinearIndexedGrammarParser
             completedState.EndColumn.AddState(newState, grammar);
         }
 
-        public void MarkStateDeleted(EarleyState oldState, ContextFreeGrammar grammar,
-            HashSet<EarleyState> statesRemovedInLastReparse)
+        public void MarkStateDeleted(EarleyState oldState, ContextFreeGrammar grammar)
         {
-            statesRemovedInLastReparse.Add(oldState);
+            StatesRemovedInLastReparse.Add(oldState);
 
             if (!oldState.IsCompleted)
             {
@@ -84,8 +117,9 @@ namespace LinearIndexedGrammarParser
                 if (oldState.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
                 {
                     oldState.EndColumn.GammaStates.Remove(oldState);
-                    oldState.EndColumn.BracketedRepresentations.Remove(oldState.BracketedRepresentation);
+                    //oldState.EndColumn.BracketedRepresentations.Remove(oldState.BracketedRepresentation);
                     OldGammaStates.Add(oldState);
+                    oldState.EndColumn.RemoveFromTreeDic(oldState);
                     return;
                 }
             }
@@ -100,15 +134,17 @@ namespace LinearIndexedGrammarParser
             }
         }
 
-        public void DeleteState(EarleyState oldState, HashSet<EarleyState> statesRemovedInLastReparse)
+        public void DeleteState(EarleyState oldState)
         {
+            stateCount--;
+
             if (oldState.Predecessor != null)
-                if (!statesRemovedInLastReparse.Contains(oldState.Predecessor))
+                if (!oldState.Predecessor.EndColumn.StatesRemovedInLastReparse.Contains(oldState.Predecessor))
                     //need to remove the parent edge between the predecessor to the deleted state
                     oldState.Predecessor.Parents.Remove(oldState);
 
             if (oldState.Reductor != null)
-                if (!statesRemovedInLastReparse.Contains(oldState.Reductor))
+                if (!oldState.Reductor.EndColumn.StatesRemovedInLastReparse.Contains(oldState.Reductor))
                     //need to remove the parent edge between the reductor to the deleted state
                     oldState.Reductor.Parents.Remove(oldState);
 
@@ -157,6 +193,10 @@ namespace LinearIndexedGrammarParser
             newState.Added = true;
             newState.EndColumn = this;
             StatesAddedInLastReparse.Add(newState);
+            stateCount++;
+
+            if (stateCount > 1000000)
+                throw new Exception("too many states (over a million)");
 
             if (!newState.IsCompleted)
             {
@@ -235,12 +275,26 @@ namespace LinearIndexedGrammarParser
                 StatesAddedInLastReparse.Clear();
             }
 
+            if (StatesRemovedInLastReparse != null)
+            {
+                foreach (var state in StatesRemovedInLastReparse)
+                    DeleteState(state);
+
+                StatesRemovedInLastReparse.Clear();
+            }
+
             NonTerminalsCandidatesToUnpredict?.Clear();
             VisitedCategoriesInUnprediction?.Clear();
+
         }
 
         public void RejectChanges()
         {
+            foreach (var state in StatesRemovedInLastReparse)
+                state.Removed = false;
+
+            StatesRemovedInLastReparse.Clear();
+
             foreach (var state in StatesAddedInLastReparse)
             {
 
@@ -249,7 +303,8 @@ namespace LinearIndexedGrammarParser
                     if (state.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
                     {
                         state.EndColumn.GammaStates.Remove(state);
-                        state.EndColumn.BracketedRepresentations.Remove(state.BracketedRepresentation);
+                        //state.EndColumn.BracketedRepresentations.Remove(state.BracketedRepresentation);
+                        state.EndColumn.RemoveFromTreeDic(state);
 
                     }
                     else
@@ -286,17 +341,28 @@ namespace LinearIndexedGrammarParser
                         state.Reductor.Parents.Remove(state);
             }
 
-            foreach (var state in OldGammaStates.ToList())
+            foreach (var state in OldGammaStates)
             {
                 GammaStates.Add(state);
-                BracketedRepresentations.Add(state.BracketedRepresentation);
-                OldGammaStates.Remove(state);
+                //BracketedRepresentations.Add(state.BracketedRepresentation);
             }
+
+
+            if (_isLastColumn)
+            {
+                lock (_treesDic[_textLength])
+                {
+                    foreach (var state in OldGammaStates)
+                        _treesDic[_textLength].Add(state.BracketedRepresentation);
+                }
+            }
+            OldGammaStates.Clear();
+
 
             VisitedCategoriesInUnprediction?.Clear();
         }
 
-        public void Unpredict(Rule r, ContextFreeGrammar grammar, HashSet<EarleyState> statesRemovedInLastReparse, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
+        public void Unpredict(Rule r, ContextFreeGrammar grammar, Dictionary<DerivedCategory, LeftCornerInfo> predictionSet)
         {
             if (Predicted.TryGetValue(r, out var list))
             {
@@ -308,11 +374,13 @@ namespace LinearIndexedGrammarParser
                     if (!state.Removed)
                     {
                         state.Removed = true;
-                        state.EndColumn.MarkStateDeleted(state, grammar, statesRemovedInLastReparse);
+                        state.EndColumn.MarkStateDeleted(state, grammar);
                     }
                 }
             }
 
         }
+
+
     }
 }

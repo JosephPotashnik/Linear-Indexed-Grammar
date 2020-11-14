@@ -73,7 +73,7 @@ namespace LinearIndexedGrammarLearner
             int numberOfSentenceUnParsed = 0;
             for (var i = 0; i < _learner.SentencesParser.Length; i++)
             {
-                if (_learner.SentencesParser[i].BracketedRepresentations.Count == 0)
+                if (!_learner.SentencesParser[i].HasParse)
                     numberOfSentenceUnParsed++;
             }
 

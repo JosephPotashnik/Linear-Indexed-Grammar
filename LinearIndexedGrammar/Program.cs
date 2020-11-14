@@ -261,12 +261,14 @@ namespace LinearIndexedGrammar
                 learner.ParseAllSentencesFromScratch(new ContextSensitiveGrammar(grammarRules));
 
                 List<SentenceParsingResults> parsableData = new List<SentenceParsingResults>();
-                for (int i = 0; i < learner.SentencesParser.Length; i++)
-                {
-                    if (learner.SentencesParser[i].BracketedRepresentations.Count > 0)
-                        parsableData.Add(learner.Parses[i]);
+                //does not work - adapt .
 
-                }
+                //for (int i = 0; i < learner.SentencesParser.Length; i++)
+                //{
+                //    if (learner.SentencesParser[i].BracketedRepresentations.Count > 0)
+                //        parsableData.Add(learner.Parses[i]);
+
+                //}
 
                 foreach (var sen in parsableData)
                     for (var i = 0; i < sen.Count; i++)

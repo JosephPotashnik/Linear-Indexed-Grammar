@@ -28,6 +28,8 @@ namespace LinearIndexedGrammarLearner
             _maxWordsInSentence = maxWordsInSentence;
             _minWordsInSentence = minWordsInSentence;
 
+            InitTreesDictionary();
+
             //var dict1 = sentences.GroupBy(x => x.Length).ToDictionary(g => g.Key, g => g.Count());
 
             var dict = sentences.GroupBy(x => string.Join(" ", x)).ToDictionary(g => g.Key, g => g.Count());
@@ -81,9 +83,6 @@ namespace LinearIndexedGrammarLearner
                 SentencesParser[i] =
                     new EarleyParser(currentCFGHypothesis, _voc, Parses[i].Sentence,
                         false); //parser does not check for cyclic unit productions
-
-            InitTreesDictionary();
-
 
             Parallel.Invoke(
                 () =>
@@ -144,12 +143,11 @@ namespace LinearIndexedGrammarLearner
                 return true;
             }
 
-            InitTreesDictionary();
             Parallel.Invoke(
                 () =>
                 {
                     Parallel.For(0, SentencesParser.Length,
-                        (i) => SentencesParser[i].ReParseSentenceWithRuleAddition(TreesDic, currentCFGHypothesis, rs));
+                        (i) => SentencesParser[i].ReParseSentenceWithRuleAddition(currentCFGHypothesis, rs));
                 },
                 () => { GrammarTreesDic = GetGrammarTrees(currentCFGHypothesis); }
             );
@@ -185,12 +183,11 @@ namespace LinearIndexedGrammarLearner
 
             var leftCorner = new LeftCorner();
             var predictionSet = leftCorner.ComputeLeftCorner(rulesExceptDeletedRule);
-            InitTreesDictionary();
             Parallel.Invoke(
                 () =>
                 {
                     Parallel.For(0, SentencesParser.Length,
-                        (i) => SentencesParser[i].ReParseSentenceWithRuleDeletion(TreesDic, currentCFGHypothesis, deletedRule, predictionSet));
+                        (i) => SentencesParser[i].ReParseSentenceWithRuleDeletion(currentCFGHypothesis, deletedRule, predictionSet));
                 },
                 () => { GrammarTreesDic = GetGrammarTrees(currentCFGHypothesis); }
             );
@@ -198,7 +195,7 @@ namespace LinearIndexedGrammarLearner
             return true;
         }
 
-        /*
+        
         public SentenceParsingResults[] ParseAllSentencesWithDebuggingAssertion(ContextFreeGrammar currentHypothesis, ContextFreeGrammar previousHypothesis,
             EarleyParser[] diffparsers = null)
         {
@@ -247,7 +244,7 @@ namespace LinearIndexedGrammarLearner
 
             return sentencesWithCounts;
         }
-        */
+        
         public Dictionary<int, int> GetGrammarTrees(ContextFreeGrammar hypothesis)
         {
             var res = GrammarTreesCalculator.Recalculate(hypothesis);

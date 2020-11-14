@@ -47,6 +47,7 @@ namespace LinearIndexedGrammarLearner
 
             while (currentTemp > finalTemp)
             {
+                //var previousGrammar = currentGrammar;
                 var (mutatedGrammar, reparsed) = _learner.GetNeighborAndReparse(currentGrammar);
                 if (mutatedGrammar == null || !reparsed) continue;
 
@@ -85,7 +86,7 @@ namespace LinearIndexedGrammarLearner
                 //uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
                 //var currentCFHypothesis = new ContextFreeGrammar(currentGrammar);
                 //var previousHypothesis12 = new ContextFreeGrammar(previousGrammar);
-                //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, previousHypothesis12,_learner._sentencesParser);
+                //var allParses1 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis, previousHypothesis12, _learner.SentencesParser);
 
                 //after a certain number of consecutive rejections, give up, reheat system.
                 if (rejectCounter > numberOfConsecutiveRejectionsToGiveUp) break;
@@ -163,7 +164,7 @@ namespace LinearIndexedGrammarLearner
             int noImprovementCounter;
 
             bool foundMaxSolution = false;
-            int currentIteration = 0;
+            //int currentIteration = 0;
             for (int i = 0; i < _params.NumberOfRestarts; i++)
             {
                 noImprovementCounter = 0;

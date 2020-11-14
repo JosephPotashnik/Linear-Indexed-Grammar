@@ -97,7 +97,7 @@ namespace LinearIndexedGrammarLearner
 
             for (int i = 0; i < learner.SentencesParser.Length; i++)
             {
-                if (learner.SentencesParser[i].BracketedRepresentations.Count == 0)
+                if (!learner.SentencesParser[i].HasParse)
                 {
                     var rhs = learner.SentencesParser[i].SuggestRHSForCompletion();
                     if (rhs == null)
