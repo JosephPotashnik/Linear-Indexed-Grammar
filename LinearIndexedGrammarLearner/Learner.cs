@@ -28,10 +28,6 @@ namespace LinearIndexedGrammarLearner
             _maxWordsInSentence = maxWordsInSentence;
             _minWordsInSentence = minWordsInSentence;
 
-            InitTreesDictionary();
-
-            //var dict1 = sentences.GroupBy(x => x.Length).ToDictionary(g => g.Key, g => g.Count());
-
             var dict = sentences.GroupBy(x => string.Join(" ", x)).ToDictionary(g => g.Key, g => g.Count());
 
             Parses = new SentenceParsingResults[dict.Count];
@@ -83,6 +79,8 @@ namespace LinearIndexedGrammarLearner
                 SentencesParser[i] =
                     new EarleyParser(currentCFGHypothesis, _voc, Parses[i].Sentence,
                         false); //parser does not check for cyclic unit productions
+
+            InitTreesDictionary();
 
             Parallel.Invoke(
                 () =>

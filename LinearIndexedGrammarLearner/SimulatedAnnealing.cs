@@ -20,6 +20,8 @@ namespace LinearIndexedGrammarLearner
         private readonly GrammarFitnessObjectiveFunction _objectiveFunction;
         private readonly SimulatedAnnealingParams _params;
         private const int NumberOfBestGrammarsTokeep = 20;
+        private double TOLERANCE = 0.0001;
+
 
         public SimulatedAnnealing(Learner l, SimulatedAnnealingParams parameters,
             GrammarFitnessObjectiveFunction objectiveFunction)
@@ -236,7 +238,7 @@ namespace LinearIndexedGrammarLearner
             //the loop can occur if the max is the feasible promiscuous grammar,
             //(having a very low objective function value).
             //every feasible grammar is ranked higher than non-feasible ones (that might have higher objective function value)
-            while (max.Item1.ObjectiveFunctionValue < 0.1)
+            while (max.Item1.ObjectiveFunctionValue <= promiscuousValue + TOLERANCE)
             {
                 if (bestGrammars.Count > 1)
                 {

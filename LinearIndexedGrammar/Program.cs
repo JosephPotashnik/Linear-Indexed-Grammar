@@ -639,7 +639,10 @@ namespace LinearIndexedGrammar
                     (currentGrammar, currentValue, feasible) = LearnGrammarFromDataUpToLengthN(data, dataVocabulary,
                         currentWordLength, minWordsInSentences, saParams, isCFG, numberOfNonterminals, noiseTolerance, initialGrammars[currentWordLength]);
                     currentWordLength++;
-                    if (currentWordLength <= maxSentenceLength)
+
+                    //LogManager.GetCurrentClassLogger().Info($"best grammar so far:\r\n  {currentGrammar}");
+
+                if (currentWordLength <= maxSentenceLength)
                         initialGrammars[currentWordLength] = new ContextSensitiveGrammar(currentGrammar);
                 }
 

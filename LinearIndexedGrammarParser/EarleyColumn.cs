@@ -195,8 +195,8 @@ namespace LinearIndexedGrammarParser
             StatesAddedInLastReparse.Add(newState);
             stateCount++;
 
-            if (stateCount > 1000000)
-                throw new Exception("too many states (over a million)");
+            if (stateCount > 2000000)
+                throw new Exception("too many states (over two million)");
 
             if (!newState.IsCompleted)
             {
