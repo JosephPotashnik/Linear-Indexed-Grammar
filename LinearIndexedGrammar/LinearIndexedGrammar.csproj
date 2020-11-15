@@ -6,6 +6,9 @@
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+  </PropertyGroup>
   
   <ItemGroup>
     <ContentWithTargetPath Include="Input Data\Programs To Run\NightRunFullAllCFGDists.json">
