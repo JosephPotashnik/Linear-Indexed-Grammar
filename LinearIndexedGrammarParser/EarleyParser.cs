@@ -18,6 +18,8 @@ namespace LinearIndexedGrammarParser
         protected Vocabulary Voc;
         //public HashSet<string> BracketedRepresentations;
         public bool HasParse = false;
+        private const int MaximumCompletedStatesInColumn = 1000000;
+
 
         public EarleyParser(ContextFreeGrammar g, Vocabulary v, string[] text, bool checkUnitProductionCycles = true)
         {
@@ -145,7 +147,7 @@ namespace LinearIndexedGrammarParser
             return gammaStates;
         }
 
-        public void ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs)
+        public int ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs)
         {
             Grammar = g;
 
@@ -180,6 +182,9 @@ namespace LinearIndexedGrammarParser
                     //1. complete
                     TraverseCompletedStates(col);
 
+                    if (col.CompletedStateCount > MaximumCompletedStatesInColumn)
+                        return 1; //parse rejected.
+
                     //2. predict after complete:
                     TraversePredictableStates(col);
                     exhaustedCompletion = col.ActionableCompleteStates.Count == 0;
@@ -195,8 +200,7 @@ namespace LinearIndexedGrammarParser
             }
 
             HasParse = _table[_table.Length - 1].GammaStates.Count > 0;
-
-
+            return 0; //all good.
         }
 
         public void ReParseSentenceWithRuleDeletion(ContextFreeGrammar g, List<Rule> rs,

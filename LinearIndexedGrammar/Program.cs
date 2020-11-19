@@ -354,6 +354,9 @@ namespace LinearIndexedGrammar
                     LogManager.GetCurrentClassLogger().Info($"{count} sentences of length {p}");
             }
 
+            //effectively this function leaves all sentences that begin with unambiguous word.
+            data = LeaveOnlyUnambiguousData(data, dataVocabulary);
+
             data = ReduceDataToUniquePOSTypes(data, dataVocabulary);
 
             LogManager.GetCurrentClassLogger().Info($"Unique sentences types (POS sequences) from data samples:");
@@ -463,6 +466,33 @@ namespace LinearIndexedGrammar
 
             LogManager.GetCurrentClassLogger().Info(s);
             StopWatch(stopWatch);
+        }
+
+
+        private static string[][] LeaveOnlyUnambiguousData(string[][] data, Vocabulary dataVocabulary)
+        {
+            List<string[]> unamibiguousdata = new List<string[]>();
+            for (int i = 0; i < data.Length; i++)
+            {
+                bool unambiguous = true;
+                for (int j = 0; j < data[i].Length; j++)
+                {
+                    if (dataVocabulary.WordWithPossiblePOS[data[i][j]].Count > 1)
+                    {
+                        unambiguous = false;
+                        break;
+                    }
+
+
+                    if (unambiguous)
+                        unamibiguousdata.Add(data[i]);
+                }
+
+
+            }
+
+            data = unamibiguousdata.ToArray();
+            return data;
         }
 
 
@@ -620,13 +650,13 @@ namespace LinearIndexedGrammar
             Vocabulary dataVocabulary, LinearIndexedGrammarLearner.SimulatedAnnealingParams saParams, bool isCFG, int numberOfNonterminals, double noiseTolerance, ContextSensitiveGrammar initialGrammar)
         {
 
-                var initialWordLength = 6;
+                var initialWordLength = 5;
                 var currentWordLength = initialWordLength;
                 var maxSentenceLength = data.Max(x => x.Length);
                 var minWordsInSentences = data.Min(x => x.Length);
 
 
-            var initialGrammars = new ContextSensitiveGrammar[maxSentenceLength + 1];
+                var initialGrammars = new ContextSensitiveGrammar[maxSentenceLength + 1];
                 ContextSensitiveGrammar currentGrammar = null;
                 initialGrammars[currentWordLength] = initialGrammar;
                 double currentValue = 0;
@@ -646,7 +676,7 @@ namespace LinearIndexedGrammar
                         initialGrammars[currentWordLength] = new ContextSensitiveGrammar(currentGrammar);
                 }
 
-            return (currentGrammar, currentValue, feasible);
+                return (currentGrammar, currentValue, feasible);
         }
 
         private static ProgramParamsList ReadProgramParamsFromFile(string fileName)

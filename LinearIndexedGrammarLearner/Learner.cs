@@ -141,14 +141,25 @@ namespace LinearIndexedGrammarLearner
                 return true;
             }
 
+            int acceptedSum = 0;
+            int[] accepted = new int[SentencesParser.Length];
+
             Parallel.Invoke(
                 () =>
                 {
                     Parallel.For(0, SentencesParser.Length,
-                        (i) => SentencesParser[i].ReParseSentenceWithRuleAddition(currentCFGHypothesis, rs));
+                        (i) =>
+                        {
+                            accepted[i] = SentencesParser[i].ReParseSentenceWithRuleAddition(currentCFGHypothesis, rs);
+                        });
                 },
                 () => { GrammarTreesDic = GetGrammarTrees(currentCFGHypothesis); }
             );
+            for (int i = 0; i < SentencesParser.Length; i++)
+                acceptedSum += accepted[i];
+
+            if (acceptedSum != 0) return false; // a parse was rejected.
+
             return true;
         }
 
@@ -213,12 +224,20 @@ namespace LinearIndexedGrammarLearner
                     new EarleyParser(currentHypothesis, _voc, Parses[i].Sentence,
                         false); //parser does not check for cyclic unit production, you have guaranteed it before (see Objective function).
 
-            InitTreesDictionary();
-            Parallel.ForEach(sentencesWithCounts,
-                (sentenceItem, loopState, i) =>
-                {
-                    parsers[i].ParseSentence(TreesDic);
-                });
+            var tempTreeDic = new Dictionary<int, HashSet<string>>();
+            for (int i = _minWordsInSentence; i <= _maxWordsInSentence; i++)
+                tempTreeDic[i] = new HashSet<string>();
+
+            //Parallel.ForEach(sentencesWithCounts,
+            //    (sentenceItem, loopState, i) =>
+            //    {
+            //        parsers[i].ParseSentence(tempTreeDic);
+            //    });
+
+            for (int i = 0; i < sentencesWithCounts.Length; i++)
+            {
+                parsers[i].ParseSentence(tempTreeDic);
+            }
 
 
             if (diffparsers != null)
@@ -291,7 +310,7 @@ namespace LinearIndexedGrammarLearner
             }
         }
 
-        internal (ContextSensitiveGrammar mutatedGrammar, bool reparsed) GetNeighborAndReparse(
+        internal (ContextSensitiveGrammar mutatedGrammar, bool acceptReparse) GetNeighborAndReparse(
             ContextSensitiveGrammar currentHypothesis)
         {
             //choose mutation function in random (weighted according to weights file)
@@ -300,8 +319,8 @@ namespace LinearIndexedGrammarLearner
 
             //mutate the grammar.
             SetOriginalGrammarBeforePermutation();
-            var (g, reparsed) = m(newGrammar, this);
-            return (g, reparsed);
+            bool acceptReparse = m(newGrammar, this);
+            return (newGrammar, acceptReparse);
         }
 
 

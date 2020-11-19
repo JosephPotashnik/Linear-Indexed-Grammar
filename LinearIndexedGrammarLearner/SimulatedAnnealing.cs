@@ -40,8 +40,9 @@ namespace LinearIndexedGrammarLearner
             var currentFeasible = initialFeasible;
             var finalTemp = 0.3;
             var rejectCounter = 0;
-            double newValue;
-            bool newFeasible;
+            double newValue = 0;
+            bool newFeasible = false;
+            bool accept = false;
             double percentageOfConsecutiveRejectionsToGiveUp = 0.1;
 
             var totalIterations = (int)((Math.Log(finalTemp) - Math.Log(_params.InitialTemperature)) / Math.Log(_params.CoolingFactor));
@@ -49,13 +50,16 @@ namespace LinearIndexedGrammarLearner
 
             while (currentTemp > finalTemp)
             {
-                //var previousGrammar = currentGrammar;
-                var (mutatedGrammar, reparsed) = _learner.GetNeighborAndReparse(currentGrammar);
-                if (mutatedGrammar == null || !reparsed) continue;
-
-                currentTemp *= _params.CoolingFactor;
-                (newValue, newFeasible) = _objectiveFunction.Compute(mutatedGrammar);
-                var accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
+                var previousGrammar = currentGrammar;
+                var (mutatedGrammar, acceptReparse) = _learner.GetNeighborAndReparse(currentGrammar);
+                if (acceptReparse)
+                {
+                    currentTemp *= _params.CoolingFactor;
+                    (newValue, newFeasible) = _objectiveFunction.Compute(mutatedGrammar);
+                    accept = _objectiveFunction.AcceptNewValue(newValue, currentValue, currentTemp);
+                }
+                else
+                    accept = false;
 
                 if (accept)
                 {
@@ -67,15 +71,7 @@ namespace LinearIndexedGrammarLearner
 
                     _learner.AcceptChanges();
                     if (_objectiveFunction.IsMaximalValue(currentValue))
-                    {
-                        //uncomment the following line ONLY to check that the differential parser works identically to the from-scratch parser.
-                        //var currentCFHypothesis2 = new ContextFreeGrammar(currentGrammar);
-                        //var previousHypothesis2 = new ContextFreeGrammar(previousGrammar);
-                        //var allParses12 = _learner.ParseAllSentencesWithDebuggingAssertion(currentCFHypothesis2, previousHypothesis2, _learner._sentencesParser);
                         break;
-                    }
-
-
                 }
                 else
                 {
@@ -94,24 +90,7 @@ namespace LinearIndexedGrammarLearner
                 if (rejectCounter > numberOfConsecutiveRejectionsToGiveUp) break;
             }
 
-            //sanity check at the end (in DEBUG) 
-            //_learner.ParseAllSentencesFromScratch(currentGrammar);
-            //bool newfeasible = false;
-            //(newValue, newfeasible) = _objectiveFunction.Compute(currentGrammar);
-            //if (newValue != currentValue || newfeasible != currentFeasible)
-            //{
-            //    LogManager.GetCurrentClassLogger().Info($"incremental value: {currentValue} feasible {currentFeasible}");
-            //    LogManager.GetCurrentClassLogger().Info($"reparsing value  {newValue} feasible {newfeasible}");
-            //    throw new Exception("should not happen! means your differential parses are compromised");
-            //}
-            
-
-
-
             PruneUnusedRules(currentGrammar);
-
-
-
             return (currentGrammar, currentValue, currentFeasible);
         }
 

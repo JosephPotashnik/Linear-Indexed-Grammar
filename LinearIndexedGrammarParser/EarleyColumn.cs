@@ -15,7 +15,7 @@ namespace LinearIndexedGrammarParser
         private Dictionary<int, HashSet<string>> _treesDic;
         public bool _isLastColumn = false;
         private int _textLength = 0;
-        private int stateCount = 0;
+        public int CompletedStateCount = 0;
 
         internal HashSet<DerivedCategory> VisitedCategoriesInUnprediction = new HashSet<DerivedCategory>();
         internal HashSet<DerivedCategory> NonTerminalsCandidatesToUnpredict = new HashSet<DerivedCategory>();
@@ -136,8 +136,7 @@ namespace LinearIndexedGrammarParser
 
         public void DeleteState(EarleyState oldState)
         {
-            stateCount--;
-
+            
             if (oldState.Predecessor != null)
                 if (!oldState.Predecessor.EndColumn.StatesRemovedInLastReparse.Contains(oldState.Predecessor))
                     //need to remove the parent edge between the predecessor to the deleted state
@@ -169,6 +168,8 @@ namespace LinearIndexedGrammarParser
             }
             else
             {
+                CompletedStateCount--;
+
                 if (oldState.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
                 {
                     var oldgammaStates = oldState.EndColumn.OldGammaStates;
@@ -193,10 +194,6 @@ namespace LinearIndexedGrammarParser
             newState.Added = true;
             newState.EndColumn = this;
             StatesAddedInLastReparse.Add(newState);
-            stateCount++;
-
-            if (stateCount > 2000000)
-                throw new Exception("too many states (over two million)");
 
             if (!newState.IsCompleted)
             {
@@ -262,6 +259,7 @@ namespace LinearIndexedGrammarParser
             }
             else
             {
+                CompletedStateCount++;
                 ActionableCompleteStates.Enqueue(newState);
             }
         }
