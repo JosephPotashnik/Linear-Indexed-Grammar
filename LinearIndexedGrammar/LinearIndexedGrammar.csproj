@@ -11,6 +11,10 @@
   </PropertyGroup>
   
   <ItemGroup>
+    <ContentWithTargetPath Include="Input Data\Programs To Run\NightRun.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <TargetPath>NightRun.json</TargetPath>
+    </ContentWithTargetPath>
     <ContentWithTargetPath Include="Input Data\Programs To Run\NightRunFullAllCFGDists.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <TargetPath>NightRunFullAllCFGDists.json</TargetPath>

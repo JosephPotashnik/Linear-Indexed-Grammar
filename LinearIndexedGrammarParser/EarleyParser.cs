@@ -1,6 +1,5 @@
 ﻿using NLog;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,9 +15,8 @@ namespace LinearIndexedGrammarParser
         private EarleyColumn[] _table;
         private string[] _text;
         protected Vocabulary Voc;
-        //public HashSet<string> BracketedRepresentations;
-        public bool HasParse = false;
-        private const int MaximumCompletedStatesInColumn = 1000000;
+        public bool HasParse;
+        private const int MaximumCompletedStatesInColumn = 10000;
 
 
         public EarleyParser(ContextFreeGrammar g, Vocabulary v, string[] text, bool checkUnitProductionCycles = true)
@@ -182,13 +180,13 @@ namespace LinearIndexedGrammarParser
                     //1. complete
                     TraverseCompletedStates(col);
 
-                    if (col.CompletedStateCount > MaximumCompletedStatesInColumn)
-                        return 1; //parse rejected.
-
                     //2. predict after complete:
                     TraversePredictableStates(col);
                     exhaustedCompletion = col.ActionableCompleteStates.Count == 0;
                 }
+
+                //if (col.CompletedStateCount > MaximumCompletedStatesInColumn)
+                //    return 1; //parse rejected.
 
                 //3. scan after predict -- not necessary if the grammar is non lexicalized,
                 //i.e if terminals are not mentioned in the grammar rules.
@@ -377,8 +375,7 @@ namespace LinearIndexedGrammarParser
 
             var startState = new EarleyState(startRule, 0, _table[0]);
             _table[0].AddState(startState, Grammar);
-            try
-            {
+
                 foreach (var col in _table)
                 {
                     var exhaustedCompletion = false;
@@ -404,12 +401,7 @@ namespace LinearIndexedGrammarParser
 
                     //if (!anyCompleted && !anyPredicted /*&& !anyScanned*/) break;
                 }
-            }
-            catch (Exception e)
-            {
-                var s = e.ToString();
-                LogManager.GetCurrentClassLogger().Info(s);
-            }
+            
 
             return GetGammaStates();
         }
@@ -417,7 +409,6 @@ namespace LinearIndexedGrammarParser
         public void ParseSentence(Dictionary<int, HashSet<string>> treesDic, int maxWords = 0)
         {
             (_table, _finalColumns) = PrepareEarleyTable(_text, maxWords);
-            //BracketedRepresentations = _table[_table.Length - 1].BracketedRepresentations;
             _table[_table.Length - 1].SetLastColumn(_text.Length, treesDic);
             PrepareScannedStates();
 
@@ -427,8 +418,7 @@ namespace LinearIndexedGrammarParser
 
             var startState = new EarleyState(startRule, 0, _table[0]);
             _table[0].AddState(startState, Grammar);
-            try
-            {
+
                 foreach (var col in _table)
                 {
                     var exhaustedCompletion = false;
@@ -454,23 +444,10 @@ namespace LinearIndexedGrammarParser
 
                     //if (!anyCompleted && !anyPredicted /*&& !anyScanned*/) break;
                 }
-            }
-            catch (Exception e)
-            {
-                var s = e.ToString();
-                LogManager.GetCurrentClassLogger().Info(s);
-            }
+
 
             HasParse = _table[_table.Length - 1].GammaStates.Count > 0;
         }
-
-        //private void UpdateConcurrentDictionary(Dictionary<int, HashSet<string>> treesDic)
-        //{
-        //    lock (treesDic[_text.Length])
-        //    {
-        //        treesDic[_text.Length].UnionWith(BracketedRepresentations);
-        //    }
-        //}
 
         protected virtual (EarleyColumn[], int[]) PrepareEarleyTable(string[] text, int maxWord)
         {

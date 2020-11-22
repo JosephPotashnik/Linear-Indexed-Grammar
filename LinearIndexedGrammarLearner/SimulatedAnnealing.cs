@@ -1,6 +1,5 @@
 ﻿using LinearIndexedGrammarParser;
 using System;
-using NLog;
 
 
 namespace LinearIndexedGrammarLearner
@@ -42,7 +41,8 @@ namespace LinearIndexedGrammarLearner
             var rejectCounter = 0;
             double newValue = 0;
             bool newFeasible = false;
-            bool accept = false;
+            // ReSharper disable once TooWideLocalVariableScope
+            bool accept;
             double percentageOfConsecutiveRejectionsToGiveUp = 0.1;
 
             var totalIterations = (int)((Math.Log(finalTemp) - Math.Log(_params.InitialTemperature)) / Math.Log(_params.CoolingFactor));
@@ -50,7 +50,7 @@ namespace LinearIndexedGrammarLearner
 
             while (currentTemp > finalTemp)
             {
-                var previousGrammar = currentGrammar;
+                //var previousGrammar = currentGrammar;
                 var (mutatedGrammar, acceptReparse) = _learner.GetNeighborAndReparse(currentGrammar);
                 if (acceptReparse)
                 {

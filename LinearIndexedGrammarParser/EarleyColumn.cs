@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LinearIndexedGrammarParser
 {
@@ -13,9 +12,9 @@ namespace LinearIndexedGrammarParser
         internal List<EarleyState> StatesAddedInLastReparse = new List<EarleyState>();
         internal HashSet<EarleyState> StatesRemovedInLastReparse = new HashSet<EarleyState>();
         private Dictionary<int, HashSet<string>> _treesDic;
-        public bool _isLastColumn = false;
-        private int _textLength = 0;
-        public int CompletedStateCount = 0;
+        public bool _isLastColumn;
+        private int _textLength;
+        public int CompletedStateCount;
 
         internal HashSet<DerivedCategory> VisitedCategoriesInUnprediction = new HashSet<DerivedCategory>();
         internal HashSet<DerivedCategory> NonTerminalsCandidatesToUnpredict = new HashSet<DerivedCategory>();
@@ -63,7 +62,6 @@ namespace LinearIndexedGrammarParser
             Reductors = new Dictionary<DerivedCategory, HashSet<EarleyState>>();
             Predicted = new Dictionary<Rule, List<EarleyState>>(new RuleValueEquals());
             GammaStates = new List<EarleyState>();
-            //BracketedRepresentations = new HashSet<string>();
             OldGammaStates = new List<EarleyState>();
             ActionableNonTerminalsToPredict = new Queue<DerivedCategory>();
         }
@@ -72,10 +70,6 @@ namespace LinearIndexedGrammarParser
         internal DeletedStatesHeap ActionableDeletedStates { get; set; }
 
         internal Queue<EarleyState> ActionableNonCompleteStates { get; set; }
-
-        //bracketed representation of gamma states
-        //public HashSet<string> BracketedRepresentations { get; set; }
-
         public List<EarleyState> GammaStates { get; set; }
         public List<EarleyState> OldGammaStates { get; set; }
 
@@ -117,7 +111,6 @@ namespace LinearIndexedGrammarParser
                 if (oldState.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
                 {
                     oldState.EndColumn.GammaStates.Remove(oldState);
-                    //oldState.EndColumn.BracketedRepresentations.Remove(oldState.BracketedRepresentation);
                     OldGammaStates.Add(oldState);
                     oldState.EndColumn.RemoveFromTreeDic(oldState);
                     return;
@@ -301,7 +294,6 @@ namespace LinearIndexedGrammarParser
                     if (state.Rule.LeftHandSide.ToString() == ContextFreeGrammar.GammaRule)
                     {
                         state.EndColumn.GammaStates.Remove(state);
-                        //state.EndColumn.BracketedRepresentations.Remove(state.BracketedRepresentation);
                         state.EndColumn.RemoveFromTreeDic(state);
 
                     }
@@ -342,7 +334,6 @@ namespace LinearIndexedGrammarParser
             foreach (var state in OldGammaStates)
             {
                 GammaStates.Add(state);
-                //BracketedRepresentations.Add(state.BracketedRepresentation);
             }
 
 

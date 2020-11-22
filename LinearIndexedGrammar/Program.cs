@@ -11,7 +11,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using NLog.LayoutRenderers.Wrappers;
 
 namespace LinearIndexedGrammar
 {
@@ -477,17 +476,15 @@ namespace LinearIndexedGrammar
                 bool unambiguous = true;
                 for (int j = 0; j < data[i].Length; j++)
                 {
-                    if (dataVocabulary.WordWithPossiblePOS[data[i][j]].Count > 1)
+                    if (dataVocabulary.WordWithPossiblePOS[data[i][j]].Count > 2)
                     {
                         unambiguous = false;
                         break;
                     }
-
-
-                    if (unambiguous)
-                        unamibiguousdata.Add(data[i]);
                 }
 
+                if (unambiguous)
+                    unamibiguousdata.Add(data[i]);
 
             }
 
