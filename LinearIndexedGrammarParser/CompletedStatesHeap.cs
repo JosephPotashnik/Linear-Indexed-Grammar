@@ -22,6 +22,12 @@ namespace LinearIndexedGrammarParser
             queue.Enqueue(state);
         }
 
+        public void Clear()
+        {
+            _indicesHeap.Clear();
+            _items.Clear();
+        }
+
         public EarleyState Dequeue()
         {
             var index = _indicesHeap.Max;

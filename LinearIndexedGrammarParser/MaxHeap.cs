@@ -17,6 +17,11 @@ namespace LinearIndexedGrammarParser
             HeapifyUp(Elements.Count - 1);
         }
 
+        public void Clear()
+        {
+            Elements.Clear();
+        }
+
         public int PopMax()
         {
             if (Elements.Count > 0)

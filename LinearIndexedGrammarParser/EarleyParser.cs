@@ -148,6 +148,7 @@ namespace LinearIndexedGrammarParser
         public int ReParseSentenceWithRuleAddition(ContextFreeGrammar g, List<Rule> rs)
         {
             Grammar = g;
+            bool rejected = false;
 
             foreach (var col in _table)
             {
@@ -185,8 +186,11 @@ namespace LinearIndexedGrammarParser
                     exhaustedCompletion = col.ActionableCompleteStates.Count == 0;
                 }
 
-                //if (col.CompletedStateCount > MaximumCompletedStatesInColumn)
-                //    return 1; //parse rejected.
+                if (col.CompletedStateCount > MaximumCompletedStatesInColumn)
+                {
+                    rejected = true;
+                    break;
+                }
 
                 //3. scan after predict -- not necessary if the grammar is non lexicalized,
                 //i.e if terminals are not mentioned in the grammar rules.
@@ -197,6 +201,17 @@ namespace LinearIndexedGrammarParser
 
             }
 
+            if (rejected)
+            {
+                foreach (var col in _table)
+                {
+                    col.ActionableCompleteStates.Clear();
+                    col.ActionableNonTerminalsToPredict.Clear();
+                }
+
+                return 1; //parse rejected.
+
+            }
             HasParse = _table[_table.Length - 1].GammaStates.Count > 0;
             return 0; //all good.
         }
