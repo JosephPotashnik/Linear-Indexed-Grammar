@@ -299,9 +299,14 @@ namespace LinearIndexedGrammarParser
                     }
                     else
                     {
-                        state.StartColumn.Reductors[state.Rule.LeftHandSide].Remove(state);
-                        if (state.StartColumn.Reductors[state.Rule.LeftHandSide].Count == 0)
-                            state.StartColumn.Reductors.Remove(state.Rule.LeftHandSide);
+                        //when the grammar has been rejected due to overflowing maximum completed earley states,
+                        //the relevant aborted earley states may not be written to the Reductors dic.
+                        if (state.StartColumn.Reductors.ContainsKey(state.Rule.LeftHandSide))
+                        {
+                            state.StartColumn.Reductors[state.Rule.LeftHandSide].Remove(state);
+                            if (state.StartColumn.Reductors[state.Rule.LeftHandSide].Count == 0)
+                                state.StartColumn.Reductors.Remove(state.Rule.LeftHandSide);
+                        }
                     }
                 }
                 else
