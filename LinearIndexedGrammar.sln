@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2026
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30709.132
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinearIndexedGrammar", "LinearIndexedGrammar\LinearIndexedGrammar.csproj", "{CD0E8349-8231-45E8-8B83-AAAF65DE4515}"
 EndProject
@@ -13,10 +13,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinearIndexedGrammarLearner
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinearIndexedGrammarParserTests", "LinearIndexedGrammarParserTests\LinearIndexedGrammarParserTests.csproj", "{84B4EEF2-8CB6-4C1B-B239-BCC0EBF1C605}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrammarLearnerGUI", "GrammarLearnerGUI\GrammarLearnerGUI.csproj", "{CF42391A-FF3E-4FF9-9A59-5C209C009C19}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0158A9ED-46DA-4CC9-80AE-C5F69CB33E20} = {0158A9ED-46DA-4CC9-80AE-C5F69CB33E20}
+	EndProjectSection
+EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -38,12 +40,19 @@ Global
 		{84B4EEF2-8CB6-4C1B-B239-BCC0EBF1C605}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84B4EEF2-8CB6-4C1B-B239-BCC0EBF1C605}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84B4EEF2-8CB6-4C1B-B239-BCC0EBF1C605}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF42391A-FF3E-4FF9-9A59-5C209C009C19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF42391A-FF3E-4FF9-9A59-5C209C009C19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF42391A-FF3E-4FF9-9A59-5C209C009C19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF42391A-FF3E-4FF9-9A59-5C209C009C19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F32C555-0CEB-48B5-9210-5489D87B57E3}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true

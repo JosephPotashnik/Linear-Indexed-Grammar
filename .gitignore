@@ -13,3 +13,5 @@
 /LinearIndexedGrammarParserTests/obj
 
 /LinearIndexedGrammar.sln.DotSettings
+/GrammarLearnerGUI/bin/Release/net5.0
+/GrammarLearnerGUI/obj
