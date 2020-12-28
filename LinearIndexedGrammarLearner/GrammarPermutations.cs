@@ -130,11 +130,7 @@ namespace LinearIndexedGrammarLearner
             ContextSensitiveGrammar grammar, Learner learner, RuleCoordinates rc)
         {
 
-            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackConstantRules))
-            {
-                 return false;
-            }
-
+            if (grammar.StackConstantRules.Contains(rc)) return false;
 
             grammar.StackConstantRules.Add(rc);
 
@@ -216,7 +212,8 @@ namespace LinearIndexedGrammarLearner
             };
 
 
-            if (grammar.ContainsRuleWithSameRHS(rcNew, grammar.StackConstantRules)) return false;
+            if (grammar.StackConstantRules.Contains(rcNew)) return false;
+
             //Console.WriteLine($"in rhs change part1");
 
             acceptReparse1 = InnerDeleteStackConstantRule(grammar, learner, rcOld);
@@ -279,8 +276,8 @@ namespace LinearIndexedGrammarLearner
             ContextSensitiveGrammar grammar, Learner learner)
         {
             var rc = CreateRandomRule(RuleType.Push1Rules);
-            if (grammar.ContainsRuleWithSameRHS(rc, grammar.StackPush1Rules))
-                return false;
+            if (grammar.StackPush1Rules.Contains(rc)) return false;
+
             grammar.StackPush1Rules.Add(rc);
             grammar.AddCorrespondingPopRule(rc);
 

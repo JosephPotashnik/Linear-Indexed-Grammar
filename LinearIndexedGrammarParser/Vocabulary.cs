@@ -100,7 +100,7 @@ namespace LinearIndexedGrammarParser
 
             //interjunctions / speech act words, untreated for now.
             HashSet<string> bannedWords = 
-                new HashSet<string>(new [] {"okay", "ok", "yes", "no", "alright", "oh", "please", "right", "well"});
+                new HashSet<string>(new [] {"but", "okay", "ok", "yes", "no", "alright", "oh", "please", "right", "well"});
             //also ban WH-words for now. see if you succeed learning "simple" CFG.
             bannedWords = bannedWords.Concat(new[] {"who", "what", "why", "where", "how", "whom", "whose", "when", "which"}).ToHashSet();
 
@@ -129,6 +129,7 @@ namespace LinearIndexedGrammarParser
                 var s = new List<string>();
                 foreach (var wordOrig in sentenceWords)
                 {
+
                     //trim leading or trailing single apostrophe
                     //(sometimes text come with single quotation marks: 'did you see him?'
                     //this case needs to be differentiated from single apostrophe used

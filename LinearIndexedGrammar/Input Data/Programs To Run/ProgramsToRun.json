@@ -11,10 +11,10 @@
       },
       "SearchSpaceParams": {
         "NumberOfRuns": 1,
-        "MinNumberOfNonTerminals": 5,
-        "MaxNumberOfNonTerminals": 8,
-        "MinNoise": 0.0,
-        "MaxNoise": 0.3,
+        "MinNumberOfNonTerminals": 9,
+        "MaxNumberOfNonTerminals": 11,
+        "MinNoise": 0.1,
+        "MaxNoise": 0.4,
         "NoiseStepSize": 0.1
       },
       "SimulatedAnnealingParams": {

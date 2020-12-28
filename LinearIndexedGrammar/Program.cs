@@ -396,7 +396,9 @@ namespace LinearIndexedGrammar
                 //var injectInitial = false;
                 //if (injectInitial)
                 //{
-                //    PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentences, maxWordsInSentence, 5, 0.0, out var objectiveFunction);
+                //    var numberOfNonterminals = 9;
+                //    var noiseTolerance = 0.1;
+                //    PrepareLearningUpToSentenceLengthN(data, universalVocabulary, minWordsInSentences, maxWordsInSentence, numberOfNonterminals, noiseTolerance, out var objectiveFunction);
                 //    var grammarRules1 = GrammarFileReader.ReadRulesFromFile("InitialGrammar.txt");
                 //    var partOfSpeechCategories = universalVocabulary.POSWithPossibleWords.Keys.ToHashSet();
                 //    initialGrammar = new ContextSensitiveGrammar(grammarRules1);

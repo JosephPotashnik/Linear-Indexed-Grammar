@@ -60,9 +60,9 @@ namespace GrammarLearnerGUI.Controllers
         {
             var res = new List<SyntacticTree>();
             var v = Vocabulary.ReadVocabularyFromFile(@"..\LinearIndexedGrammar\Input Data\Vocabularies\UniversalVocabulary.json");
-            var rules = GrammarFileReader.ReadRulesFromFile(@"..\LinearIndexedGrammar\Input Data\Context Free Grammars\LearnedGrammar.txt");
+            var rules = GrammarFileReader.ReadRulesFromFile(@"..\LinearIndexedGrammar\Input Data\Context Free Grammars\TargetGrammar.txt");
             var g = new ContextFreeGrammar(rules);
-
+            v.LeaveOnlySentencesWithWordsInVocabulary(new List<string> { text });
             var parser = new EarleyParser(g, v, text.Split(), true);
             var treeDic = new Dictionary<int, HashSet<string>>();
             for (int i = 1; i <= 10; i++)

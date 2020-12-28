@@ -74,7 +74,10 @@ namespace LinearIndexedGrammarLearner
             for (var i = 0; i < _learner.SentencesParser.Length; i++)
             {
                 if (!_learner.SentencesParser[i].HasParse)
+                {
+                    //Console.WriteLine(string.Join(" ", _learner.Parses[i].Sentence));
                     numberOfSentenceUnParsed++;
+                }
             }
 
             var dataTreesPerLength = new Dictionary<int, int>();

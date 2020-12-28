@@ -95,23 +95,6 @@ namespace LinearIndexedGrammarParser
             return s1 + "\r\n" + s2;
         }
 
-        //if there is a rule that has the same RHS side, i.e. the same RHS index
-        public bool ContainsRuleWithSameRHS(RuleCoordinates rc, List<RuleCoordinates> rules)
-        {
-            //RHSIndex 0 is a special index, reserved for rules of the type
-            //S -> X1, S -> X2, S -> X3 (CFG table) or X1[X1] -> epsilon, X2[X2]->epsilon (Pop table)
-            //so if RHSIndex = 0 we check that exactly the same rule (same LHS) is in the grammar)
-            if (rc.RHSIndex == 0)
-                return rules.Contains(rc);
-
-            //else we just need to check that the same RHS index appears in some other rule.
-            foreach (var ruleCoord in rules)
-                if (ruleCoord.RHSIndex == rc.RHSIndex && ruleCoord.RuleType == rc.RuleType)
-                    return true;
-
-            return false;
-        }
-
         public void PruneUnusedRules(Dictionary<int, int> usagesDic)
         {
             try
@@ -189,14 +172,5 @@ namespace LinearIndexedGrammarParser
             if (MoveableReferences[lhsIndex] < 0)
                 throw new Exception("wrong value of moveable references");
         }
-
-        public int NumberOfLHSNonterminals()
-        {
-            var lhses = StackConstantRules.Select(x => RuleSpace[x]).Select(x => x.LeftHandSide.ToString());
-            return lhses.Distinct().Count() - 1; //do not count "START" symbol.
-        }
-
     }
-
-
 }

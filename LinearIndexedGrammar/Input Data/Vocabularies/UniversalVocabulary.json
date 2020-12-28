@@ -1,5 +1,12 @@
 {
   "POSWithPossibleWords": {
+    "COP": [
+      "is",
+      "are",
+      "am",
+      "was",
+      "were"
+    ],
     "N": [
       "'hood",
       "'s gravenhage",
@@ -150414,7 +150421,6 @@
       "verticillate",
       "verticillated",
       "vertiginous",
-      "very",
       "vesical",
       "vesicant",
       "vesicatory",
@@ -151392,7 +151398,6 @@
       "own",
       "self",
       "several",
-      "so",
       "some",
       "somebody",
       "someone",
